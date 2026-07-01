@@ -3,6 +3,7 @@ SOPS secrets manager for Kairo Phantom.
 Handles transparent decryption of encrypted yaml/json secret files for local and CI environments.
 Falls back to mock secrets if the sops CLI or key material is unavailable.
 """
+
 import os
 import subprocess
 import shutil
@@ -12,6 +13,7 @@ from typing import Dict, Any, Optional
 
 try:
     import yaml
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -46,7 +48,7 @@ class SopsManager:
                 # Call sops decryption
                 cmd = [self.sops_bin, "-d", file_path]
                 res = subprocess.run(cmd, capture_output=True, text=True, check=True, env=env)
-                
+
                 # Parse output
                 if file_path.endswith(".json"):
                     return json.loads(res.stdout)
@@ -54,7 +56,9 @@ class SopsManager:
                     if HAS_YAML:
                         return yaml.safe_load(res.stdout) or {}
                     else:
-                        log.warning("[SOPS] PyYAML not installed; parsing simple key-value YAML manually.")
+                        log.warning(
+                            "[SOPS] PyYAML not installed; parsing simple key-value YAML manually."
+                        )
                         return self._parse_simple_yaml(res.stdout)
                 else:
                     # Generic format or env format
@@ -63,7 +67,9 @@ class SopsManager:
                 log.error(f"[SOPS] Decryption failed: {e}. Falling back to mock secrets.")
                 return self._get_mock_secrets()
         else:
-            log.info("[SOPS] sops CLI not found on PATH. Using mock secrets for local verification.")
+            log.info(
+                "[SOPS] sops CLI not found on PATH. Using mock secrets for local verification."
+            )
             return self._get_mock_secrets()
 
     def _get_mock_secrets(self) -> Dict[str, Any]:

@@ -48,7 +48,9 @@ impl ScreenContextEngine {
             .join("tmp");
         std::fs::create_dir_all(&temp_dir).ok();
 
-        let farscry_path = config.farscry_path.as_ref()
+        let farscry_path = config
+            .farscry_path
+            .as_ref()
             .map(PathBuf::from)
             .or_else(Self::find_farscry_in_path);
 
@@ -72,13 +74,20 @@ impl ScreenContextEngine {
 
     /// Check if farscry is available specifically.
     pub fn has_farscry(&self) -> bool {
-        self.farscry_path.as_ref().map(|p| p.exists()).unwrap_or(false)
+        self.farscry_path
+            .as_ref()
+            .map(|p| p.exists())
+            .unwrap_or(false)
     }
 
     /// Capture screenshot and extract structured context.
     ///
     /// Full pipeline: Win32 screenshot → save PNG → farscry VASP → ScreenContext
-    pub async fn capture_and_extract(&self, app_name: &str, window_title: &str) -> Result<ScreenContext> {
+    pub async fn capture_and_extract(
+        &self,
+        app_name: &str,
+        window_title: &str,
+    ) -> Result<ScreenContext> {
         if !self.config.enabled {
             bail!("Screen context capture is disabled in config");
         }
@@ -116,15 +125,18 @@ impl ScreenContextEngine {
     #[cfg(windows)]
     pub fn capture_screenshot(&self) -> Result<PathBuf> {
         use windows::Win32::Foundation::HWND;
-        use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
         use windows::Win32::Graphics::Gdi::{
-            GetDC, ReleaseDC, CreateCompatibleDC, CreateCompatibleBitmap,
-            SelectObject, BitBlt, DeleteDC, DeleteObject, GetDIBits,
-            SRCCOPY, BITMAPINFO, BITMAPINFOHEADER, BI_RGB, DIB_RGB_COLORS,
+            BitBlt, CreateCompatibleBitmap, CreateCompatibleDC, DeleteDC, DeleteObject, GetDC,
+            GetDIBits, ReleaseDC, SelectObject, BITMAPINFO, BITMAPINFOHEADER, BI_RGB,
+            DIB_RGB_COLORS, SRCCOPY,
         };
         use windows::Win32::UI::WindowsAndMessaging::GetClientRect;
+        use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
-        let filename = format!("kairo_screen_{}.bmp", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
+        let filename = format!(
+            "kairo_screen_{}.bmp",
+            chrono::Utc::now().format("%Y%m%d_%H%M%S")
+        );
         let output_path = self.temp_dir.join(filename);
 
         unsafe {
@@ -136,7 +148,7 @@ impl ScreenContextEngine {
             let height = rect.bottom - rect.top;
 
             if width <= 0 || height <= 0 {
-                bail!("Invalid window dimensions: {}x{}", width, height);
+                bail!("Invalid window dimensions: {width}x{height}");
             }
 
             let hdc_window = GetDC(hwnd);
@@ -190,7 +202,10 @@ impl ScreenContextEngine {
 
     #[cfg(not(windows))]
     pub fn capture_screenshot(&self) -> Result<PathBuf> {
-        let filename = format!("kairo_screen_{}.png", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
+        let filename = format!(
+            "kairo_screen_{}.png",
+            chrono::Utc::now().format("%Y%m%d_%H%M%S")
+        );
         let output_path = self.temp_dir.join(filename);
 
         // Use scrot or gnome-screenshot on Linux, screencapture on macOS
@@ -221,7 +236,7 @@ impl ScreenContextEngine {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            bail!("farscry failed: {}", stderr);
+            bail!("farscry failed: {stderr}");
         }
 
         let vasp = String::from_utf8_lossy(&output.stdout).to_string();
@@ -255,9 +270,10 @@ impl ScreenContextEngine {
         };
 
         for name in candidates {
-            if let Ok(output) = std::process::Command::new(if cfg!(windows) { "where" } else { "which" })
-                .arg(name)
-                .output()
+            if let Ok(output) =
+                std::process::Command::new(if cfg!(windows) { "where" } else { "which" })
+                    .arg(name)
+                    .output()
             {
                 if output.status.success() {
                     let path_str = String::from_utf8_lossy(&output.stdout);
@@ -293,14 +309,14 @@ impl ScreenContextEngine {
         f.write_all(&40u32.to_le_bytes())?;
         f.write_all(&width.to_le_bytes())?;
         f.write_all(&height.to_le_bytes())?; // positive = bottom-up
-        f.write_all(&1u16.to_le_bytes())?;   // planes
-        f.write_all(&24u16.to_le_bytes())?;  // bits per pixel
-        f.write_all(&0u32.to_le_bytes())?;   // compression (none)
+        f.write_all(&1u16.to_le_bytes())?; // planes
+        f.write_all(&24u16.to_le_bytes())?; // bits per pixel
+        f.write_all(&0u32.to_le_bytes())?; // compression (none)
         f.write_all(&data_size.to_le_bytes())?;
         f.write_all(&2835u32.to_le_bytes())?; // X ppm
         f.write_all(&2835u32.to_le_bytes())?; // Y ppm
-        f.write_all(&0u32.to_le_bytes())?;    // colors
-        f.write_all(&0u32.to_le_bytes())?;    // important colors
+        f.write_all(&0u32.to_le_bytes())?; // colors
+        f.write_all(&0u32.to_le_bytes())?; // important colors
 
         // Pixel data (already in BGR format from GetDIBits)
         // Write rows bottom-to-top for BMP format
@@ -330,7 +346,11 @@ impl ScreenContext {
             self.timestamp,
             self.app_name,
             self.window_title,
-            if self.used_farscry { "farscry VASP" } else { "fallback OCR" },
+            if self.used_farscry {
+                "farscry VASP"
+            } else {
+                "fallback OCR"
+            },
             self.vasp_output
         )
     }

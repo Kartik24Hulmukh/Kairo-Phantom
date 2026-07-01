@@ -28,7 +28,9 @@ impl SentinelHashDetector {
         if output.contains(&self.current_hash) {
             return Err("Sentinel hash leak detected in output".to_string());
         }
-        if output.to_lowercase().contains("swarm role") || output.to_lowercase().contains("swarm brain") {
+        if output.to_lowercase().contains("swarm role")
+            || output.to_lowercase().contains("swarm brain")
+        {
             return Err("System prompt role leak detected in output".to_string());
         }
         Ok(())
@@ -51,7 +53,8 @@ impl IntegrityGateChecklist {
         }
 
         // 3. Block AI persona frame-lock (model ignoring the task)
-        if lower_output.contains("as an ai, i cannot") || lower_output.contains("i am not able to") {
+        if lower_output.contains("as an ai, i cannot") || lower_output.contains("i am not able to")
+        {
             return Err("Integrity check failed: AI refusal detected.".to_string());
         }
 
@@ -65,18 +68,34 @@ impl MultiReviewerPipeline {
         let lower_output = output.to_lowercase();
 
         // Devil's Advocate: Look for contradictions or excessive hedging
-        if (output.contains("however") && output.contains("but") && output.len() < 100) || lower_output.contains("it is possible that") {
-            return Err("Devil's Advocate rejected: Possible internal contradiction or excessive hedging.".to_string());
+        if (output.contains("however") && output.contains("but") && output.len() < 100)
+            || lower_output.contains("it is possible that")
+        {
+            return Err(
+                "Devil's Advocate rejected: Possible internal contradiction or excessive hedging."
+                    .to_string(),
+            );
         }
 
         // Style Reviewer: Check for "stiff" or "AI-like" phrasing
         let stiff_phrases = [
-            "it is important to note", "delve into", "tapestry of", "in conclusion", "to summarize", 
-            "not only but also", "furthermore", "moreover", "in summary", "essentially", "crucially"
+            "it is important to note",
+            "delve into",
+            "tapestry of",
+            "in conclusion",
+            "to summarize",
+            "not only but also",
+            "furthermore",
+            "moreover",
+            "in summary",
+            "essentially",
+            "crucially",
         ];
         for phrase in stiff_phrases {
             if lower_output.contains(phrase) {
-                return Err(format!("Style Reviewer rejected: Detected overused AI phrasing ('{}').", phrase));
+                return Err(format!(
+                    "Style Reviewer rejected: Detected overused AI phrasing ('{phrase}')."
+                ));
             }
         }
 
@@ -84,7 +103,9 @@ impl MultiReviewerPipeline {
         let informal = ["gotta", "cuz", "theyre", "lol", "alright", "wanna", "gonna"];
         for word in informal {
             if lower_output.contains(word) {
-                return Err(format!("Style Reviewer rejected: Informal language or slang detected ('{}').", word));
+                return Err(format!(
+                    "Style Reviewer rejected: Informal language or slang detected ('{word}')."
+                ));
             }
         }
 
@@ -97,9 +118,13 @@ impl MultiReviewerPipeline {
     }
 }
 
-pub fn anti_leakage_format(system: &str, context: &str, user_prompt: &str, sentinel: &str) -> String {
+pub fn anti_leakage_format(
+    system: &str,
+    context: &str,
+    user_prompt: &str,
+    sentinel: &str,
+) -> String {
     format!(
-        "<system>\n{}\nSentinel: {}\n</system>\n<document_context>\n{}\n</document_context>\n<user_prompt>\n{}\n</user_prompt>\nOutput your response between <output> and </output> tags.",
-        system, sentinel, context, user_prompt
+        "<system>\n{system}\nSentinel: {sentinel}\n</system>\n<document_context>\n{context}\n</document_context>\n<user_prompt>\n{user_prompt}\n</user_prompt>\nOutput your response between <output> and </output> tags."
     )
 }

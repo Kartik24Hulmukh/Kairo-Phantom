@@ -8,17 +8,20 @@ go through LangGraph orchestration.
 All nodes pass through security stack (PromptShield before, Sentinel after).
 LangGraph is additive — it does NOT replace the existing router.
 """
+
 from __future__ import annotations
 import logging
-from typing import Any, Dict, List, Optional, TypedDict, Annotated
-from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, TypedDict
+from dataclasses import dataclass
 
 log = logging.getLogger("kairo-sidecar.langgraph_router")
 
 # ── State Definition ──────────────────────────────────────────────────────────
 
+
 class WorkflowState(TypedDict, total=False):
     """State passed between LangGraph nodes."""
+
     input_text: str
     contract_text: str
     clause_list: List[Dict[str, Any]]
@@ -32,9 +35,11 @@ class WorkflowState(TypedDict, total=False):
 
 # ── Intent Gate ───────────────────────────────────────────────────────────────
 
+
 @dataclass
 class IntentClassification:
     """Result of intent classification."""
+
     is_multi_domain: bool
     domains: List[str]
     workflow: Optional[str] = None
@@ -90,18 +95,25 @@ def classify_intent(request: str) -> IntentClassification:
 
 # ── Security Wrapper ──────────────────────────────────────────────────────────
 
+
 def secure_node(node_name: str, node_fn):
     """Wrap a node function with PromptShield (before) and Sentinel (after)."""
+
     def wrapped(state: WorkflowState) -> WorkflowState:
         # Pre-security: scan input
         input_text = state.get("input_text", "")
         if input_text:
             try:
                 from sidecar.safety.security_enhanced import scan_with_domain12
+
                 is_safe, matched = scan_with_domain12(input_text)
                 if not is_safe:
-                    log.warning(f"LangGraph node '{node_name}': input blocked by PromptShield — {matched}")
-                    state["errors"] = state.get("errors", []) + [f"Security: {node_name} input blocked"]
+                    log.warning(
+                        f"LangGraph node '{node_name}': input blocked by PromptShield — {matched}"
+                    )
+                    state["errors"] = state.get("errors", []) + [
+                        f"Security: {node_name} input blocked"
+                    ]
                     return state
             except ImportError:
                 pass
@@ -113,14 +125,21 @@ def secure_node(node_name: str, node_fn):
         # Post-security: scan output
         output_text = ""
         if isinstance(result, dict):
-            output_text = result.get("summary", "") or result.get("email_body", "") or str(result.get("clause_list", ""))
+            output_text = (
+                result.get("summary", "")
+                or result.get("email_body", "")
+                or str(result.get("clause_list", ""))
+            )
         if output_text:
             try:
                 from sidecar.safety.security_enhanced import RecursiveSentinel
+
                 sentinel = RecursiveSentinel()
                 if not sentinel.is_safe(output_text):
                     log.warning(f"LangGraph node '{node_name}': output flagged by Sentinel")
-                    result["errors"] = result.get("errors", []) + [f"Security: {node_name} output flagged"]
+                    result["errors"] = result.get("errors", []) + [
+                        f"Security: {node_name} output flagged"
+                    ]
             except ImportError:
                 pass
 
@@ -129,10 +148,12 @@ def secure_node(node_name: str, node_fn):
             result["node_history"] = result.get("node_history", []) + [node_name]
 
         return result
+
     return wrapped
 
 
 # ── Domain Node Functions ─────────────────────────────────────────────────────
+
 
 def node_parse_contract(state: WorkflowState) -> WorkflowState:
     """Parse a contract document — extract text and structure."""
@@ -151,7 +172,9 @@ def node_extract_clauses(state: WorkflowState) -> WorkflowState:
     clause_types = ["termination", "liability", "payment", "confidentiality", "warranty"]
     for clause_type in clause_types:
         if clause_type in text.lower():
-            clauses.append({"type": clause_type, "found": True, "text": f"Clause about {clause_type}"})
+            clauses.append(
+                {"type": clause_type, "found": True, "text": f"Clause about {clause_type}"}
+            )
     state["clause_list"] = clauses
     log.info(f"extract_clauses: found {len(clauses)} clauses")
     return state
@@ -162,7 +185,9 @@ def node_generate_slides(state: WorkflowState) -> WorkflowState:
     clauses = state.get("clause_list", [])
     slides = []
     # Title slide
-    slides.append({"title": "Contract Analysis", "content": state.get("summary", "Contract Review")})
+    slides.append(
+        {"title": "Contract Analysis", "content": state.get("summary", "Contract Review")}
+    )
     # One slide per clause
     for clause in clauses:
         slides.append({"title": clause["type"].title(), "content": clause["text"]})
@@ -199,12 +224,15 @@ Kairo Phantom"""
 
 def node_export_results(state: WorkflowState) -> WorkflowState:
     """Export results in the requested format."""
-    state["summary"] = f"Workflow complete. Clauses: {len(state.get('clause_list', []))}, Slides: {len(state.get('slide_content', []))}"
+    state["summary"] = (
+        f"Workflow complete. Clauses: {len(state.get('clause_list', []))}, Slides: {len(state.get('slide_content', []))}"
+    )
     log.info(f"export_results: {state['summary']}")
     return state
 
 
 # ── LangGraph Router ──────────────────────────────────────────────────────────
+
 
 class LangGraphRouter:
     """

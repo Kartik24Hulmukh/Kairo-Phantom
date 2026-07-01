@@ -1,0 +1,12 @@
+# =============================================================================
+# Kairo-Phantom — Rust toolchain pin (reproducible builds)
+# =============================================================================
+# Pinned to a specific stable version for reproducibility across CI, GPU
+# runner, and developer machines. Bump intentionally in a dedicated PR.
+# =============================================================================
+
+[toolchain]
+channel = "1.88.0"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
+targets = ["x86_64-unknown-linux-gnu"]

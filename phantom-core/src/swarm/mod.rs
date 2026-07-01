@@ -1,40 +1,37 @@
 // phantom-core/src/swarm/mod.rs
-pub mod design;
-pub mod reasoning;
 pub mod content;
-pub mod engineer;
 pub mod data;
+pub mod design;
+pub mod engineer;
 pub mod image;
-pub mod sales;
-pub mod medical;
 pub mod legal;
+pub mod medical;
 pub mod metrics;
-use crate::skills::SkillManager;
+pub mod reasoning;
+pub mod sales;
 #[allow(unused_imports)]
 use crate::integration::IntegrationManager;
+use crate::skills::SkillManager;
 
-
-
-
-use crate::document_context::DocumentContext;
-use tracing::info;
-use std::sync::Arc;
 use crate::ai::{build_backend, AiBackend};
 use crate::config::SwarmConfig;
-use crate::plugin::{SwarmAgent, AgentRegistry};
-use crate::persona::{PersonaManager, PersonaAwareContext};
-use crate::memory::KairoMemory;
 use crate::context7::Context7;
+use crate::document_context::DocumentContext;
+use crate::memory::KairoMemory;
+use crate::persona::{PersonaAwareContext, PersonaManager};
+use crate::plugin::{AgentRegistry, SwarmAgent};
+use std::sync::Arc;
+use tracing::info;
 
-pub use design::DesignAgent;
-pub use reasoning::ReasoningAgent;
 pub use content::{ContentAgent, StudentTutorAgent};
-pub use engineer::EngineerAgent;
 pub use data::DataAnalystAgent;
+pub use design::DesignAgent;
+pub use engineer::EngineerAgent;
 pub use image::ImageAgent;
-pub use sales::SalesAgent;
-pub use medical::MedicalAgent;
 pub use legal::LegalPlusAgent;
+pub use medical::MedicalAgent;
+pub use reasoning::ReasoningAgent;
+pub use sales::SalesAgent;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AgentType {
@@ -84,9 +81,18 @@ pub struct SwarmOrchestrator {
 impl SwarmOrchestrator {
     pub fn new(config: SwarmConfig, fallback_agent: Arc<dyn AiBackend>) -> Self {
         let brain = config.brain.as_ref().and_then(|c| build_backend(c).ok());
-        let design_backend = config.design_agent.as_ref().and_then(|c| build_backend(c).ok());
-        let reasoning_backend = config.reasoning_agent.as_ref().and_then(|c| build_backend(c).ok());
-        let content_backend = config.content_agent.as_ref().and_then(|c| build_backend(c).ok());
+        let design_backend = config
+            .design_agent
+            .as_ref()
+            .and_then(|c| build_backend(c).ok());
+        let reasoning_backend = config
+            .reasoning_agent
+            .as_ref()
+            .and_then(|c| build_backend(c).ok());
+        let content_backend = config
+            .content_agent
+            .as_ref()
+            .and_then(|c| build_backend(c).ok());
 
         let mut registry = AgentRegistry::new();
         registry.register(Arc::new(DesignAgent));
@@ -118,17 +124,26 @@ impl SwarmOrchestrator {
         }
     }
 
-    pub async fn route(&self, doc_ctx: &DocumentContext, command_mode: &crate::command_protocol::CommandMode) -> (Arc<dyn AiBackend>, AgentProfile) {
+    pub async fn route(
+        &self,
+        doc_ctx: &DocumentContext,
+        command_mode: &crate::command_protocol::CommandMode,
+    ) -> (Arc<dyn AiBackend>, AgentProfile) {
         let start = std::time::Instant::now();
         let (backend, profile) = self.route_internal(doc_ctx, command_mode).await;
         let latency = start.elapsed().as_millis() as u64;
-        
-        self.dashboard.record_call(profile.agent_type_id(), latency, true);
-        
+
+        self.dashboard
+            .record_call(profile.agent_type_id(), latency, true);
+
         (backend, profile)
     }
 
-    async fn route_internal(&self, doc_ctx: &DocumentContext, command_mode: &crate::command_protocol::CommandMode) -> (Arc<dyn AiBackend>, AgentProfile) {
+    async fn route_internal(
+        &self,
+        doc_ctx: &DocumentContext,
+        command_mode: &crate::command_protocol::CommandMode,
+    ) -> (Arc<dyn AiBackend>, AgentProfile) {
         let mut selected_agent: Arc<dyn SwarmAgent> = match self.registry.select_best(doc_ctx) {
             Some(agent) => agent,
             None => {
@@ -149,11 +164,22 @@ impl SwarmOrchestrator {
                     Decide the best specialized agent. Reply ONLY with the agent ID: {}.",
                     doc_ctx.prompt_text,
                     doc_ctx.doc_kind.human_name(),
-                    self.registry.list_agents().iter().map(|a| a.id()).collect::<Vec<_>>().join(", ")
+                    self.registry
+                        .list_agents()
+                        .iter()
+                        .map(|a| a.id())
+                        .collect::<Vec<_>>()
+                        .join(", ")
                 );
-                
+
                 info!("🧠 Brain is thinking...");
-                if let Ok(decision) = brain_llm.complete("You are a router. Reply with exactly one ID.", &brain_prompt).await {
+                if let Ok(decision) = brain_llm
+                    .complete(
+                        "You are a router. Reply with exactly one ID.",
+                        &brain_prompt,
+                    )
+                    .await
+                {
                     let d = decision.trim().to_lowercase();
                     if let Some(agent) = self.registry.get_agent(&d) {
                         selected_agent = agent;
@@ -164,7 +190,12 @@ impl SwarmOrchestrator {
         }
 
         let agent_score = selected_agent.match_score(doc_ctx);
-        info!("🧠 Swarm routed to: {} (score={}) | doc={}", agent_id, agent_score, doc_ctx.doc_kind.human_name());
+        info!(
+            "🧠 Swarm routed to: {} (score={}) | doc={}",
+            agent_id,
+            agent_score,
+            doc_ctx.doc_kind.human_name()
+        );
 
         // V4: Log agent selection to ~/.kairo-phantom/agent_debug.jsonl
         crate::toast_notification::log_agent_selection(
@@ -178,32 +209,34 @@ impl SwarmOrchestrator {
         let app_name = doc_ctx.app_name.clone().unwrap_or_default();
         let memory_fragment = self.optimizer.optimize_memory(&self.memory, &app_name);
         let ground_truth = self.context7.fetch_ground_truth(&doc_ctx.prompt_text).await;
-        let ground_truth_fragment = ground_truth.map(|gt| format!("\n\n## GROUND TRUTH (Context7)\n{}", gt)).unwrap_or_default();
+        let ground_truth_fragment = ground_truth
+            .map(|gt| format!("\n\n## GROUND TRUTH (Context7)\n{gt}"))
+            .unwrap_or_default();
 
         // Fetch deep app context if an adapter is available
         let mut deep_context_fragment = String::new();
         if let Some(app_id) = &doc_ctx.app_name {
-            if let Some(adapter) = self.integration_manager.get_adapter(&app_id.to_lowercase()).await {
+            if let Some(adapter) = self
+                .integration_manager
+                .get_adapter(&app_id.to_lowercase())
+                .await
+            {
                 if let Ok(ctx) = adapter.get_deep_context().await {
-                    deep_context_fragment = format!("\n\n## DEEP APP CONTEXT ({})\n{}", app_id, ctx);
+                    deep_context_fragment = format!("\n\n## DEEP APP CONTEXT ({app_id})\n{ctx}");
                 }
             }
         }
 
         let command_hint = command_mode.system_hint();
-        let skill_directive = self.skill_manager.get_skill_directive(command_mode).unwrap_or_default();
+        let skill_directive = self
+            .skill_manager
+            .get_skill_directive(command_mode)
+            .unwrap_or_default();
         let persona_aware_ctx = PersonaAwareContext::new(doc_ctx.clone(), &self.persona_manager);
         let persona_fragment = persona_aware_ctx.persona.build_prompt_fragment();
-        
+
         let system_directive = format!(
-            "<system>\n{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n## COMMAND PROTOCOL\n{}\n\nCRITICAL: Output ONLY within <output> tags. No conversational preamble.\n</system>",
-            base_directive,
-            persona_fragment,
-            memory_fragment,
-            ground_truth_fragment,
-            deep_context_fragment,
-            skill_directive,
-            command_hint
+            "<system>\n{base_directive}\n\n{persona_fragment}\n\n{memory_fragment}\n\n{ground_truth_fragment}\n\n{deep_context_fragment}\n\n{skill_directive}\n\n## COMMAND PROTOCOL\n{command_hint}\n\nCRITICAL: Output ONLY within <output> tags. No conversational preamble.\n</system>"
         );
 
         let agent_type = match agent_id.as_str() {
@@ -221,15 +254,28 @@ impl SwarmOrchestrator {
         };
 
         let backend = match agent_id.as_str() {
-            "design" => self.design_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
-            "reasoning" => self.reasoning_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
-            _ => self.content_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
+            "design" => self
+                .design_backend
+                .clone()
+                .unwrap_or_else(|| self.fallback_agent.clone()),
+            "reasoning" => self
+                .reasoning_backend
+                .clone()
+                .unwrap_or_else(|| self.fallback_agent.clone()),
+            _ => self
+                .content_backend
+                .clone()
+                .unwrap_or_else(|| self.fallback_agent.clone()),
         };
 
         (backend, profile)
     }
 
-    pub fn get_backend_and_profile_by_type(&self, agent_type: &AgentType, doc_ctx: &DocumentContext) -> (Arc<dyn AiBackend>, AgentProfile) {
+    pub fn get_backend_and_profile_by_type(
+        &self,
+        agent_type: &AgentType,
+        doc_ctx: &DocumentContext,
+    ) -> (Arc<dyn AiBackend>, AgentProfile) {
         let agent_id = match agent_type {
             AgentType::DesignAndMedia => "design",
             AgentType::ReasoningAndLogic => "reasoning",
@@ -239,11 +285,13 @@ impl SwarmOrchestrator {
             AgentType::ContentAndAllRounder => "content",
         };
 
-        let base_directive = self.registry.get_agent(agent_id)
+        let base_directive = self
+            .registry
+            .get_agent(agent_id)
             .map(|a| a.build_system_prompt(doc_ctx))
             .unwrap_or_else(|| crate::ai::KAIRO_SYSTEM_PROMPT.to_string());
 
-        let system_directive = format!("<system>\n{}\n\nCRITICAL: Output ONLY within <output> tags. No conversational preamble.\n</system>", base_directive);
+        let system_directive = format!("<system>\n{base_directive}\n\nCRITICAL: Output ONLY within <output> tags. No conversational preamble.\n</system>");
 
         let profile = AgentProfile {
             agent_type: agent_type.clone(),
@@ -251,15 +299,27 @@ impl SwarmOrchestrator {
         };
 
         let backend = match agent_id {
-            "design" => self.design_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
-            "reasoning" => self.reasoning_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
-            _ => self.content_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
+            "design" => self
+                .design_backend
+                .clone()
+                .unwrap_or_else(|| self.fallback_agent.clone()),
+            "reasoning" => self
+                .reasoning_backend
+                .clone()
+                .unwrap_or_else(|| self.fallback_agent.clone()),
+            _ => self
+                .content_backend
+                .clone()
+                .unwrap_or_else(|| self.fallback_agent.clone()),
         };
 
         (backend, profile)
     }
 
-    pub fn get_domain_capability(&self, domain_id: &str) -> Option<crate::plugin::DomainCapability> {
+    pub fn get_domain_capability(
+        &self,
+        domain_id: &str,
+    ) -> Option<crate::plugin::DomainCapability> {
         self.registry.get_agent(domain_id).map(|a| a.capability())
     }
 }
@@ -267,8 +327,17 @@ impl SwarmOrchestrator {
 pub struct TestFallbackBackend;
 #[async_trait::async_trait]
 impl AiBackend for TestFallbackBackend {
-    async fn complete(&self, _system: &str, _prompt: &str) -> anyhow::Result<String> { Ok("test response".to_string()) }
-    async fn stream_complete(&self, _system: &str, _prompt: &str, _tx: tokio::sync::mpsc::Sender<String>) -> anyhow::Result<()> { Ok(()) }
+    async fn complete(&self, _system: &str, _prompt: &str) -> anyhow::Result<String> {
+        Ok("test response".to_string())
+    }
+    async fn stream_complete(
+        &self,
+        _system: &str,
+        _prompt: &str,
+        _tx: tokio::sync::mpsc::Sender<String>,
+    ) -> anyhow::Result<()> {
+        Ok(())
+    }
 }
 
 impl SwarmOrchestrator {
@@ -278,7 +347,10 @@ impl SwarmOrchestrator {
     }
 
     pub fn select_agent(&mut self, doc_ctx: &DocumentContext) -> String {
-        self.registry.select_best(doc_ctx).map(|a| a.id().to_string()).unwrap_or_else(|| "content".to_string())
+        self.registry
+            .select_best(doc_ctx)
+            .map(|a| a.id().to_string())
+            .unwrap_or_else(|| "content".to_string())
     }
 }
 
@@ -341,7 +413,11 @@ impl SwarmOrchestrator {
         info!(
             "⚡ B3 ParallelSwarm: consulting {} agents concurrently: [{}]",
             scored.len(),
-            scored.iter().map(|(s, a)| format!("{}({})", a.id(), s)).collect::<Vec<_>>().join(", ")
+            scored
+                .iter()
+                .map(|(s, a)| format!("{}({})", a.id(), s))
+                .collect::<Vec<_>>()
+                .join(", ")
         );
 
         // 2. Build (agent_id, system_prompt, backend) tuples
@@ -351,9 +427,18 @@ impl SwarmOrchestrator {
                 let agent_id = agent.id().to_string();
                 let sys = agent.build_system_prompt(doc_ctx);
                 let backend = match agent.id() {
-                    "design" => self.design_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
-                    "reasoning" => self.reasoning_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
-                    _ => self.content_backend.clone().unwrap_or_else(|| self.fallback_agent.clone()),
+                    "design" => self
+                        .design_backend
+                        .clone()
+                        .unwrap_or_else(|| self.fallback_agent.clone()),
+                    "reasoning" => self
+                        .reasoning_backend
+                        .clone()
+                        .unwrap_or_else(|| self.fallback_agent.clone()),
+                    _ => self
+                        .content_backend
+                        .clone()
+                        .unwrap_or_else(|| self.fallback_agent.clone()),
                 };
                 (agent_id, sys, backend)
             })
@@ -366,8 +451,10 @@ impl SwarmOrchestrator {
             .map(|(agent_id, sys_prompt, backend)| {
                 let prompt = prompt_clone.clone();
                 async move {
-                    let result = backend.complete(&sys_prompt, &prompt).await
-                        .unwrap_or_else(|e| format!("[{} failed: {}]", agent_id, e));
+                    let result = backend
+                        .complete(&sys_prompt, &prompt)
+                        .await
+                        .unwrap_or_else(|e| format!("[{agent_id} failed: {e}]"));
                     (agent_id, result)
                 }
             })
@@ -376,11 +463,14 @@ impl SwarmOrchestrator {
         let results: Vec<(String, String)> = futures::future::join_all(futures).await;
 
         let elapsed_ms = start.elapsed().as_millis() as u64;
-        self.dashboard.record_call("parallel_swarm", elapsed_ms, !results.is_empty());
+        self.dashboard
+            .record_call("parallel_swarm", elapsed_ms, !results.is_empty());
 
         // 4. Primary = first result (highest-scored agent), rest are alternatives
         let mut iter = results.into_iter();
-        let (primary_agent, primary_response) = iter.next().unwrap_or_else(|| ("content".to_string(), String::new()));
+        let (primary_agent, primary_response) = iter
+            .next()
+            .unwrap_or_else(|| ("content".to_string(), String::new()));
         let alternatives: Vec<(String, String)> = iter.collect();
 
         info!(
@@ -406,7 +496,8 @@ impl SwarmOrchestrator {
     /// 2. Are not error messages (don't start with `[`)
     /// 3. Have more content than the minimum length threshold
     pub fn select_best_response(results: &[(String, String)], min_len: usize) -> Option<&str> {
-        results.iter()
+        results
+            .iter()
             .filter(|(_, r)| !r.is_empty() && !r.starts_with('[') && r.len() >= min_len)
             .map(|(_, r)| r.as_str())
             .next()

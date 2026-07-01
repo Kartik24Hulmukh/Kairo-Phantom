@@ -4,19 +4,20 @@ import io
 import builtins
 import pytest
 import pptx
-import fitz
 from unittest.mock import patch, MagicMock
 from sidecar.test_fix_loop import TestFixLoop, ProtectedPathViolation
 from sidecar.oracles import verify_pptx, verify_pdf
+
 
 @pytest.fixture
 def temp_dir(tmpdir):
     return str(tmpdir)
 
+
 # 1. Path Safety Verification Tests
 def test_verify_patch_safety_bypasses():
     loop = TestFixLoop(workspace_root="/dummy/workspace")
-    
+
     # These should be successfully BLOCKED
     blocked_paths = [
         "kairo-sidecar/sidecar/oracles.py",
@@ -31,9 +32,9 @@ def test_verify_patch_safety_bypasses():
         "kairo-sidecar/sidecar/oracles.py.pub",
         "kairo-sidecar/sidecar/test_fix_loop.py",
         "scripts/ci/sbom_gate.py",
-        "scripts/ci/eval_integrity_guard.py"
+        "scripts/ci/eval_integrity_guard.py",
     ]
-    
+
     for path in blocked_paths:
         with pytest.raises(ProtectedPathViolation):
             loop.verify_patch_safety({path})
@@ -44,9 +45,9 @@ def test_verify_patch_safety_bypasses():
         "kairo-sidecar/sidecar/not_oracles.py",
         "phantom-core/src/response_validator.rs.bak",
         "scripts/ci/sbom_gate.py.tmp",
-        "kairo-sidecar/sidecar/oracles.py.bak"
+        "kairo-sidecar/sidecar/oracles.py.bak",
     ]
-    
+
     for path in allowed_paths:
         # Should not raise exception
         loop.verify_patch_safety({path})
@@ -55,10 +56,10 @@ def test_verify_patch_safety_bypasses():
 # 2. Cryptographic signature and public key on disk modification tests
 def test_oracles_signature_verification_failures():
     loop = TestFixLoop(workspace_root="/dummy/workspace")
-    
+
     # We will mock builtins.open to intercept reads to oracles.py, oracles.py.pub, and oracles.py.sig
     original_open = builtins.open
-    
+
     # Mocking standard Ed25519 public key bytes that is DIFFERENT from the pinned key
     different_pub_key = (
         b"-----BEGIN PUBLIC KEY-----\n"
@@ -72,7 +73,7 @@ def test_oracles_signature_verification_failures():
         if filename == "oracles.py.pub" and "b" in mode:
             return io.BytesIO(different_pub_key)
         return original_open(file, mode, *args, **kwargs)
-        
+
     with patch("builtins.open", side_effect=mock_open_diff_pub):
         with pytest.raises(PermissionError) as excinfo:
             loop.verify_oracles_signature()
@@ -105,13 +106,23 @@ def test_oracles_signature_verification_failures():
         assert "Signature verification failed" in str(excinfo.value)
 
     # Test Case 2d: Missing oracles.py
-    with patch("os.path.exists", side_effect=lambda path: False if "oracles.py" in os.path.basename(path) and not path.endswith(".py.sig") and not path.endswith(".py.pub") else True):
+    with patch(
+        "os.path.exists",
+        side_effect=lambda path: False
+        if "oracles.py" in os.path.basename(path)
+        and not path.endswith(".py.sig")
+        and not path.endswith(".py.pub")
+        else True,
+    ):
         with pytest.raises(PermissionError) as excinfo:
             loop.verify_oracles_signature()
         assert "oracles.py is missing" in str(excinfo.value)
 
     # Test Case 2e: Missing oracles.py.sig
-    with patch("os.path.exists", side_effect=lambda path: False if "oracles.py.sig" in os.path.basename(path) else True):
+    with patch(
+        "os.path.exists",
+        side_effect=lambda path: False if "oracles.py.sig" in os.path.basename(path) else True,
+    ):
         with pytest.raises(PermissionError) as excinfo:
             loop.verify_oracles_signature()
         assert "Signature oracles.py.sig is missing" in str(excinfo.value)
@@ -122,17 +133,17 @@ def test_pptx_binned_coordinate_sorting(temp_dir):
     pptx_path = os.path.join(temp_dir, "binned_sort.pptx")
     prs = pptx.Presentation()
     slide = prs.slides.add_slide(prs.slide_layouts[6])
-    
+
     # Add textbox A visually at top=50, left=200
     tx_a = slide.shapes.add_textbox(200, 50, 100, 100)
     tx_a.text_frame.text = "A"
-    
+
     # Add textbox B visually at top=52, left=100 (B is to the left of A, but slightly lower)
     tx_b = slide.shapes.add_textbox(100, 52, 100, 100)
     tx_b.text_frame.text = "B"
-    
+
     prs.save(pptx_path)
-    
+
     # Sorting by binned top:
     # A top=50 -> binned to 50
     # B top=52 -> binned to 50
@@ -144,29 +155,26 @@ def test_pptx_binned_coordinate_sorting(temp_dir):
 
 def test_pdf_binned_coordinate_sorting(temp_dir):
     pdf_path = os.path.join(temp_dir, "binned_sort.pdf")
-    
+
     mock_page = MagicMock()
-    mock_page.get_text.return_value = [
-        (200, 50, 250, 60, "A", 0, 0),
-        (100, 52, 150, 62, "B", 1, 0)
-    ]
-    
+    mock_page.get_text.return_value = [(200, 50, 250, 60, "A", 0, 0), (100, 52, 150, 62, "B", 1, 0)]
+
     mock_doc = MagicMock()
     mock_doc.__iter__.return_value = [mock_page]
     mock_doc.__enter__.return_value = mock_doc
-    
+
     mock_plumber_page = MagicMock()
     mock_plumber_page.extract_text.return_value = "B A"
-    
+
     mock_plumber_doc = MagicMock()
     mock_plumber_doc.pages = [mock_plumber_page]
     mock_plumber_doc.__enter__.return_value = mock_plumber_doc
-    
-    with patch("fitz.open", return_value=mock_doc), \
-         patch("pdfplumber.open", return_value=mock_plumber_doc):
-         
-        assert verify_pdf(pdf_path, ["B A"])
 
+    with (
+        patch("fitz.open", return_value=mock_doc),
+        patch("pdfplumber.open", return_value=mock_plumber_doc),
+    ):
+        assert verify_pdf(pdf_path, ["B A"])
 
 
 # 4. Word Limit Enforcement on Slide Level 0 Placeholders
@@ -176,14 +184,15 @@ def test_pptx_word_limit_enforcement(temp_dir):
     pptx_path = os.path.join(temp_dir, "word_limit_test.pptx")
     prs = pptx.Presentation()
     slide = prs.slides.add_slide(prs.slide_layouts[1])
-    
+
     body_placeholder = slide.placeholders[1]
     title_placeholder = slide.placeholders[0]
-    
+
     # Check that body placeholder is actually PP_PLACEHOLDER.BODY or PP_PLACEHOLDER.OBJECT
     from pptx.enum.shapes import PP_PLACEHOLDER
+
     assert body_placeholder.placeholder_format.type in (PP_PLACEHOLDER.BODY, PP_PLACEHOLDER.OBJECT)
-    
+
     # 4a: Body placeholder level 0 text exceeding limit (13 words)
     tf = body_placeholder.text_frame
     tf.clear()
@@ -191,11 +200,11 @@ def test_pptx_word_limit_enforcement(temp_dir):
     p.text = "one two three four five six seven eight nine ten eleven twelve thirteen"
     p.level = 0
     prs.save(pptx_path)
-    
+
     with pytest.raises(AssertionError) as excinfo:
         verify_pptx(pptx_path, bullet_word_limit=12)
     assert "exceeds word limit" in str(excinfo.value)
-    
+
     # 4b: Body placeholder level 0 text within limit (12 words)
     tf.clear()
     p = tf.paragraphs[0]
@@ -203,23 +212,25 @@ def test_pptx_word_limit_enforcement(temp_dir):
     p.level = 0
     prs.save(pptx_path)
     assert verify_pptx(pptx_path, bullet_word_limit=12)
-    
+
     # 4c: Title placeholder (not BODY/OBJECT) exceeding limit does not raise AssertionError
     tf_title = title_placeholder.text_frame
     tf_title.clear()
     p_title = tf_title.paragraphs[0]
-    p_title.text = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen"
+    p_title.text = (
+        "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen"
+    )
     p_title.level = 0
     prs.save(pptx_path)
     assert verify_pptx(pptx_path, bullet_word_limit=12)
-    
+
     # 4d: Title placeholder exceeding limit with level > 0 DOES raise AssertionError
     p_title.level = 1
     prs.save(pptx_path)
     with pytest.raises(AssertionError) as excinfo:
         verify_pptx(pptx_path, bullet_word_limit=12)
     assert "exceeds word limit" in str(excinfo.value)
-    
+
     # 4e: Title placeholder exceeding limit starting with '-' DOES raise AssertionError
     p_title.level = 0
     p_title.text = "- one two three four five six seven eight nine ten eleven twelve thirteen"
@@ -236,11 +247,13 @@ def test_pptx_word_limit_enforcement(temp_dir):
     p = tf.paragraphs[0]
     p.text = "Short body"
     p.level = 0
-    
+
     txBox = slide.shapes.add_textbox(0, 0, 100, 100)
     tf_box = txBox.text_frame
     p_box = tf_box.paragraphs[0]
-    p_box.text = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen"
+    p_box.text = (
+        "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen"
+    )
     p_box.level = 0
     prs.save(pptx_path)
     assert verify_pptx(pptx_path, bullet_word_limit=12)
@@ -249,7 +262,7 @@ def test_pptx_word_limit_enforcement(temp_dir):
 # 5. Case-insensitivity Bypass Verification (Vulnerability Detection)
 def test_verify_patch_safety_case_insensitive_bypass():
     loop = TestFixLoop(workspace_root="/dummy/workspace")
-    
+
     # On case-insensitive filesystems (like Windows), ORACLES.py refers to the same file as oracles.py.
     # However, verify_patch_safety matches case-sensitively, so "ORACLES.py" is NOT blocked.
     # We assert that the bypass succeeds (which confirms the presence of the vulnerability).
@@ -258,6 +271,5 @@ def test_verify_patch_safety_case_insensitive_bypass():
         bypass_succeeded = True
     except ProtectedPathViolation:
         bypass_succeeded = False
-        
-    assert bypass_succeeded, "Case-insensitive bypass failed (it should succeed due to the bug!)"
 
+    assert bypass_succeeded, "Case-insensitive bypass failed (it should succeed due to the bug!)"

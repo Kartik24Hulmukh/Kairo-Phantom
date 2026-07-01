@@ -1,13 +1,12 @@
 import datetime
-import os
 import traceback
 import logging
 from pathlib import Path
-from typing import Dict, Any
 
 from sidecar.parsers.cache import DocumentCache
 
 log = logging.getLogger("kairo-sidecar.docx_parser")
+
 
 def parse_docx(file_path: str) -> dict:
     """
@@ -17,7 +16,7 @@ def parse_docx(file_path: str) -> dict:
       "tables": [{"after_paragraph_index": int, "rows": [[str]]}],
       "metadata": {"total_paragraphs": int, "heading_count": int, "table_count": int, "file_path": str, "parse_timestamp": str}
     }
-    
+
     Uses 4-tier parsing chain:
     Tier 0: win32com (reads live Word document — bypasses file lock)
     Tier 1: MinerU (optional, highly accurate layout parser)
@@ -90,19 +89,22 @@ def _parse_docx_com(file_path: str) -> dict:
     import win32com.client
     import pythoncom
     import subprocess
+
     pythoncom.CoInitialize()
-    
+
     word = None
     target_doc = None
     path = Path(file_path).resolve()
-    
+
     word_running = False
     try:
-        out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True)
+        out = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True
+        )
         word_running = "winword.exe" in out.stdout.lower()
     except Exception:
         pass
-        
+
     if word_running:
         try:
             target_doc = win32com.client.GetObject(str(path))
@@ -119,14 +121,14 @@ def _parse_docx_com(file_path: str) -> dict:
                         pass
             except Exception:
                 pass
-    
+
     if not target_doc:
         return None  # File not open in Word
-    
+
     paragraphs = []
     tables = []
     p_idx = 0
-    
+
     for i in range(1, target_doc.Paragraphs.Count + 1):
         p = target_doc.Paragraphs(i)
         text = p.Range.Text.rstrip("\r\n\x0d\x07")  # Strip Word paragraph marks
@@ -136,23 +138,19 @@ def _parse_docx_com(file_path: str) -> dict:
             style_name = p.Style.NameLocal
         except Exception:
             pass
-        
+
         if "Heading" in style_name:
             try:
                 level = int(style_name.split()[-1])
             except Exception:
                 level = 1
-        
+
         runs = [{"text": text, "bold": bool(p.Range.Bold), "italic": bool(p.Range.Italic)}]
-        paragraphs.append({
-            "index": p_idx,
-            "text": text,
-            "style": style_name,
-            "level": level,
-            "runs": runs
-        })
+        paragraphs.append(
+            {"index": p_idx, "text": text, "style": style_name, "level": level, "runs": runs}
+        )
         p_idx += 1
-    
+
     # Extract tables
     for t_idx in range(1, target_doc.Tables.Count + 1):
         table = target_doc.Tables(t_idx)
@@ -166,9 +164,9 @@ def _parse_docx_com(file_path: str) -> dict:
                     row.append("")
             rows.append(row)
         tables.append({"after_paragraph_index": p_idx - 1, "rows": rows})
-    
+
     headings_count = sum(1 for p in paragraphs if p["level"] > 0)
-    
+
     return {
         "paragraphs": paragraphs,
         "tables": tables,
@@ -178,10 +176,9 @@ def _parse_docx_com(file_path: str) -> dict:
             "table_count": len(tables),
             "file_path": file_path,
             "parse_timestamp": datetime.datetime.now().isoformat(),
-            "source": "com"
-        }
+            "source": "com",
+        },
     }
-
 
 
 def _parse_docx_mineru(file_path: str) -> dict:
@@ -192,25 +189,25 @@ def _parse_docx_mineru(file_path: str) -> dict:
     # Try importing MinerU libraries
     from magic_pdf.data.data_reader_writer import FileBasedReaderWriter
     from magic_pdf.pipe.UNIPipe import UNIPipe
-    
+
     # Create output directory for MinerU internal processing
     parent_dir = str(Path(file_path).parent)
-    reader = FileBasedReaderWriter(parent_dir)
-    
+    FileBasedReaderWriter(parent_dir)
+
     # Initialize UNIPipe on docx
     with open(file_path, "rb") as f:
         docx_bytes = f.read()
-        
+
     pipe = UNIPipe(docx_bytes, "docx", {})
     pipe.pipe_classify()
     pipe.pipe_analyze()
     model_json = pipe.pipe_to_json()
-    
+
     # Process model_json and map to Kairo schema
     # Let's map headings, texts, tables, and runs
     paragraphs = []
     tables = []
-    
+
     p_idx = 0
     # Process blocks from MinerU json output
     for block in model_json:
@@ -225,27 +222,20 @@ def _parse_docx_mineru(file_path: str) -> dict:
             elif block_type == "heading":
                 level = block.get("level", 1)
                 style = f"Heading{level}"
-                
+
             runs = [{"text": text, "bold": False, "italic": False}]
-            paragraphs.append({
-                "index": p_idx,
-                "text": text,
-                "style": style,
-                "level": level,
-                "runs": runs
-            })
+            paragraphs.append(
+                {"index": p_idx, "text": text, "style": style, "level": level, "runs": runs}
+            )
             p_idx += 1
         elif block_type == "table":
             # Extract rows from block
             rows = block.get("table_cells", [])
             # MinerU tables have structured format, let's build rows grid
-            tables.append({
-                "after_paragraph_index": p_idx - 1,
-                "rows": rows
-            })
-            
+            tables.append({"after_paragraph_index": p_idx - 1, "rows": rows})
+
     headings_count = sum(1 for p in paragraphs if p["level"] > 0)
-    
+
     return {
         "paragraphs": paragraphs,
         "tables": tables,
@@ -254,8 +244,8 @@ def _parse_docx_mineru(file_path: str) -> dict:
             "heading_count": headings_count,
             "table_count": len(tables),
             "file_path": file_path,
-            "parse_timestamp": datetime.datetime.now().isoformat()
-        }
+            "parse_timestamp": datetime.datetime.now().isoformat(),
+        },
     }
 
 
@@ -265,15 +255,15 @@ def _parse_docx_mammoth(file_path: str) -> dict:
     """
     import mammoth
     from bs4 import BeautifulSoup
-    
+
     with open(file_path, "rb") as docx_file:
         result = mammoth.convert_to_html(docx_file)
         html = result.value
-        
+
     soup = BeautifulSoup(html, "html.parser")
     paragraphs = []
     tables = []
-    
+
     p_idx = 0
     # Mammoth outputs a flat body with elements. We traverse linearly.
     for child in soup.children:
@@ -289,7 +279,7 @@ def _parse_docx_mammoth(file_path: str) -> dict:
                 except ValueError:
                     level = 1
                 style = f"Heading{level}"
-            
+
             # Map child text runs to runs
             runs = []
             for item in child.children:
@@ -299,35 +289,24 @@ def _parse_docx_mammoth(file_path: str) -> dict:
                 else:
                     bold = item.name == "strong" or bool(item.find("strong"))
                     italic = item.name == "em" or bool(item.find("em"))
-                    runs.append({
-                        "text": item.get_text(),
-                        "bold": bold,
-                        "italic": italic
-                    })
-            
+                    runs.append({"text": item.get_text(), "bold": bold, "italic": italic})
+
             if not runs:
                 runs = [{"text": text, "bold": False, "italic": False}]
-                
-            paragraphs.append({
-                "index": p_idx,
-                "text": text,
-                "style": style,
-                "level": level,
-                "runs": runs
-            })
+
+            paragraphs.append(
+                {"index": p_idx, "text": text, "style": style, "level": level, "runs": runs}
+            )
             p_idx += 1
-            
+
         elif child.name == "table":
             rows = []
             for tr in child.find_all("tr"):
                 rows.append([td.get_text().strip() for td in tr.find_all(["td", "th"])])
-            tables.append({
-                "after_paragraph_index": p_idx - 1,
-                "rows": rows
-            })
-            
+            tables.append({"after_paragraph_index": p_idx - 1, "rows": rows})
+
     headings_count = sum(1 for p in paragraphs if p["level"] > 0)
-    
+
     return {
         "paragraphs": paragraphs,
         "tables": tables,
@@ -336,8 +315,8 @@ def _parse_docx_mammoth(file_path: str) -> dict:
             "heading_count": headings_count,
             "table_count": len(tables),
             "file_path": file_path,
-            "parse_timestamp": datetime.datetime.now().isoformat()
-        }
+            "parse_timestamp": datetime.datetime.now().isoformat(),
+        },
     }
 
 
@@ -349,11 +328,11 @@ def _parse_docx_python_docx(file_path: str) -> dict:
     from docx import Document
     from docx.oxml.text.paragraph import CT_P
     from docx.oxml.table import CT_Tbl
-    
+
     doc = Document(file_path)
     paragraphs = []
     tables = []
-    
+
     # Enumerate paragraphs
     for i, p in enumerate(doc.paragraphs):
         text = p.text.strip()
@@ -366,24 +345,14 @@ def _parse_docx_python_docx(file_path: str) -> dict:
                 level = 1
         runs = []
         for r in p.runs:
-            runs.append({
-                "text": r.text,
-                "bold": bool(r.bold),
-                "italic": bool(r.italic)
-            })
-        paragraphs.append({
-            "index": i,
-            "text": text,
-            "style": style,
-            "level": level,
-            "runs": runs
-        })
-        
+            runs.append({"text": r.text, "bold": bool(r.bold), "italic": bool(r.italic)})
+        paragraphs.append({"index": i, "text": text, "style": style, "level": level, "runs": runs})
+
     # Walk doc XML body to place tables at correct paragraph indices
     body_elements = doc.element.body
     paragraph_idx = -1
     table_idx = 0
-    
+
     for child in body_elements:
         if isinstance(child, CT_P):
             paragraph_idx += 1
@@ -394,13 +363,10 @@ def _parse_docx_python_docx(file_path: str) -> dict:
                 rows = []
                 for r in table_el.rows:
                     rows.append([cell.text.strip() for cell in r.cells])
-                tables.append({
-                    "after_paragraph_index": paragraph_idx,
-                    "rows": rows
-                })
-                
+                tables.append({"after_paragraph_index": paragraph_idx, "rows": rows})
+
     headings_count = sum(1 for p in paragraphs if p["level"] > 0)
-    
+
     return {
         "paragraphs": paragraphs,
         "tables": tables,
@@ -409,6 +375,6 @@ def _parse_docx_python_docx(file_path: str) -> dict:
             "heading_count": headings_count,
             "table_count": len(tables),
             "file_path": file_path,
-            "parse_timestamp": datetime.datetime.now().isoformat()
-        }
+            "parse_timestamp": datetime.datetime.now().isoformat(),
+        },
     }

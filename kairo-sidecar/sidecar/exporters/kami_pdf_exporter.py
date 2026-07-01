@@ -16,7 +16,7 @@ import logging
 import os
 import re
 import shutil
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -41,12 +41,12 @@ try:
         TableStyle,
         PageBreak,
         HRFlowable,
-        KeepTogether,
+        KeepTogether,  # noqa: F401
     )
-    from reportlab.platypus.tableofcontents import TableOfContents
+    from reportlab.platypus.tableofcontents import TableOfContents  # noqa: F401
     from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.pdfbase import pdfmetrics  # noqa: F401
+    from reportlab.pdfbase.ttfonts import TTFont  # noqa: F401
 
     _REPORTLAB_AVAILABLE = True
 except ImportError:
@@ -63,6 +63,7 @@ except ImportError:
 # Theme Definitions
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class KamiTheme:
     """
@@ -78,6 +79,7 @@ class KamiTheme:
         heading_size:   H1 heading point size (H2 = heading_size - 2, H3 = heading_size - 4).
         margin_inches:  Page margin in inches applied to all four sides.
     """
+
     name: str
     primary_color: Tuple[int, int, int]
     bg_color: Tuple[int, int, int]
@@ -99,8 +101,8 @@ def _rgb(r: int, g: int, b: int):
 THEMES: Dict[str, KamiTheme] = {
     "warm-academic": KamiTheme(
         name="warm-academic",
-        primary_color=(101, 56, 22),       # dark brown
-        bg_color=(250, 243, 224),           # warm cream #FAF3E0
+        primary_color=(101, 56, 22),  # dark brown
+        bg_color=(250, 243, 224),  # warm cream #FAF3E0
         font_family="Times-Roman",
         heading_font="Times-BoldItalic",
         body_size=11.0,
@@ -109,7 +111,7 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "classic-thesis": KamiTheme(
         name="classic-thesis",
-        primary_color=(0, 0, 128),          # navy
+        primary_color=(0, 0, 128),  # navy
         bg_color=(255, 255, 255),
         font_family="Times-Roman",
         heading_font="Times-BoldItalic",
@@ -119,17 +121,17 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "tufte": KamiTheme(
         name="tufte",
-        primary_color=(60, 60, 60),         # near-black
+        primary_color=(60, 60, 60),  # near-black
         bg_color=(255, 255, 255),
         font_family="Times-Roman",
         heading_font="Times-Bold",
         body_size=10.0,
         heading_size=16.0,
-        margin_inches=1.5,                  # Tufte's characteristic wide margins
+        margin_inches=1.5,  # Tufte's characteristic wide margins
     ),
     "ieee-journal": KamiTheme(
         name="ieee-journal",
-        primary_color=(0, 102, 153),        # IEEE blue #006699
+        primary_color=(0, 102, 153),  # IEEE blue #006699
         bg_color=(255, 255, 255),
         font_family="Times-Roman",
         heading_font="Times-Bold",
@@ -140,7 +142,7 @@ THEMES: Dict[str, KamiTheme] = {
     "elegant-book": KamiTheme(
         name="elegant-book",
         primary_color=(20, 20, 20),
-        bg_color=(253, 252, 248),           # off-white
+        bg_color=(253, 252, 248),  # off-white
         font_family="Times-Roman",
         heading_font="Times-Bold",
         body_size=12.0,
@@ -149,7 +151,7 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "chinese-red": KamiTheme(
         name="chinese-red",
-        primary_color=(204, 0, 0),          # Chinese red #CC0000
+        primary_color=(204, 0, 0),  # Chinese red #CC0000
         bg_color=(255, 255, 255),
         font_family="Helvetica",
         heading_font="Helvetica-Bold",
@@ -159,8 +161,8 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "ink-wash": KamiTheme(
         name="ink-wash",
-        primary_color=(30, 30, 40),         # dark ink
-        bg_color=(240, 240, 238),           # light gray
+        primary_color=(30, 30, 40),  # dark ink
+        bg_color=(240, 240, 238),  # light gray
         font_family="Times-Roman",
         heading_font="Times-Bold",
         body_size=11.0,
@@ -169,7 +171,7 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "github-light": KamiTheme(
         name="github-light",
-        primary_color=(3, 102, 214),        # GitHub blue #0366D6
+        primary_color=(3, 102, 214),  # GitHub blue #0366D6
         bg_color=(255, 255, 255),
         font_family="Helvetica",
         heading_font="Helvetica-Bold",
@@ -179,8 +181,8 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "nord-frost": KamiTheme(
         name="nord-frost",
-        primary_color=(94, 129, 172),       # Nord frost #5E81AC
-        bg_color=(236, 239, 244),           # Nord snow #ECEFF4
+        primary_color=(94, 129, 172),  # Nord frost #5E81AC
+        bg_color=(236, 239, 244),  # Nord snow #ECEFF4
         font_family="Helvetica",
         heading_font="Helvetica-Bold",
         body_size=10.5,
@@ -189,8 +191,8 @@ THEMES: Dict[str, KamiTheme] = {
     ),
     "ocean-breeze": KamiTheme(
         name="ocean-breeze",
-        primary_color=(0, 137, 150),        # teal accent
-        bg_color=(225, 245, 248),           # light blue-green
+        primary_color=(0, 137, 150),  # teal accent
+        bg_color=(225, 245, 248),  # light blue-green
         font_family="Helvetica",
         heading_font="Helvetica-Bold",
         body_size=10.5,
@@ -206,6 +208,7 @@ _DEFAULT_THEME = "github-light"
 # ---------------------------------------------------------------------------
 # Kami PDF Exporter
 # ---------------------------------------------------------------------------
+
 
 class KamiPdfExporter:
     """
@@ -265,9 +268,7 @@ class KamiPdfExporter:
         log.info(f"KamiPdfExporter: theme={selected_theme.name}, output={output_path}")
 
         if not self._reportlab_ok:
-            return self._export_txt_fallback(
-                markdown_content, output_path, title, author, subtitle
-            )
+            return self._export_txt_fallback(markdown_content, output_path, title, author, subtitle)
 
         blocks = self._parse_markdown(markdown_content)
         headings = [b for b in blocks if b["type"] in ("h1", "h2", "h3")]
@@ -289,8 +290,12 @@ class KamiPdfExporter:
             # Fallback to txt on render error
             txt_path = Path(output_path).with_suffix(".txt")
             return self._export_txt_fallback(
-                markdown_content, str(txt_path), title, author, subtitle,
-                extra_warning=f"PDF render failed: {exc}"
+                markdown_content,
+                str(txt_path),
+                title,
+                author,
+                subtitle,
+                extra_warning=f"PDF render failed: {exc}",
             )
 
     def export_batch(
@@ -405,7 +410,9 @@ class KamiPdfExporter:
                     code_lines.append(cl)
                     i += 1
                 code_text = "\n".join(code_lines)
-                blocks.append({"type": "code", "content": code_text, "raw": code_text, "lang": lang})
+                blocks.append(
+                    {"type": "code", "content": code_text, "raw": code_text, "lang": lang}
+                )
                 continue
 
             # --- ATX headings ---
@@ -415,7 +422,9 @@ class KamiPdfExporter:
                 heading_text = heading_match.group(2).strip()
                 level = len(level_str)
                 htype = f"h{min(level, 3)}"  # map h4-h6 → h3
-                blocks.append({"type": htype, "content": heading_text, "raw": stripped, "level": level})
+                blocks.append(
+                    {"type": htype, "content": heading_text, "raw": stripped, "level": level}
+                )
                 i += 1
                 continue
 
@@ -456,7 +465,14 @@ class KamiPdfExporter:
                         continue
                     rows.append(cells)
                 if rows:
-                    blocks.append({"type": "table", "content": "", "raw": "\n".join(table_lines), "rows": rows})
+                    blocks.append(
+                        {
+                            "type": "table",
+                            "content": "",
+                            "raw": "\n".join(table_lines),
+                            "rows": rows,
+                        }
+                    )
                 continue
 
             # --- Blockquote ---
@@ -554,11 +570,9 @@ class KamiPdfExporter:
         Create a custom style dictionary for the given theme.
         Returns a dict of style name → ParagraphStyle (or TableStyle).
         """
-        base = getSampleStyleSheet()
+        getSampleStyleSheet()
         pc = theme.primary_color
-        bg = theme.bg_color
         primary_rl = colors.Color(pc[0] / 255, pc[1] / 255, pc[2] / 255)
-        black = colors.black
         dark_gray = colors.Color(0.2, 0.2, 0.2)
 
         def ps(name: str, **kwargs) -> ParagraphStyle:
@@ -826,13 +840,10 @@ class KamiPdfExporter:
             # Select indentation and style based on heading level
             if h_type == "h1":
                 toc_style = styles["TOCEntry1"]
-                dot_indent = 0
             elif h_type == "h2":
                 toc_style = styles["TOCEntry2"]
-                dot_indent = 18
             else:
                 toc_style = styles["TOCEntry3"]
-                dot_indent = 36
 
             # Build a two-column table: [heading text | dots + page]
             # Page placeholder is blank — we can't know page numbers in single-pass
@@ -941,7 +952,7 @@ class KamiPdfExporter:
         The first row is treated as headers (bold, colored background).
         """
         pc = theme.primary_color
-        header_bg = colors.Color(
+        colors.Color(
             min(pc[0] / 255 + 0.1, 1.0),
             min(pc[1] / 255 + 0.1, 1.0),
             min(pc[2] / 255 + 0.1, 1.0),
@@ -958,10 +969,7 @@ class KamiPdfExporter:
         table_data: List[List[Any]] = []
         for row_idx, row in enumerate(rows):
             cell_style = header_style if row_idx == 0 else body_style
-            cell_row = [
-                Paragraph(self._escape_xml(str(cell)), cell_style)
-                for cell in row
-            ]
+            cell_row = [Paragraph(self._escape_xml(str(cell)), cell_style) for cell in row]
             table_data.append(cell_row)
 
         if not table_data:
@@ -977,18 +985,27 @@ class KamiPdfExporter:
         tbl = Table(table_data, colWidths=[col_width] * ncols, repeatRows=1)
 
         pc_rl = colors.Color(pc[0] / 255, pc[1] / 255, pc[2] / 255)
-        tbl.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), pc_rl),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), theme.heading_font),
-            ("FONTSIZE", (0, 0), (-1, -1), theme.body_size),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.Color(0.96, 0.96, 0.96)]),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.Color(0.75, 0.75, 0.75)),
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("PADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, 0), 8),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-        ]))
+        tbl.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), pc_rl),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("FONTNAME", (0, 0), (-1, 0), theme.heading_font),
+                    ("FONTSIZE", (0, 0), (-1, -1), theme.body_size),
+                    (
+                        "ROWBACKGROUNDS",
+                        (0, 1),
+                        (-1, -1),
+                        [colors.white, colors.Color(0.96, 0.96, 0.96)],
+                    ),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.Color(0.75, 0.75, 0.75)),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("PADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, 0), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+                ]
+            )
+        )
 
         story.append(Spacer(1, 6))
         story.append(tbl)
@@ -1059,8 +1076,7 @@ class KamiPdfExporter:
             warning_lines.append(f"Reason: {extra_warning}")
         else:
             warning_lines.append(
-                "Reason: reportlab is not installed. "
-                "Install it with: pip install reportlab"
+                "Reason: reportlab is not installed. " "Install it with: pip install reportlab"
             )
         warning_lines += [
             f"Title:  {title}",

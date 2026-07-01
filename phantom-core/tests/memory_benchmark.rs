@@ -22,63 +22,121 @@ async fn mem_benchmark_semantic_recall_precision() {
 
     // Seed with 10 episodes — each semantically distinct
     let episodes = vec![
-        ("Microsoft Word",  "quarterly results",   "Q3 revenue exceeded $4.2M, up 18% YoY"),
-        ("Microsoft Word",  "board meeting",        "Board approved Series A at $12M valuation"),
-        ("Microsoft Excel", "financial model",      "DCF model shows IRR of 24% at base case"),
-        ("Microsoft Excel", "budget planning",      "2026 budget: $1.2M OpEx, $800K CapEx"),
-        ("PowerPoint",      "investor deck",        "Total addressable market is $8B globally"),
-        ("PowerPoint",      "product roadmap",      "Q2 milestone: launch mobile SDK v2.0"),
-        ("Microsoft Word",  "contract review",      "Limitation of liability clause is uncapped"),
-        ("Microsoft Word",  "client proposal",      "Custom enterprise pricing at $50K ARR"),
-        ("Windows Terminal","git workflow",          "Feature branches merge via squash commits"),
-        ("Microsoft Word",  "meeting summary",      "Action items: deploy by Friday, update docs"),
+        (
+            "Microsoft Word",
+            "quarterly results",
+            "Q3 revenue exceeded $4.2M, up 18% YoY",
+        ),
+        (
+            "Microsoft Word",
+            "board meeting",
+            "Board approved Series A at $12M valuation",
+        ),
+        (
+            "Microsoft Excel",
+            "financial model",
+            "DCF model shows IRR of 24% at base case",
+        ),
+        (
+            "Microsoft Excel",
+            "budget planning",
+            "2026 budget: $1.2M OpEx, $800K CapEx",
+        ),
+        (
+            "PowerPoint",
+            "investor deck",
+            "Total addressable market is $8B globally",
+        ),
+        (
+            "PowerPoint",
+            "product roadmap",
+            "Q2 milestone: launch mobile SDK v2.0",
+        ),
+        (
+            "Microsoft Word",
+            "contract review",
+            "Limitation of liability clause is uncapped",
+        ),
+        (
+            "Microsoft Word",
+            "client proposal",
+            "Custom enterprise pricing at $50K ARR",
+        ),
+        (
+            "Windows Terminal",
+            "git workflow",
+            "Feature branches merge via squash commits",
+        ),
+        (
+            "Microsoft Word",
+            "meeting summary",
+            "Action items: deploy by Friday, update docs",
+        ),
     ];
 
     for (app, key, content) in &episodes {
-        mm.remember(content, Some(&format!("Episode about: {}", key)), app, Some(key), true, vec!["benchmark"])
-            .await.expect("remember");
+        mm.remember(
+            content,
+            Some(&format!("Episode about: {key}")),
+            app,
+            Some(key),
+            true,
+            vec!["benchmark"],
+        )
+        .await
+        .expect("remember");
     }
 
     // ── Test 1: Revenue query → should recall Q3 episode first ────────────
-    let results = mm.recall_contextualized(
-        "quarterly revenue results",
-        vec!["Microsoft Word".to_string()],
-        5,
-    ).await.expect("recall");
+    let results = mm
+        .recall_contextualized(
+            "quarterly revenue results",
+            vec!["Microsoft Word".to_string()],
+            5,
+        )
+        .await
+        .expect("recall");
 
     assert!(!results.is_empty(), "Must recall at least one Word episode");
     let top = &results[0];
     assert!(
-        top.contains("Q3") || top.contains("quarterly") || top.contains("revenue") || top.contains("4.2M"),
-        "Top result must be Q3 revenue episode, got: {}", top
+        top.contains("Q3")
+            || top.contains("quarterly")
+            || top.contains("revenue")
+            || top.contains("4.2M"),
+        "Top result must be Q3 revenue episode, got: {top}"
     );
 
     // ── Test 2: Excel financial query ─────────────────────────────────────
-    let excel_results = mm.recall_contextualized(
-        "DCF model internal rate of return",
-        vec!["Microsoft Excel".to_string()],
-        3,
-    ).await.expect("recall excel");
+    let excel_results = mm
+        .recall_contextualized(
+            "DCF model internal rate of return",
+            vec!["Microsoft Excel".to_string()],
+            3,
+        )
+        .await
+        .expect("recall excel");
 
     assert!(!excel_results.is_empty(), "Must recall Excel episodes");
     let excel_top = &excel_results[0];
     assert!(
         excel_top.contains("DCF") || excel_top.contains("IRR") || excel_top.contains("24%"),
-        "Excel top result must be DCF/IRR episode, got: {}", excel_top
+        "Excel top result must be DCF/IRR episode, got: {excel_top}"
     );
 
     // ── Test 3: PPT query doesn't contaminate Word results ────────────────
-    let ppt_results = mm.recall_contextualized(
-        "investor slide deck",
-        vec!["PowerPoint".to_string()],
-        3,
-    ).await.expect("recall ppt");
+    let ppt_results = mm
+        .recall_contextualized("investor slide deck", vec!["PowerPoint".to_string()], 3)
+        .await
+        .expect("recall ppt");
 
     assert!(!ppt_results.is_empty());
     let ppt_top = &ppt_results[0];
     assert!(
-        ppt_top.contains("addressable") || ppt_top.contains("roadmap") || ppt_top.contains("milestone"),
-        "PPT top result must be presentation episode, got: {}", ppt_top
+        ppt_top.contains("addressable")
+            || ppt_top.contains("roadmap")
+            || ppt_top.contains("milestone"),
+        "PPT top result must be presentation episode, got: {ppt_top}"
     );
 
     // ── Test 4: Semantic precision — all recalled episodes match the app ──
@@ -91,10 +149,25 @@ async fn mem_benchmark_semantic_recall_precision() {
 
     // ── Test 5: Precision score ≥ 0.80 ────────────────────────────────────
     // "Precision" = fraction of top-5 results containing query-related terms
-    let word_query_terms = ["Q3", "quarterly", "board", "contract", "proposal", "meeting", "revenue"];
-    let precision = results.iter().take(5).filter(|r| {
-        word_query_terms.iter().any(|term| r.to_lowercase().contains(&term.to_lowercase()))
-    }).count() as f64 / results.len().min(5) as f64;
+    let word_query_terms = [
+        "Q3",
+        "quarterly",
+        "board",
+        "contract",
+        "proposal",
+        "meeting",
+        "revenue",
+    ];
+    let precision = results
+        .iter()
+        .take(5)
+        .filter(|r| {
+            word_query_terms
+                .iter()
+                .any(|term| r.to_lowercase().contains(&term.to_lowercase()))
+        })
+        .count() as f64
+        / results.len().min(5) as f64;
 
     assert!(
         precision >= 0.80,
@@ -104,7 +177,11 @@ async fn mem_benchmark_semantic_recall_precision() {
         results.len().min(5)
     );
 
-    println!("✅ memory_benchmark: precision = {:.2} ({} results recalled)", precision, results.len());
+    println!(
+        "✅ memory_benchmark: precision = {:.2} ({} results recalled)",
+        precision,
+        results.len()
+    );
 }
 
 /// Validates that Alaya forgetting (retrieval_strength decay) preserves
@@ -118,15 +195,25 @@ async fn mem_benchmark_alaya_forgetting_preserves_ground_truth() {
     mm.remember(
         "CEO prefers concise bullet points, max 3 per slide",
         Some("Learnt from 5 rejected long-form responses"),
-        "PowerPoint", None, true, vec!["preference"]
-    ).await.expect("store ground truth");
+        "PowerPoint",
+        None,
+        true,
+        vec!["preference"],
+    )
+    .await
+    .expect("store ground truth");
 
     // Store a weak non-ground-truth episode
     mm.remember(
         "User typed 'asdf' once",
         None,
-        "Notepad", None, false, vec!["noise"]
-    ).await.expect("store noise");
+        "Notepad",
+        None,
+        false,
+        vec!["noise"],
+    )
+    .await
+    .expect("store noise");
 
     // Run multiple maintenance cycles to decay the weak memory
     for _ in 0..5 {
@@ -134,11 +221,14 @@ async fn mem_benchmark_alaya_forgetting_preserves_ground_truth() {
     }
 
     // Ground truth must survive 5 decay cycles
-    let gt_results = mm.recall_contextualized(
-        "CEO bullet points preference",
-        vec!["PowerPoint".to_string()],
-        5,
-    ).await.expect("recall gt");
+    let gt_results = mm
+        .recall_contextualized(
+            "CEO bullet points preference",
+            vec!["PowerPoint".to_string()],
+            5,
+        )
+        .await
+        .expect("recall gt");
 
     assert!(
         !gt_results.is_empty(),
@@ -146,7 +236,8 @@ async fn mem_benchmark_alaya_forgetting_preserves_ground_truth() {
     );
     assert!(
         gt_results[0].contains("CEO") || gt_results[0].contains("bullet"),
-        "Ground truth content must be preserved: {}", gt_results[0]
+        "Ground truth content must be preserved: {}",
+        gt_results[0]
     );
 }
 
@@ -162,8 +253,13 @@ async fn mem_benchmark_prime_generalisation() {
         mm.remember(
             "Always use active voice",
             Some("User corrected passive voice 3 times"),
-            app, Some("voice_preference"), false, vec!["style"]
-        ).await.expect("store");
+            app,
+            Some("voice_preference"),
+            false,
+            vec!["style"],
+        )
+        .await
+        .expect("store");
         // Boost storage_strength above 0.8 threshold for generalisation
         // (In production, PAHF feedback does this — here we call update_strengths directly)
     }
@@ -172,11 +268,10 @@ async fn mem_benchmark_prime_generalisation() {
     mm.run_maintenance_cycle().await.expect("maintenance");
 
     // After generalisation, global scope should recall the preference
-    let global_results = mm.recall_contextualized(
-        "active voice writing style",
-        vec!["global".to_string()],
-        5,
-    ).await.expect("recall global");
+    let global_results = mm
+        .recall_contextualized("active voice writing style", vec!["global".to_string()], 5)
+        .await
+        .expect("recall global");
 
     // Either the generalised episode is there, or both originals recalled
     // (maintenance only generalises if storage_strength > 0.8 — freshly inserted
@@ -184,7 +279,10 @@ async fn mem_benchmark_prime_generalisation() {
     assert!(
         !global_results.is_empty() || {
             // Fallback: at least one app-specific result recalls correctly
-            let word = mm.recall_contextualized("active voice", vec!["Microsoft Word".to_string()], 3).await.unwrap();
+            let word = mm
+                .recall_contextualized("active voice", vec!["Microsoft Word".to_string()], 3)
+                .await
+                .unwrap();
             !word.is_empty()
         },
         "PRIME generalisation or app-specific recall must work"
@@ -205,7 +303,15 @@ fn mem_benchmark_embedding_dim_correct() {
     let mm = MemMachine::new(dir.path().to_path_buf()).expect("init");
     // The remember() call internally calls embed_engine::embed() — if it panics, test fails
     tokio::runtime::Runtime::new().unwrap().block_on(async {
-        mm.remember("test embedding dimension", None, "test", None, false, vec![])
-            .await.expect("embedding must not panic or error");
+        mm.remember(
+            "test embedding dimension",
+            None,
+            "test",
+            None,
+            false,
+            vec![],
+        )
+        .await
+        .expect("embedding must not panic or error");
     });
 }

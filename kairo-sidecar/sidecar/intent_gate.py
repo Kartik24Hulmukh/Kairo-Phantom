@@ -72,9 +72,7 @@ class IntentGate:
                 {"role": "system", "content": self.SYSTEM_PROMPT},
                 {
                     "role": "user",
-                    "content": (
-                        f"Classify this user prompt:{context_hint}\n\n{user_prompt}"
-                    ),
+                    "content": (f"Classify this user prompt:{context_hint}\n\n{user_prompt}"),
                 },
             ]
 

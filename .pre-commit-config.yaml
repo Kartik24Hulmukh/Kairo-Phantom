@@ -1,0 +1,105 @@
+# =============================================================================
+# Kairo-Phantom — Pre-commit hooks (local mirror of cheap CI gates)
+# =============================================================================
+# Catches failures BEFORE pushing so devs don't wait for CI to find them.
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+#
+# PROVEN FACTS:
+#   scripts/ci/no_skip_gates.py EXISTS (ls confirmed: 5492 bytes)
+#   scripts/anti_cheat_scan.py EXISTS (ls confirmed: 4123 bytes)
+#   scripts/dependency_audit.py EXISTS (ls confirmed: 5312 bytes, executable)
+#   dtolnay/rust-toolchain is a GitHub ACTION, not a pre-commit hooks repo.
+#     We use local system hooks for cargo fmt/clippy instead (BUG 5 fix).
+#
+# SHA-PINNED ACTIONS:
+#   astral-sh/ruff-pre-commit@81c403600c42f39a55a4dca36c80e5328c66d83c # ruff 0.6.9
+#   pre-commit/mirrors-mypy@v1.11.2
+#   gitleaks/gitleaks@v8.19.3
+#   pre-commit/pre-commit-hooks@c4a0b883114b00d8d76b479e8a3fdf917781eb9c # v4.6.0
+# =============================================================================
+
+repos:
+  # ── Python: ruff lint + format ──
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 81c403600c42f39a55a4dca36c80e5328c66d83c  # ruff 0.6.9
+    hooks:
+      - id: ruff
+        args: [--config, kairo-sidecar/pyproject.toml]
+        files: ^kairo-sidecar/
+      - id: ruff-format
+        args: [--config, kairo-sidecar/pyproject.toml, --check]
+        files: ^kairo-sidecar/
+
+  # ── Python: mypy type checking ──
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        args: [--config-file, kairo-sidecar/pyproject.toml]
+        files: ^kairo-sidecar/sidecar/
+        additional_dependencies: [pydantic>=2.0.0]
+
+  # ── Secret scanning: gitleaks ──
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.19.3
+    hooks:
+      - id: gitleaks
+        args: [--config, .gitleaks.toml, --verbose]
+
+  # ── Local system hooks (no external repo dependency) ──
+  - repo: local
+    hooks:
+      # ── Rust: fmt + clippy via local system hooks (BUG 5 fix) ──
+      - id: cargo-fmt
+        name: cargo fmt --check
+        entry: cargo fmt --all -- --check
+        language: system
+        pass_filenames: false
+        types: [rust]
+
+      - id: cargo-clippy
+        name: cargo clippy -D warnings
+        entry: cargo clippy --workspace --exclude phantom-overlay --all-targets -- -D warnings
+        language: system
+        pass_filenames: false
+        types: [rust]
+
+      # ── No-skip gate: BLOCKING (FIX 2 — skipif removed from tests, gate restored) ──
+      - id: no-skip-gate
+        name: No-Skip Gate (forbidden test patterns)
+        entry: python scripts/ci/no_skip_gates.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      # ── Anti-cheat scan: prevent fabricated metrics / mock interception ──
+      - id: anti-cheat-scan
+        name: Anti-Cheat Scan (no fabricated metrics)
+        entry: python scripts/anti_cheat_scan.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      # ── Dependency pinning check ──
+      - id: dependency-audit
+        name: Dependency Audit (pinned + no known CVEs)
+        entry: python scripts/dependency_audit.py
+        language: system
+        files: ^kairo-sidecar/requirements.*\.txt$
+        pass_filenames: true
+
+  # ── Check YAML/TOML validity ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: c4a0b883114b00d8d76b479e8a3fdf917781eb9c  # v4.6.0
+    hooks:
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: end-of-file-fixer
+        exclude: \.agents/.*|\.md$
+      - id: trailing-whitespace
+        exclude: \.agents/.*

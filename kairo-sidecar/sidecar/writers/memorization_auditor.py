@@ -47,22 +47,26 @@ from sidecar.safety.bmc_gate import SuffixAutomaton, longest_common_substring_wi
 
 # ─── Risk Levels ──────────────────────────────────────────────────────────────
 
+
 class MemorizationRisk(str, Enum):
     """Risk level for detected memorization."""
-    SAFE = "safe"             # No memorization detected
-    LOW = "low"               # 3–5 gram overlap, possibly coincidental
-    MEDIUM = "medium"         # 5–10 gram overlap, likely memorization
-    HIGH = "high"             # >10 gram overlap, clear memorization
-    BLOCKED = "blocked"       # >30-word verbatim match — output blocked
+
+    SAFE = "safe"  # No memorization detected
+    LOW = "low"  # 3–5 gram overlap, possibly coincidental
+    MEDIUM = "medium"  # 5–10 gram overlap, likely memorization
+    HIGH = "high"  # >10 gram overlap, clear memorization
+    BLOCKED = "blocked"  # >30-word verbatim match — output blocked
 
 
 # ─── Bloom Filter ─────────────────────────────────────────────────────────────
+
 
 class BloomFilter:
     """
     A space-efficient probabilistic data structure for set membership.
     Used for compact copyright checking without storing original texts.
     """
+
     def __init__(self, size: int = 100000, num_hashes: int = 4) -> None:
         self.size = size
         self.num_hashes = num_hashes
@@ -85,25 +89,28 @@ class BloomFilter:
 
 # ─── Data Structures ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class MemorizationFinding:
     """A single finding from the memorization check."""
-    text_fragment: str           # The flagged fragment (first 100 chars)
-    gram_overlap: int            # Size of overlapping n-gram
-    source_hint: str             # What source it likely came from
+
+    text_fragment: str  # The flagged fragment (first 100 chars)
+    gram_overlap: int  # Size of overlapping n-gram
+    source_hint: str  # What source it likely came from
     risk: MemorizationRisk
-    position: int = 0            # Character position in the input text
+    position: int = 0  # Character position in the input text
 
 
 @dataclass
 class AuditResult:
     """Result of a memorization audit."""
-    is_blocked: bool             # True if output must be suppressed
+
+    is_blocked: bool  # True if output must be suppressed
     risk: MemorizationRisk
     findings: list[MemorizationFinding] = field(default_factory=list)
     text_length: int = 0
     safe_to_output: bool = True  # False if is_blocked
-    
+
     # Paper metrics for compliance
     longest_contiguous_block: int = 0
     bmc_at_3: int = 0
@@ -145,7 +152,6 @@ class AuditResult:
         }
 
 
-
 # ─── Built-in High-Risk Corpus ────────────────────────────────────────────────
 
 # Known high-risk phrases that commonly appear in training data.
@@ -166,13 +172,17 @@ _BUILTIN_NGRAM_HASHES: dict[str, str] = {}
 _VERBATIM_BLOCKLIST: list[tuple[str, str]] = [
     # (substring to detect, source_hint)
     # These are general patterns, not actual copyrighted text
-    ("Permission is hereby granted, free of charge, to any person obtaining", "MIT License verbatim"),
+    (
+        "Permission is hereby granted, free of charge, to any person obtaining",
+        "MIT License verbatim",
+    ),
     ("GNU GENERAL PUBLIC LICENSE", "GPL License verbatim"),
     ("TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION", "GPL terms verbatim"),
 ]
 
 
 # ─── Memorization Auditor ─────────────────────────────────────────────────────
+
 
 class MemorizationAuditor:
     """
@@ -195,11 +205,11 @@ class MemorizationAuditor:
     - Designed for inline use, not async
     """
 
-    MIN_GRAM_SIZE = 3      # Minimum n-gram size to detect
-    MAX_GRAM_SIZE = 15     # Maximum n-gram size to check
-    BLOCK_THRESHOLD = 30   # Words — verbatim match at this length is blocked
-    HIGH_THRESHOLD = 10    # Words — n-gram at this size triggers HIGH risk
-    MEDIUM_THRESHOLD = 5   # Words — n-gram at this size triggers MEDIUM risk
+    MIN_GRAM_SIZE = 3  # Minimum n-gram size to detect
+    MAX_GRAM_SIZE = 15  # Maximum n-gram size to check
+    BLOCK_THRESHOLD = 30  # Words — verbatim match at this length is blocked
+    HIGH_THRESHOLD = 10  # Words — n-gram at this size triggers HIGH risk
+    MEDIUM_THRESHOLD = 5  # Words — n-gram at this size triggers MEDIUM risk
 
     def __init__(
         self,
@@ -261,7 +271,7 @@ class MemorizationAuditor:
         # Build Suffix Automaton
         for token in tokens:
             self._automaton.insert_word(token)
-            
+
         # Store raw text for edit-distance LCS verification
         self._raw_texts[source_hint] = text
 
@@ -313,7 +323,7 @@ class MemorizationAuditor:
                     gram_overlap=longest_automaton_match,
                     source_hint="Suffix Automaton Match",
                     risk=risk,
-                    position=0
+                    position=0,
                 )
             )
 
@@ -329,7 +339,7 @@ class MemorizationAuditor:
                         gram_overlap=lcs_len,
                         source_hint=f"LCS-Tolerance Match: {source_hint}",
                         risk=risk,
-                        position=0
+                        position=0,
                     )
                 )
 
@@ -369,7 +379,9 @@ class MemorizationAuditor:
             cross_paragraph_ratio=cpr,
         )
 
-    def _compute_metrics(self, generated_text: str, tokens: list[str]) -> tuple[int, int, int, float]:
+    def _compute_metrics(
+        self, generated_text: str, tokens: list[str]
+    ) -> tuple[int, int, int, float]:
         """
         Compute longest contiguous block, bmc_at_3, bmc_at_5, and cross-paragraph ratio.
         """
@@ -377,10 +389,12 @@ class MemorizationAuditor:
             return 0, 0, 0, 0.0
 
         matched = [False] * len(tokens)
-        
+
         # 1. Check n-gram overlaps
         if self._corpus:
-            for gram_size in range(self.MIN_GRAM_SIZE, min(self.MAX_GRAM_SIZE + 1, len(tokens) + 1)):
+            for gram_size in range(
+                self.MIN_GRAM_SIZE, min(self.MAX_GRAM_SIZE + 1, len(tokens) + 1)
+            ):
                 for i in range(len(tokens) - gram_size + 1):
                     gram = " ".join(tokens[i : i + gram_size])
                     h = self._hash_gram(gram)
@@ -441,7 +455,7 @@ class MemorizationAuditor:
         paragraphs = [p for p in generated_text.split("\n\n") if p.strip()]
         if not paragraphs:
             paragraphs = [p for p in generated_text.splitlines() if p.strip()]
-        
+
         if not paragraphs:
             cpr = 0.0
         else:
@@ -462,7 +476,6 @@ class MemorizationAuditor:
             cpr = matching_paragraphs / len(paragraphs)
 
         return longest, bmc_3, bmc_5, cpr
-
 
     def _check_verbatim(self, text: str) -> list[MemorizationFinding]:
         """Check for verbatim matches against the blocklist."""

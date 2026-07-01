@@ -10,12 +10,12 @@ Schema
   episodes     — one row per gym_env step (backward-compat with SQLite version)
   loop_results — one row per TestFixLoop.run_loop() call (with audit trail JSON)
 """
+
 from __future__ import annotations
 
 import json
 import logging
 import os
-import time
 from typing import Any, Dict, List, Optional
 
 import duckdb
@@ -24,6 +24,7 @@ log = logging.getLogger("kairo.outcome_store")
 
 
 # ── default DB location ───────────────────────────────────────────────────────
+
 
 def _default_db_path() -> str:
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -166,8 +167,7 @@ class OutcomeStore:
 
         try:
             audit_json = json.dumps(
-                [_dc.asdict(a) for a in loop_result.audit_trail]
-                if loop_result.audit_trail else []
+                [_dc.asdict(a) for a in loop_result.audit_trail] if loop_result.audit_trail else []
             )
             con = self._con()
             con.execute(
@@ -218,8 +218,15 @@ class OutcomeStore:
             ).fetchall()
             con.close()
             cols = [
-                "scenario_id", "terminal_state", "reward", "attempts_used",
-                "elapsed_s", "failure_reason", "ticket_path", "audit_trail", "ts",
+                "scenario_id",
+                "terminal_state",
+                "reward",
+                "attempts_used",
+                "elapsed_s",
+                "failure_reason",
+                "ticket_path",
+                "audit_trail",
+                "ts",
             ]
             results = []
             for row in rows:
@@ -245,8 +252,13 @@ class OutcomeStore:
             ).fetchall()
             con.close()
             cols = [
-                "scenario_id", "terminal_state", "reward",
-                "attempts_used", "elapsed_s", "failure_reason", "ts",
+                "scenario_id",
+                "terminal_state",
+                "reward",
+                "attempts_used",
+                "elapsed_s",
+                "failure_reason",
+                "ts",
             ]
             return [dict(zip(cols, r)) for r in rows]
         except Exception as exc:
@@ -266,12 +278,12 @@ class OutcomeStore:
             except Exception:
                 pass
         return {
-            "id":          eid,
+            "id": eid,
             "scenario_id": scenario_id,
-            "state":       state,
-            "intent":      intent,
-            "action":      action,
-            "outcome":     outcome,
-            "accepted":    bool(accepted),
-            "timestamp":   str(ts),
+            "state": state,
+            "intent": intent,
+            "action": action,
+            "outcome": outcome,
+            "accepted": bool(accepted),
+            "timestamp": str(ts),
         }

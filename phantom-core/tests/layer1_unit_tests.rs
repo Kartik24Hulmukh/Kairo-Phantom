@@ -1,11 +1,11 @@
+use phantom_core::config::PhantomConfig;
 /// ============================================================
 /// LAYER 1: Unit Tests — Core Module Isolation
 ///
-/// Tests each internal function in isolation without 
+/// Tests each internal function in isolation without
 /// external dependencies (Ollama, UIA, clipboard)
 /// ============================================================
-use phantom_core::ghost_session::{GhostSession, ConfidenceBand, SessionState};
-use phantom_core::config::PhantomConfig;
+use phantom_core::ghost_session::{ConfidenceBand, GhostSession, SessionState};
 use std::sync::atomic::Ordering;
 
 // ─── ConfidenceBand ───────────────────────────────────────────
@@ -25,7 +25,8 @@ fn unit_confidence_medium_for_vague_known() {
 #[test]
 fn unit_confidence_medium_for_clear_unknown() {
     let band = ConfidenceBand::compute(
-        "rewrite this paragraph in a professional tone for a board meeting", "Unknown"
+        "rewrite this paragraph in a professional tone for a board meeting",
+        "Unknown",
     );
     assert!(matches!(band, ConfidenceBand::Medium));
 }
@@ -34,7 +35,7 @@ fn unit_confidence_medium_for_clear_unknown() {
 fn unit_confidence_high_for_clear_known() {
     let band = ConfidenceBand::compute(
         "add three bullet points summarizing the key risks identified in this document",
-        "Word"
+        "Word",
     );
     assert!(matches!(band, ConfidenceBand::High));
 }
@@ -109,7 +110,10 @@ fn unit_config_swarm_disabled_by_default() {
 fn unit_config_serialization_no_panic() {
     let cfg = PhantomConfig::default();
     let result = toml::to_string_pretty(&cfg);
-    assert!(result.is_ok(), "Default config must serialize without error");
+    assert!(
+        result.is_ok(),
+        "Default config must serialize without error"
+    );
 }
 
 // ─── DocumentGraph ─────────────────────────────────────────────
@@ -121,19 +125,28 @@ struct MockDocumentGraphBackend {
 #[async_trait::async_trait]
 impl phantom_core::ai::AiBackend for MockDocumentGraphBackend {
     async fn complete(&self, _system: &str, _user: &str) -> anyhow::Result<String> {
-        let count = self.call_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let count = self
+            .call_count
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         if count == 0 {
             Ok(r#"[
                 {"name": "Rust Language", "entity_type": "company", "relation": "subject"}
-            ]"#.to_string())
+            ]"#
+            .to_string())
         } else {
             Ok(r#"[
                 {"name": "Cpp Language", "entity_type": "company", "relation": "subject"}
-            ]"#.to_string())
+            ]"#
+            .to_string())
         }
     }
 
-    async fn stream_complete(&self, _system: &str, _user: &str, _tx: tokio::sync::mpsc::Sender<String>) -> anyhow::Result<()> {
+    async fn stream_complete(
+        &self,
+        _system: &str,
+        _user: &str,
+        _tx: tokio::sync::mpsc::Sender<String>,
+    ) -> anyhow::Result<()> {
         Ok(())
     }
 }
@@ -141,11 +154,11 @@ impl phantom_core::ai::AiBackend for MockDocumentGraphBackend {
 #[tokio::test]
 async fn unit_document_graph_reindexing_on_modification() {
     use phantom_core::memory::document_graph::DocumentGraph;
-    use std::sync::Arc;
-    use tempfile::tempdir;
+    use rusqlite::params;
     use std::fs::File;
     use std::io::Write;
-    use rusqlite::params;
+    use std::sync::Arc;
+    use tempfile::tempdir;
 
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test_graph.db");
@@ -161,7 +174,8 @@ async fn unit_document_graph_reindexing_on_modification() {
     let file_path = docs_dir.join("doc1.txt");
     {
         let mut file = File::create(&file_path).unwrap();
-        file.write_all(b"Initial content referencing Rust Language.").unwrap();
+        file.write_all(b"Initial content referencing Rust Language.")
+            .unwrap();
     }
 
     // 2. Index the directory
@@ -169,12 +183,16 @@ async fn unit_document_graph_reindexing_on_modification() {
 
     // 3. Query the entities to confirm they are indexed
     let entities = doc_graph.list_entities().unwrap();
-    assert!(entities.contains("Rust Language"), "Should contain Rust Language entity initially: {}", entities);
+    assert!(
+        entities.contains("Rust Language"),
+        "Should contain Rust Language entity initially: {entities}"
+    );
 
     // 4. Modify the document content
     {
         let mut file = File::create(&file_path).unwrap();
-        file.write_all(b"Modified content referencing C++ language.").unwrap();
+        file.write_all(b"Modified content referencing C++ language.")
+            .unwrap();
     }
 
     // 5. Index the directory again
@@ -182,16 +200,26 @@ async fn unit_document_graph_reindexing_on_modification() {
 
     // 6. Verify that it was re-indexed (meaning the database stored content is updated).
     let conn = rusqlite::Connection::open(&db_path).unwrap();
-    let content: String = conn.query_row(
-        "SELECT content FROM nodes WHERE node_type = 'document'",
-        [],
-        |row| row.get(0)
-    ).unwrap();
-    assert!(content.contains("C++ language"), "Document content should be updated to C++ language, but was: {}", content);
+    let content: String = conn
+        .query_row(
+            "SELECT content FROM nodes WHERE node_type = 'document'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert!(
+        content.contains("C++ language"),
+        "Document content should be updated to C++ language, but was: {content}"
+    );
 
     // Verify edges are deleted and replaced:
-    let mut stmt = conn.prepare("SELECT target FROM edges WHERE source = ?1").unwrap();
-    let edge_targets: Vec<String> = stmt.query_map(params![file_path.to_string_lossy().to_string()], |row| row.get(0))
+    let mut stmt = conn
+        .prepare("SELECT target FROM edges WHERE source = ?1")
+        .unwrap();
+    let edge_targets: Vec<String> = stmt
+        .query_map(params![file_path.to_string_lossy().to_string()], |row| {
+            row.get(0)
+        })
         .unwrap()
         .collect::<Result<Vec<String>, _>>()
         .unwrap();
@@ -199,5 +227,3 @@ async fn unit_document_graph_reindexing_on_modification() {
     assert_eq!(edge_targets.len(), 1);
     assert_eq!(edge_targets[0], "entity:cpp-language");
 }
-
-

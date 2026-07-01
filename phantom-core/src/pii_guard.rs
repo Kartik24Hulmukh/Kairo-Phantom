@@ -22,12 +22,12 @@ pub enum PiiKind {
 impl PiiKind {
     pub fn placeholder(&self) -> &'static str {
         match self {
-            PiiKind::Email       => "[EMAIL REDACTED]",
-            PiiKind::PhoneUs     => "[PHONE REDACTED]",
-            PiiKind::CreditCard  => "[CARD REDACTED]",
-            PiiKind::SsnUs       => "[SSN REDACTED]",
-            PiiKind::IpAddress   => "[IP REDACTED]",
-            PiiKind::ApiKey      => "[KEY REDACTED]",
+            PiiKind::Email => "[EMAIL REDACTED]",
+            PiiKind::PhoneUs => "[PHONE REDACTED]",
+            PiiKind::CreditCard => "[CARD REDACTED]",
+            PiiKind::SsnUs => "[SSN REDACTED]",
+            PiiKind::IpAddress => "[IP REDACTED]",
+            PiiKind::ApiKey => "[KEY REDACTED]",
         }
     }
 }
@@ -36,29 +36,36 @@ impl PiiGuard {
     pub fn new() -> Self {
         let patterns = vec![
             // Email addresses
-            (PiiKind::Email, Regex::new(
-                r"(?i)[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}"
-            ).unwrap()),
+            (
+                PiiKind::Email,
+                Regex::new(r"(?i)[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}").unwrap(),
+            ),
             // US phone numbers (various formats)
-            (PiiKind::PhoneUs, Regex::new(
-                r"(?:\+1[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}"
-            ).unwrap()),
+            (
+                PiiKind::PhoneUs,
+                Regex::new(r"(?:\+1[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}").unwrap(),
+            ),
             // Credit card numbers (Luhn-format, 13-19 digits with optional spaces/dashes)
-            (PiiKind::CreditCard, Regex::new(
-                r"\b(?:\d[ \-]?){13,19}\b"
-            ).unwrap()),
+            (
+                PiiKind::CreditCard,
+                Regex::new(r"\b(?:\d[ \-]?){13,19}\b").unwrap(),
+            ),
             // US SSN
-            (PiiKind::SsnUs, Regex::new(
-                r"\b\d{3}[- ]\d{2}[- ]\d{4}\b"
-            ).unwrap()),
+            (
+                PiiKind::SsnUs,
+                Regex::new(r"\b\d{3}[- ]\d{2}[- ]\d{4}\b").unwrap(),
+            ),
             // IP addresses
-            (PiiKind::IpAddress, Regex::new(
-                r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
-            ).unwrap()),
+            (
+                PiiKind::IpAddress,
+                Regex::new(r"\b(?:\d{1,3}\.){3}\d{1,3}\b").unwrap(),
+            ),
             // API keys (common patterns: sk-, Bearer, ghp_, etc.)
-            (PiiKind::ApiKey, Regex::new(
-                r"(?:sk-|Bearer\s+|ghp_|gho_|glpat-|xoxb-|xoxp-)[A-Za-z0-9_\-]{8,}"
-            ).unwrap()),
+            (
+                PiiKind::ApiKey,
+                Regex::new(r"(?:sk-|Bearer\s+|ghp_|gho_|glpat-|xoxb-|xoxp-)[A-Za-z0-9_\-]{8,}")
+                    .unwrap(),
+            ),
         ];
 
         Self { patterns }
@@ -71,7 +78,10 @@ impl PiiGuard {
 
         for (kind, pattern) in &self.patterns {
             if pattern.is_match(&result) {
-                warn!("⚠️  [PII GUARD] Detected {:?} — redacting before LLM call", kind);
+                warn!(
+                    "⚠️  [PII GUARD] Detected {:?} — redacting before LLM call",
+                    kind
+                );
                 result = pattern.replace_all(&result, kind.placeholder()).to_string();
                 redacted = true;
             }
@@ -85,7 +95,7 @@ impl PiiGuard {
         let mut findings = Vec::new();
         for (kind, pattern) in &self.patterns {
             if pattern.is_match(text) {
-                findings.push(format!("{:?}", kind));
+                findings.push(format!("{kind:?}"));
             }
         }
         findings
@@ -98,7 +108,9 @@ impl PiiGuard {
 }
 
 impl Default for PiiGuard {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]

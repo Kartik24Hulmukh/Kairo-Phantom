@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+
 
 def build_docx_prompt(
     user_instruction: str,
@@ -8,13 +8,13 @@ def build_docx_prompt(
     file_path: str = "Unknown",
     app_name: str = "Microsoft Word",
     app_type: str = "Word Processor",
-    intent_classification: str = "Document Operation Generation"
+    intent_classification: str = "Document Operation Generation",
 ) -> str:
     """
     Builds a highly structured system + user prompt for document editing.
     Instructs the LLM to output a JSON object conforming exactly to the DocxResponse schema.
     """
-    
+
     # DocxResponse Pydantic representation for LLM awareness
     schema_description = """
 {
@@ -73,11 +73,15 @@ def build_docx_prompt(
         "document_context": {
             "paragraphs": [
                 {"index": 0, "text": "Kairo Phantom Project Plan", "style": "Heading1"},
-                {"index": 1, "text": "This project aims to automate office document generation using locally hosted LLMs and native sidecars.", "style": "Normal"}
+                {
+                    "index": 1,
+                    "text": "This project aims to automate office document generation using locally hosted LLMs and native sidecars.",
+                    "style": "Normal",
+                },
             ]
-        }
+        },
     }
-    
+
     few_shot_1_output = {
         "operations": [
             {
@@ -85,12 +89,16 @@ def build_docx_prompt(
                 "after_paragraph_index": 1,
                 "style": "Normal",
                 "runs": [
-                    {"text": "Summary: Kairo Phantom delivers sub-2ms local vector search and 100% offline-first secure document manipulation.", "bold": True, "italic": False}
-                ]
+                    {
+                        "text": "Summary: Kairo Phantom delivers sub-2ms local vector search and 100% offline-first secure document manipulation.",
+                        "bold": True,
+                        "italic": False,
+                    }
+                ],
             }
         ],
         "confidence": 0.95,
-        "reasoning": "Inserted summary paragraph at the end of the document as requested."
+        "reasoning": "Inserted summary paragraph at the end of the document as requested.",
     }
 
     few_shot_2_input = {
@@ -98,11 +106,11 @@ def build_docx_prompt(
         "document_context": {
             "paragraphs": [
                 {"index": 0, "text": "Old Kairo Document Title", "style": "Heading1"},
-                {"index": 1, "text": "Intro text.", "style": "Normal"}
+                {"index": 1, "text": "Intro text.", "style": "Normal"},
             ]
-        }
+        },
     }
-    
+
     few_shot_2_output = {
         "operations": [
             {
@@ -111,15 +119,17 @@ def build_docx_prompt(
                 "style": "Heading1",
                 "runs": [
                     {"text": "Kairo Phantom Production Design", "bold": False, "italic": False}
-                ]
+                ],
             }
         ],
         "confidence": 0.98,
-        "reasoning": "Replaced the document title with the requested title while keeping the Heading1 style."
+        "reasoning": "Replaced the document title with the requested title while keeping the Heading1 style.",
     }
 
     # 1. Fallbacks
-    styles_list = document_context.get('styles', {}).get('paragraph', []) if document_context else []
+    styles_list = (
+        document_context.get("styles", {}).get("paragraph", []) if document_context else []
+    )
     if not styles_list:
         styles_str = "Normal, Heading 1, Heading 2, List Bullet, List Number"
     else:

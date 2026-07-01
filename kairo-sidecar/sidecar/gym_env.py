@@ -13,6 +13,7 @@ Fix-loop rewards (from TestFixLoop terminal states):
   QUARANTINE → -1.0
   ESCALATE   → -2.0
 """
+
 from __future__ import annotations
 
 import logging
@@ -23,17 +24,27 @@ log = logging.getLogger("kairo.gym_env")
 try:
     import gymnasium as gym
     from gymnasium import spaces
+
     HAS_GYMNASIUM = True
 except ImportError:
-    class gym:           # type: ignore[no-redef]
-        class Env: pass
-    class spaces:        # type: ignore[no-redef]
+
+    class gym:  # type: ignore[no-redef]
+        class Env:
+            pass
+
+    class spaces:  # type: ignore[no-redef]
         class Box:
-            def __init__(self, *a, **kw): pass
+            def __init__(self, *a, **kw):
+                pass
+
         class Discrete:
-            def __init__(self, n): self.n = n
+            def __init__(self, n):
+                self.n = n
+
         class Dict:
-            def __init__(self, d): self.spaces = d
+            def __init__(self, d):
+                self.spaces = d
+
     HAS_GYMNASIUM = False
 
 
@@ -47,9 +58,9 @@ class KairoDocEnv(gym.Env):
 
     # Fix-loop terminal-state → reward mapping
     FIX_LOOP_REWARDS = {
-        "PASS":       1.0,
+        "PASS": 1.0,
         "QUARANTINE": -1.0,
-        "ESCALATE":   -2.0,
+        "ESCALATE": -2.0,
     }
 
     def __init__(
@@ -63,16 +74,19 @@ class KairoDocEnv(gym.Env):
 
         if HAS_GYMNASIUM:
             self.action_space = spaces.Discrete(3)
-            self.observation_space = spaces.Dict({
-                "text_length":     spaces.Discrete(100_000),
-                "relevance_score": spaces.Box(low=0.0, high=1.0, shape=(1,)),
-                "turns_count":     spaces.Discrete(100),
-            })
+            self.observation_space = spaces.Dict(
+                {
+                    "text_length": spaces.Discrete(100_000),
+                    "relevance_score": spaces.Box(low=0.0, high=1.0, shape=(1,)),
+                    "turns_count": spaces.Discrete(100),
+                }
+            )
         else:
             self.action_space = spaces.Discrete(3)
             self.observation_space = None
 
         from sidecar.outcome_store import OutcomeStore
+
         self.store = OutcomeStore(outcome_store_path)
         self.current_step = 0
         self.max_steps = scenario_data.get("fix_budget", 5)
@@ -87,19 +101,17 @@ class KairoDocEnv(gym.Env):
         """Reset for a new episode."""
         self.current_step = 0
         self.state = {
-            "text_length":     len(self.scenario.get("prompt", "")),
+            "text_length": len(self.scenario.get("prompt", "")),
             "relevance_score": 1.0,
-            "turns_count":     0,
+            "turns_count": 0,
         }
         info = {
-            "status":      "initialized",
+            "status": "initialized",
             "scenario_id": self.scenario.get("id"),
         }
         return self.state, info
 
-    def step(
-        self, action: int
-    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
+    def step(self, action: int) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
         """
         Execute one step.
 
@@ -109,15 +121,15 @@ class KairoDocEnv(gym.Env):
         terminated = False
         truncated = self.current_step >= self.max_steps
 
-        if action == 0:           # Accept
+        if action == 0:  # Accept
             reward = 1.0
             terminated = True
             outcome_str = "ACCEPTED"
-        elif action == 1:         # Regenerate
+        elif action == 1:  # Regenerate
             reward = -0.1
             self.state["turns_count"] += 1
             outcome_str = "REGENERATE"
-        elif action == 2:         # CUA correction
+        elif action == 2:  # CUA correction
             reward = -0.5
             self.state["turns_count"] += 1
             outcome_str = "CUA_EDIT"
@@ -136,7 +148,7 @@ class KairoDocEnv(gym.Env):
         )
 
         info = {
-            "step":    self.current_step,
+            "step": self.current_step,
             "outcome": outcome_str,
             "success": outcome_str == "ACCEPTED",
         }
@@ -146,13 +158,13 @@ class KairoDocEnv(gym.Env):
 
     def run_fix_loop_episode(
         self,
-        fix_loop: Any,          # TestFixLoop instance
+        fix_loop: Any,  # TestFixLoop instance
         initial_fail_result: Dict[str, Any],
         run_tests_fn,
         generate_fix_fn,
         apply_patch_fn,
         rollback_fn,
-    ) -> Any:                   # LoopResult
+    ) -> Any:  # LoopResult
         """
         Run a complete TestFixLoop episode and log the structured LoopResult
         to DuckDB.  Returns the LoopResult dataclass.
@@ -164,7 +176,7 @@ class KairoDocEnv(gym.Env):
             generate_fix_fn=generate_fix_fn,
             apply_patch_fn=apply_patch_fn,
             rollback_fn=rollback_fn,
-            log_to_store=True,   # OutcomeStore.log_loop_result called inside loop
+            log_to_store=True,  # OutcomeStore.log_loop_result called inside loop
         )
         # Map terminal state to gym reward for interoperability
         gym_reward = self.FIX_LOOP_REWARDS.get(result.terminal_state, -1.0)

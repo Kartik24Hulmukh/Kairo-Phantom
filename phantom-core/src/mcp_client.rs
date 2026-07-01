@@ -1,4 +1,4 @@
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
@@ -37,9 +37,16 @@ impl McpClient {
     }
 
     /// Executes a single tool call on the MCP server via stdio.
-    pub async fn call_tool(&self, tool_name: &str, arguments: serde_json::Value) -> Result<serde_json::Value> {
-        info!("MCP Client calling tool: {} via {}", tool_name, self.command);
-        
+    pub async fn call_tool(
+        &self,
+        tool_name: &str,
+        arguments: serde_json::Value,
+    ) -> Result<serde_json::Value> {
+        info!(
+            "MCP Client calling tool: {} via {}",
+            tool_name, self.command
+        );
+
         let mut child = Command::new(&self.command)
             .args(&self.args)
             .stdin(Stdio::piped())
@@ -69,18 +76,18 @@ impl McpClient {
 
         let mut reader = BufReader::new(stdout);
         let mut line = String::new();
-        
+
         // Wait for response
         let _ = reader.read_line(&mut line).await?;
-        
+
         // Ensure child cleans up
         let _ = child.kill().await;
 
-        let response: JsonRpcResponse = serde_json::from_str(&line)
-            .context("Failed to parse MCP response")?;
+        let response: JsonRpcResponse =
+            serde_json::from_str(&line).context("Failed to parse MCP response")?;
 
         if let Some(err) = response.error {
-            anyhow::bail!("MCP Tool Error: {:?}", err);
+            anyhow::bail!("MCP Tool Error: {err:?}");
         }
 
         if let Some(result) = response.result {

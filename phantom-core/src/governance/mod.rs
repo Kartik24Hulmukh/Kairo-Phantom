@@ -6,11 +6,11 @@ pub mod tool_gate;
 // enterprise SSO hooks, and admin-controlled model selection.
 // This is what turns Kairo from "cool open-source tool" to "enterprise document AI infrastructure".
 
-use std::sync::Mutex;
-use std::collections::VecDeque;
-use std::path::PathBuf;
-use std::io::Write;
 use serde::{Deserialize, Serialize};
+use std::collections::VecDeque;
+use std::io::Write;
+use std::path::PathBuf;
+use std::sync::Mutex;
 use tracing::{info, warn};
 
 // ─── Audit Log Entry ──────────────────────────────────────────────────────────
@@ -113,15 +113,19 @@ impl AuditLogger {
     }
 
     pub fn log(&self, entry: AuditEntry) {
-        if !self.enabled { return; }
+        if !self.enabled {
+            return;
+        }
 
         // Write to JSONL file
         if let Some(ref path) = self.log_path {
             if let Ok(mut file) = std::fs::OpenOptions::new()
-                .create(true).append(true).open(path)
+                .create(true)
+                .append(true)
+                .open(path)
             {
                 let line = serde_json::to_string(&entry).unwrap_or_default();
-                let _ = writeln!(file, "{}", line);
+                let _ = writeln!(file, "{line}");
             }
         }
 
@@ -230,11 +234,18 @@ impl PluginPermissionManifest {
         ];
         for risk in &high_risk {
             if self.has_permission(risk) {
-                warn!("⚠️  Plugin '{}' requests high-risk permission: {:?}", self.name, risk);
+                warn!(
+                    "⚠️  Plugin '{}' requests high-risk permission: {:?}",
+                    self.name, risk
+                );
             }
         }
-        info!("✅ Plugin '{}' v{} permissions validated ({} declared)",
-            self.name, self.version, self.permissions.len());
+        info!(
+            "✅ Plugin '{}' v{} permissions validated ({} declared)",
+            self.name,
+            self.version,
+            self.permissions.len()
+        );
     }
 }
 
@@ -280,7 +291,11 @@ impl EnterpriseConfig {
             "Enterprise mode: ✅ | Org: {} | Audit: {} | Plugin governance: {}",
             self.org_name.as_deref().unwrap_or("N/A"),
             if self.audit_logging { "ON" } else { "OFF" },
-            if self.strict_plugin_governance { "STRICT" } else { "permissive" },
+            if self.strict_plugin_governance {
+                "STRICT"
+            } else {
+                "permissive"
+            },
         )
     }
 }
@@ -320,7 +335,10 @@ impl SessionGovernor {
         }
 
         if starts.len() >= self.max_per_minute {
-            warn!("🚫 Session rate limit reached ({}/min). Throttling.", self.max_per_minute);
+            warn!(
+                "🚫 Session rate limit reached ({}/min). Throttling.",
+                self.max_per_minute
+            );
             return false;
         }
 
@@ -337,7 +355,7 @@ fn chrono_local_now() -> String {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs();
-    format!("{}Z", secs) // Unix epoch as fallback — replace with chrono if needed
+    format!("{secs}Z") // Unix epoch as fallback — replace with chrono if needed
 }
 
 fn whoami_user() -> String {
@@ -363,8 +381,14 @@ impl Default for ToolGate {
 impl ToolGate {
     pub fn new() -> Self {
         let mut allowed = HashSet::new();
-        allowed.insert(dirs::home_dir().unwrap().join(".kairo-phantom").to_string_lossy().to_string());
-        
+        allowed.insert(
+            dirs::home_dir()
+                .unwrap()
+                .join(".kairo-phantom")
+                .to_string_lossy()
+                .to_string(),
+        );
+
         Self {
             allowed_paths: allowed,
             token_cap: 5000,
@@ -374,12 +398,18 @@ impl ToolGate {
     pub fn validate_file_access(&self, path: &str) -> bool {
         // Enforce: Never write to C:\Windows or /etc
         if path.to_lowercase().starts_with("c:\\windows") || path.starts_with("/etc") {
-            tracing::warn!("?? ToolGate: Blocked LLM attempt to access system directory: {}", path);
+            tracing::warn!(
+                "?? ToolGate: Blocked LLM attempt to access system directory: {}",
+                path
+            );
             return false;
         }
 
         // Must be in allowed paths
-        let is_allowed = self.allowed_paths.iter().any(|allowed| path.starts_with(allowed));
+        let is_allowed = self
+            .allowed_paths
+            .iter()
+            .any(|allowed| path.starts_with(allowed));
         if !is_allowed {
             tracing::warn!("?? ToolGate: Blocked access to unapproved path: {}", path);
         }
@@ -388,7 +418,11 @@ impl ToolGate {
 
     pub fn validate_token_usage(&self, tokens_requested: usize) -> bool {
         if tokens_requested > self.token_cap {
-            tracing::warn!("?? ToolGate: Token cap exceeded ({} > {})", tokens_requested, self.token_cap);
+            tracing::warn!(
+                "?? ToolGate: Token cap exceeded ({} > {})",
+                tokens_requested,
+                self.token_cap
+            );
             return false;
         }
         true
@@ -397,7 +431,10 @@ impl ToolGate {
     pub fn authorize_tool_call(&self, tool_name: &str, agent_allowlist: &[&str]) -> bool {
         let allowed = agent_allowlist.contains(&tool_name);
         if !allowed {
-            tracing::warn!("?? ToolGate: Agent attempted to call unauthorized tool: {}", tool_name);
+            tracing::warn!(
+                "?? ToolGate: Agent attempted to call unauthorized tool: {}",
+                tool_name
+            );
         }
         allowed
     }

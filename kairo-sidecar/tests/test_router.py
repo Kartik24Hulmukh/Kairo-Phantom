@@ -24,7 +24,7 @@ import pytest
 import tempfile
 import shutil
 from pathlib import Path
-from unittest.mock import MagicMock, patch, call, PropertyMock
+from unittest.mock import MagicMock, patch
 
 from docx import Document
 import openpyxl
@@ -33,8 +33,11 @@ import openpyxl
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from sidecar.router import (
-    DomainMasterRouter, KairoRequest, KairoResponse,
-    ReasoningStep, OutputVerifier, QualityReport,
+    DomainMasterRouter,
+    KairoRequest,
+    KairoResponse,
+    OutputVerifier,
+    QualityReport,
 )
 from sidecar.masters.word_master import WordMaster
 from sidecar.masters.excel_master import ExcelMaster
@@ -43,6 +46,7 @@ from sidecar.masters.excel_master import ExcelMaster
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def temp_docx():
@@ -86,6 +90,7 @@ def router():
 # Helper — build a mock LLM response
 # ---------------------------------------------------------------------------
 
+
 def mock_llm_response(operations=None, confidence=0.95, reasoning="Test"):
     r = MagicMock()
     r.operations = operations or []
@@ -93,8 +98,7 @@ def mock_llm_response(operations=None, confidence=0.95, reasoning="Test"):
     r.reasoning = reasoning
     r.model_dump.return_value = {
         "operations": [
-            op.model_dump() if hasattr(op, "model_dump") else op
-            for op in (operations or [])
+            op.model_dump() if hasattr(op, "model_dump") else op for op in (operations or [])
         ],
         "confidence": confidence,
         "reasoning": reasoning,
@@ -106,6 +110,7 @@ def mock_llm_response(operations=None, confidence=0.95, reasoning="Test"):
 # TEST 1: Word request → WordMaster called, NOT ExcelMaster
 # ===========================================================================
 
+
 def test_route_word_uses_word_master_not_excel(router, temp_docx):
     """
     route(KairoRequest(domain='word')) must dispatch to WordMaster.
@@ -115,7 +120,8 @@ def test_route_word_uses_word_master_not_excel(router, temp_docx):
 
     with patch("sidecar.router.call_with_schema", return_value=mock_resp):
         with patch.object(
-            router.masters["excel"], "extract_context",
+            router.masters["excel"],
+            "extract_context",
             side_effect=AssertionError("ExcelMaster should NOT be called for a Word request!"),
         ):
             req = KairoRequest(
@@ -134,6 +140,7 @@ def test_route_word_uses_word_master_not_excel(router, temp_docx):
 # TEST 2: Ambiguous prompt → clarification returned (not operations)
 # ===========================================================================
 
+
 def test_route_ambiguous_returns_clarification(router, temp_docx):
     """
     When the orchestrator classifies a request as is_ambiguous=True with
@@ -149,9 +156,7 @@ def test_route_ambiguous_returns_clarification(router, temp_docx):
         ambiguity_reason="Target paragraph not specified",
     )
 
-    with patch.object(
-        router.reasoning_step, "classify", return_value=mock_classification
-    ):
+    with patch.object(router.reasoning_step, "classify", return_value=mock_classification):
         req = KairoRequest(
             user_prompt="fix it",
             domain="word",
@@ -168,6 +173,7 @@ def test_route_ambiguous_returns_clarification(router, temp_docx):
 # TEST 3: Quality failure → retry with feedback
 # ===========================================================================
 
+
 def test_route_quality_failure_triggers_retry(router, temp_docx):
     """
     When quality gates fail on the first LLM call, route() must call
@@ -180,7 +186,7 @@ def test_route_quality_failure_triggers_retry(router, temp_docx):
     bad_resp.model_dump.return_value = {
         "operations": [],
         "confidence": 0.9,
-        "reasoning": "waza_agent leaked",   # triggers leakage quality check
+        "reasoning": "waza_agent leaked",  # triggers leakage quality check
     }
 
     # Second (retry) response — clean
@@ -203,15 +209,16 @@ def test_route_quality_failure_triggers_retry(router, temp_docx):
         resp = router.route(req)
 
     # Must have called LLM at least twice (initial + retry)
-    assert call_count["n"] >= 2, (
-        f"Expected at least 2 LLM calls (initial + retry), got {call_count['n']}"
-    )
+    assert (
+        call_count["n"] >= 2
+    ), f"Expected at least 2 LLM calls (initial + retry), got {call_count['n']}"
     assert resp.type in ("operations", "error")
 
 
 # ===========================================================================
 # TEST 4: MemMachine query called with correct domain tag
 # ===========================================================================
+
 
 def test_route_queries_mem_machine_with_correct_domain(router, temp_docx):
     """
@@ -240,9 +247,9 @@ def test_route_queries_mem_machine_with_correct_domain(router, temp_docx):
 
     if router.mem_machine:
         assert len(query_calls) >= 1, "mem_machine.query() was never called"
-        assert query_calls[0].get("domain") == "word", (
-            f"Expected domain='word', got {query_calls[0].get('domain')!r}"
-        )
+        assert (
+            query_calls[0].get("domain") == "word"
+        ), f"Expected domain='word', got {query_calls[0].get('domain')!r}"
         # Restore
         router.mem_machine.query = original_query
 
@@ -250,6 +257,7 @@ def test_route_queries_mem_machine_with_correct_domain(router, temp_docx):
 # ===========================================================================
 # TEST 5: MemMachine record called after successful operation
 # ===========================================================================
+
 
 def test_route_records_to_mem_machine_on_success(router, temp_docx):
     """
@@ -278,9 +286,9 @@ def test_route_records_to_mem_machine_on_success(router, temp_docx):
 
     if router.mem_machine:
         assert len(record_calls) >= 1, "mem_machine.record_interaction() was never called"
-        assert record_calls[0].get("domain") == "word", (
-            f"Expected domain='word', got {record_calls[0].get('domain')!r}"
-        )
+        assert (
+            record_calls[0].get("domain") == "word"
+        ), f"Expected domain='word', got {record_calls[0].get('domain')!r}"
         router.mem_machine.record_interaction = original_record
 
     assert resp.type == "operations"
@@ -289,6 +297,7 @@ def test_route_records_to_mem_machine_on_success(router, temp_docx):
 # ===========================================================================
 # TEST 6: Browser + Notion URL → Yjs CRDT path taken
 # ===========================================================================
+
 
 def test_route_browser_notion_yjs_crdt(router):
     """
@@ -328,6 +337,7 @@ def test_route_browser_notion_yjs_crdt(router):
 # TEST 7: PDF domain → PDFMaster called, output contains new file creation op
 # ===========================================================================
 
+
 def test_route_pdf_creates_file_op(router):
     """
     PDF domain routing must call PDFMaster and the response should describe
@@ -354,14 +364,15 @@ def test_route_pdf_creates_file_op(router):
 
     assert resp.type == "operations"
     assert resp.domain == "pdf"
-    assert "converted_output.docx" in resp.raw_data.get("output_filename", ""), (
-        "output_filename missing from PDF response"
-    )
+    assert "converted_output.docx" in resp.raw_data.get(
+        "output_filename", ""
+    ), "output_filename missing from PDF response"
 
 
 # ===========================================================================
 # TEST 8: Code domain Python file → CodeMaster called with language context
 # ===========================================================================
+
 
 def test_route_code_domain_python_file(router):
     """
@@ -411,6 +422,7 @@ def test_route_code_domain_python_file(router):
 # TEST 9: End-to-end Word: prompt → operations → write → verify file
 # ===========================================================================
 
+
 def test_route_word_end_to_end_write_file(router, temp_docx):
     """
     Full end-to-end Word pipeline:
@@ -445,27 +457,27 @@ def test_route_word_end_to_end_write_file(router, temp_docx):
         )
         resp = router.route(req)
 
-    assert resp.type == "operations", f"Expected 'operations', got: {resp.type}, error: {resp.error}"
+    assert (
+        resp.type == "operations"
+    ), f"Expected 'operations', got: {resp.type}, error: {resp.error}"
     assert len(resp.operations) == 1, f"Expected 1 op, got {len(resp.operations)}"
 
     # Apply the validated ops to the file
     apply_result = router.masters["word"].apply_operations(temp_docx, resp.operations)
-    assert apply_result.get("applied_count", 0) >= 1, (
-        f"apply_operations failed: {apply_result}"
-    )
+    assert apply_result.get("applied_count", 0) >= 1, f"apply_operations failed: {apply_result}"
 
     # Verify the paragraph now exists in the file
     saved_doc = Document(temp_docx)
     texts = [p.text for p in saved_doc.paragraphs]
     assert any(new_para_text in t for t in texts), (
-        f"E2E paragraph '{new_para_text}' not found in saved document.\n"
-        f"All paragraphs: {texts}"
+        f"E2E paragraph '{new_para_text}' not found in saved document.\n" f"All paragraphs: {texts}"
     )
 
 
 # ===========================================================================
 # TEST 10: End-to-end Excel: prompt → formula → validate → write → verify
 # ===========================================================================
+
 
 def test_route_excel_end_to_end_write_formula(router, temp_xlsx):
     """
@@ -502,29 +514,28 @@ def test_route_excel_end_to_end_write_formula(router, temp_xlsx):
         )
         resp = router.route(req)
 
-    assert resp.type == "operations", (
-        f"Expected 'operations', got '{resp.type}': {resp.error}"
-    )
+    assert resp.type == "operations", f"Expected 'operations', got '{resp.type}': {resp.error}"
 
     # Apply to file
     apply_result = router.masters["excel"].apply_operations(temp_xlsx, resp.operations)
-    assert apply_result.get("applied_count", 0) >= 1 or apply_result.get("errors") == [], (
-        f"apply_operations returned unexpected result: {apply_result}"
-    )
+    assert (
+        apply_result.get("applied_count", 0) >= 1 or apply_result.get("errors") == []
+    ), f"apply_operations returned unexpected result: {apply_result}"
 
     # Verify formula written to file
     wb = openpyxl.load_workbook(temp_xlsx, data_only=False)
     ws = wb.active
     cell_value = ws[target_cell].value
-    assert cell_value == target_formula, (
-        f"Expected formula '{target_formula}' in {target_cell}, got '{cell_value}'"
-    )
+    assert (
+        cell_value == target_formula
+    ), f"Expected formula '{target_formula}' in {target_cell}, got '{cell_value}'"
 
 
 # ===========================================================================
 # BACKWARD-COMPATIBLE LEGACY TESTS (Tests 11-23)
 # These exercise route_llm_request() to ensure nothing broke.
 # ===========================================================================
+
 
 @pytest.mark.anyio
 async def test_route_word_request(temp_docx):
@@ -599,7 +610,11 @@ async def test_mem_machine_context_integration(temp_docx):
     mock_response.operations = []
     mock_response.confidence = 0.95
     mock_response.reasoning = "Test"
-    mock_response.model_dump.return_value = {"operations": [], "confidence": 0.95, "reasoning": "Test"}
+    mock_response.model_dump.return_value = {
+        "operations": [],
+        "confidence": 0.95,
+        "reasoning": "Test",
+    }
 
     with patch("sidecar.router.call_with_schema", return_value=mock_response) as mock_call:
         await router.route_llm_request(
@@ -620,7 +635,11 @@ async def test_excel_grid_context_generation(temp_xlsx):
     mock_response.operations = []
     mock_response.confidence = 0.95
     mock_response.reasoning = "Test"
-    mock_response.model_dump.return_value = {"operations": [], "confidence": 0.95, "reasoning": "Test"}
+    mock_response.model_dump.return_value = {
+        "operations": [],
+        "confidence": 0.95,
+        "reasoning": "Test",
+    }
 
     with patch("sidecar.router.call_with_schema", return_value=mock_response) as mock_call:
         await router.route_llm_request(
@@ -741,7 +760,9 @@ async def test_excel_locale_adjusted_via_router(temp_xlsx):
 @pytest.mark.anyio
 async def test_router_error_handling(temp_docx):
     router = DomainMasterRouter()
-    with patch.object(router.word_extractor, "extract", side_effect=RuntimeError("Hard disk error")):
+    with patch.object(
+        router.word_extractor, "extract", side_effect=RuntimeError("Hard disk error")
+    ):
         res = await router.route_llm_request(
             domain="word",
             file_path=temp_docx,
@@ -760,7 +781,11 @@ async def test_router_maps_file_extensions_correctly(temp_docx):
     mock_response.operations = []
     mock_response.confidence = 0.95
     mock_response.reasoning = "Test"
-    mock_response.model_dump.return_value = {"operations": [], "confidence": 0.95, "reasoning": "Test"}
+    mock_response.model_dump.return_value = {
+        "operations": [],
+        "confidence": 0.95,
+        "reasoning": "Test",
+    }
 
     with patch("sidecar.router.call_with_schema", return_value=mock_response) as mock_call:
         res = await router.route_llm_request(
@@ -785,7 +810,11 @@ async def test_browser_notion_yjs_path():
         "injection_method": "crdt_yjs",
         "content": "Notion text",
         "is_collaborative_editor": True,
-        "safety_check": {"is_password_field": False, "is_payment_field": False, "is_auto_submit": False},
+        "safety_check": {
+            "is_password_field": False,
+            "is_payment_field": False,
+            "is_auto_submit": False,
+        },
         "confidence": 0.95,
     }
 
@@ -856,6 +885,7 @@ async def test_code_domain_called():
 # Additional edge-case tests for the new route() API
 # ===========================================================================
 
+
 def test_route_normalises_docx_domain(router, temp_docx):
     """'docx' domain alias must be normalised to 'word'."""
     mock_resp = mock_llm_response()
@@ -885,7 +915,8 @@ def test_route_normalises_xlsx_domain(router, temp_xlsx):
 def test_route_error_returns_error_response(router, temp_docx):
     """Extraction failure must return KairoResponse(type='error') not raise."""
     with patch.object(
-        router.masters["word"], "extract_context",
+        router.masters["word"],
+        "extract_context",
         side_effect=OSError("File not found"),
     ):
         req = KairoRequest(
@@ -900,7 +931,7 @@ def test_route_error_returns_error_response(router, temp_docx):
 
 def test_word_master_facade_imports():
     """WordMaster must be importable and expose the required interface."""
-    from sidecar.masters.word_master import WordMaster
+
     m = WordMaster()
     assert hasattr(m, "extract_context")
     assert hasattr(m, "build_prompt")
@@ -911,7 +942,7 @@ def test_word_master_facade_imports():
 
 def test_excel_master_facade_imports():
     """ExcelMaster must be importable and expose the required interface."""
-    from sidecar.masters.excel_master import ExcelMaster
+
     m = ExcelMaster()
     assert hasattr(m, "extract_context")
     assert hasattr(m, "build_prompt")
@@ -987,6 +1018,7 @@ def test_config_kairo_toml_exists():
 def test_memmachine_db_path_from_config():
     """MemMachineClient must resolve a valid db_path (from env, config, or default)."""
     from sidecar.mem_machine import MemMachineClient
+
     client = MemMachineClient()
     assert client.db_path, "db_path must not be empty"
     # The path must point to an existing directory (DB file may not exist yet)

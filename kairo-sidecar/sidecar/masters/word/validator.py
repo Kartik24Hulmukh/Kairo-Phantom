@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import difflib
 import logging
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 log = logging.getLogger("kairo-sidecar.word.validator")
 
@@ -179,17 +179,16 @@ class WordOperationValidator:
         # ── Style validation ────────────────────────────────────────────────
         op_type = op.get("type", op.get("action", ""))
         style_ops = {
-            "insert_paragraph", "replace_paragraph", "append",
-            "insert_after_heading", "change_style",
+            "insert_paragraph",
+            "replace_paragraph",
+            "append",
+            "insert_after_heading",
+            "change_style",
         }
         if op_type in style_ops and "style" in op:
-            corrected_style, was_corrected = self.validate_style(
-                op["style"], available_styles
-            )
+            corrected_style, was_corrected = self.validate_style(op["style"], available_styles)
             if was_corrected:
-                corrections.append(
-                    f"Style '{op['style']}' corrected to '{corrected_style}'"
-                )
+                corrections.append(f"Style '{op['style']}' corrected to '{corrected_style}'")
                 op["style"] = corrected_style
 
         # ── paragraph_index clamping ────────────────────────────────────────
@@ -198,9 +197,7 @@ class WordOperationValidator:
                 int(op["paragraph_index"]), doc_length
             )
             if was_corrected:
-                corrections.append(
-                    f"paragraph_index {op['paragraph_index']} clamped to {clamped}"
-                )
+                corrections.append(f"paragraph_index {op['paragraph_index']} clamped to {clamped}")
                 op["paragraph_index"] = clamped
 
         # ── after_paragraph_index clamping ──────────────────────────────────
@@ -212,9 +209,7 @@ class WordOperationValidator:
             else:
                 clamped, was_corrected = self.validate_paragraph_index(raw_idx, doc_length)
                 if was_corrected:
-                    corrections.append(
-                        f"after_paragraph_index {raw_idx} clamped to {clamped}"
-                    )
+                    corrections.append(f"after_paragraph_index {raw_idx} clamped to {clamped}")
                     op["after_paragraph_index"] = clamped
 
         # ── Text safety (basic empty-text guard) ────────────────────────────

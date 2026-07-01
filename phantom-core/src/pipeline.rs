@@ -1,12 +1,12 @@
 // phantom-core/src/pipeline.rs
 
+use crate::document_context::DocumentContext;
 use enigo::{Enigo, Keyboard, Settings};
+use futures_util::StreamExt;
 use reqwest::Client;
 use std::time::Duration;
 use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
-use futures_util::StreamExt;
-use crate::document_context::DocumentContext;
 
 /// Manages pre-warmed connections for sub-100ms LLM latency.
 pub struct HotkeyPipeline {
@@ -23,7 +23,7 @@ impl HotkeyPipeline {
             .tcp_keepalive(Duration::from_secs(60))
             .build()
             .expect("Failed to build HTTP client");
-        
+
         Self { client, endpoint }
     }
 
@@ -34,9 +34,9 @@ impl HotkeyPipeline {
 
     /// Parallel context capture and API request setup using tokio::join!
     pub async fn parallel_capture_and_request(
-        &self, 
-        prompt: String, 
-        cancel_token: CancellationToken
+        &self,
+        prompt: String,
+        cancel_token: CancellationToken,
     ) -> Result<(), String> {
         // Run UIA capture and LLM request concurrently
         let (capture_result, request_result) = tokio::join!(
@@ -48,7 +48,7 @@ impl HotkeyPipeline {
         let _context = capture_result?;
 
         let mut injector = StreamInjector::new();
-        
+
         // Process stream
         while let Some(chunk) = stream.next().await {
             if cancel_token.is_cancelled() {
@@ -59,7 +59,7 @@ impl HotkeyPipeline {
                 injector.inject_chunk(&text).await;
             }
         }
-        
+
         injector.flush().await;
         Ok(())
     }
@@ -97,11 +97,15 @@ impl HotkeyPipeline {
         // 3. Screenshot OCR fallback
         let ocr_config = crate::config::ScreenContextConfig::default();
         let ocr_engine = crate::screen_context::ScreenContextEngine::new(ocr_config);
-        if let Ok(screen_ctx) = ocr_engine.capture_and_extract(&app_name, &window_title).await {
+        if let Ok(screen_ctx) = ocr_engine
+            .capture_and_extract(&app_name, &window_title)
+            .await
+        {
             let ocr_trimmed = screen_ctx.vasp_output.trim();
             if !ocr_trimmed.is_empty() {
                 tracing::info!("📸 Screenshot OCR read: {} chars", ocr_trimmed.len());
-                let mut ctx = DocumentContext::from_plain_text(&app_name, &screen_ctx.vasp_output, prompt);
+                let mut ctx =
+                    DocumentContext::from_plain_text(&app_name, &screen_ctx.vasp_output, prompt);
                 ctx.app_name = Some(app_name.clone());
                 return Ok(ctx);
             }
@@ -116,22 +120,22 @@ impl HotkeyPipeline {
         }
 
         // Total failure
-        crate::toast_notification::show_error_toast("Kairo context capture failed. Please make sure target app is active.");
+        crate::toast_notification::show_error_toast(
+            "Kairo context capture failed. Please make sure target app is active.",
+        );
         Err("Total context capture failure".to_string())
     }
 
     async fn initiate_stream(
-        &self, 
-        prompt: String, 
-        cancel_token: CancellationToken
+        &self,
+        prompt: String,
+        cancel_token: CancellationToken,
     ) -> Result<impl futures_util::Stream<Item = reqwest::Result<bytes::Bytes>>, String> {
-        let request = self.client
-            .post(&self.endpoint)
-            .json(&serde_json::json!({
-                "prompt": prompt,
-                "stream": true
-            }));
-            
+        let request = self.client.post(&self.endpoint).json(&serde_json::json!({
+            "prompt": prompt,
+            "stream": true
+        }));
+
         let response = request.send().await.map_err(|e| e.to_string())?;
         Ok(response.bytes_stream())
     }
@@ -141,6 +145,12 @@ impl HotkeyPipeline {
 pub struct StreamInjector {
     enigo: Enigo,
     buffer: String,
+}
+
+impl Default for StreamInjector {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl StreamInjector {
@@ -153,7 +163,7 @@ impl StreamInjector {
 
     pub async fn inject_chunk(&mut self, text: &str) {
         self.buffer.push_str(text);
-        
+
         while self.buffer.len() >= 5 {
             let chunk: String = self.buffer.drain(..5).collect();
             let _ = self.enigo.text(&chunk);

@@ -3,12 +3,12 @@
 // Persistent, versioned UIA tree representation (World Model)
 // ─────────────────────────────────────────────────────────────────────────────
 
+use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
-use std::hash::{Hash, Hasher};
-use once_cell::sync::Lazy;
-use serde::{Serialize, Deserialize};
 
 use super::WindowRect;
 
@@ -39,26 +39,16 @@ pub struct AppWorldModel {
 }
 
 // Global cached world models keyed by "hwnd"
-pub static GLOBAL_WORLD_MODEL: Lazy<Mutex<HashMap<isize, AppWorldModel>>> = Lazy::new(|| {
-    Mutex::new(HashMap::new())
-});
+pub static GLOBAL_WORLD_MODEL: Lazy<Mutex<HashMap<isize, AppWorldModel>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
 /// Computes a hash of the text value.
 pub fn compute_hash(s: &str) -> u64 {
-    fxhash::hash64(s)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_compute_hash_deterministic() {
-        let input = "Kairo Hashing";
-        let h1 = compute_hash(input);
-        let h2 = compute_hash(input);
-        assert_eq!(h1, h2);
-    }
+    use rustc_hash::FxHasher;
+    use std::hash::Hasher;
+    let mut hasher = FxHasher::default();
+    hasher.write(s.as_bytes());
+    hasher.finish()
 }
 
 /// Recursively traverses a UIA element and builds a UiNode tree.
@@ -102,7 +92,8 @@ pub fn build_tree(element: &uiautomation::core::UIElement, depth: usize) -> Resu
     if depth < 8 {
         if let Ok(automation) = uiautomation::core::UIAutomation::new() {
             if let Ok(cond) = automation.create_true_condition() {
-                if let Ok(elems) = element.find_all(uiautomation::types::TreeScope::Children, &cond) {
+                if let Ok(elems) = element.find_all(uiautomation::types::TreeScope::Children, &cond)
+                {
                     for elem in &elems {
                         if let Ok(child_node) = build_tree(elem, depth + 1) {
                             children.push(child_node);
@@ -133,10 +124,16 @@ pub fn build_tree(_element: &(), _depth: usize) -> Result<UiNode, String> {
 pub fn diff_trees(old: &UiNode, new: &UiNode, delta: &mut UiDelta) {
     if old.runtime_id == new.runtime_id {
         if old.value_hash != new.value_hash {
-            delta.value_changed.push((new.runtime_id.clone(), new.value_hash));
+            delta
+                .value_changed
+                .push((new.runtime_id.clone(), new.value_hash));
         }
 
-        let mut old_children_map: HashMap<Vec<i32>, &UiNode> = old.children.iter().map(|c| (c.runtime_id.clone(), c)).collect();
+        let mut old_children_map: HashMap<Vec<i32>, &UiNode> = old
+            .children
+            .iter()
+            .map(|c| (c.runtime_id.clone(), c))
+            .collect();
 
         for new_child in &new.children {
             if let Some(old_child) = old_children_map.remove(&new_child.runtime_id) {
@@ -188,5 +185,18 @@ pub fn get_vlm_call_rate() -> f32 {
         0.0
     } else {
         VLM_INVOCATIONS.load(Ordering::SeqCst) as f32 / total as f32
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compute_hash_deterministic() {
+        let input = "Kairo Hashing";
+        let h1 = compute_hash(input);
+        let h2 = compute_hash(input);
+        assert_eq!(h1, h2);
     }
 }

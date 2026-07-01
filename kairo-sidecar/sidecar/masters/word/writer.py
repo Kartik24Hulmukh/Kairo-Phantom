@@ -17,7 +17,6 @@ from docx import Document
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
-from lxml import etree
 
 log = logging.getLogger("kairo-sidecar.word.writer")
 
@@ -79,7 +78,9 @@ class WordWriter:
         try:
             new_para.style = doc.styles[style_name]
         except (KeyError, Exception) as exc:
-            log.debug(f"WordWriter._insert_paragraph: style '{style_name}' not found ({exc}); using Normal")
+            log.debug(
+                f"WordWriter._insert_paragraph: style '{style_name}' not found ({exc}); using Normal"
+            )
             try:
                 new_para.style = doc.styles["Normal"]
             except Exception:
@@ -109,7 +110,9 @@ class WordWriter:
             Replacement text.
         """
         if idx < 0 or idx >= len(doc.paragraphs):
-            log.warning(f"WordWriter._edit_paragraph: index {idx} out of range (0-{len(doc.paragraphs)-1})")
+            log.warning(
+                f"WordWriter._edit_paragraph: index {idx} out of range (0-{len(doc.paragraphs)-1})"
+            )
             return
 
         para = doc.paragraphs[idx]

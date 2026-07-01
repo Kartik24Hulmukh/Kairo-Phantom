@@ -74,7 +74,9 @@ class NamedPipeProtocol(asyncio.Protocol):
         self.transport = None
 
 
-async def start_named_pipe_server(pipe_name: str, handler: Callable[[dict], Coroutine[Any, Any, dict]]):
+async def start_named_pipe_server(
+    pipe_name: str, handler: Callable[[dict], Coroutine[Any, Any, dict]]
+):
     """Starts the Windows Named Pipe server using asyncio ProactorEventLoop."""
     loop = asyncio.get_running_loop()
     if not sys.platform.startswith("win"):
@@ -82,14 +84,13 @@ async def start_named_pipe_server(pipe_name: str, handler: Callable[[dict], Coro
         raise OSError("Named Pipe IPC is only supported on Windows")
 
     log.info(f"Binding to Named Pipe: {pipe_name}")
-    
+
     # ProactorEventLoop has start_serving_pipe
     try:
-        server = await loop.start_serving_pipe(
-            lambda: NamedPipeProtocol(handler),
-            pipe_name
-        )
+        server = await loop.start_serving_pipe(lambda: NamedPipeProtocol(handler), pipe_name)
         return server
     except AttributeError:
-        log.error("Active event loop does not support Named Pipes (must use ProactorEventLoop on Windows)")
+        log.error(
+            "Active event loop does not support Named Pipes (must use ProactorEventLoop on Windows)"
+        )
         raise RuntimeError("ProactorEventLoop required for Windows Named Pipes")

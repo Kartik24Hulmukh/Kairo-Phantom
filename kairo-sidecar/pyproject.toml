@@ -1,0 +1,162 @@
+# =============================================================================
+# Kairo-Phantom — Python project config (ruff + mypy, RATCHETED)
+# =============================================================================
+# Place this at kairo-sidecar/pyproject.toml (merge with any existing content).
+#
+# RATCHET POLICY (ISSUES 7, 8):
+#   The initial config is GREEN on the current codebase. Strictness tightens
+#   over future PRs — see the RATCHET PLAN in the verification report.
+#
+#   - ruff: starts with E9 (syntax errors) + F (Pyflakes) — the rules that
+#     pass clean NOW (0 errors after auto-fixes were committed). Additional
+#     rule sets (E, W, I, B, C4, UP, N, SIM) are added module-by-module.
+#   - mypy: starts in lenient mode (many error codes disabled) — GREEN on
+#     current code. Error codes are re-enabled module-by-module.
+# =============================================================================
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["sidecar", "tests"]
+extend-exclude = [
+    ".agents",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+    # oracles.py is Ed25519-signed (oracles.py.sig) — immutability is a security
+    # guardrail (Guardrail 2: Oracle Immutability). Reformatting or auto-fixing
+    # it breaks the cryptographic signature and fails test_fix_loop / test_oracles.
+    # The unused `sys` import and formatting are intentional and must not change.
+    "sidecar/oracles.py",
+]
+
+[tool.ruff.lint]
+# ── RATCHET: initial ruleset that passes clean on current code ──
+# E9 = syntax errors (E999, etc.) — always 0
+# F = Pyflakes (unused imports, undefined names, unused variables) — 0 after auto-fixes
+# These are the ONLY rules enforced NOW. Add more via the ratchet plan.
+select = [
+    "E9",   # syntax errors (always block)
+    "F",    # Pyflakes: unused imports, undefined names, unused variables
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "B017",   # pytest.raises(Exception) is intentional in some tests
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# =============================================================================
+# Mypy — RATCHETED type checking for the sidecar package
+# =============================================================================
+# INITIAL CONFIG: lenient mode that is GREEN on the current codebase.
+# The following error codes are DISABLED initially because the codebase has
+# violations for each. They will be re-enabled module-by-module via the
+# ratchet plan (see verification report).
+#
+# Measured baseline: 1352 errors in strict mode, 0 errors in this lenient mode.
+[tool.mypy]
+python_version = "3.12"
+mypy_path = ["sidecar", "tests"]
+packages = ["sidecar"]
+exclude = [
+    "tests/",
+    "build/",
+    "dist/",
+]
+
+# ── Lenient settings (GREEN on current code) ──
+ignore_missing_imports = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+disallow_untyped_decorators = false
+disallow_incomplete_defs = false
+disallow_any_generics = false
+no_implicit_optional = false
+no_implicit_reexport = false
+warn_return_any = false
+warn_unused_configs = true
+warn_redundant_casts = false
+warn_unused_ignores = false
+warn_no_return = false
+warn_unreachable = false
+show_error_codes = true
+show_column_numbers = true
+
+# ── Error codes disabled initially (ratchet to re-enable) ──
+# These are the codes that produce violations on the current codebase.
+# Each will be re-enabled one at a time, fixing the violations first.
+disable_error_code = [
+    "no-untyped-def",       # 1352+ violations — ratchet module-by-module
+    "no-untyped-call",      # many violations — ratchet
+    "assignment",           # type assignment mismatches — ratchet
+    "attr-defined",         # dict attr access — ratchet
+    "return-value",         # return type mismatches — ratchet
+    "arg-type",             # argument type mismatches — ratchet
+    "call-overload",        # overload resolution — ratchet
+    "type-arg",             # missing type args — ratchet
+    "var-annotated",        # need type annotation — ratchet
+    "index",                # index type — ratchet
+    "list-item",            # list item type — ratchet
+    "dict-item",            # dict item type — ratchet
+    "union-attr",           # union attribute access — ratchet
+    "override",             # method override — ratchet
+    "name-defined",         # name defined — ratchet
+    "unused-ignore",        # unused noqa — ratchet
+    "operator",             # operator type — ratchet
+    "func-returns-value",   # function returns — ratchet
+    "comparison-overlap",   # comparison overlap — ratchet
+    "str-format",           # string format — ratchet
+    "return",               # return statement — ratchet
+    "no-redef",             # name redefinition — ratchet
+    "misc",                 # miscellaneous — ratchet
+    "valid-type",           # valid type — ratchet
+    "call-arg",             # call argument — ratchet
+]
+
+# Per-module overrides for third-party libs without stubs.
+[[tool.mypy.overrides]]
+module = [
+    "faster_whisper.*",
+    "embed_anything.*",
+    "ollama.*",
+    "litellm.*",
+    "docling.*",
+    "weasyprint.*",
+    "mammoth.*",
+    "docx2python.*",
+    "model2vec.*",
+    "sqlite_vec.*",
+    "headroom_ai.*",
+    "duckdb.*",
+    "ebooklib.*",
+    "striprtf.*",
+    "odfpy.*",
+    "kreuzberg.*",
+    "markitdown.*",
+    "networkx.*",
+    "imagehash.*",
+    "pdfplumber.*",
+    "fitz.*",
+    "psutil.*",
+    "pyttsx3.*",
+    "openwakeword.*",
+    "sounddevice.*",
+    "pyautogui.*",
+    "pywinauto.*",
+    "win32com.*",
+    "win32api.*",
+    "win32con.*",
+    "win32gui.*",
+    "pythoncom.*",
+    "uiautomation.*",
+    "requests.*",
+    "yaml.*",
+]
+ignore_missing_imports = true

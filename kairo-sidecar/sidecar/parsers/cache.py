@@ -4,6 +4,7 @@ import threading
 from pathlib import Path
 from typing import Optional, Dict, Any
 
+
 class DocumentCache:
     _lock = threading.Lock()
 
@@ -20,7 +21,7 @@ class DocumentCache:
             p = Path(file_path)
             if not p.exists():
                 return None
-            
+
             cache_p = cls.get_cache_path(file_path)
             if not cache_p.exists():
                 return None
@@ -30,7 +31,7 @@ class DocumentCache:
                 current_mtime = p.stat().st_mtime
                 with open(cache_p, "r", encoding="utf-8") as f:
                     cached_data = json.load(f)
-                
+
                 cached_mtime = cached_data.get("mtime", 0.0)
                 if abs(current_mtime - cached_mtime) < 1e-4:
                     return cached_data.get("data")
@@ -47,14 +48,11 @@ class DocumentCache:
             p = Path(file_path)
             if not p.exists():
                 return
-            
+
             cache_p = cls.get_cache_path(file_path)
             current_mtime = p.stat().st_mtime
 
-            cache_payload = {
-                "mtime": current_mtime,
-                "data": data
-            }
+            cache_payload = {"mtime": current_mtime, "data": data}
 
             with cls._lock:
                 # Write atomically using a temporary file

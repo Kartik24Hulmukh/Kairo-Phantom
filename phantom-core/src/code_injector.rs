@@ -3,11 +3,11 @@
 // Atomically injects generated code into source files, preserving indentation,
 // line endings, and ensuring safety through backup/temp-file writes.
 
-use std::fs::{self, File};
-use std::io::{Write};
-use std::path::Path;
-use anyhow::{Result, Context};
 use crate::code_context::LineEnding;
+use anyhow::{Context, Result};
+use std::fs::{self, File};
+use std::io::Write;
+use std::path::Path;
 
 /// Injects generated code at the target cursor line of a file.
 /// Prepend `indentation` to each line of the generated code.
@@ -22,7 +22,7 @@ pub fn inject_code(
 ) -> Result<()> {
     let path = Path::new(file_path);
     if !path.exists() {
-        return Err(anyhow::anyhow!("File does not exist: {}", file_path));
+        return Err(anyhow::anyhow!("File does not exist: {file_path}"));
     }
 
     // Read the entire file lines
@@ -38,14 +38,14 @@ pub fn inject_code(
             if line.trim().is_empty() {
                 String::new()
             } else {
-                format!("{}{}", indentation, line)
+                format!("{indentation}{line}")
             }
         })
         .collect();
 
     // Identify target index. If target_line is out of bounds, append to end.
     let target_idx = target_line.saturating_sub(1);
-    
+
     // Inject the formatted lines.
     // Replace the line at target_idx (the command prompt) with the generated code.
     let mut new_lines = Vec::new();
@@ -78,9 +78,14 @@ pub fn inject_code(
     let temp_path = dir.join(format!(".kairo_tmp_{}.tmp", uuid::Uuid::new_v4()));
 
     {
-        let mut temp_file = File::create(&temp_path).context("Failed to create temporary file for atomic write")?;
-        temp_file.write_all(output.as_bytes()).context("Failed to write to temporary file")?;
-        temp_file.sync_all().context("Failed to sync temporary file to disk")?;
+        let mut temp_file =
+            File::create(&temp_path).context("Failed to create temporary file for atomic write")?;
+        temp_file
+            .write_all(output.as_bytes())
+            .context("Failed to write to temporary file")?;
+        temp_file
+            .sync_all()
+            .context("Failed to sync temporary file to disk")?;
     }
 
     // Rename temp file to target path (atomic rename)

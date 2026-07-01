@@ -15,7 +15,6 @@ from __future__ import annotations
 import json
 import logging
 import re
-import os
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -26,6 +25,7 @@ log = logging.getLogger("kairo-sidecar.kami_kpx")
 
 # ── PromptShield integration ──────────────────────────────────────────────────
 
+
 def _scan_for_injections(text: str) -> Tuple[bool, List[str]]:
     """
     Scan export content for injection payloads using PromptShield.
@@ -34,6 +34,7 @@ def _scan_for_injections(text: str) -> Tuple[bool, List[str]]:
     """
     try:
         from sidecar.safety.prompt_shield import PromptShield
+
         shield = PromptShield()
         result = shield.scan_detailed(text)
         if not result.get("safe", True):
@@ -46,9 +47,11 @@ def _scan_for_injections(text: str) -> Tuple[bool, List[str]]:
 
 # ── KAMI Index ────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class KAMIEntry:
     """A single document entry in the Kairo Memory Index."""
+
     doc_id: str
     title: str
     summary: str
@@ -82,6 +85,7 @@ class KAMIIndex:
         self._embedder_loaded = True
         try:
             from model2vec import StaticModel
+
             self._embedder = StaticModel.from_pretrained("minishlab/potion-base-8M")
             log.info("KAMI: model2vec potion-base-8M loaded for semantic search")
         except Exception as e:
@@ -123,7 +127,9 @@ class KAMIIndex:
 
     def _generate_summary(self, content: str, max_len: int = 200) -> str:
         """Generate a simple extractive summary (first meaningful paragraph)."""
-        lines = [l.strip() for l in content.splitlines() if l.strip() and not l.strip().startswith("#")]
+        lines = [
+            l.strip() for l in content.splitlines() if l.strip() and not l.strip().startswith("#")
+        ]
         if not lines:
             return content[:max_len]
         summary = lines[0]
@@ -150,12 +156,14 @@ class KAMIIndex:
                 if query_lower in tag.lower():
                     score += 2
             if score > 0:
-                results.append({
-                    "doc_id": entry.doc_id,
-                    "title": entry.title,
-                    "summary": entry.summary,
-                    "score": score,
-                })
+                results.append(
+                    {
+                        "doc_id": entry.doc_id,
+                        "title": entry.title,
+                        "summary": entry.summary,
+                        "score": score,
+                    }
+                )
         results.sort(key=lambda x: x["score"], reverse=True)
         return results[:limit]
 
@@ -163,10 +171,13 @@ class KAMIIndex:
         """Semantic search using model2vec embeddings (real, not hash)."""
         query_emb = self._embed(query)
         if query_emb is None:
-            log.warning("KAMI: Semantic search unavailable (no embedder) — falling back to full-text")
+            log.warning(
+                "KAMI: Semantic search unavailable (no embedder) — falling back to full-text"
+            )
             return self.full_text_search(query, limit)
 
         import math
+
         results = []
         for entry in self._entries.values():
             if entry.embedding is None:
@@ -179,12 +190,14 @@ class KAMIIndex:
                 sim = dot / (norm_q * norm_e)
             else:
                 sim = 0.0
-            results.append({
-                "doc_id": entry.doc_id,
-                "title": entry.title,
-                "summary": entry.summary,
-                "similarity": sim,
-            })
+            results.append(
+                {
+                    "doc_id": entry.doc_id,
+                    "title": entry.title,
+                    "summary": entry.summary,
+                    "similarity": sim,
+                }
+            )
         results.sort(key=lambda x: x["similarity"], reverse=True)
         return results[:limit]
 
@@ -196,6 +209,7 @@ class KAMIIndex:
         if target.embedding is None:
             return []
         import math
+
         results = []
         for entry in self._entries.values():
             if entry.doc_id == doc_id or entry.embedding is None:
@@ -207,11 +221,13 @@ class KAMIIndex:
                 sim = dot / (norm_t * norm_e)
             else:
                 sim = 0.0
-            results.append({
-                "doc_id": entry.doc_id,
-                "title": entry.title,
-                "similarity": sim,
-            })
+            results.append(
+                {
+                    "doc_id": entry.doc_id,
+                    "title": entry.title,
+                    "similarity": sim,
+                }
+            )
         results.sort(key=lambda x: x["similarity"], reverse=True)
         return results[:limit]
 
@@ -221,6 +237,7 @@ class KAMIIndex:
 
 
 # ── KPX Export: 5 formats ────────────────────────────────────────────────────
+
 
 class KPXExporter:
     """
@@ -279,7 +296,9 @@ class KPXExporter:
 
         # Write EPUB
         epub.write_epub(str(out_path), book, {})
-        assert out_path.exists() and out_path.stat().st_size > 200, "EPUB file too small — generation may have failed"
+        assert (
+            out_path.exists() and out_path.stat().st_size > 200
+        ), "EPUB file too small — generation may have failed"
 
         return {
             "ok": True,
@@ -334,7 +353,7 @@ blockquote {{ border-left: 4px solid #ddd; margin-left: 0; padding-left: 1em; co
         # Clean markdown: ensure consistent heading levels, strip Kairo-specific markers
         clean = text
         # Remove any Kairo command markers
-        clean = re.sub(r'^//\s*kami\s+.*$', '', clean, flags=re.MULTILINE)
+        clean = re.sub(r"^//\s*kami\s+.*$", "", clean, flags=re.MULTILINE)
         # Ensure ends with newline
         if not clean.endswith("\n"):
             clean += "\n"
@@ -476,13 +495,19 @@ blockquote {{ border-left: 4px solid #ddd; margin-left: 0; padding-left: 1em; co
                 continue
             # Headings
             if stripped.startswith("### "):
-                if in_list: html_lines.append("</ul>"); in_list = False
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
                 html_lines.append(f"<h3>{stripped[4:]}</h3>")
             elif stripped.startswith("## "):
-                if in_list: html_lines.append("</ul>"); in_list = False
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
                 html_lines.append(f"<h2>{stripped[3:]}</h2>")
             elif stripped.startswith("# "):
-                if in_list: html_lines.append("</ul>"); in_list = False
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
                 html_lines.append(f"<h1>{stripped[2:]}</h1>")
             elif stripped.startswith("- ") or stripped.startswith("* "):
                 if not in_list:
@@ -490,15 +515,19 @@ blockquote {{ border-left: 4px solid #ddd; margin-left: 0; padding-left: 1em; co
                     in_list = True
                 html_lines.append(f"<li>{stripped[2:]}</li>")
             elif stripped.startswith("> "):
-                if in_list: html_lines.append("</ul>"); in_list = False
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
                 html_lines.append(f"<blockquote>{stripped[2:]}</blockquote>")
             elif stripped:
-                if in_list: html_lines.append("</ul>"); in_list = False
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
                 # Inline formatting
                 content = stripped
-                content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', content)
-                content = re.sub(r'\*(.+?)\*', r'<em>\1</em>', content)
-                content = re.sub(r'`(.+?)`', r'<code>\1</code>', content)
+                content = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", content)
+                content = re.sub(r"\*(.+?)\*", r"<em>\1</em>", content)
+                content = re.sub(r"`(.+?)`", r"<code>\1</code>", content)
                 html_lines.append(f"<p>{content}</p>")
         if in_list:
             html_lines.append("</ul>")
@@ -520,11 +549,13 @@ blockquote {{ border-left: 4px solid #ddd; margin-left: 0; padding-left: 1em; co
             elif stripped.startswith("- ") or stripped.startswith("* "):
                 latex_lines.append(f"\\item {self._latex_escape(stripped[2:])}")
             elif stripped.startswith("> "):
-                latex_lines.append(f"\\begin{{quote}}{self._latex_escape(stripped[2:])}\\end{{quote}}")
+                latex_lines.append(
+                    f"\\begin{{quote}}{self._latex_escape(stripped[2:])}\\end{{quote}}"
+                )
             elif stripped:
                 content = self._latex_escape(stripped)
-                content = re.sub(r'\*\*(.+?)\*\*', r'\\textbf{\1}', content)
-                content = re.sub(r'\*(.+?)\*', r'\\textit{\1}', content)
+                content = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", content)
+                content = re.sub(r"\*(.+?)\*", r"\\textit{\1}", content)
                 latex_lines.append(content)
         # Wrap consecutive \item lines in itemize
         result = []
@@ -548,8 +579,14 @@ blockquote {{ border-left: 4px solid #ddd; margin-left: 0; padding-left: 1em; co
         """Escape special LaTeX characters."""
         # Order matters: backslash must be done LAST to avoid double-escaping
         replacements = {
-            "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#",
-            "_": r"\_", "{": r"\{", "}": r"\}", "~": r"\textasciitilde{}",
+            "&": r"\&",
+            "%": r"\%",
+            "$": r"\$",
+            "#": r"\#",
+            "_": r"\_",
+            "{": r"\{",
+            "}": r"\}",
+            "~": r"\textasciitilde{}",
             "^": r"\textasciicircum{}",
         }
         for char, replacement in replacements.items():
@@ -566,31 +603,38 @@ blockquote {{ border-left: 4px solid #ddd; margin-left: 0; padding-left: 1em; co
         for line in text.splitlines():
             if line.startswith("# "):
                 if current_content:
-                    sections.append({
-                        "heading": current_heading,
-                        "content": "\n".join(current_content).strip(),
-                    })
+                    sections.append(
+                        {
+                            "heading": current_heading,
+                            "content": "\n".join(current_content).strip(),
+                        }
+                    )
                 current_heading = line[2:].strip()
                 current_content = []
             elif line.startswith("## "):
                 if current_content:
-                    sections.append({
-                        "heading": current_heading,
-                        "content": "\n".join(current_content).strip(),
-                    })
+                    sections.append(
+                        {
+                            "heading": current_heading,
+                            "content": "\n".join(current_content).strip(),
+                        }
+                    )
                 current_heading = line[3:].strip()
                 current_content = []
             else:
                 current_content.append(line)
         if current_content:
-            sections.append({
-                "heading": current_heading,
-                "content": "\n".join(current_content).strip(),
-            })
+            sections.append(
+                {
+                    "heading": current_heading,
+                    "content": "\n".join(current_content).strip(),
+                }
+            )
         return sections
 
 
 # ── Markdown Round-Trip ───────────────────────────────────────────────────────
+
 
 class MarkdownRoundTrip:
     """
@@ -621,18 +665,18 @@ class MarkdownRoundTrip:
                 raise ValueError(f"Injection payloads in document '{title}': {patterns}")
 
             # Generate safe filename
-            safe_name = re.sub(r'[^\w\s-]', '', title).strip().replace(" ", "-").lower()
+            safe_name = re.sub(r"[^\w\s-]", "", title).strip().replace(" ", "-").lower()
             if not safe_name:
                 safe_name = "untitled"
             out_path = output_dir / f"{safe_name}.md"
 
             # Build frontmatter
             frontmatter_lines = ["---"]
-            frontmatter_lines.append(f"title: \"{title}\"")
+            frontmatter_lines.append(f'title: "{title}"')
             if tags:
                 frontmatter_lines.append(f"tags: [{', '.join(tags)}]")
             frontmatter_lines.append(f"kairo_id: \"{doc.get('doc_id', '')}\"")
-            frontmatter_lines.append(f"exported_at: \"{datetime.now().astimezone().isoformat()}\"")
+            frontmatter_lines.append(f'exported_at: "{datetime.now().astimezone().isoformat()}"')
             frontmatter_lines.append("---")
             frontmatter = "\n".join(frontmatter_lines)
 
@@ -666,7 +710,7 @@ class MarkdownRoundTrip:
                 tags = [t.strip() for t in tags.split(",")]
 
             # Also extract inline tags from content
-            inline_tags = re.findall(r'(?:^|\s)#([a-zA-Z][\w-]*)', body)
+            inline_tags = re.findall(r"(?:^|\s)#([a-zA-Z][\w-]*)", body)
             all_tags = list(set(tags + inline_tags))
 
             # Scan for injections
@@ -674,13 +718,15 @@ class MarkdownRoundTrip:
             if not is_clean:
                 raise ValueError(f"Injection payloads in '{md_file.name}': {patterns}")
 
-            documents.append({
-                "title": frontmatter.get("title", md_file.stem),
-                "content": body.strip(),
-                "tags": all_tags,
-                "doc_id": frontmatter.get("kairo_id", ""),
-                "source_file": str(md_file),
-            })
+            documents.append(
+                {
+                    "title": frontmatter.get("title", md_file.stem),
+                    "content": body.strip(),
+                    "tags": all_tags,
+                    "doc_id": frontmatter.get("kairo_id", ""),
+                    "source_file": str(md_file),
+                }
+            )
             log.info(f"Markdown round-trip: imported '{md_file.name}'")
 
         return documents
@@ -716,7 +762,7 @@ class MarkdownRoundTrip:
         """Ensure wikilinks ([[page]]) are preserved in content."""
         # Wikilinks are already preserved as-is in markdown
         # This method validates they exist and are well-formed
-        wikilinks = re.findall(r'\[\[([^\]]+)\]\]', content)
+        wikilinks = re.findall(r"\[\[([^\]]+)\]\]", content)
         for link in wikilinks:
             log.debug(f"Markdown round-trip: preserved wikilink [[{link}]]")
         return content
@@ -724,4 +770,4 @@ class MarkdownRoundTrip:
     @staticmethod
     def extract_wikilinks(content: str) -> List[str]:
         """Extract all wikilink targets from content."""
-        return re.findall(r'\[\[([^\]]+)\]\]', content)
+        return re.findall(r"\[\[([^\]]+)\]\]", content)

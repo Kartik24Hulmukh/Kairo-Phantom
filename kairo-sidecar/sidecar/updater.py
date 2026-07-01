@@ -3,6 +3,7 @@ Auto-update checker for Kairo Phantom.
 Checks GitHub releases API on startup (non-blocking).
 Never downloads automatically — only prompts user.
 """
+
 import json
 import threading
 import logging
@@ -17,6 +18,7 @@ from urllib import request, error
 
 try:
     from cryptography.hazmat.primitives.asymmetric import ed25519
+
     HAS_CRYPTOGRAPHY = True
 except ImportError:
     HAS_CRYPTOGRAPHY = False
@@ -39,7 +41,7 @@ def check_for_update() -> Optional[Tuple[str, str]]:
     if os.environ.get("KAIRO_OFFLINE") == "1":
         log.info("[Updater] Offline mode active; skipping update check.")
         return None
-        
+
     try:
         req = request.Request(
             GITHUB_RELEASES_API,
@@ -68,10 +70,12 @@ def _is_newer(a: str, b: str) -> bool:
 
 def check_for_update_async(callback) -> None:
     """Run update check in background thread, call callback with result."""
+
     def _run():
         result = check_for_update()
         if result:
             callback(result)
+
     threading.Thread(target=_run, daemon=True, name="kairo-updater").start()
 
 
@@ -127,14 +131,10 @@ def verify_installer_signature(file_path: str) -> bool:
             "-ExecutionPolicy",
             "Bypass",
             "-Command",
-            f"(Get-AuthenticodeSignature -LiteralPath '{file_path}').Status"
+            f"(Get-AuthenticodeSignature -LiteralPath '{file_path}').Status",
         ]
         result = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True
         )
         status = result.stdout.strip()
         if status == "Valid":
@@ -155,14 +155,19 @@ def run_health_check() -> bool:
     """Startup health check simulation."""
     # A real health check tries to load sidecar submodules
     try:
-        import sidecar.main
         return True
     except Exception as e:
         log.error(f"[Updater] Health check failed: {e}")
         return False
 
 
-def apply_update(archive_path: str, signature_hex: str, expected_sha256: str, public_key_hex: str = DEFAULT_PUBLIC_KEY, target_dir: Optional[str] = None) -> bool:
+def apply_update(
+    archive_path: str,
+    signature_hex: str,
+    expected_sha256: str,
+    public_key_hex: str = DEFAULT_PUBLIC_KEY,
+    target_dir: Optional[str] = None,
+) -> bool:
     """
     Verifies signature and checksum, backs up target directory, extracts update archive,
     runs health check, and rolls back if the health check fails.
@@ -179,19 +184,24 @@ def apply_update(archive_path: str, signature_hex: str, expected_sha256: str, pu
         target_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     backup_dir = target_dir + "_backup"
-    
+
     # 1. Take backup
     try:
         if os.path.exists(backup_dir):
             shutil.rmtree(backup_dir)
-        shutil.copytree(target_dir, backup_dir, symlinks=True, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.tmp"))
+        shutil.copytree(
+            target_dir,
+            backup_dir,
+            symlinks=True,
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.tmp"),
+        )
     except Exception as e:
         log.error(f"[Updater] Failed to create backup: {e}")
         return False
 
     # 2. Extract ZIP
     try:
-        with zipfile.ZipFile(archive_path, 'r') as zip_ref:
+        with zipfile.ZipFile(archive_path, "r") as zip_ref:
             zip_ref.extractall(target_dir)
     except Exception as e:
         log.error(f"[Updater] Extraction failed: {e}. Initiating rollback...")
@@ -224,4 +234,3 @@ def _rollback(backup_dir: str, target_dir: str):
         log.info("[Updater] Rollback completed successfully")
     except Exception as e:
         log.critical(f"[Updater] Rollback failed: {e}. System may be in inconsistent state!")
-

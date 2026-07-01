@@ -10,6 +10,7 @@ import logging
 
 log = logging.getLogger("kairo-sidecar.debounce_guard")
 
+
 class DebounceGuard:
     def __init__(self, interval_seconds: float = 0.2):
         self.interval = interval_seconds
@@ -25,5 +26,7 @@ class DebounceGuard:
         if elapsed >= self.interval:
             self.last_triggered = now
             return True
-        log.warning(f"DebounceGuard: debounced request (elapsed={elapsed*1000:.1f}ms < {self.interval*1000:.1f}ms)")
+        log.warning(
+            f"DebounceGuard: debounced request (elapsed={elapsed*1000:.1f}ms < {self.interval*1000:.1f}ms)"
+        )
         return False

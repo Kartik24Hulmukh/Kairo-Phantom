@@ -182,7 +182,7 @@ pub struct ForgeValidationResult {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExcelChartOp {
     pub source_range: String,
-    pub chart_type: String,   // "bar", "line", "pie", "column", "scatter"
+    pub chart_type: String, // "bar", "line", "pie", "column", "scatter"
     pub title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_sheet: Option<String>,
@@ -225,13 +225,12 @@ pub struct ExcelWriteOp {
     #[serde(default)]
     pub value: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub number_format: Option<String>,  // e.g. "0.00%", "#,##0.00"
+    pub number_format: Option<String>, // e.g. "0.00%", "#,##0.00"
     #[serde(default)]
     pub bold: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub conditional_formatting: Option<ConditionalFormatConfig>,
 }
-
 
 // â”€â”€â”€ Core client function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -247,7 +246,7 @@ async fn call_sidecar(req: SidecarRequest) -> Result<serde_json::Value> {
         let mut client = ClientOptions::new()
             .open(r"\\.\pipe\kairo_sidecar")
             .context("Sidecar Named Pipe not reachable")?;
-        
+
         client.write_all(json_line.as_bytes()).await?;
         let mut buf_reader = BufReader::new(client);
         buf_reader.read_line(&mut response_line).await?;
@@ -264,13 +263,16 @@ async fn call_sidecar(req: SidecarRequest) -> Result<serde_json::Value> {
         buf_reader.read_line(&mut response_line).await?;
     }
 
-    let resp: SidecarResponse = serde_json::from_str(response_line.trim())
-        .context("Invalid JSON from sidecar")?;
+    let resp: SidecarResponse =
+        serde_json::from_str(response_line.trim()).context("Invalid JSON from sidecar")?;
 
     if !resp.ok {
-        let err_msg = resp.error.clone()
+        let err_msg = resp
+            .error
+            .clone()
             .or_else(|| {
-                resp.data.as_ref()
+                resp.data
+                    .as_ref()
                     .and_then(|d| d.get("error"))
                     .and_then(|e| e.as_str())
                     .map(|s| s.to_string())
@@ -279,7 +281,7 @@ async fn call_sidecar(req: SidecarRequest) -> Result<serde_json::Value> {
         if err_msg.starts_with("Domain ") {
             crate::toast_notification::show_error_toast(&err_msg);
         }
-        bail!("Sidecar error: {}", err_msg);
+        bail!("Sidecar error: {err_msg}");
     }
 
     Ok(resp.data.unwrap_or(serde_json::Value::Null))
@@ -401,7 +403,10 @@ pub async fn get_workbook_blueprint(path: &str) -> Result<ExcelWorkbookBlueprint
 }
 
 /// Validate an Excel formula via Forge (deterministic).
-pub async fn validate_formula(formula: &str, context: Option<&serde_json::Value>) -> Result<ForgeValidationResult> {
+pub async fn validate_formula(
+    formula: &str,
+    context: Option<&serde_json::Value>,
+) -> Result<ForgeValidationResult> {
     let payload = serde_json::json!({
         "formula": formula,
         "context": context
@@ -430,7 +435,10 @@ pub async fn explain_formula(formula: &str) -> Result<String> {
 }
 
 /// Write Excel operations with formatting preservation (Domain 2).
-pub async fn write_xlsx_formatted(path: &str, operations: Vec<ExcelWriteOp>) -> Result<serde_json::Value> {
+pub async fn write_xlsx_formatted(
+    path: &str,
+    operations: Vec<ExcelWriteOp>,
+) -> Result<serde_json::Value> {
     let payload = serde_json::json!({
         "operations": serde_json::to_value(&operations)?
     });
@@ -479,7 +487,10 @@ pub async fn create_excel_pivot(path: &str, op: ExcelPivotOp) -> Result<serde_js
 }
 
 /// Capture full Excel context for SmartContextCapture (Domain 2).
-pub async fn get_excel_smart_context(path: &str, active_cell: Option<&str>) -> Result<serde_json::Value> {
+pub async fn get_excel_smart_context(
+    path: &str,
+    active_cell: Option<&str>,
+) -> Result<serde_json::Value> {
     let mut payload = serde_json::json!({});
     if let Some(cell) = active_cell {
         payload["active_cell"] = serde_json::Value::String(cell.to_string());
@@ -494,7 +505,11 @@ pub async fn get_excel_smart_context(path: &str, active_cell: Option<&str>) -> R
 }
 
 /// Fill a formula across a range (AutoFill — relative refs adjust).
-pub async fn fill_formula(path: &str, formula: &str, fill_range: &str) -> Result<serde_json::Value> {
+pub async fn fill_formula(
+    path: &str,
+    formula: &str,
+    fill_range: &str,
+) -> Result<serde_json::Value> {
     let payload = serde_json::json!({
         "formula": formula,
         "fill_range": fill_range
@@ -559,7 +574,10 @@ pub struct DeepPresenterResult {
 }
 
 /// Capture full presentation context for the LLM.
-pub async fn pptx_context_capture(presentation_id: &str, slide_index: Option<usize>) -> Result<PptxContextResponse> {
+pub async fn pptx_context_capture(
+    presentation_id: &str,
+    slide_index: Option<usize>,
+) -> Result<PptxContextResponse> {
     let mut payload = serde_json::json!({});
     if let Some(idx) = slide_index {
         payload["slide_index"] = serde_json::Value::Number(idx.into());
@@ -638,7 +656,6 @@ pub async fn slide_image_generate(
     .await
 }
 
-
 /// Generate a 256-dimensional Model2Vec embedding vector from Python sidecar.
 pub async fn embed_text(text: &str) -> Result<Vec<f32>> {
     let payload = serde_json::json!({ "text": text });
@@ -664,8 +681,9 @@ pub async fn embed_texts(texts: Vec<String>) -> Result<Vec<Vec<f32>>> {
         payload: Some(payload),
     })
     .await?;
-    let vectors: Vec<Vec<f32>> = serde_json::from_value(data.get("vectors").cloned().unwrap_or_default())
-        .context("Invalid embedding vectors format")?;
+    let vectors: Vec<Vec<f32>> =
+        serde_json::from_value(data.get("vectors").cloned().unwrap_or_default())
+            .context("Invalid embedding vectors format")?;
     Ok(vectors)
 }
 
@@ -683,7 +701,10 @@ pub async fn compile_quarkdown(content: &str, format: &str, output_path: &str) -
         payload: Some(payload),
     })
     .await?;
-    let success = data.get("success").and_then(|v| v.as_bool()).unwrap_or(false);
+    let success = data
+        .get("success")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
     Ok(success)
 }
 
@@ -874,7 +895,12 @@ impl DocFormat {
             Some("pdf") => DocFormat::Pdf,
             Some("txt") => DocFormat::Txt,
             Some("md") | Some("markdown") => DocFormat::Md,
-            Some(ext) if matches!(ext, "rs"|"py"|"js"|"ts"|"cpp"|"c"|"go"|"java"|"cs") => {
+            Some(ext)
+                if matches!(
+                    ext,
+                    "rs" | "py" | "js" | "ts" | "cpp" | "c" | "go" | "java" | "cs"
+                ) =>
+            {
                 DocFormat::Code(ext.to_string())
             }
             _ => DocFormat::Unknown,
@@ -882,7 +908,15 @@ impl DocFormat {
     }
 
     pub fn is_sidecar_supported(&self) -> bool {
-        matches!(self, DocFormat::Docx | DocFormat::Xlsx | DocFormat::Pptx | DocFormat::Pdf | DocFormat::Txt | DocFormat::Md)
+        matches!(
+            self,
+            DocFormat::Docx
+                | DocFormat::Xlsx
+                | DocFormat::Pptx
+                | DocFormat::Pdf
+                | DocFormat::Txt
+                | DocFormat::Md
+        )
     }
 }
 
@@ -906,7 +940,9 @@ pub fn resolve_document_path(window_title: &str, process_name: &str) -> Option<S
         .trim()
         .to_string();
 
-    if fname.is_empty() { return None; }
+    if fname.is_empty() {
+        return None;
+    }
 
     // Determine expected extensions based on process
     let extensions: &[&str] = if process_lower.contains("winword") {
@@ -955,7 +991,7 @@ pub fn resolve_document_path(window_title: &str, process_name: &str) -> Option<S
             let candidate = if ext.is_empty() || fname.contains('.') {
                 dir.join(&fname)
             } else {
-                dir.join(format!("{}{}", fname, ext))
+                dir.join(format!("{fname}{ext}"))
             };
             if candidate.exists() {
                 tracing::info!("📂 Resolved doc path: {:?}", candidate);
@@ -972,7 +1008,11 @@ pub fn resolve_document_path(window_title: &str, process_name: &str) -> Option<S
         }
     }
 
-    tracing::debug!("📂 Could not resolve path for '{}' ({})", fname, process_name);
+    tracing::debug!(
+        "📂 Could not resolve path for '{}' ({})",
+        fname,
+        process_name
+    );
     None
 }
 
@@ -983,7 +1023,12 @@ fn find_in_recent_files(fname: &str) -> Option<String> {
     use std::path::Path;
     // Try common recent files dirs
     let home = dirs::home_dir().unwrap_or_default();
-    let recent = home.join("AppData").join("Roaming").join("Microsoft").join("Windows").join("Recent");
+    let recent = home
+        .join("AppData")
+        .join("Roaming")
+        .join("Microsoft")
+        .join("Windows")
+        .join("Recent");
     if recent.exists() {
         if let Ok(entries) = std::fs::read_dir(&recent) {
             for entry in entries.flatten() {
@@ -993,9 +1038,15 @@ fn find_in_recent_files(fname: &str) -> Option<String> {
                     .file_stem()
                     .map(|s| s.to_string_lossy().to_string())
                     .unwrap_or_default();
-                if base.eq_ignore_ascii_case(fname) || base.eq_ignore_ascii_case(
-                    Path::new(fname).file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default().as_str()
-                ) {
+                if base.eq_ignore_ascii_case(fname)
+                    || base.eq_ignore_ascii_case(
+                        Path::new(fname)
+                            .file_stem()
+                            .map(|s| s.to_string_lossy().to_string())
+                            .unwrap_or_default()
+                            .as_str(),
+                    )
+                {
                     // Read the .lnk target path using shell32 (simplified: parse raw bytes)
                     // The actual file path is embedded at offset 0x4C in the .lnk file
                     if let Ok(bytes) = std::fs::read(entry.path()) {
@@ -1048,19 +1099,29 @@ pub async fn launch_sidecar() {
 
     let candidates = vec![
         // Relative to EXE: target/release/ -> ../../kairo-sidecar/sidecar/main.py
-        exe.parent().and_then(|p| p.parent()).and_then(|p| p.parent())
+        exe.parent()
+            .and_then(|p| p.parent())
+            .and_then(|p| p.parent())
             .map(|p| p.join("kairo-sidecar").join("sidecar").join("main.py"))
             .unwrap_or_default(),
         // Relative to EXE: target/release/ -> ../../../kairo-sidecar/sidecar/main.py (if in phantom-core/target/release)
-        exe.parent().and_then(|p| p.parent()).and_then(|p| p.parent()).and_then(|p| p.parent())
+        exe.parent()
+            .and_then(|p| p.parent())
+            .and_then(|p| p.parent())
+            .and_then(|p| p.parent())
             .map(|p| p.join("kairo-sidecar").join("sidecar").join("main.py"))
             .unwrap_or_default(),
         // Relative to current working directory
         cwd.join("kairo-sidecar").join("sidecar").join("main.py"),
         // Explicit known location based on project structure
-        dirs::home_dir().unwrap_or_default()
-            .join("Desktop").join("Memory").join("KairoPhantom")
-            .join("kairo-sidecar").join("sidecar").join("main.py"),
+        dirs::home_dir()
+            .unwrap_or_default()
+            .join("Desktop")
+            .join("Memory")
+            .join("KairoPhantom")
+            .join("kairo-sidecar")
+            .join("sidecar")
+            .join("main.py"),
     ];
 
     let sidecar_path = candidates.into_iter().find(|p| p.exists());
@@ -1071,8 +1132,12 @@ pub async fn launch_sidecar() {
             p
         }
         None => {
-            tracing::warn!("⚠️  Sidecar not found in any candidate path — document-native mode disabled");
-            tracing::warn!("   To enable: place sidecar.py at <project_root>/kairo-sidecar/sidecar.py");
+            tracing::warn!(
+                "⚠️  Sidecar not found in any candidate path — document-native mode disabled"
+            );
+            tracing::warn!(
+                "   To enable: place sidecar.py at <project_root>/kairo-sidecar/sidecar.py"
+            );
             return;
         }
     };
@@ -1088,8 +1153,12 @@ pub async fn launch_sidecar() {
             let mut started = false;
 
             for exec in py_execs {
-                tracing::info!("🐍 Attempting to launch Python sidecar using '{}': {:?}", exec, sidecar_path);
-                
+                tracing::info!(
+                    "🐍 Attempting to launch Python sidecar using '{}': {:?}",
+                    exec,
+                    sidecar_path
+                );
+
                 let stderr_file = std::fs::File::create(&log_file_path)
                     .map(Stdio::from)
                     .unwrap_or_else(|_| Stdio::null());
@@ -1106,7 +1175,11 @@ pub async fn launch_sidecar() {
                         for i in 1..=30 {
                             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                             if ping().await {
-                                tracing::info!("✅ Sidecar ready on port {} (attempt {})", SIDECAR_PORT, i);
+                                tracing::info!(
+                                    "✅ Sidecar ready on port {} (attempt {})",
+                                    SIDECAR_PORT,
+                                    i
+                                );
                                 ping_success = true;
                                 break;
                             }
@@ -1117,10 +1190,16 @@ pub async fn launch_sidecar() {
                             backoff_secs = 2;
                             // Wait for child to exit
                             let _ = child.wait().await;
-                            tracing::warn!("⚠️  Sidecar process exited — restarting in {}s", backoff_secs);
+                            tracing::warn!(
+                                "⚠️  Sidecar process exited — restarting in {}s",
+                                backoff_secs
+                            );
                             break; // break the exec loop to run the backoff/retry loop of the main thread
                         } else {
-                            tracing::warn!("⚠️  Sidecar spawned via '{}' but failed to respond to pings", exec);
+                            tracing::warn!(
+                                "⚠️  Sidecar spawned via '{}' but failed to respond to pings",
+                                exec
+                            );
                             let _ = child.kill().await;
                         }
                     }
@@ -1132,8 +1211,10 @@ pub async fn launch_sidecar() {
 
             if !started {
                 tracing::error!("❌ All Python executables failed to start the sidecar.");
-                crate::toast_notification::show_error_toast("Kairo Sidecar failed to start. Check ~/.kairo-phantom/sidecar-error.log");
-                
+                crate::toast_notification::show_error_toast(
+                    "Kairo Sidecar failed to start. Check ~/.kairo-phantom/sidecar-error.log",
+                );
+
                 tokio::time::sleep(std::time::Duration::from_secs(backoff_secs)).await;
                 backoff_secs = (backoff_secs * 2).min(60);
             }
@@ -1214,7 +1295,10 @@ pub async fn figma_create(payload: serde_json::Value) -> Result<serde_json::Valu
 }
 
 /// Apply visual updates to the active design window.
-pub async fn design_ghost_write(window_title: &str, payload: serde_json::Value) -> Result<serde_json::Value> {
+pub async fn design_ghost_write(
+    window_title: &str,
+    payload: serde_json::Value,
+) -> Result<serde_json::Value> {
     let mut full_payload = payload.clone();
     if let Some(obj) = full_payload.as_object_mut() {
         obj.insert("window_title".to_string(), serde_json::json!(window_title));
@@ -1229,7 +1313,11 @@ pub async fn design_ghost_write(window_title: &str, payload: serde_json::Value) 
 }
 
 /// Route prompt requests to ComfyUI (or the high-fidelity offline PIL fallback).
-pub async fn generate_design_asset(prompt: &str, style: &str, output_path: Option<&str>) -> Result<serde_json::Value> {
+pub async fn generate_design_asset(
+    prompt: &str,
+    style: &str,
+    output_path: Option<&str>,
+) -> Result<serde_json::Value> {
     let payload = serde_json::json!({
         "prompt": prompt,
         "style": style,
@@ -1245,7 +1333,10 @@ pub async fn generate_design_asset(prompt: &str, style: &str, output_path: Optio
 }
 
 /// Manipulate shape components, flowcharts, or lines on the tldraw whiteboard canvas.
-pub async fn tldraw_canvas(operation: &str, payload: serde_json::Value) -> Result<serde_json::Value> {
+pub async fn tldraw_canvas(
+    operation: &str,
+    payload: serde_json::Value,
+) -> Result<serde_json::Value> {
     let mut full_payload = payload.clone();
     if let Some(obj) = full_payload.as_object_mut() {
         obj.insert("operation".to_string(), serde_json::json!(operation));
@@ -1340,10 +1431,7 @@ pub async fn voice_process_sidecar(
 /// it's converted to the `//` command format. Otherwise, wrapped as ghost-write.
 ///
 /// Returns JSON with `prompt`, `original`, `processed`, `mode`.
-pub async fn voice_format_sidecar(
-    transcription: &str,
-    mode: &str,
-) -> Result<serde_json::Value> {
+pub async fn voice_format_sidecar(transcription: &str, mode: &str) -> Result<serde_json::Value> {
     let payload = serde_json::json!({
         "transcription": transcription,
         "mode": mode,

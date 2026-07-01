@@ -18,10 +18,9 @@ import logging
 import os
 import sys
 import traceback
-import tempfile
 import shutil
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 # Enforce clean package imports
 sys.path.insert(0, str(Path(__file__).parent.resolve()))
@@ -43,6 +42,7 @@ log = logging.getLogger("kairo-sidecar")
 
 # ─── Lazy imports (graceful degradation if package missing) ──────────────────
 
+
 def _try_import(name):
     try:
         return __import__(name)
@@ -50,7 +50,9 @@ def _try_import(name):
         log.warning(f"Optional package '{name}' not installed — related features disabled")
         return None
 
+
 # ─── DOCX Operations ─────────────────────────────────────────────────────────
+
 
 def _read_docx(path: str) -> dict:
     """
@@ -59,7 +61,7 @@ def _read_docx(path: str) -> dict:
     """
     try:
         from docx import Document
-        from docx.oxml.ns import qn
+        from docx.oxml.ns import qn  # noqa: F401
     except ImportError:
         return {"error": "python-docx not installed — run: pip install python-docx"}
 
@@ -77,7 +79,9 @@ def _read_docx(path: str) -> dict:
             "text": text,
             "style": style,
             "is_heading": is_heading,
-            "heading_level": int(style.replace("Heading ", "")) if is_heading and style != "Heading" else 0,
+            "heading_level": int(style.replace("Heading ", ""))
+            if is_heading and style != "Heading"
+            else 0,
             "bold": any(run.bold for run in para.runs if run.bold is not None),
             "italic": any(run.italic for run in para.runs if run.italic is not None),
         }
@@ -113,8 +117,8 @@ def _write_docx(path: str, operations: list) -> dict:
     """
     try:
         from docx import Document
-        from docx.shared import Pt, RGBColor
-        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.shared import Pt, RGBColor  # noqa: F401
+        from docx.enum.text import WD_ALIGN_PARAGRAPH  # noqa: F401
     except ImportError:
         return {"error": "python-docx not installed — run: pip install python-docx"}
 
@@ -186,7 +190,7 @@ def _write_docx(path: str, operations: list) -> dict:
 
 def _op_insert_after_heading(doc, op: dict):
     """Insert paragraphs after a heading matched by text."""
-    from docx.oxml import OxmlElement
+
     target_heading = op.get("heading_text", "")
     style = op.get("style", "Normal")
     content = op.get("content", "")
@@ -284,8 +288,7 @@ def _op_insert_table(doc, op: dict):
 
 def _make_paragraph(doc, text: str, style: str):
     """Create a new paragraph element (not added to doc yet)."""
-    from docx.oxml import OxmlElement
-    from docx.oxml.ns import qn
+
     para = doc.add_paragraph(text)
     try:
         para.style = doc.styles[style]
@@ -308,6 +311,7 @@ def _add_paragraph_with_style(doc, text: str, style: str):
 
 # ─── XLSX Operations ─────────────────────────────────────────────────────────
 
+
 def _read_xlsx(path: str, active_cell: Optional[str] = None) -> dict:
     """Read Excel file and return surrounding context."""
     try:
@@ -321,8 +325,8 @@ def _read_xlsx(path: str, active_cell: Optional[str] = None) -> dict:
 
     # Parse active cell (e.g. "G5")
     if active_cell:
-        col_str = ''.join(c for c in active_cell if c.isalpha())
-        row = int(''.join(c for c in active_cell if c.isdigit()))
+        col_str = "".join(c for c in active_cell if c.isalpha())
+        row = int("".join(c for c in active_cell if c.isdigit()))
         col = column_index_from_string(col_str)
     else:
         row, col = 1, 1
@@ -338,12 +342,14 @@ def _read_xlsx(path: str, active_cell: Optional[str] = None) -> dict:
         row_data = []
         for c in range(c_start, c_end + 1):
             cell = ws.cell(row=r, column=c)
-            row_data.append({
-                "ref": f"{get_column_letter(c)}{r}",
-                "value": str(cell.value) if cell.value is not None else "",
-                "formula": str(cell.value) if str(cell.value).startswith("=") else "",
-                "is_active": (r == row and c == col),
-            })
+            row_data.append(
+                {
+                    "ref": f"{get_column_letter(c)}{r}",
+                    "value": str(cell.value) if cell.value is not None else "",
+                    "formula": str(cell.value) if str(cell.value).startswith("=") else "",
+                    "is_active": (r == row and c == col),
+                }
+            )
         grid.append(row_data)
 
     # Column headers (row 1)
@@ -425,14 +431,14 @@ def _write_xlsx(path: str, operations: list) -> dict:
     return {"applied": len(applied), "cells": applied, "errors": errors}
 
 
-
 # ─── PPTX Operations ─────────────────────────────────────────────────────────
+
 
 def _read_pptx(path: str) -> dict:
     """Read PowerPoint and return slide/shape inventory."""
     try:
         from pptx import Presentation
-        from pptx.util import Pt
+        from pptx.util import Pt  # noqa: F401
     except ImportError:
         return {"error": "python-pptx not installed — run: pip install python-pptx"}
 
@@ -443,13 +449,15 @@ def _read_pptx(path: str) -> dict:
         for shape in slide.shapes:
             if shape.has_text_frame:
                 text = "\n".join(p.text for p in shape.text_frame.paragraphs)
-                shapes.append({
-                    "id": shape.shape_id,
-                    "name": shape.name,
-                    "text": text,
-                    "left": shape.left,
-                    "top": shape.top,
-                })
+                shapes.append(
+                    {
+                        "id": shape.shape_id,
+                        "name": shape.name,
+                        "text": text,
+                        "left": shape.left,
+                        "top": shape.top,
+                    }
+                )
         # Slide title
         title = slide.shapes.title.text if slide.shapes.title else f"Slide {i+1}"
         slides.append({"index": i, "title": title, "shapes": shapes})
@@ -461,7 +469,7 @@ def _write_pptx(path: str, operations: list) -> dict:
     """Apply SlideOperation list to .pptx file."""
     try:
         from pptx import Presentation
-        from pptx.util import Pt
+        from pptx.util import Pt  # noqa: F401
     except ImportError:
         return {"error": "python-pptx not installed — run: pip install python-pptx"}
 
@@ -511,7 +519,6 @@ def _write_pptx(path: str, operations: list) -> dict:
             # FIX-9: Preserve theme font — update existing paragraphs/runs instead of
             # clearing the text frame (tf.clear() destroys run formatting/theme font).
             # Strategy: reuse existing paragraphs where possible, add/remove as needed.
-            from pptx.util import Pt
 
             # Snapshot existing run format from first paragraph (theme font, size, color)
             existing_fmt = None
@@ -577,8 +584,8 @@ def _write_pptx(path: str, operations: list) -> dict:
     return {"applied": len(applied), "errors": errors}
 
 
-
 # ─── Context extractor (for LLM prompt building) ─────────────────────────────
+
 
 def _extract_context(path: str, active_cell: Optional[str] = None) -> dict:
     """
@@ -604,6 +611,7 @@ def _extract_context(path: str, active_cell: Optional[str] = None) -> dict:
 def _read_pdf(path: str) -> dict:
     """3-tier PDF extraction: fitz → docling → mineru_vlm."""
     from sidecar.parsers.pdf_parser import parse_pdf
+
     try:
         res = parse_pdf(path)
         # Convert structured paragraphs to flat full_text if expected by old callers
@@ -615,7 +623,6 @@ def _read_pdf(path: str) -> dict:
         return {"error": f"PDF parsing failed: {e}", "format": "pdf"}
 
 
-
 # ─── TCP Server ──────────────────────────────────────────────────────────────
 
 HOST = "127.0.0.1"
@@ -625,10 +632,9 @@ PORT = 7438
 async def _check_already_running() -> bool:
     """Check if a sidecar is already running on our port."""
     import asyncio
+
     try:
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(HOST, PORT), timeout=1.0
-        )
+        reader, writer = await asyncio.wait_for(asyncio.open_connection(HOST, PORT), timeout=1.0)
         # Send ping
         writer.write(b'{"id":"startup-check","action":"ping"}\n')
         await writer.drain()
@@ -691,6 +697,7 @@ async def handle_request(data: dict) -> dict:
         # ─── Domain 5: Design & Figma Actions ───────────────────────────────
         elif action == "figma_create":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             node_type = payload.get("node_type", "FRAME").upper()
             name = payload.get("name", "Unnamed Node")
@@ -724,27 +731,44 @@ async def handle_request(data: dict) -> dict:
             if res.get("ok") and color_hex:
                 bridge.figma.set_fills(res["node_id"], color_hex)
             if res.get("ok") and layout_mode and node_type in ("FRAME", "COMPONENT"):
-                bridge.figma.set_auto_layout(res["node_id"], layout_mode, spacing, padding_tb, padding_lr)
+                bridge.figma.set_auto_layout(
+                    res["node_id"], layout_mode, spacing, padding_tb, padding_lr
+                )
 
             return {"id": req_id, "ok": res.get("ok", False), "data": res}
 
         elif action == "design_ghost_write":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             window_title = payload.get("window_title", "")
             tool = bridge.detect_active_design_tool(window_title)
-            
+
             res = {"tool_detected": tool}
             if tool == "figma":
                 # Create a sample text node to represent ghost design action
-                node = bridge.figma.create_text_node("Ghost Written Element", "Generated via Kairo Swarm", 16)
+                node = bridge.figma.create_text_node(
+                    "Ghost Written Element", "Generated via Kairo Swarm", 16
+                )
                 res.update(node)
             elif tool == "penpot":
-                svg = payload.get("svg", "<svg><rect width='100' height='100' fill='#6140f0'/></svg>")
+                svg = payload.get(
+                    "svg", "<svg><rect width='100' height='100' fill='#6140f0'/></svg>"
+                )
                 penpot_res = bridge.penpot.draw_svg(svg)
                 res.update(penpot_res)
             elif tool == "tldraw":
-                shapes = payload.get("shapes", [{"type": "geo", "x": 100, "y": 100, "props": {"w": 100, "h": 50, "text": "Ghost"}}])
+                shapes = payload.get(
+                    "shapes",
+                    [
+                        {
+                            "type": "geo",
+                            "x": 100,
+                            "y": 100,
+                            "props": {"w": 100, "h": 50, "text": "Ghost"},
+                        }
+                    ],
+                )
                 created = []
                 for s in shapes:
                     s_type = s.get("type", "geo")
@@ -754,7 +778,7 @@ async def handle_request(data: dict) -> dict:
                     created.append(bridge.tldraw.create_shape(s_type, s_x, s_y, s_props))
                 res["created_shapes"] = created
             elif tool == "openpencil":
-                stroke = payload.get("stroke", {"points": [(0,0), (10,10)]})
+                stroke = payload.get("stroke", {"points": [(0, 0), (10, 10)]})
                 op_res = bridge.openpencil.record_stroke(stroke)
                 res.update(op_res)
             elif tool == "frameground":
@@ -766,12 +790,13 @@ async def handle_request(data: dict) -> dict:
                 res["error"] = "No active design tool matched window title."
                 res["ok"] = False
                 return {"id": req_id, "ok": False, "data": res}
-            
+
             res["ok"] = True
             return {"id": req_id, "ok": True, "data": res}
 
         elif action == "generate_design_asset":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             prompt = payload.get("prompt", "")
             style = payload.get("style", "default")
@@ -781,9 +806,10 @@ async def handle_request(data: dict) -> dict:
 
         elif action == "tldraw_canvas":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             operation = payload.get("operation", "get_shapes")
-            
+
             if operation == "create_shape":
                 shape_type = payload.get("shape_type", "geo")
                 x = payload.get("x", 0.0)
@@ -805,11 +831,12 @@ async def handle_request(data: dict) -> dict:
                 res = bridge.tldraw.draw_flowchart(nodes, edges)
             else:
                 res = {"shapes": bridge.tldraw.get_canvas_shapes(), "ok": True}
-                
+
             return {"id": req_id, "ok": res.get("ok", True), "data": res}
 
         elif action == "extract_design_code":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             root_id = payload.get("root_id", "canvas-root")
             html = bridge.transpile_figma_to_tailwind(root_id)
@@ -817,6 +844,7 @@ async def handle_request(data: dict) -> dict:
 
         elif action == "learn_design_preference":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             tool = payload.get("tool", "default")
             key = payload.get("key", "")
@@ -826,6 +854,7 @@ async def handle_request(data: dict) -> dict:
 
         elif action == "get_design_preference":
             from sidecar.parsers.design_bridge import UnifiedDesignBridge
+
             bridge = UnifiedDesignBridge(offline_mode=True)
             tool = payload.get("tool", "default")
             key = payload.get("key", "")

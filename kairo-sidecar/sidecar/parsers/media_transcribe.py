@@ -15,6 +15,7 @@ Usage:
     result = transcriber.transcribe_video('/path/to/video.mp4')
     # → {text, segments, duration, language}
 """
+
 from __future__ import annotations
 
 import logging
@@ -22,7 +23,6 @@ import os
 import shutil
 import subprocess
 import tempfile
-from pathlib import Path
 from typing import Dict, List, Optional
 
 log = logging.getLogger("kairo.media_transcribe")
@@ -33,6 +33,7 @@ HAS_FASTER_WHISPER: bool = False
 
 try:
     from faster_whisper import WhisperModel  # type: ignore
+
     HAS_FASTER_WHISPER = True
 except ImportError:
     log.info(
@@ -70,9 +71,7 @@ class MediaTranscriber:
         compute_type: str = "int8",
     ) -> None:
         if not HAS_FASTER_WHISPER:
-            raise RuntimeError(
-                "faster-whisper not installed. pip install faster-whisper"
-            )
+            raise RuntimeError("faster-whisper not installed. pip install faster-whisper")
         self.model_size = model_size
         self.device = device
         self.compute_type = compute_type
@@ -103,12 +102,16 @@ class MediaTranscriber:
 
         cmd = [
             ffmpeg_path,
-            "-i", video_path,
-            "-vn",              # no video
-            "-acodec", "pcm_s16le",
-            "-ar", "16000",     # 16kHz for whisper
-            "-ac", "1",         # mono
-            "-y",               # overwrite
+            "-i",
+            video_path,
+            "-vn",  # no video
+            "-acodec",
+            "pcm_s16le",
+            "-ar",
+            "16000",  # 16kHz for whisper
+            "-ac",
+            "1",  # mono
+            "-y",  # overwrite
             output_path,
         ]
         log.info("Extracting audio: %s → %s", video_path, output_path)
@@ -129,9 +132,7 @@ class MediaTranscriber:
             raise RuntimeError(f"ffmpeg not found: {exc}") from exc
 
         if not os.path.exists(output_path):
-            raise RuntimeError(
-                f"ffmpeg did not produce output file: {output_path}"
-            )
+            raise RuntimeError(f"ffmpeg did not produce output file: {output_path}")
         return output_path
 
     def transcribe_audio(self, audio_path: str) -> Dict:
@@ -141,9 +142,7 @@ class MediaTranscriber:
         Returns: {text, segments, duration, language}
         """
         if not HAS_FASTER_WHISPER:
-            raise RuntimeError(
-                "faster-whisper not installed. pip install faster-whisper"
-            )
+            raise RuntimeError("faster-whisper not installed. pip install faster-whisper")
         if not os.path.exists(audio_path):
             raise RuntimeError(f"Audio file not found: {audio_path}")
 

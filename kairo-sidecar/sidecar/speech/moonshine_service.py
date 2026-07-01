@@ -6,12 +6,11 @@ Provides offline speech-to-text via Moonshine Voice (MIT license).
 
 The user NEVER sees "Moonshine" — this is Kairo Voice Dictation™.
 """
+
 from __future__ import annotations
 
 import argparse
 import asyncio
-import io
-import json
 import logging
 import os
 import time
@@ -43,6 +42,7 @@ _moonshine_available: bool = False
 
 try:
     from aiohttp import web
+
     _aiohttp_available = True
 except ImportError:
     log.error("aiohttp not installed: pip install aiohttp")
@@ -63,12 +63,14 @@ def _try_load_moonshine(model_name: str = "moonshine/moonshine-base") -> bool:
         # Try moonshine-voice package first (MIT)
         try:
             from moonshine_onnx import MoonshineOnnxModel  # type: ignore
+
             _moonshine_model = MoonshineOnnxModel(model=model_name)
             _moonshine_available = True
             log.info(f"✅ Moonshine ONNX model loaded: {model_name}")
         except ImportError:
             # Try the PyPI moonshine package
             import moonshine  # type: ignore
+
             _moonshine_model = moonshine.load(model_name)
             _moonshine_available = True
             log.info(f"✅ Moonshine model loaded: {model_name}")
@@ -333,7 +335,7 @@ async def handle_languages(request) -> "web.Response":
             "supported": supported,
             "primary": "en",
             "note": "Non-English input will be processed but may have lower accuracy. "
-                    "whisper.cpp fallback is recommended for non-English.",
+            "whisper.cpp fallback is recommended for non-English.",
         }
     )
 

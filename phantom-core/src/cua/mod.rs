@@ -19,13 +19,13 @@
 //! All code gated behind `#[cfg(feature = "cua")]`.
 
 #[cfg(feature = "cua")]
-pub mod cua_gate;
+pub mod config;
 #[cfg(feature = "cua")]
 pub mod cua_executor;
 #[cfg(feature = "cua")]
-pub mod cua_planner;
+pub mod cua_gate;
 #[cfg(feature = "cua")]
-pub mod config;
+pub mod cua_planner;
 #[cfg(feature = "cua")]
 pub mod vlm_bridge;
 #[cfg(feature = "cua")]
@@ -39,11 +39,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[allow(clippy::upper_case_acronyms)]
 pub enum TargetingSource {
-    Keyboard,           // 100% reliable — keyboard shortcut, no visual targeting
-    UIA,                // ~99% for accessible apps — found by accessibility name
-    VLM,                // 88-97% for any app — Qwen2.5-VL visual grounding
-    OCR,                // ~70% — farscry text detection
-    Coordinate,         // <43% — raw pixel coordinate (should almost never be used)
+    Keyboard,   // 100% reliable — keyboard shortcut, no visual targeting
+    UIA,        // ~99% for accessible apps — found by accessibility name
+    VLM,        // 88-97% for any app — Qwen2.5-VL visual grounding
+    OCR,        // ~70% — farscry text detection
+    Coordinate, // <43% — raw pixel coordinate (should almost never be used)
 }
 
 /// All possible CUA actions.
@@ -59,11 +59,7 @@ pub enum CuaAction {
         targeting_confidence: f32,
     },
     /// Double-click at absolute screen coordinates
-    MouseDoubleClick {
-        x: i32,
-        y: i32,
-        button: MouseButton,
-    },
+    MouseDoubleClick { x: i32, y: i32, button: MouseButton },
     /// Move mouse to absolute screen coordinates without clicking
     MouseMove { x: i32, y: i32 },
     /// Scroll mouse wheel

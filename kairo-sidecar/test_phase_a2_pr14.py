@@ -3,15 +3,14 @@ Phase A2: PR-14 Gate — MemMachine semantic recall via model2vec embeddings.
 
 Verifies:
 1. recall_contextualized uses real model2vec embeddings (not hash fallback)
-2. Semantic similarity: "cancel subscription" retrieves "membership termination" 
+2. Semantic similarity: "cancel subscription" retrieves "membership termination"
    over "newsletter subscribe"
 3. Precision@5 >= 80% on a small test corpus
 4. Latency < 10ms per query (after model load)
 """
-import os
+
 import sys
 import time
-import tempfile
 import pytest
 from pathlib import Path
 
@@ -32,50 +31,55 @@ class TestRecallContextualized:
 
     def test_recall_contextualized_exists(self, temp_mem_client):
         """recall_contextualized method must exist."""
-        assert hasattr(temp_mem_client, 'recall_contextualized'), \
-            "MemMachineClient must have recall_contextualized method"
+        assert hasattr(
+            temp_mem_client, "recall_contextualized"
+        ), "MemMachineClient must have recall_contextualized method"
 
     def test_semantic_recall_finds_similar(self, temp_mem_client):
         """'cancel subscription' should retrieve 'membership termination' over 'newsletter subscribe'."""
         # Seed interactions with semantically distinct content
         temp_mem_client.record_interaction(
-            domain="word", task_type="writing",
+            domain="word",
+            task_type="writing",
             user_prompt="cancel my subscription",
-            style_notes="User wants to terminate their membership"
+            style_notes="User wants to terminate their membership",
         )
         temp_mem_client.record_interaction(
-            domain="word", task_type="writing",
+            domain="word",
+            task_type="writing",
             user_prompt="subscribe to newsletter",
-            style_notes="User wants to join the mailing list"
+            style_notes="User wants to join the mailing list",
         )
         temp_mem_client.record_interaction(
-            domain="word", task_type="writing",
+            domain="word",
+            task_type="writing",
             user_prompt="how to unsubscribe",
-            style_notes="User wants to stop receiving emails"
+            style_notes="User wants to stop receiving emails",
         )
 
         # Query with semantically similar text
-        result = temp_mem_client.recall_contextualized(
-            "cancel membership", domain="word", limit=5
-        )
+        result = temp_mem_client.recall_contextualized("cancel membership", domain="word", limit=5)
 
         # The result should contain "terminate" (semantically close to "cancel membership")
         # and NOT just "newsletter" or "mailing list"
         assert result != "", "recall_contextualized returned empty — semantic recall NOT working"
-        assert "terminate" in result.lower() or "membership" in result.lower(), \
-            f"Expected 'terminate' or 'membership' in result, got: {result}"
+        assert (
+            "terminate" in result.lower() or "membership" in result.lower()
+        ), f"Expected 'terminate' or 'membership' in result, got: {result}"
 
     def test_semantic_recall_not_keyword_match(self, temp_mem_client):
         """Semantic recall should find results even without exact keyword matches."""
         temp_mem_client.record_interaction(
-            domain="word", task_type="writing",
+            domain="word",
+            task_type="writing",
             user_prompt="draft a contract amendment",
-            style_notes="Use formal legal language with clause references"
+            style_notes="Use formal legal language with clause references",
         )
         temp_mem_client.record_interaction(
-            domain="word", task_type="writing",
+            domain="word",
+            task_type="writing",
             user_prompt="write a grocery list",
-            style_notes="Keep it simple and casual"
+            style_notes="Keep it simple and casual",
         )
 
         # Query with a synonym, not the exact word
@@ -85,8 +89,9 @@ class TestRecallContextualized:
 
         # Should find the contract amendment (semantically similar)
         # and NOT the grocery list
-        assert "formal" in result.lower() or "legal" in result.lower() or "clause" in result.lower(), \
-            f"Expected legal/contract content, got: {result}"
+        assert (
+            "formal" in result.lower() or "legal" in result.lower() or "clause" in result.lower()
+        ), f"Expected legal/contract content, got: {result}"
 
     def test_precision_at_5(self, temp_mem_client):
         """Precision@5 >= 80% on a small test corpus."""
@@ -108,8 +113,7 @@ class TestRecallContextualized:
 
         for prompt, notes in legal_prompts + cooking_prompts:
             temp_mem_client.record_interaction(
-                domain="word", task_type="writing",
-                user_prompt=prompt, style_notes=notes
+                domain="word", task_type="writing", user_prompt=prompt, style_notes=notes
             )
 
         # Query for "legal contract" — should return mostly legal results
@@ -120,22 +124,25 @@ class TestRecallContextualized:
         # Check that legal-related terms dominate
         legal_terms = ["formal", "legal", "clause", "compliance", "obligation", "termination"]
         cooking_terms = ["recipe", "pasta", "cake", "smoothie", "grill", "olive"]
-        
+
         result_lower = result.lower()
         legal_hits = sum(1 for t in legal_terms if t in result_lower)
         cooking_hits = sum(1 for t in cooking_terms if t in result_lower)
-        
+
         # Precision: legal hits should dominate
-        assert legal_hits > cooking_hits, \
-            f"Expected legal terms to dominate, but legal={legal_hits}, cooking={cooking_hits}"
+        assert (
+            legal_hits > cooking_hits
+        ), f"Expected legal terms to dominate, but legal={legal_hits}, cooking={cooking_hits}"
 
     def test_recall_latency_under_10ms(self, temp_mem_client):
         """Latency after model load must be < 10ms per query."""
         # Seed a few interactions
         for i in range(20):
             temp_mem_client.record_interaction(
-                domain="word", task_type="writing",
-                user_prompt=f"test prompt {i}", style_notes=f"style note {i}"
+                domain="word",
+                task_type="writing",
+                user_prompt=f"test prompt {i}",
+                style_notes=f"style note {i}",
             )
 
         # Warm up the model (first call loads model2vec)
@@ -148,10 +155,11 @@ class TestRecallContextualized:
             temp_mem_client.recall_contextualized(f"query {i}", domain="word", limit=5)
             elapsed_ms = (time.perf_counter() - start) * 1000
             times.append(elapsed_ms)
-        
+
         avg_ms = sum(times) / len(times)
         # Note: model2vec inference is fast but SQLite query + numpy adds overhead
         # The 10ms target is for the Rust fastembed path; Python model2vec may be slightly slower
         # We assert < 100ms as a reasonable Python-side target
-        assert avg_ms < 100, \
-            f"Average recall latency {avg_ms:.1f}ms exceeds 100ms threshold. Times: {times}"
+        assert (
+            avg_ms < 100
+        ), f"Average recall latency {avg_ms:.1f}ms exceeds 100ms threshold. Times: {times}"

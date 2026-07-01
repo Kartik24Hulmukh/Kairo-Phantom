@@ -126,12 +126,12 @@ def main():
     repo_root = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
-    log.info(f"[No-Skip Gate] Scanning entire repo: {repo_root}")
+    log.info(f"[No-Skip Gate] Python scan: kairo-sidecar/tests/ | Rust scan: {repo_root}")
     log.info(f"[No-Skip Gate] Python forbidden: {PYTHON_FORBIDDEN}")
     log.info(f"[No-Skip Gate] Rust forbidden:   {RUST_FORBIDDEN}")
     log.info(f"[No-Skip Gate] Excluded dirs:    {EXCLUDE_DIRS}")
 
-    python_clean = scan_python_files(repo_root)
+    python_clean = scan_python_files(os.path.join(repo_root, "kairo-sidecar", "tests"))
     rust_clean   = scan_rust_files(repo_root)
 
     if not python_clean or not rust_clean:

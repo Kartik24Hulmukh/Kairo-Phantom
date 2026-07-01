@@ -1,9 +1,9 @@
-use std::path::PathBuf;
-use std::fs;
-use std::collections::HashMap;
-use notify::{Watcher, RecursiveMode, Event};
-use std::sync::{Arc, RwLock};
 use crate::AgentManifest;
+use notify::{Event, RecursiveMode, Watcher};
+use std::collections::HashMap;
+use std::fs;
+use std::path::PathBuf;
+use std::sync::{Arc, RwLock};
 
 pub struct AgentRegistry {
     agents_dir: PathBuf,
@@ -48,7 +48,7 @@ impl AgentRegistry {
     pub fn start_hot_reload(&self) {
         let agents_ref = self.agents.clone();
         let dir = self.agents_dir.clone();
-        
+
         std::thread::spawn(move || {
             let dir_clone = dir.clone();
             let mut watcher = notify::recommended_watcher(move |res: notify::Result<Event>| {
@@ -63,8 +63,11 @@ impl AgentRegistry {
                                     let manifest_path = path.join("manifest.toml");
                                     if manifest_path.exists() {
                                         if let Ok(content) = fs::read_to_string(&manifest_path) {
-                                            if let Ok(manifest) = toml::from_str::<AgentManifest>(&content) {
-                                                new_agents.insert(manifest.agent.id.clone(), manifest);
+                                            if let Ok(manifest) =
+                                                toml::from_str::<AgentManifest>(&content)
+                                            {
+                                                new_agents
+                                                    .insert(manifest.agent.id.clone(), manifest);
                                             }
                                         }
                                     }
@@ -73,13 +76,14 @@ impl AgentRegistry {
                         }
                         let mut lock = agents_ref.write().unwrap();
                         *lock = new_agents;
-                    },
-                    Err(e) => println!("watch error: {:?}", e),
+                    }
+                    Err(e) => println!("watch error: {e:?}"),
                 }
-            }).unwrap();
+            })
+            .unwrap();
 
             watcher.watch(&dir, RecursiveMode::Recursive).unwrap();
-            
+
             // Block thread
             loop {
                 std::thread::sleep(std::time::Duration::from_secs(60));

@@ -43,9 +43,7 @@ class AppWatcher:
     def __init__(self):
         self._current_profile: AppProfile = AppProfile(Domain.UNKNOWN, "Unknown")
         self._preload_cache: Dict[str, Any] = {}  # keyed by file_path
-        self._executor = ThreadPoolExecutor(
-            max_workers=2, thread_name_prefix="kairo-preload"
-        )
+        self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="kairo-preload")
         self._lock = threading.RLock()
         self._running = False
         self._poll_thread: Optional[threading.Thread] = None
@@ -166,19 +164,13 @@ class AppWatcher:
 
         # Microsoft Office
         if "winword" in p:
-            file_path = self._extract_file_from_title(
-                window_title, [".docx", ".doc", ".rtf"]
-            )
+            file_path = self._extract_file_from_title(window_title, [".docx", ".doc", ".rtf"])
             return AppProfile(Domain.WORD, "Microsoft Word", file_path)
         elif "excel" in p:
-            file_path = self._extract_file_from_title(
-                window_title, [".xlsx", ".xlsm", ".csv"]
-            )
+            file_path = self._extract_file_from_title(window_title, [".xlsx", ".xlsm", ".csv"])
             return AppProfile(Domain.EXCEL, "Microsoft Excel", file_path)
         elif "powerpnt" in p:
-            file_path = self._extract_file_from_title(
-                window_title, [".pptx", ".pptm"]
-            )
+            file_path = self._extract_file_from_title(window_title, [".pptx", ".pptm"])
             return AppProfile(Domain.POWERPOINT, "Microsoft PowerPoint", file_path)
         elif "outlook" in p or "thunderbird" in p:
             return AppProfile(Domain.EMAIL, process_name)
@@ -202,7 +194,7 @@ class AppWatcher:
                 "goland",
                 "rider",
                 "clion",
-                "devenv",   # Visual Studio
+                "devenv",  # Visual Studio
                 "vim",
                 "nvim",
                 "sublime",
@@ -230,19 +222,33 @@ class AppWatcher:
             return AppProfile(Domain.TERMINAL, process_name)
         # PDF viewers — Adobe Reader (AcroRd32/Acrobat), Foxit, SumatraPDF
         elif any(
-            pdf in p for pdf in [
-                "acrobat", "acrord",  # AcroRd32.exe + Acrobat.exe
-                "foxit", "sumatrapdf", "pdfxchange",
+            pdf in p
+            for pdf in [
+                "acrobat",
+                "acrord",  # AcroRd32.exe + Acrobat.exe
+                "foxit",
+                "sumatrapdf",
+                "pdfxchange",
             ]
         ):
             file_path = self._extract_file_from_title(window_title, [".pdf"])
             return AppProfile(Domain.PDF, process_name, file_path)
         # Design tools — Figma, Penpot, Canva, Adobe XD, Photoshop, Illustrator, Sketch, Affinity, Inkscape
-        elif any(d in p for d in [
-            "figma", "penpot", "canva", "xd",
-            "photoshop", "illustrator", "sketch",
-            "affinity", "inkscape", "gimp",
-        ]):
+        elif any(
+            d in p
+            for d in [
+                "figma",
+                "penpot",
+                "canva",
+                "xd",
+                "photoshop",
+                "illustrator",
+                "sketch",
+                "affinity",
+                "inkscape",
+                "gimp",
+            ]
+        ):
             return AppProfile(Domain.DESIGN, process_name)
         # Notes apps
         elif any(n in p for n in ["obsidian", "notion", "logseq", "bear", "roam"]):
@@ -299,17 +305,14 @@ class AppWatcher:
     # Helpers
     # ------------------------------------------------------------------
 
-    def _extract_file_from_title(
-        self, title: str, extensions: list
-    ) -> Optional[str]:
+    def _extract_file_from_title(self, title: str, extensions: list) -> Optional[str]:
         """Extract file path from window title if it contains a known file extension."""
         import re
 
         for ext in extensions:
             # Match Windows paths: C:\...\filename.ext or just filename.ext
             pattern = (
-                rf"([A-Za-z]:\\[^|:\"<>?*]+{re.escape(ext)}"
-                rf"|[\w\s\-_.()]+{re.escape(ext)})"
+                rf"([A-Za-z]:\\[^|:\"<>?*]+{re.escape(ext)}" rf"|[\w\s\-_.()]+{re.escape(ext)})"
             )
             m = re.search(pattern, title, re.IGNORECASE)
             if m:
@@ -342,8 +345,7 @@ class AppWatcher:
                 return
 
             cache_key = (
-                f"{file_path}:"
-                f"{os.path.getmtime(file_path) if os.path.exists(file_path) else 0}"
+                f"{file_path}:" f"{os.path.getmtime(file_path) if os.path.exists(file_path) else 0}"
             )
 
             with self._lock:
@@ -351,14 +353,10 @@ class AppWatcher:
                     log.debug(f"AppWatcher: preload cache hit for {file_path}")
                     return
 
-            log.info(
-                f"AppWatcher: preloading context for {profile.domain} - {file_path}"
-            )
+            log.info(f"AppWatcher: preloading context for {profile.domain} - {file_path}")
             context = None
 
-            if profile.domain == Domain.WORD and file_path.endswith(
-                (".docx", ".doc")
-            ):
+            if profile.domain == Domain.WORD and file_path.endswith((".docx", ".doc")):
                 try:
                     from sidecar.masters.word_master import WordContextExtractor
 
@@ -367,9 +365,7 @@ class AppWatcher:
                 except Exception as e:
                     log.warning(f"Word preload failed: {e}")
 
-            elif profile.domain == Domain.EXCEL and file_path.endswith(
-                (".xlsx", ".xlsm", ".csv")
-            ):
+            elif profile.domain == Domain.EXCEL and file_path.endswith((".xlsx", ".xlsm", ".csv")):
                 try:
                     from sidecar.masters.excel_master import ExcelContextExtractor
 
@@ -395,9 +391,7 @@ class AppWatcher:
                 log.info(f"AppWatcher: preload complete for {file_path}")
                 profile.preload_ready = True
         except Exception as e:
-            log.error(
-                f"AppWatcher: preload failed for {profile.file_path}: {e}"
-            )
+            log.error(f"AppWatcher: preload failed for {profile.file_path}: {e}")
 
     # ------------------------------------------------------------------
     # Public getters

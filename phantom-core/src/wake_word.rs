@@ -43,8 +43,10 @@ impl WakeWordDaemon {
     /// Create a new WakeWordDaemon (does not start listening).
     pub fn new(config: WakeWordConfig) -> Self {
         let engine = Self::detect_engine();
-        info!("👂 WakeWordDaemon initialized (phrase: '{}', enabled: {}, engine: {:?})",
-            config.phrase, config.enabled, engine);
+        info!(
+            "👂 WakeWordDaemon initialized (phrase: '{}', enabled: {}, engine: {:?})",
+            config.phrase, config.enabled, engine
+        );
 
         WakeWordDaemon {
             config,
@@ -56,13 +58,15 @@ impl WakeWordDaemon {
     /// Detect the best available wake word engine.
     fn detect_engine() -> WakeEngine {
         // 1. Check for horchd (rustpotter CLI wrapper)
-        let horchd_candidates = [
-            dirs::home_dir()
-                .unwrap_or_default()
-                .join(".kairo-phantom")
-                .join("bin")
-                .join(if cfg!(windows) { "horchd.exe" } else { "horchd" }),
-        ];
+        let horchd_candidates = [dirs::home_dir()
+            .unwrap_or_default()
+            .join(".kairo-phantom")
+            .join("bin")
+            .join(if cfg!(windows) {
+                "horchd.exe"
+            } else {
+                "horchd"
+            })];
 
         for candidate in &horchd_candidates {
             if candidate.exists() {
@@ -130,7 +134,10 @@ impl WakeWordDaemon {
         let engine = self.engine.clone();
 
         active.store(true, Ordering::SeqCst);
-        info!("👂 Wake word detection started (engine: {:?}) — listening for '{}'", engine, phrase);
+        info!(
+            "👂 Wake word detection started (engine: {:?}) — listening for '{}'",
+            engine, phrase
+        );
 
         let active_clone = active.clone();
 
@@ -163,8 +170,10 @@ impl WakeWordDaemon {
             // horchd CLI: listens and prints "wake_word_detected: <confidence>" lines
             let mut child = match tokio::process::Command::new(&horchd_path)
                 .args([
-                    "--sensitivity", &format!("{:.2}", sensitivity),
-                    "--phrase", &phrase,
+                    "--sensitivity",
+                    &format!("{sensitivity:.2}"),
+                    "--phrase",
+                    &phrase,
                 ])
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::null())
@@ -212,7 +221,9 @@ impl WakeWordDaemon {
         tx: Sender<PhantomEvent>,
     ) {
         tokio::spawn(async move {
-            let client = crate::config::get_client_builder().build().unwrap_or_default();
+            let client = crate::config::get_client_builder()
+                .build()
+                .unwrap_or_default();
             let mut interval = tokio::time::interval(std::time::Duration::from_millis(500));
 
             while active.load(Ordering::SeqCst) {
@@ -256,9 +267,11 @@ impl WakeWordDaemon {
                 .join(".kairo-phantom");
 
             // Check if whisper.cpp is available
-            let whisper_bin = kairo_dir.join("bin").join(
-                if cfg!(windows) { "whisper-cli.exe" } else { "whisper-cli" }
-            );
+            let whisper_bin = kairo_dir.join("bin").join(if cfg!(windows) {
+                "whisper-cli.exe"
+            } else {
+                "whisper-cli"
+            });
             let model_path = kairo_dir.join("models").join("ggml-base.en.bin");
 
             if !whisper_bin.exists() || !model_path.exists() {
@@ -281,11 +294,16 @@ impl WakeWordDaemon {
                 // Quick record using ffmpeg (3 seconds)
                 let record_result = tokio::process::Command::new("ffmpeg")
                     .args([
-                        "-f", "dshow",
-                        "-i", "audio=Microphone",
-                        "-t", "3",
-                        "-ar", "16000",
-                        "-ac", "1",
+                        "-f",
+                        "dshow",
+                        "-i",
+                        "audio=Microphone",
+                        "-t",
+                        "3",
+                        "-ar",
+                        "16000",
+                        "-ac",
+                        "1",
                         "-y",
                         wav_path.to_str().unwrap_or("wake.wav"),
                     ])
@@ -301,10 +319,13 @@ impl WakeWordDaemon {
                 // Transcribe the chunk
                 let transcribe_result = tokio::process::Command::new(&whisper_bin)
                     .args([
-                        "-m", model_path.to_str().unwrap_or(""),
-                        "-f", wav_path.to_str().unwrap_or(""),
+                        "-m",
+                        model_path.to_str().unwrap_or(""),
+                        "-f",
+                        wav_path.to_str().unwrap_or(""),
                         "--no-timestamps",
-                        "-l", "en",
+                        "-l",
+                        "en",
                         "-np",
                     ])
                     .stdout(std::process::Stdio::piped())
@@ -345,7 +366,9 @@ impl WakeWordDaemon {
     /// Basic fuzzy matching: checks if the phrase words appear near each other.
     fn fuzzy_match(text: &str, phrase: &str) -> bool {
         let phrase_words: Vec<&str> = phrase.split_whitespace().collect();
-        if phrase_words.is_empty() { return false; }
+        if phrase_words.is_empty() {
+            return false;
+        }
 
         // Check if all words of the phrase appear in the text
         phrase_words.iter().all(|word| text.contains(word))

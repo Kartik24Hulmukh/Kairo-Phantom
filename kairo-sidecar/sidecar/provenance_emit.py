@@ -13,18 +13,17 @@ Each trace entry contains:
 This is the Python-side observability layer. The Rust-side audit_chain.rs
 provides the cryptographic chain. Together they form the provenance system.
 """
+
 import os
 import json
 import time
 import hashlib
 import functools
-from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 # Default trace directory
 _DEFAULT_TRACE_DIR = os.environ.get(
-    "KAIRO_TRACE_DIR",
-    os.path.join(os.path.expanduser("~"), ".kairo-phantom", "traces")
+    "KAIRO_TRACE_DIR", os.path.join(os.path.expanduser("~"), ".kairo-phantom", "traces")
 )
 
 # Singleton emitter
@@ -40,8 +39,14 @@ class ProvenanceEmitter:
         self.trace_file = os.path.join(self.trace_dir, f"traces_{int(time.time())}.jsonl")
         self._trace_count = 0
 
-    def emit(self, domain: str, method: str, args_summary: str,
-             result_summary: str, metadata: dict | None = None) -> str:
+    def emit(
+        self,
+        domain: str,
+        method: str,
+        args_summary: str,
+        result_summary: str,
+        metadata: dict | None = None,
+    ) -> str:
         """Emit a trace entry and return the receipt_id."""
         entry = {
             "timestamp": time.time(),
@@ -106,18 +111,19 @@ def track(domain: str):
     2. Emit a JSONL trace with domain, method, args, result
     3. Return the original result (trace is side-effect)
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # Summarize args (first arg is usually self)
             args_summary = str(args[1:])[:200] if len(args) > 1 else str(kwargs)[:200]
-            
+
             # Execute the function
             result = func(*args, **kwargs)
-            
+
             # Summarize result
             result_summary = str(result)[:200] if result is not None else "None"
-            
+
             # Emit trace
             try:
                 emitter = get_emitter()
@@ -129,7 +135,9 @@ def track(domain: str):
                 )
             except Exception:
                 pass  # Tracing is non-fatal — never break production code
-            
+
             return result
+
         return wrapper
+
     return decorator

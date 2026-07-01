@@ -4,7 +4,6 @@
 /// - New strategy: Home + Shift+End + Ctrl+V (select current line → replace with paste)
 /// - Added click_to_focus() via mouse_event to click document body before sending keys
 /// - Clipboard is always set BEFORE focus switch to avoid clipboard race
-
 use std::thread;
 use std::time::Duration;
 
@@ -94,7 +93,9 @@ impl HumanizedInjector {
     /// This is the main entry point called from main.rs ghost session handler.
     /// Caller must have already called BringWindowToTop + SetForegroundWindow + 300ms sleep.
     pub fn inject_via_clipboard(&self, text: &str) -> bool {
-        if text.is_empty() { return true; }
+        if text.is_empty() {
+            return true;
+        }
 
         let _guard = CLIPBOARD_MUTEX.lock().unwrap();
 
@@ -142,7 +143,9 @@ impl HumanizedInjector {
 
     /// Type text — always via clipboard for reliability.
     pub fn type_text(&self, text: &str) {
-        if text.is_empty() { return; }
+        if text.is_empty() {
+            return;
+        }
         tracing::info!("type_text: {} chars via clipboard", text.len());
         self.inject_via_clipboard(text);
     }
@@ -190,15 +193,27 @@ impl HumanizedInjector {
     pub fn undo_ghost_char(&self) {}
 
     // Legacy async API (kept for compatibility)
-    pub async fn inject_char(&mut self, c: char, cancel: &tokio_util::sync::CancellationToken) -> bool {
-        if cancel.is_cancelled() { return false; }
+    pub async fn inject_char(
+        &mut self,
+        c: char,
+        cancel: &tokio_util::sync::CancellationToken,
+    ) -> bool {
+        if cancel.is_cancelled() {
+            return false;
+        }
         self.send_char(c);
         true
     }
 
-    pub async fn inject_stream(&mut self, text: &str, cancel: &tokio_util::sync::CancellationToken) {
+    pub async fn inject_stream(
+        &mut self,
+        text: &str,
+        cancel: &tokio_util::sync::CancellationToken,
+    ) {
         for c in text.chars() {
-            if !self.inject_char(c, cancel).await { break; }
+            if !self.inject_char(c, cancel).await {
+                break;
+            }
         }
     }
 
@@ -230,38 +245,38 @@ impl HumanizedInjector {
             };
             buffer.pop()
         };
-        
+
         if let Some(record) = record {
             tracing::info!("Performing undo for hwnd: {}", record.hwnd);
-            
+
             let injector = crate::platform::new_injector();
-            
+
             // Focus the window
             if injector.focus_window(record.hwnd) {
                 thread::sleep(Duration::from_millis(200));
             }
-            
+
             // Save current clipboard
             let original_clipboard = injector.get_clipboard();
-            
+
             // Set clipboard to original text
             let _ = injector.set_clipboard(&record.original_text);
             thread::sleep(Duration::from_millis(30));
-            
+
             // Select back injected_text character count
             let char_count = record.injected_text.chars().count();
             injector.select_backward(char_count);
             thread::sleep(Duration::from_millis(50));
-            
+
             // Paste (replaces selection with original_text)
             injector.send_ctrl_v();
             thread::sleep(Duration::from_millis(150));
-            
+
             // Restore clipboard
             if let Some(orig) = original_clipboard {
                 let _ = injector.set_clipboard(&orig);
             }
-            
+
             tracing::info!("Undo execution complete");
             true
         } else {

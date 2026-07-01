@@ -22,11 +22,11 @@
 //
 // Hotkeys: Alt+Ctrl+M (ghost-write), Alt+V (voice), Alt+Shift+M (screen context)
 
-use tokio::sync::mpsc::Sender;
-use tracing::{info, warn, error};
-use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use once_cell::sync::Lazy;
+use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use std::sync::Mutex;
+use tokio::sync::mpsc::Sender;
+use tracing::{error, info, warn};
 
 use crate::PhantomEvent;
 
@@ -78,32 +78,25 @@ impl HotkeyWatcher {
     #[cfg(windows)]
     fn run_windows(hotkey_str: String) {
         use windows::Win32::UI::WindowsAndMessaging::{
-            SetWindowsHookExW, UnhookWindowsHookEx, CallNextHookEx,
-            GetMessageW, DispatchMessageW, TranslateMessage,
-            WH_KEYBOARD_LL, MSG,
+            CallNextHookEx, DispatchMessageW, GetMessageW, SetWindowsHookExW, TranslateMessage,
+            UnhookWindowsHookEx, MSG, WH_KEYBOARD_LL,
         };
 
-        std::thread::spawn(move || {
-            unsafe {
-                let h_hook = SetWindowsHookExW(
-                    WH_KEYBOARD_LL,
-                    Some(low_level_keyboard_proc),
-                    None,
-                    0,
-                ).expect("Failed to install WH_KEYBOARD_LL hook");
+        std::thread::spawn(move || unsafe {
+            let h_hook = SetWindowsHookExW(WH_KEYBOARD_LL, Some(low_level_keyboard_proc), None, 0)
+                .expect("Failed to install WH_KEYBOARD_LL hook");
 
-                info!("✅ Keyboard hook active (Windows WH_KEYBOARD_LL). Listening for Alt+Ctrl+M.");
-                info!("   Alt events pass through unmodified — no stuck key risk.");
+            info!("✅ Keyboard hook active (Windows WH_KEYBOARD_LL). Listening for Alt+Ctrl+M.");
+            info!("   Alt events pass through unmodified — no stuck key risk.");
 
-                let mut msg = MSG::default();
-                while GetMessageW(&mut msg, None, 0, 0).as_bool() {
-                    let _ = TranslateMessage(&msg);
-                    DispatchMessageW(&msg);
-                }
-
-                UnhookWindowsHookEx(h_hook).ok();
-                info!("🔑 Keyboard hook removed.");
+            let mut msg = MSG::default();
+            while GetMessageW(&mut msg, None, 0, 0).as_bool() {
+                let _ = TranslateMessage(&msg);
+                DispatchMessageW(&msg);
             }
+
+            UnhookWindowsHookEx(h_hook).ok();
+            info!("🔑 Keyboard hook removed.");
         });
     }
 
@@ -130,13 +123,16 @@ impl HotkeyWatcher {
                     EventType::KeyPress(Key::ShiftLeft) | EventType::KeyPress(Key::ShiftRight) => {
                         SHIFT_PRESSED.store(true, Ordering::SeqCst);
                     }
-                    EventType::KeyRelease(Key::ShiftLeft) | EventType::KeyRelease(Key::ShiftRight) => {
+                    EventType::KeyRelease(Key::ShiftLeft)
+                    | EventType::KeyRelease(Key::ShiftRight) => {
                         SHIFT_PRESSED.store(false, Ordering::SeqCst);
                     }
-                    EventType::KeyPress(Key::ControlLeft) | EventType::KeyPress(Key::ControlRight) => {
+                    EventType::KeyPress(Key::ControlLeft)
+                    | EventType::KeyPress(Key::ControlRight) => {
                         CONTROL_PRESSED.store(true, Ordering::SeqCst);
                     }
-                    EventType::KeyRelease(Key::ControlLeft) | EventType::KeyRelease(Key::ControlRight) => {
+                    EventType::KeyRelease(Key::ControlLeft)
+                    | EventType::KeyRelease(Key::ControlRight) => {
                         CONTROL_PRESSED.store(false, Ordering::SeqCst);
                     }
 
@@ -144,7 +140,12 @@ impl HotkeyWatcher {
                         if CUA_PENDING.load(Ordering::SeqCst) {
                             let is_modifier = matches!(
                                 key,
-                                Key::Alt | Key::AltGr | Key::ShiftLeft | Key::ShiftRight | Key::ControlLeft | Key::ControlRight
+                                Key::Alt
+                                    | Key::AltGr
+                                    | Key::ShiftLeft
+                                    | Key::ShiftRight
+                                    | Key::ControlLeft
+                                    | Key::ControlRight
                             );
                             if !is_modifier {
                                 if key == Key::Tab {
@@ -156,7 +157,9 @@ impl HotkeyWatcher {
                                     CUA_PENDING.store(false, Ordering::SeqCst);
                                     send_event(PhantomEvent::CuaCancelled);
                                 } else {
-                                    info!("❌ CUA cancelled because user pressed another key (rdev).");
+                                    info!(
+                                        "❌ CUA cancelled because user pressed another key (rdev)."
+                                    );
                                     CUA_PENDING.store(false, Ordering::SeqCst);
                                     send_event(PhantomEvent::CuaCancelled);
                                 }
@@ -167,7 +170,12 @@ impl HotkeyWatcher {
                         if SKILL_SAVE_PENDING.load(Ordering::SeqCst) {
                             let is_modifier = matches!(
                                 key,
-                                Key::Alt | Key::AltGr | Key::ShiftLeft | Key::ShiftRight | Key::ControlLeft | Key::ControlRight
+                                Key::Alt
+                                    | Key::AltGr
+                                    | Key::ShiftLeft
+                                    | Key::ShiftRight
+                                    | Key::ControlLeft
+                                    | Key::ControlRight
                             );
                             if !is_modifier {
                                 if key == Key::Tab {
@@ -236,16 +244,15 @@ fn send_event(event: PhantomEvent) {
 // correct window.
 
 #[cfg(windows)]
-use windows::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, KBDLLHOOKSTRUCT, WM_KEYDOWN, WM_SYSKEYDOWN, HC_ACTION,
-    GetForegroundWindow,
-};
-#[cfg(windows)]
-use windows::Win32::Foundation::{LPARAM, LRESULT, WPARAM, HWND};
+use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 #[cfg(windows)]
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-    VK_MENU, VK_LMENU, VK_RMENU, VK_SHIFT, VK_LSHIFT, VK_RSHIFT,
-    VK_CONTROL, VK_LCONTROL, VK_RCONTROL,
+    VK_CONTROL, VK_LCONTROL, VK_LMENU, VK_LSHIFT, VK_MENU, VK_RCONTROL, VK_RMENU, VK_RSHIFT,
+    VK_SHIFT,
+};
+#[cfg(windows)]
+use windows::Win32::UI::WindowsAndMessaging::{
+    CallNextHookEx, GetForegroundWindow, HC_ACTION, KBDLLHOOKSTRUCT, WM_KEYDOWN, WM_SYSKEYDOWN,
 };
 
 #[cfg(windows)]
@@ -295,12 +302,14 @@ unsafe extern "system" fn low_level_keyboard_proc(
     }
 
     if CUA_PENDING.load(Ordering::SeqCst) && is_down {
-        if kbd.vkCode == 0x09 { // Tab
+        if kbd.vkCode == 0x09 {
+            // Tab
             info!("🎯 Intercepted Tab keypress for CUA approval!");
             CUA_PENDING.store(false, Ordering::SeqCst);
             send_event(PhantomEvent::CuaApproved);
             return LRESULT(1); // Suppress Tab keystroke
-        } else if kbd.vkCode == 0x1B { // Esc
+        } else if kbd.vkCode == 0x1B {
+            // Esc
             info!("❌ CUA cancelled by user pressing Escape.");
             CUA_PENDING.store(false, Ordering::SeqCst);
             send_event(PhantomEvent::CuaCancelled);
@@ -332,19 +341,26 @@ unsafe extern "system" fn low_level_keyboard_proc(
     {
         let hwnd: HWND = GetForegroundWindow();
         CAPTURED_HWND.store(hwnd.0 as isize, Ordering::SeqCst);
-        info!("↩️ Ctrl+Shift+Z detected! Triggering Undo. HWND={:?}", hwnd.0);
+        info!(
+            "↩️ Ctrl+Shift+Z detected! Triggering Undo. HWND={:?}",
+            hwnd.0
+        );
         send_event(PhantomEvent::UndoPressed);
         return LRESULT(1); // Suppress 'Z'
     }
 
     // ── Alt+Shift+M: Screen Context (must check BEFORE Alt+Ctrl+M) ─────────────
-    if kbd.vkCode == 0x4D && is_down
-       && ALT_PRESSED.load(Ordering::SeqCst)
-       && SHIFT_PRESSED.load(Ordering::SeqCst)
+    if kbd.vkCode == 0x4D
+        && is_down
+        && ALT_PRESSED.load(Ordering::SeqCst)
+        && SHIFT_PRESSED.load(Ordering::SeqCst)
     {
         let hwnd: HWND = GetForegroundWindow();
         CAPTURED_HWND.store(hwnd.0 as isize, Ordering::SeqCst);
-        info!("📸 Alt+Shift+M detected! Screen Context → HWND={:?}", hwnd.0);
+        info!(
+            "📸 Alt+Shift+M detected! Screen Context → HWND={:?}",
+            hwnd.0
+        );
         send_event(PhantomEvent::ScreenContextPressed);
         return LRESULT(1); // Suppress 'M'
     }
@@ -359,10 +375,12 @@ unsafe extern "system" fn low_level_keyboard_proc(
     }
 
     // ── Alt+Ctrl+M: Ghost-Write (CUA 1000x hotkey) ─────────────────────────
-    if kbd.vkCode == 0x4D && is_down
-       && ALT_PRESSED.load(Ordering::SeqCst)
-       && CONTROL_PRESSED.load(Ordering::SeqCst)
-       && !SHIFT_PRESSED.load(Ordering::SeqCst)  // NOT Alt+Shift+M
+    if kbd.vkCode == 0x4D
+        && is_down
+        && ALT_PRESSED.load(Ordering::SeqCst)
+        && CONTROL_PRESSED.load(Ordering::SeqCst)
+        && !SHIFT_PRESSED.load(Ordering::SeqCst)
+    // NOT Alt+Shift+M
     {
         let hwnd: HWND = GetForegroundWindow();
         CAPTURED_HWND.store(hwnd.0 as isize, Ordering::SeqCst);

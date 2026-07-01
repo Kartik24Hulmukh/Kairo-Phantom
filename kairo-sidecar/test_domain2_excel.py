@@ -15,33 +15,39 @@ using in-memory openpyxl mocks and temporary file fixtures.
 
 from __future__ import annotations
 
-import os
-from io import BytesIO
 from pathlib import Path
 import pytest
 import openpyxl
 
-from sidecar.parsers.forge_bridge import ForgeValidator, validate_formula, explain_formula, validate_formula_batch
-from sidecar.parsers.excel_context import ExcelContextCapture, get_workbook_overview, get_active_cell_context, format_excel_context_for_prompt
+from sidecar.parsers.forge_bridge import (
+    validate_formula,
+    explain_formula,
+    validate_formula_batch,
+)
+from sidecar.parsers.excel_context import (
+    ExcelContextCapture,
+    get_workbook_overview,
+    get_active_cell_context,
+    format_excel_context_for_prompt,
+)
 from sidecar.parsers.excelmcp_bridge import (
     excelmcp_available,
     excel_is_open,
     excelmcp_read_range,
     excelmcp_write_cell,
-    excelmcp_write_range,
     excelmcp_fill_formula,
     excelmcp_create_chart,
     excelmcp_create_pivot_table,
     excelmcp_screenshot_range,
     get_workbook_blueprint,
     col_to_idx,
-    idx_to_col,
 )
 from sidecar.parsers.xlsx_parser import write_xlsx_with_formatting
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def temp_xlsx(tmp_path) -> Path:
@@ -50,31 +56,39 @@ def temp_xlsx(tmp_path) -> Path:
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Sales"
-    
+
     # Write some header rows and values
     ws["A1"] = "Product"
     ws["B1"] = "Price"
     ws["C1"] = "Quantity"
     ws["D1"] = "Revenue"
-    
+
     ws["A2"] = "Widget A"
     ws["B2"] = 10.0
     ws["C2"] = 5
     ws["D2"] = "=B2*C2"
-    
+
     ws["A3"] = "Widget B"
     ws["B3"] = 20.0
     ws["C3"] = 3
     ws["D3"] = "=B3*C3"
-    
+
     # Add named ranges
-    wb.defined_names.add(openpyxl.workbook.defined_name.DefinedName("PriceRange", attr_text="Sales!$B$2:$B$3"))
-    
+    wb.defined_names.add(
+        openpyxl.workbook.defined_name.DefinedName("PriceRange", attr_text="Sales!$B$2:$B$3")
+    )
+
     # Add a table
     from openpyxl.worksheet.table import Table, TableStyleInfo
+
     tab = Table(displayName="SalesTable", ref="A1:D3")
-    style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
-                           showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+    style = TableStyleInfo(
+        name="TableStyleMedium9",
+        showFirstColumn=False,
+        showLastColumn=False,
+        showRowStripes=True,
+        showColumnStripes=False,
+    )
     tab.tableStyleInfo = style
     ws.add_table(tab)
 
@@ -85,6 +99,7 @@ def temp_xlsx(tmp_path) -> Path:
 # ──────────────────────────────────────────────────────────────────────────────
 # 1. TestForgeValidator (15 tests)
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 class TestForgeValidator:
     def test_valid_sum_formula(self):
@@ -165,6 +180,7 @@ class TestForgeValidator:
 # 2. TestExcelContextCapture (12 tests)
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 class TestExcelContextCapture:
     def test_capture_returns_dict(self, temp_xlsx):
         cap = ExcelContextCapture()
@@ -234,6 +250,7 @@ class TestExcelContextCapture:
 # 3. TestExcelMcpBridge (12 tests)
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 class TestExcelMcpBridge:
     def test_excelmcp_available_returns_bool(self):
         assert isinstance(excelmcp_available(), bool)
@@ -255,7 +272,7 @@ class TestExcelMcpBridge:
     def test_excelmcp_write_cell_valid_formula(self, temp_xlsx):
         res = excelmcp_write_cell(str(temp_xlsx), "E2", formula="=B2*1.1")
         assert res["ok"] is True
-        
+
         # Verify it was saved and written as formula
         wb = openpyxl.load_workbook(str(temp_xlsx), data_only=False)
         assert wb.active["E2"].value == "=B2*1.1"
@@ -268,7 +285,7 @@ class TestExcelMcpBridge:
     def test_excelmcp_fill_formula_adjusts_refs(self, temp_xlsx):
         res = excelmcp_fill_formula(str(temp_xlsx), "=B2*10", "E2:E4")
         assert res["ok"] is True
-        
+
         wb = openpyxl.load_workbook(str(temp_xlsx), data_only=False)
         assert wb.active["E2"].value == "=B2*10"
         assert wb.active["E3"].value == "=B3*10"
@@ -301,6 +318,7 @@ class TestExcelMcpBridge:
 # 4. TestXlsxParserUpgrade (6 tests)
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 class TestXlsxParserUpgrade:
     def test_get_workbook_blueprint_has_sheets(self, temp_xlsx):
         res = get_workbook_blueprint(str(temp_xlsx))
@@ -315,7 +333,7 @@ class TestXlsxParserUpgrade:
         ops = [{"cell": "E2", "formula": "=SUM(B2:C2)"}]
         res = write_xlsx_with_formatting(str(temp_xlsx), ops)
         assert res["ok"] is True
-        
+
         wb = openpyxl.load_workbook(str(temp_xlsx), data_only=False)
         assert wb.active["E2"].value == "=SUM(B2:C2)"
 
@@ -323,7 +341,7 @@ class TestXlsxParserUpgrade:
         ops = [{"cell": "E3", "value": "TestVal"}]
         res = write_xlsx_with_formatting(str(temp_xlsx), ops)
         assert res["ok"] is True
-        
+
         wb = openpyxl.load_workbook(str(temp_xlsx), data_only=False)
         assert wb.active["E3"].value == "TestVal"
 
@@ -331,7 +349,7 @@ class TestXlsxParserUpgrade:
         ops = [{"cell": "B2", "value": 0.123, "number_format": "0.0%"}]
         res = write_xlsx_with_formatting(str(temp_xlsx), ops)
         assert res["ok"] is True
-        
+
         wb = openpyxl.load_workbook(str(temp_xlsx), data_only=False)
         assert wb.active["B2"].number_format == "0.0%"
 
@@ -344,7 +362,7 @@ class TestXlsxParserUpgrade:
         ops = [{"cell": "C2", "value": 10}]
         res = write_xlsx_with_formatting(str(temp_xlsx), ops)
         assert res["ok"] is True
-        
+
         wb = openpyxl.load_workbook(str(temp_xlsx))
         assert wb.active["B2"].number_format == "$#,##0.00"
 
@@ -352,6 +370,7 @@ class TestXlsxParserUpgrade:
 # ──────────────────────────────────────────────────────────────────────────────
 # 5. TestGateConditions (9 tests)
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 class TestGateConditions:
     def test_gate1_formula_injection_valid_formula(self):
@@ -388,17 +407,20 @@ class TestGateConditions:
 
     def test_gate5_chart_op_has_required_fields(self):
         from sidecar.parsers.excelmcp_bridge import excelmcp_create_chart
+
         # Syntactic checks only
         assert excelmcp_create_chart is not None
 
     def test_gate6_pivot_op_has_required_fields(self):
         from sidecar.parsers.excelmcp_bridge import excelmcp_create_pivot_table
+
         assert excelmcp_create_pivot_table is not None
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 6. TestW4Regression (6 tests)
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 class TestW4Regression:
     def test_no_system_prompt_in_excel_output(self):
@@ -426,6 +448,8 @@ class TestW4Regression:
     def test_forge_none_formula_handles_gracefully(self):
         res = validate_formula(None)
         assert res["valid"] is False
+
+
 # =============================================================================
 # 7. TestLibreOfficeRecompute (8 tests)
 # =============================================================================
@@ -437,8 +461,6 @@ from sidecar.parsers.libreoffice_recompute import (
     recompute_xlsx_with_timing,
     soffice_available,
 )
-
-import time as _time
 
 
 @pytest.fixture
@@ -582,6 +604,7 @@ class TestLibreOfficeRecompute:
 # 8. TestConditionalFormatting (6 tests)
 # =============================================================================
 
+
 class TestConditionalFormatting:
     def test_data_bar_conditional_format(self, tmp_path):
         """Create .xlsx with data bar conditional formatting and verify it's valid."""
@@ -592,8 +615,10 @@ class TestConditionalFormatting:
         for i in range(1, 11):
             ws[f"A{i}"] = i * 10
         from openpyxl.formatting.rule import DataBarRule
+
         rule = DataBarRule(
-            start_type="min", end_type="max",
+            start_type="min",
+            end_type="max",
             color="638EC6",
         )
         ws.conditional_formatting.add("A1:A10", rule)
@@ -613,10 +638,15 @@ class TestConditionalFormatting:
         for i in range(1, 11):
             ws[f"B{i}"] = i * 5
         from openpyxl.formatting.rule import ColorScaleRule
+
         rule = ColorScaleRule(
-            start_type="min", start_color="FF0000",
-            mid_type="percentile", mid_value=50, mid_color="FFFF00",
-            end_type="max", end_color="00FF00",
+            start_type="min",
+            start_color="FF0000",
+            mid_type="percentile",
+            mid_value=50,
+            mid_color="FFFF00",
+            end_type="max",
+            end_color="00FF00",
         )
         ws.conditional_formatting.add("B1:B10", rule)
         wb.save(str(file_path))
@@ -634,6 +664,7 @@ class TestConditionalFormatting:
         for i in range(1, 11):
             ws[f"C{i}"] = i * 3
         from openpyxl.formatting.rule import IconSetRule
+
         rule = IconSetRule("3Arrows", "num", [0, 10, 20])
         ws.conditional_formatting.add("C1:C10", rule)
         wb.save(str(file_path))
@@ -652,6 +683,7 @@ class TestConditionalFormatting:
             ws[f"D{i}"] = i
         from openpyxl.formatting.rule import CellIsRule
         from openpyxl.styles import PatternFill
+
         red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
         rule = CellIsRule(operator="greaterThan", formula=["5"], fill=red_fill)
         ws.conditional_formatting.add("D1:D10", rule)
@@ -672,6 +704,7 @@ class TestConditionalFormatting:
             ws[f"B{i}"] = i * 2
         from openpyxl.formatting.rule import FormulaRule
         from openpyxl.styles import Font
+
         bold_font = Font(bold=True)
         rule = FormulaRule(formula=["A1>B1"], font=bold_font)
         ws.conditional_formatting.add("A1:B10", rule)
@@ -691,6 +724,7 @@ class TestConditionalFormatting:
             ws[f"A{i}"] = i
         from openpyxl.formatting.rule import CellIsRule, DataBarRule
         from openpyxl.styles import PatternFill
+
         red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
         rule1 = CellIsRule(operator="greaterThan", formula=["5"], fill=red_fill)
         rule2 = DataBarRule(start_type="min", end_type="max", color="638EC6")
@@ -707,6 +741,7 @@ class TestConditionalFormatting:
 # 9. TestExcelTables (4 tests)
 # =============================================================================
 
+
 class TestExcelTables:
     def test_table_creation_basic(self, tmp_path):
         """Create .xlsx with an Excel Table (ListObject) and verify it's valid."""
@@ -722,11 +757,14 @@ class TestExcelTables:
             for col_idx, val in enumerate(row_data, 1):
                 ws.cell(row=row_idx, column=col_idx, value=val)
         from openpyxl.worksheet.table import Table, TableStyleInfo
+
         tab = Table(displayName="ScoreTable", ref="A1:C4")
         style = TableStyleInfo(
             name="TableStyleMedium9",
-            showFirstColumn=False, showLastColumn=False,
-            showRowStripes=True, showColumnStripes=False,
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
         )
         tab.tableStyleInfo = style
         ws.add_table(tab)
@@ -748,11 +786,14 @@ class TestExcelTables:
             ws[f"A{i}"] = i
             ws[f"B{i}"] = i * 3
         from openpyxl.worksheet.table import Table, TableStyleInfo
+
         tab = Table(displayName="LightTable", ref="A1:B6")
         style = TableStyleInfo(
             name="TableStyleLight1",
-            showFirstColumn=False, showLastColumn=False,
-            showRowStripes=True, showColumnStripes=False,
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
         )
         tab.tableStyleInfo = style
         ws.add_table(tab)
@@ -774,11 +815,14 @@ class TestExcelTables:
             ws[f"A{i}"] = f"Item{i-1}"
             ws[f"B{i}"] = i * 10
         from openpyxl.worksheet.table import Table, TableStyleInfo
+
         tab = Table(displayName="TotalTable", ref="A1:B6")
         style = TableStyleInfo(
             name="TableStyleMedium2",
-            showFirstColumn=False, showLastColumn=False,
-            showRowStripes=True, showColumnStripes=False,
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
         )
         tab.tableStyleInfo = style
         ws.add_table(tab)
@@ -802,11 +846,14 @@ class TestExcelTables:
             ws[f"B{i}"] = i
             ws[f"C{i}"] = f"=A{i}*B{i}"
         from openpyxl.worksheet.table import Table, TableStyleInfo
+
         tab = Table(displayName="CalcTable", ref="A1:C5")
         style = TableStyleInfo(
             name="TableStyleMedium4",
-            showFirstColumn=False, showLastColumn=False,
-            showRowStripes=True, showColumnStripes=False,
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
         )
         tab.tableStyleInfo = style
         ws.add_table(tab)
@@ -823,6 +870,7 @@ class TestExcelTables:
 # 10. TestErrorPaths (16 tests)
 # =============================================================================
 
+
 class TestErrorPaths:
     def test_invalid_formula_syntax_summ(self):
         """Test that =SUMM (typo) is caught as invalid by forge_bridge."""
@@ -838,7 +886,7 @@ class TestErrorPaths:
 
     def test_invalid_formula_syntax_countfi(self):
         """Test that =COUNTFI (typo for COUNTIF) is caught as invalid."""
-        res = validate_formula("=COUNTFI(A1:A10,\">5\")")
+        res = validate_formula('=COUNTFI(A1:A10,">5")')
         assert res["valid"] is False
         assert res["error"] is not None
 
@@ -908,7 +956,9 @@ class TestErrorPaths:
         ws["A1"] = "Header"
         ws["A2"] = "Data"
         wb.save(str(file_path))
-        res = excelmcp_create_pivot_table(str(file_path), "ZZ999:ZZ1000", ["NonExistent"], [], ["NonExistent"])
+        res = excelmcp_create_pivot_table(
+            str(file_path), "ZZ999:ZZ1000", ["NonExistent"], [], ["NonExistent"]
+        )
         assert "ok" in res
 
     def test_pivot_no_data(self, tmp_path):

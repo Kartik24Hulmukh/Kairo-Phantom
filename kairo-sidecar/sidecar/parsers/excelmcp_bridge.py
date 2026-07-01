@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import json
 import logging
-import math
-import os
 import re
 import shutil
 import subprocess
@@ -23,7 +21,6 @@ import tempfile
 import time
 import traceback
 from contextlib import contextmanager
-from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +29,7 @@ log = logging.getLogger("kairo-sidecar.excelmcp_bridge")
 # ──────────────────────────────────────────────────────────────────────────────
 # Capability detection
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def excelmcp_available() -> bool:
     """True if the excel-mcp-server CLI is in PATH."""
@@ -42,6 +40,7 @@ def win32com_available() -> bool:
     """True if win32com (pywin32) is importable."""
     try:
         import win32com.client  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -54,15 +53,17 @@ def excel_is_open(file_path: str) -> bool:
     """
     try:
         import sys
+
         if sys.platform != "win32":
             return False
         if not win32com_available():
             return False
-        
+
         import win32com.client
         import pythoncom
+
         pythoncom.CoInitialize()
-        
+
         try:
             xl = win32com.client.GetActiveObject("Excel.Application")
         except Exception:
@@ -88,6 +89,7 @@ def excel_com_lease(file_path: str):
     yields to perform openpyxl operations, and reopens it in Excel.
     """
     import sys
+
     if sys.platform != "win32" or not win32com_available():
         yield
         return
@@ -105,7 +107,9 @@ def excel_com_lease(file_path: str):
     try:
         excel_running = False
         try:
-            out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True)
+            out = subprocess.run(
+                ["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True
+            )
             excel_running = "excel.exe" in out.stdout.lower()
         except Exception:
             pass
@@ -147,9 +151,11 @@ def excel_com_lease(file_path: str):
                     xl.Visible = True
                 except Exception:
                     # Excel was killed or COM reference is dead. Launch a new instance!
-                    log.info("excel_com_lease: Excel application reference is dead. Launching new Excel instance...")
+                    log.info(
+                        "excel_com_lease: Excel application reference is dead. Launching new Excel instance..."
+                    )
                     xl = win32com.client.Dispatch("Excel.Application")
-                
+
                 log.info("excel_com_lease: Reopening workbook %s in Excel...", target.name)
                 for attempt in range(5):
                     try:
@@ -160,7 +166,11 @@ def excel_com_lease(file_path: str):
                     except Exception as e:
                         if attempt == 4:
                             raise e
-                        log.warning("excel_com_lease: Reopen attempt %d failed: %s. Retrying in 1.5s...", attempt + 1, e)
+                        log.warning(
+                            "excel_com_lease: Reopen attempt %d failed: %s. Retrying in 1.5s...",
+                            attempt + 1,
+                            e,
+                        )
                         time.sleep(1.5)
             except Exception as e:
                 log.warning("excel_com_lease: Failed to reopen workbook: %s", e)
@@ -174,8 +184,12 @@ def save_workbook_safely(wb, path):
     try:
         wb.save(str(path))
     except PermissionError as pe:
-        log.warning("save_workbook_safely: PermissionError encountered: %s. Force-killing Excel to release lock and retrying...", pe)
+        log.warning(
+            "save_workbook_safely: PermissionError encountered: %s. Force-killing Excel to release lock and retrying...",
+            pe,
+        )
         import os
+
         os.system("taskkill /F /IM EXCEL.EXE /T >nul 2>&1")
         time.sleep(2)
         wb.save(str(path))
@@ -184,6 +198,7 @@ def save_workbook_safely(wb, path):
 # ──────────────────────────────────────────────────────────────────────────────
 # Column helpers (Pi-style)
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def col_to_idx(col: str) -> int:
     """A→0, B→1, …, Z→25, AA→26, …"""
@@ -215,6 +230,7 @@ def parse_cell_ref(ref: str) -> tuple[str, int]:
 # Workbook blueprint
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def get_workbook_blueprint(file_path: str) -> dict:
     """
     Get structural overview of an Excel workbook via openpyxl.
@@ -226,16 +242,19 @@ def get_workbook_blueprint(file_path: str) -> dict:
         return _error(f"File not found: {file_path}")
     try:
         import openpyxl
+
         wb = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
         sheets = []
         for name in wb.sheetnames:
             ws = wb[name]
-            sheets.append({
-                "name": name,
-                "max_row": ws.max_row or 0,
-                "max_col": ws.max_column or 0,
-                "has_tables": bool(getattr(ws, "tables", {})),
-            })
+            sheets.append(
+                {
+                    "name": name,
+                    "max_row": ws.max_row or 0,
+                    "max_col": ws.max_column or 0,
+                    "has_tables": bool(getattr(ws, "tables", {})),
+                }
+            )
         try:
             named_ranges = list(wb.defined_names.keys())
         except Exception:
@@ -248,8 +267,7 @@ def get_workbook_blueprint(file_path: str) -> dict:
             for name in wb2.sheetnames:
                 ws2 = wb2[name]
                 for tname, tobj in (getattr(ws2, "tables", {}) or {}).items():
-                    tables.append({"name": tname, "sheet": name,
-                                   "range": getattr(tobj, "ref", "")})
+                    tables.append({"name": tname, "sheet": name, "range": getattr(tobj, "ref", "")})
         except Exception:
             pass
 
@@ -273,6 +291,7 @@ def get_workbook_blueprint(file_path: str) -> dict:
 # Read operations
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def excelmcp_read_range(file_path: str, range_spec: str, mode: str = "compact") -> dict:
     """
     Read a cell range from an xlsx file.
@@ -284,6 +303,7 @@ def excelmcp_read_range(file_path: str, range_spec: str, mode: str = "compact") 
         return _error(f"File not found: {file_path}")
     try:
         import openpyxl
+
         wb = openpyxl.load_workbook(str(path), data_only=False)
 
         sheet_name, cell_range = _parse_range_spec(range_spec, wb.active.title)
@@ -296,6 +316,7 @@ def excelmcp_read_range(file_path: str, range_spec: str, mode: str = "compact") 
         # Normalise to 2-D rows×cols so we can always do: for row in ...: for cell in row:
         raw_range = ws[cell_range]
         from openpyxl.cell.cell import Cell as _Cell
+
         rows_2d = (raw_range,) if (raw_range and isinstance(raw_range[0], _Cell)) else raw_range
         for row in rows_2d:
             row_data = []
@@ -307,12 +328,14 @@ def excelmcp_read_range(file_path: str, range_spec: str, mode: str = "compact") 
                     formula = val
                 elif val is not None:
                     value_str = str(val)
-                row_data.append({
-                    "ref": cell.coordinate,
-                    "value": value_str,
-                    "formula": formula,
-                    "number_format": cell.number_format or "General",
-                })
+                row_data.append(
+                    {
+                        "ref": cell.coordinate,
+                        "value": value_str,
+                        "formula": formula,
+                        "number_format": cell.number_format or "General",
+                    }
+                )
             cells.append(row_data)
 
         if mode == "compact":
@@ -325,10 +348,11 @@ def excelmcp_read_range(file_path: str, range_spec: str, mode: str = "compact") 
         elif mode == "csv":
             lines = []
             for row in cells:
-                lines.append(",".join(
-                    f'"{c["formula"] or c["value"]}"' for c in row
-                ))
-            return {"ok": True, "data": {"mode": "csv", "content": "\n".join(lines), "cells": cells}}
+                lines.append(",".join(f'"{c["formula"] or c["value"]}"' for c in row))
+            return {
+                "ok": True,
+                "data": {"mode": "csv", "content": "\n".join(lines), "cells": cells},
+            }
         else:
             return {"ok": True, "data": {"mode": "detailed", "cells": cells}}
     except ImportError:
@@ -340,6 +364,7 @@ def excelmcp_read_range(file_path: str, range_spec: str, mode: str = "compact") 
 # ──────────────────────────────────────────────────────────────────────────────
 # Write operations
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def excelmcp_write_cell(
     file_path: str,
@@ -380,6 +405,7 @@ def excelmcp_write_range(
     try:
         with excel_com_lease(file_path):
             import openpyxl
+
             wb = openpyxl.load_workbook(str(path), data_only=False)
             sheet_name, cell_range = _parse_range_spec(range_spec, wb.active.title)
             if sheet_name not in wb.sheetnames:
@@ -415,7 +441,8 @@ def excelmcp_fill_formula(file_path: str, formula: str, fill_range: str) -> dict
     try:
         with excel_com_lease(file_path):
             import openpyxl
-            from openpyxl.utils import column_index_from_string, get_column_letter
+            from openpyxl.utils import column_index_from_string, get_column_letter  # noqa: F401
+
             wb = openpyxl.load_workbook(str(path), data_only=False)
             sheet_name, cell_range = _parse_range_spec(fill_range, wb.active.title)
             ws = wb[sheet_name]
@@ -446,6 +473,7 @@ def excelmcp_fill_formula(file_path: str, formula: str, fill_range: str) -> dict
 # Creation operations
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def excelmcp_create_chart(
     file_path: str,
     source_range: str,
@@ -466,8 +494,9 @@ def excelmcp_create_chart(
         try:
             import win32com.client
             import pythoncom
+
             pythoncom.CoInitialize()
-            
+
             target = Path(file_path).resolve()
             xl = None
             wb = None
@@ -480,40 +509,40 @@ def excelmcp_create_chart(
                     if Path(w.FullName).resolve() == target:
                         wb = w
                         break
-            
+
             if wb is not None:
                 sheet_name, cell_range = _parse_range_spec(source_range, wb.ActiveSheet.Name)
                 ws_data = wb.Sheets(sheet_name)
-                
+
                 # Target sheet
                 tsheet = target_sheet if target_sheet else sheet_name
                 ws_target = wb.Sheets(tsheet)
-                
+
                 # Add chart object
                 parts = cell_range.upper().split(":")
                 max_cell = parts[1] if len(parts) > 1 else parts[0]
                 max_col_str, min_row = parse_cell_ref(max_cell)
                 max_col = col_to_idx(max_col_str) + 1
-                
-                anchor_col = idx_to_col(max_col) # one column right of data
-                
+
+                anchor_col = idx_to_col(max_col)  # one column right of data
+
                 # Line chart is type 4 (xlLine), Column chart is type 51 (xlColumnClustered)
                 xl_chart_type = 4 if chart_type.lower() == "line" else 51
                 chart_shape = ws_target.Shapes.AddChart2(Style=-1, XlChartType=xl_chart_type)
                 chart = chart_shape.Chart
-                
+
                 # Set source data
                 src_range = ws_data.Range(cell_range)
                 chart.SetSourceData(Source=src_range)
-                
+
                 chart.HasTitle = True
                 chart.ChartTitle.Text = title
-                
+
                 # Position chart near anchor
                 anchor_cell = ws_target.Range(f"{anchor_col}{min_row}")
                 chart_shape.Left = anchor_cell.Left
                 chart_shape.Top = anchor_cell.Top
-                
+
                 wb.Save()
                 log.info("Direct win32com chart creation OK: %s '%s'", chart_type, title)
                 return {
@@ -532,7 +561,14 @@ def excelmcp_create_chart(
     try:
         with excel_com_lease(file_path):
             import openpyxl
-            from openpyxl.chart import BarChart, LineChart, PieChart, ScatterChart, AreaChart, Reference
+            from openpyxl.chart import (
+                BarChart,
+                LineChart,
+                PieChart,
+                ScatterChart,
+                AreaChart,
+                Reference,
+            )
 
             wb = openpyxl.load_workbook(str(path))
             sheet_name, cell_range = _parse_range_spec(source_range, wb.active.title)
@@ -548,6 +584,7 @@ def excelmcp_create_chart(
             max_col_str, max_row = parse_cell_ref(max_cell)
 
             from openpyxl.utils import column_index_from_string
+
             min_col = column_index_from_string(min_col_str)
             max_col = column_index_from_string(max_col_str)
 
@@ -574,8 +611,9 @@ def excelmcp_create_chart(
             chart.width = 15
             chart.height = 10
 
-            data = Reference(ws_data, min_col=min_col, min_row=min_row,
-                             max_col=max_col, max_row=max_row)
+            data = Reference(
+                ws_data, min_col=min_col, min_row=min_row, max_col=max_col, max_row=max_row
+            )
             chart.add_data(data, titles_from_data=True)
 
             # Target sheet
@@ -630,8 +668,9 @@ def excelmcp_create_pivot_table(
         try:
             import win32com.client
             import pythoncom
+
             pythoncom.CoInitialize()
-            
+
             target = Path(file_path).resolve()
             xl = None
             wb = None
@@ -644,26 +683,26 @@ def excelmcp_create_pivot_table(
                     if Path(w.FullName).resolve() == target:
                         wb = w
                         break
-            
+
             if wb is not None:
                 sheet_name, cell_range = _parse_range_spec(source_range, wb.ActiveSheet.Name)
                 ws_src = wb.Sheets(sheet_name)
-                
+
                 parts = cell_range.upper().split(":")
                 min_cell = parts[0]
                 max_cell = parts[1] if len(parts) > 1 else parts[0]
                 min_col_str, min_row = parse_cell_ref(min_cell)
                 max_col_str, max_row = parse_cell_ref(max_cell)
-                
+
                 min_col = col_to_idx(min_col_str) + 1
                 max_col = col_to_idx(max_col_str) + 1
-                
+
                 header_map = {}
                 for c in range(min_col, max_col + 1):
                     h = ws_src.Cells(min_row, c).Value
                     if h:
                         header_map[str(h)] = idx_to_col(c - 1)
-                
+
                 tsheet = target_sheet or (sheet_name + "_Pivot")
                 # Delete existing sheet if it exists
                 xl.DisplayAlerts = False
@@ -672,14 +711,14 @@ def excelmcp_create_pivot_table(
                 except Exception:
                     pass
                 xl.DisplayAlerts = True
-                
+
                 ws_pivot = wb.Sheets.Add(Before=wb.Sheets(1))
                 ws_pivot.Name = tsheet
-                
+
                 pivot_headers = rows + columns + values
                 for i, h in enumerate(pivot_headers, start=1):
                     ws_pivot.Cells(1, i).Value = h
-                    
+
                 formula_row = 2
                 for val_col in values:
                     val_letter = header_map.get(val_col, "A")
@@ -688,12 +727,12 @@ def excelmcp_create_pivot_table(
                         ws_pivot.Cells(formula_row, 1).Value = f"={row_field} totals"
                         formula = (
                             f"=SUMIF({sheet_name}!{row_letter}:{row_letter},"
-                            f'\"<>\",'
+                            f'"<>",'
                             f"{sheet_name}!{val_letter}:{val_letter})"
                         )
                         ws_pivot.Cells(formula_row, len(pivot_headers)).Formula = formula
                         formula_row += 1
-                
+
                 # Save changes
                 wb.Save()
                 log.info("Direct win32com pivot summary creation OK → sheet '%s'", tsheet)
@@ -709,7 +748,9 @@ def excelmcp_create_pivot_table(
                     },
                 }
         except Exception as e:
-            log.warning("Direct COM pivot table creation failed: %s. Falling back to openpyxl...", e)
+            log.warning(
+                "Direct COM pivot table creation failed: %s. Falling back to openpyxl...", e
+            )
 
     try:
         with excel_com_lease(file_path):
@@ -749,8 +790,6 @@ def excelmcp_create_pivot_table(
             for i, h in enumerate(pivot_headers, start=1):
                 ws_pivot.cell(row=1, column=i).value = h
 
-            data_range = f"{sheet_name}!{cell_range}"
-
             # Write a SUMIFS formula row for each value column
             formula_row = 2
             for val_col in values:
@@ -761,7 +800,7 @@ def excelmcp_create_pivot_table(
                     # SUMIF formula: =SUMIF(Sheet1!A:A,"<>",Sheet1!C:C)
                     formula = (
                         f"=SUMIF({sheet_name}!{row_letter}:{row_letter},"
-                        f'\"<>\",'
+                        f'"<>",'
                         f"{sheet_name}!{val_letter}:{val_letter})"
                     )
                     ws_pivot.cell(row=formula_row, column=len(pivot_headers)).value = formula
@@ -786,7 +825,9 @@ def excelmcp_create_pivot_table(
         return _error(traceback.format_exc())
 
 
-def excelmcp_screenshot_range(file_path: str, range_spec: str, output_path: str | None = None) -> dict:
+def excelmcp_screenshot_range(
+    file_path: str, range_spec: str, output_path: str | None = None
+) -> dict:
     """
     Capture a range as PNG. Requires win32com + Excel open OR Pillow + openpyxl.
     Returns error gracefully if unavailable (not a fatal failure).
@@ -805,7 +846,9 @@ def excelmcp_screenshot_range(file_path: str, range_spec: str, output_path: str 
             }
             result = subprocess.run(
                 ["excel-mcp-server", "screenshot", json.dumps(args)],
-                capture_output=True, text=True, timeout=20,
+                capture_output=True,
+                text=True,
+                timeout=20,
             )
             if result.returncode == 0 and Path(output_path).exists():
                 return {"ok": True, "data": {"output_path": output_path}}
@@ -825,6 +868,7 @@ def excelmcp_screenshot_range(file_path: str, range_spec: str, output_path: str 
 # ──────────────────────────────────────────────────────────────────────────────
 # Internal helpers
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def _parse_range_spec(range_spec: str, default_sheet: str) -> tuple[str, str]:
     """Parse 'Sheet1!A1:D10' → ('Sheet1', 'A1:D10'). Handles missing sheet name."""
@@ -846,6 +890,7 @@ def _openpyxl_write_cell(
     try:
         with excel_com_lease(file_path):
             import openpyxl
+
             wb = openpyxl.load_workbook(str(file_path), data_only=False)
             ws = wb.active
             target = ws[cell]
@@ -861,6 +906,7 @@ def _openpyxl_write_cell(
                 target.number_format = number_format
             if bold:
                 from openpyxl.styles import Font
+
                 existing_font = target.font
                 target.font = Font(
                     bold=True,
@@ -890,8 +936,9 @@ def _win32com_write_cell(file_path: str, cell: str, value: Any, formula: str | N
     try:
         import win32com.client
         import pythoncom
+
         pythoncom.CoInitialize()
-        
+
         try:
             xl = win32com.client.GetActiveObject("Excel.Application")
             excel_running = True

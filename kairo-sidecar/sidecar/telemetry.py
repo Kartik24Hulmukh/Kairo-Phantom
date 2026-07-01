@@ -9,6 +9,7 @@ Observability design (Item 56):
 - Air-gap mode (KAIRO_OFFLINE=1 or telemetry_enabled=False) suppresses ALL writes.
 - Spans include trace_id, span_id, parent_span_id for distributed trace correlation.
 """
+
 import json
 import time
 import uuid
@@ -19,6 +20,7 @@ from typing import Dict, List, Optional
 from collections import defaultdict
 import os
 from sidecar.crash_reporter import scrub_pii
+
 
 class ScrubbedLogger:
     def __init__(self, logger):
@@ -38,6 +40,7 @@ class ScrubbedLogger:
 
     def critical(self, msg, *args, **kwargs):
         self._logger.critical(scrub_pii(msg), *args, **kwargs)
+
 
 log = ScrubbedLogger(logging.getLogger("kairo.telemetry"))
 
@@ -68,7 +71,7 @@ def _update_prometheus_metrics() -> None:
     """Read all entries from telemetry.jsonl and generate metrics.prom in Prometheus exposition format."""
     if not TELEMETRY_FILE.exists():
         return
-    
+
     counts = defaultdict(lambda: {"true": 0, "false": 0})
     latencies = defaultdict(list)
     try:
@@ -155,7 +158,10 @@ def record_span(
             if isinstance(v, str):
                 v_scrubbed = scrub_pii(v)
             elif isinstance(v, dict):
-                v_scrubbed = {scrub_pii(str(dk)): (scrub_pii(dv) if isinstance(dv, str) else dv) for dk, dv in v.items()}
+                v_scrubbed = {
+                    scrub_pii(str(dk)): (scrub_pii(dv) if isinstance(dv, str) else dv)
+                    for dk, dv in v.items()
+                }
             elif isinstance(v, list):
                 v_scrubbed = [scrub_pii(item) if isinstance(item, str) else item for item in v]
             else:
@@ -181,7 +187,7 @@ def record_span(
         SPANS_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(SPANS_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(span) + "\n")
-            
+
         otel_span = {
             "traceId": span["trace_id"],
             "spanId": span["span_id"],
@@ -193,8 +199,8 @@ def record_span(
             "attributes": span["attributes"],
             "status": {
                 "code": "STATUS_CODE_OK" if span["status"] == "OK" else "STATUS_CODE_ERROR",
-                "message": span["status"]
-            }
+                "message": span["status"],
+            },
         }
         LOGS_JSONL_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(LOGS_JSONL_FILE, "a", encoding="utf-8") as f:
@@ -206,7 +212,12 @@ def record_span(
 
 
 @contextmanager
-def traced_operation(name: str, domain: str = "", trace_id: Optional[str] = None, parent_span_id: Optional[str] = None):
+def traced_operation(
+    name: str,
+    domain: str = "",
+    trace_id: Optional[str] = None,
+    parent_span_id: Optional[str] = None,
+):
     """
     Context manager that records both a legacy operation metric and an OTel span.
 

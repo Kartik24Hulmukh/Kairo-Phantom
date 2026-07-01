@@ -12,7 +12,7 @@
 use anyhow::{bail, Context, Result};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 
 use crate::config::VoiceConfig;
 
@@ -32,14 +32,16 @@ pub struct MoonshineEngine {
 impl MoonshineEngine {
     pub fn new(port: u16, confidence_threshold: f32) -> Self {
         MoonshineEngine {
-            service_url: format!("http://localhost:{}", port),
+            service_url: format!("http://localhost:{port}"),
             confidence_threshold,
         }
     }
 
     /// Check if Moonshine sidecar is reachable.
     pub async fn is_available(&self) -> bool {
-        let client = crate::config::get_client_builder().build().unwrap_or_default();
+        let client = crate::config::get_client_builder()
+            .build()
+            .unwrap_or_default();
         client
             .get(format!("{}/health", self.service_url))
             .timeout(std::time::Duration::from_secs(2))
@@ -57,7 +59,9 @@ impl MoonshineEngine {
             "audio_path": wav_path.to_str().unwrap_or(""),
         });
 
-        let client = crate::config::get_client_builder().build().unwrap_or_default();
+        let client = crate::config::get_client_builder()
+            .build()
+            .unwrap_or_default();
         let response = client
             .post(format!("{}/transcribe", self.service_url))
             .json(&payload)
@@ -147,8 +151,10 @@ impl VoiceEngine {
         let model_file = format!("ggml-{}.bin", config.whisper_model);
         let model_path = models_dir.join(&model_file);
 
-        info!("🎤 VoiceEngine initialized (model: {}, binary: {:?})",
-            config.whisper_model, whisper_binary);
+        info!(
+            "🎤 VoiceEngine initialized (model: {}, binary: {:?})",
+            config.whisper_model, whisper_binary
+        );
 
         Ok(VoiceEngine {
             whisper_binary,
@@ -199,7 +205,10 @@ impl VoiceEngine {
 
         self.recording.store(true, Ordering::SeqCst);
 
-        let wav_filename = format!("kairo_voice_{}.wav", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
+        let wav_filename = format!(
+            "kairo_voice_{}.wav",
+            chrono::Utc::now().format("%Y%m%d_%H%M%S")
+        );
         let wav_path = self.temp_dir.join(wav_filename);
 
         info!("🔴 Recording started → {}", wav_path.display());
@@ -231,7 +240,10 @@ impl VoiceEngine {
     /// using a spawned process. Falls back to PowerShell recording if cpal
     /// is not available at runtime.
     pub async fn record_audio(&self, duration_secs: u64) -> Result<PathBuf> {
-        let wav_filename = format!("kairo_voice_{}.wav", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
+        let wav_filename = format!(
+            "kairo_voice_{}.wav",
+            chrono::Utc::now().format("%Y%m%d_%H%M%S")
+        );
         let wav_path = self.temp_dir.join(&wav_filename);
 
         info!("🔴 Recording {} seconds of audio...", duration_secs);
@@ -247,22 +259,26 @@ $recognizer = New-Object System.Speech.Recognition.SpeechRecognitionEngine
 $recognizer.SetInputToDefaultAudioDevice()
 $grammar = New-Object System.Speech.Recognition.DictationGrammar
 $recognizer.LoadGrammar($grammar)
-$recognizer.InitialSilenceTimeout = [TimeSpan]::FromSeconds({duration})
-$recognizer.BabbleTimeout = [TimeSpan]::FromSeconds({duration})
-$result = $recognizer.Recognize([TimeSpan]::FromSeconds({duration}))
+$recognizer.InitialSilenceTimeout = [TimeSpan]::FromSeconds({duration_secs})
+$recognizer.BabbleTimeout = [TimeSpan]::FromSeconds({duration_secs})
+$result = $recognizer.Recognize([TimeSpan]::FromSeconds({duration_secs}))
 if ($result) {{ $result.Text }} else {{ "" }}
-"#,
-                duration = duration_secs
+"#
             );
 
             // Alternative: use ffmpeg if available (better quality)
             let ffmpeg_result = tokio::process::Command::new("ffmpeg")
                 .args([
-                    "-f", "dshow",
-                    "-i", "audio=Microphone",
-                    "-t", &duration_secs.to_string(),
-                    "-ar", "16000",
-                    "-ac", "1",
+                    "-f",
+                    "dshow",
+                    "-i",
+                    "audio=Microphone",
+                    "-t",
+                    &duration_secs.to_string(),
+                    "-ar",
+                    "16000",
+                    "-ac",
+                    "1",
                     "-y",
                     wav_path.to_str().unwrap_or("output.wav"),
                 ])
@@ -285,10 +301,14 @@ if ($result) {{ $result.Text }} else {{ "" }}
             // On Linux/macOS: try arecord or sox
             let status = tokio::process::Command::new("arecord")
                 .args([
-                    "-f", "S16_LE",
-                    "-r", "16000",
-                    "-c", "1",
-                    "-d", &duration_secs.to_string(),
+                    "-f",
+                    "S16_LE",
+                    "-r",
+                    "16000",
+                    "-c",
+                    "1",
+                    "-d",
+                    &duration_secs.to_string(),
                     wav_path.to_str().unwrap_or("output.wav"),
                 ])
                 .status()
@@ -319,7 +339,8 @@ if ($result) {{ $result.Text }} else {{ "" }}
                 "Whisper model not found at {:?}. \
                  Download ggml-{}.bin from https://huggingface.co/ggerganov/whisper.cpp/tree/main \
                  and place in ~/.kairo-phantom/models/",
-                self.model_path, self.config.whisper_model
+                self.model_path,
+                self.config.whisper_model
             );
         }
 
@@ -327,12 +348,15 @@ if ($result) {{ $result.Text }} else {{ "" }}
 
         let output = tokio::process::Command::new(&self.whisper_binary)
             .args([
-                "-m", self.model_path.to_str().unwrap_or(""),
-                "-f", wav_path.to_str().unwrap_or(""),
+                "-m",
+                self.model_path.to_str().unwrap_or(""),
+                "-f",
+                wav_path.to_str().unwrap_or(""),
                 "--no-timestamps",
-                "-l", &self.config.language,
+                "-l",
+                &self.config.language,
                 "--output-txt",
-                "-np",   // No progress bar
+                "-np", // No progress bar
             ])
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
@@ -342,12 +366,10 @@ if ($result) {{ $result.Text }} else {{ "" }}
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            bail!("whisper.cpp failed: {}", stderr);
+            bail!("whisper.cpp failed: {stderr}");
         }
 
-        let transcription = String::from_utf8_lossy(&output.stdout)
-            .trim()
-            .to_string();
+        let transcription = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         // Also check the .txt output file (whisper.cpp sometimes writes there instead)
         if transcription.is_empty() {
@@ -366,9 +388,11 @@ if ($result) {{ $result.Text }} else {{ "" }}
             }
         }
 
-        info!("📝 Transcription: {} chars — '{}'",
+        info!(
+            "📝 Transcription: {} chars — '{}'",
             transcription.len(),
-            transcription.chars().take(80).collect::<String>());
+            transcription.chars().take(80).collect::<String>()
+        );
 
         Ok(transcription)
     }
@@ -384,35 +408,53 @@ if ($result) {{ $result.Text }} else {{ "" }}
             let moonshine = MoonshineEngine::new(self.moonshine_port, self.confidence_threshold);
 
             match moonshine.transcribe(&wav_path).await {
-                Ok((text, confidence, language)) if !moonshine.needs_fallback(confidence, &language) => {
-                    info!("🎤 Moonshine ASR: confidence={:.2}, lang={}, '{}'",
-                        confidence, language,
-                        text.chars().take(80).collect::<String>());
+                Ok((text, confidence, language))
+                    if !moonshine.needs_fallback(confidence, &language) =>
+                {
+                    info!(
+                        "🎤 Moonshine ASR: confidence={:.2}, lang={}, '{}'",
+                        confidence,
+                        language,
+                        text.chars().take(80).collect::<String>()
+                    );
                     text
                 }
                 Ok((moonshine_text, confidence, language)) => {
                     // Low confidence or non-English — try whisper.cpp
                     let reason = if language != "en" {
-                        format!("non-English language: {}", language)
+                        format!("non-English language: {language}")
                     } else {
-                        format!("low confidence: {:.2} < {:.2}", confidence, self.confidence_threshold)
+                        format!(
+                            "low confidence: {:.2} < {:.2}",
+                            confidence, self.confidence_threshold
+                        )
                     };
-                    info!("🎤 Moonshine fallback reason: {}. Trying whisper.cpp.", reason);
+                    info!(
+                        "🎤 Moonshine fallback reason: {}. Trying whisper.cpp.",
+                        reason
+                    );
 
                     if self.config.whisper_fallback_enabled && self.is_available() {
                         match self.transcribe(&wav_path).await {
                             Ok(whisper_text) if !whisper_text.is_empty() => {
-                                info!("🎤 whisper.cpp fallback succeeded: {} chars", whisper_text.len());
+                                info!(
+                                    "🎤 whisper.cpp fallback succeeded: {} chars",
+                                    whisper_text.len()
+                                );
                                 whisper_text
                             }
                             _ => {
-                                warn!("🎤 whisper.cpp fallback also failed, using Moonshine result");
+                                warn!(
+                                    "🎤 whisper.cpp fallback also failed, using Moonshine result"
+                                );
                                 moonshine_text
                             }
                         }
                     } else {
                         // Whisper not available — return moonshine result anyway
-                        if !moonshine_text.is_empty() { moonshine_text } else {
+                        if !moonshine_text.is_empty() {
+                            moonshine_text
+                        } else {
                             bail!("No transcription available: Moonshine low-confidence, whisper.cpp unavailable")
                         }
                     }
@@ -440,7 +482,7 @@ if ($result) {{ $result.Text }} else {{ "" }}
         let candidates = [
             "whisper-cli.exe",
             "whisper.exe",
-            "main.exe",          // whisper.cpp default build name
+            "main.exe", // whisper.cpp default build name
             "whisper-cli",
             "whisper",
             "main",
@@ -468,7 +510,11 @@ if ($result) {{ $result.Text }} else {{ "" }}
         }
 
         // Default expected location
-        bin_dir.join(if cfg!(windows) { "whisper-cli.exe" } else { "whisper-cli" })
+        bin_dir.join(if cfg!(windows) {
+            "whisper-cli.exe"
+        } else {
+            "whisper-cli"
+        })
     }
 
     fn write_wav_header(path: &Path) -> Result<()> {
@@ -484,22 +530,21 @@ if ($result) {{ $result.Text }} else {{ "" }}
 
         // Write RIFF header with placeholder sizes (will be updated on close)
         f.write_all(b"RIFF")?;
-        f.write_all(&0u32.to_le_bytes())?;        // file size - 8 (placeholder)
+        f.write_all(&0u32.to_le_bytes())?; // file size - 8 (placeholder)
         f.write_all(b"WAVE")?;
         f.write_all(b"fmt ")?;
-        f.write_all(&16u32.to_le_bytes())?;        // fmt chunk size
-        f.write_all(&1u16.to_le_bytes())?;         // PCM format
+        f.write_all(&16u32.to_le_bytes())?; // fmt chunk size
+        f.write_all(&1u16.to_le_bytes())?; // PCM format
         f.write_all(&channels.to_le_bytes())?;
         f.write_all(&sample_rate.to_le_bytes())?;
         f.write_all(&byte_rate.to_le_bytes())?;
         f.write_all(&block_align.to_le_bytes())?;
         f.write_all(&bits_per_sample.to_le_bytes())?;
         f.write_all(b"data")?;
-        f.write_all(&0u32.to_le_bytes())?;         // data size (placeholder)
+        f.write_all(&0u32.to_le_bytes())?; // data size (placeholder)
 
         Ok(())
     }
-
 }
 
 impl AudioRecorder {

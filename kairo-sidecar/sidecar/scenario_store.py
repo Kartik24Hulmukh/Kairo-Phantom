@@ -8,6 +8,7 @@ Schema:
               sandbox_path TEXT, oracle_verdict TEXT, elapsed_s REAL,
               ts TIMESTAMP DEFAULT current_timestamp)
 """
+
 from __future__ import annotations
 
 import os
@@ -58,18 +59,21 @@ def upsert_scenario(
     try:
         # DuckDB doesn't support INSERT OR REPLACE; use DELETE + INSERT.
         con.execute("DELETE FROM scenarios WHERE id = ?", [sid])
-        con.execute("""
+        con.execute(
+            """
             INSERT INTO scenarios
                 (id, prompt, fixture, oracle, category, fix_budget)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, [
-            sid,
-            scenario.get("prompt", ""),
-            scenario.get("fixture", ""),
-            scenario.get("oracle", ""),
-            scenario.get("category", ""),
-            int(scenario.get("fix_budget", 3)),
-        ])
+        """,
+            [
+                sid,
+                scenario.get("prompt", ""),
+                scenario.get("fixture", ""),
+                scenario.get("oracle", ""),
+                scenario.get("category", ""),
+                int(scenario.get("fix_budget", 3)),
+            ],
+        )
     finally:
         con.close()
 
@@ -86,19 +90,22 @@ def record_result(
     """Append one result row."""
     con = _connect(db_path)
     try:
-        con.execute("""
+        con.execute(
+            """
             INSERT INTO results
                 (run_id, scenario_id, worker_id, sandbox_path, oracle_verdict, elapsed_s, ts)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, [
-            run_id,
-            scenario_id,
-            worker_id,
-            sandbox_path,
-            oracle_verdict,
-            float(elapsed_s),
-            datetime.datetime.utcnow(),
-        ])
+        """,
+            [
+                run_id,
+                scenario_id,
+                worker_id,
+                sandbox_path,
+                oracle_verdict,
+                float(elapsed_s),
+                datetime.datetime.utcnow(),
+            ],
+        )
     finally:
         con.close()
 
@@ -108,14 +115,17 @@ def query_results(run_id: Optional[str] = None, db_path: str = _DEFAULT_DB) -> L
     con = _connect(db_path)
     try:
         if run_id:
-            rows = con.execute("""
+            rows = con.execute(
+                """
                 SELECT r.run_id, r.scenario_id, s.category, r.worker_id,
                        r.sandbox_path, r.oracle_verdict, r.elapsed_s, r.ts
                 FROM   results r
                 LEFT JOIN scenarios s ON s.id = r.scenario_id
                 WHERE  r.run_id = ?
                 ORDER  BY r.ts
-            """, [run_id]).fetchall()
+            """,
+                [run_id],
+            ).fetchall()
         else:
             rows = con.execute("""
                 SELECT r.run_id, r.scenario_id, s.category, r.worker_id,
@@ -124,8 +134,16 @@ def query_results(run_id: Optional[str] = None, db_path: str = _DEFAULT_DB) -> L
                 LEFT JOIN scenarios s ON s.id = r.scenario_id
                 ORDER  BY r.ts
             """).fetchall()
-        columns = ["run_id", "scenario_id", "category", "worker_id",
-                   "sandbox_path", "oracle_verdict", "elapsed_s", "ts"]
+        columns = [
+            "run_id",
+            "scenario_id",
+            "category",
+            "worker_id",
+            "sandbox_path",
+            "oracle_verdict",
+            "elapsed_s",
+            "ts",
+        ]
         return [dict(zip(columns, row)) for row in rows]
     finally:
         con.close()

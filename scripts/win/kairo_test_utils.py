@@ -20,14 +20,14 @@ try:
     import pyautogui
     pyautogui.FAILSAFE = False
     pyautogui.PAUSE = 0.05
-except ImportError:
+except Exception:
     pass
 
 log = logging.getLogger("kairo_test_utils")
 
-KAIRO_API    = "http://127.0.0.1:7437"
-OLLAMA_MOCK  = "http://127.0.0.1:11435"
-OLLAMA_REAL  = "http://127.0.0.1:11434"
+KAIRO_API    = os.environ.get("KAIRO_DAEMON_URL", "http://127.0.0.1:7437")
+OLLAMA_MOCK  = os.environ.get("KAIRO_OLLAMA_MOCK_URL", "http://127.0.0.1:11435")
+OLLAMA_REAL  = os.environ.get("KAIRO_OLLAMA_REAL_URL", "http://127.0.0.1:11434")
 
 
 def daemon_running(timeout: int = 3) -> bool:

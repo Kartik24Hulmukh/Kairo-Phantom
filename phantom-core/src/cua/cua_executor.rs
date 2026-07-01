@@ -26,11 +26,11 @@ pub enum ExecutorError {
 impl std::fmt::Display for ExecutorError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ExecutorError::EnigoInit(e) => write!(f, "enigo init failed: {}", e),
-            ExecutorError::EnigoAction(e) => write!(f, "enigo action failed: {}", e),
+            ExecutorError::EnigoInit(e) => write!(f, "enigo init failed: {e}"),
+            ExecutorError::EnigoAction(e) => write!(f, "enigo action failed: {e}"),
             ExecutorError::CuaDriverNotFound => write!(f, "cua-driver binary not found"),
-            ExecutorError::CuaDriverFailed(e) => write!(f, "cua-driver failed: {}", e),
-            ExecutorError::VerificationFailed(e) => write!(f, "farscry verification failed: {}", e),
+            ExecutorError::CuaDriverFailed(e) => write!(f, "cua-driver failed: {e}"),
+            ExecutorError::VerificationFailed(e) => write!(f, "farscry verification failed: {e}"),
         }
     }
 }
@@ -100,14 +100,24 @@ pub async fn execute(
                         return CuaResult::Success(v);
                     }
                     Ok(v) => {
-                        tracing::warn!("[CUA] Verification failed for {:?} — trying fallback", action);
+                        tracing::warn!(
+                            "[CUA] Verification failed for {:?} — trying fallback",
+                            action
+                        );
                         // Try fallback backend
                         if let Some(fallback) = current_backend.fallback() {
                             current_backend = fallback;
                             continue;
                         } else {
-                            audit_log_failure(action, &mutable_ctx, "Both backends failed verification").await;
-                            return CuaResult::Failed("Verification failed after both backends".to_string());
+                            audit_log_failure(
+                                action,
+                                &mutable_ctx,
+                                "Both backends failed verification",
+                            )
+                            .await;
+                            return CuaResult::Failed(
+                                "Verification failed after both backends".to_string(),
+                            );
                         }
                     }
                     Err(e) => {
@@ -118,8 +128,11 @@ pub async fn execute(
                 }
             }
             Err(e) => {
-                tracing::warn!("[CUA] {:?} backend failed: {} — trying fallback", 
-                    current_backend, e);
+                tracing::warn!(
+                    "[CUA] {:?} backend failed: {} — trying fallback",
+                    current_backend,
+                    e
+                );
                 // Try fallback backend
                 if let Some(fallback) = current_backend.fallback() {
                     current_backend = fallback;
@@ -136,14 +149,13 @@ pub async fn execute(
 /// Execute action via enigo (primary backend).
 /// CRITICAL: All mouse coordinates are DPI-scaled by ctx.dpi_scale.
 fn execute_enigo(action: &CuaAction, ctx: &CuaContext) -> Result<(), ExecutorError> {
-    use enigo::{Button, Coordinate, Direction, Enigo, Key, Keyboard, Mouse, Settings, Axis};
+    use enigo::{Axis, Button, Coordinate, Direction, Enigo, Key, Keyboard, Mouse, Settings};
 
     match action {
-        CuaAction::MouseClick { x, y, .. } |
-        CuaAction::MouseDoubleClick { x, y, .. } |
-        CuaAction::MouseMove { x, y } => {
-            let scaled_x = (*x as f32 * ctx.dpi_scale) as i32;
-            let scaled_y = (*y as f32 * ctx.dpi_scale) as i32;
+        CuaAction::MouseClick { x, y, .. }
+        | CuaAction::MouseDoubleClick { x, y, .. }
+        | CuaAction::MouseMove { x, y } => {
+            let (scaled_x, scaled_y) = scale_to_physical(ctx, *x, *y);
             if let Ok(mut guard) = LAST_MOUSE_MOVE.lock() {
                 *guard = Some((scaled_x, scaled_y));
             }
@@ -165,8 +177,7 @@ fn execute_enigo(action: &CuaAction, ctx: &CuaContext) -> Result<(), ExecutorErr
     match action {
         CuaAction::MouseClick { x, y, button, .. } => {
             // Scale logical coordinates to physical pixels
-            let scaled_x = (*x as f32 * ctx.dpi_scale) as i32;
-            let scaled_y = (*y as f32 * ctx.dpi_scale) as i32;
+            let (scaled_x, scaled_y) = scale_to_physical(ctx, *x, *y);
 
             enigo
                 .move_mouse(scaled_x, scaled_y, Coordinate::Abs)
@@ -186,8 +197,7 @@ fn execute_enigo(action: &CuaAction, ctx: &CuaContext) -> Result<(), ExecutorErr
         }
 
         CuaAction::MouseDoubleClick { x, y, button } => {
-            let scaled_x = (*x as f32 * ctx.dpi_scale) as i32;
-            let scaled_y = (*y as f32 * ctx.dpi_scale) as i32;
+            let (scaled_x, scaled_y) = scale_to_physical(ctx, *x, *y);
 
             enigo
                 .move_mouse(scaled_x, scaled_y, Coordinate::Abs)
@@ -209,8 +219,7 @@ fn execute_enigo(action: &CuaAction, ctx: &CuaContext) -> Result<(), ExecutorErr
         }
 
         CuaAction::MouseMove { x, y } => {
-            let scaled_x = (*x as f32 * ctx.dpi_scale) as i32;
-            let scaled_y = (*y as f32 * ctx.dpi_scale) as i32;
+            let (scaled_x, scaled_y) = scale_to_physical(ctx, *x, *y);
             enigo
                 .move_mouse(scaled_x, scaled_y, Coordinate::Abs)
                 .map_err(|e| ExecutorError::EnigoAction(e.to_string()))?;
@@ -311,18 +320,34 @@ fn execute_well_known_shortcut(
     use enigo::{Direction, Key, Keyboard};
 
     let press_ctrl = |enigo: &mut enigo::Enigo, key: Key| -> Result<(), String> {
-        enigo.key(Key::Control, Direction::Press).map_err(|e| e.to_string())?;
-        enigo.key(key, Direction::Click).map_err(|e| e.to_string())?;
-        enigo.key(Key::Control, Direction::Release).map_err(|e| e.to_string())?;
+        enigo
+            .key(Key::Control, Direction::Press)
+            .map_err(|e| e.to_string())?;
+        enigo
+            .key(key, Direction::Click)
+            .map_err(|e| e.to_string())?;
+        enigo
+            .key(Key::Control, Direction::Release)
+            .map_err(|e| e.to_string())?;
         Ok(())
     };
 
     let press_ctrl_shift = |enigo: &mut enigo::Enigo, key: Key| -> Result<(), String> {
-        enigo.key(Key::Control, Direction::Press).map_err(|e| e.to_string())?;
-        enigo.key(Key::Shift, Direction::Press).map_err(|e| e.to_string())?;
-        enigo.key(key, Direction::Click).map_err(|e| e.to_string())?;
-        enigo.key(Key::Shift, Direction::Release).map_err(|e| e.to_string())?;
-        enigo.key(Key::Control, Direction::Release).map_err(|e| e.to_string())?;
+        enigo
+            .key(Key::Control, Direction::Press)
+            .map_err(|e| e.to_string())?;
+        enigo
+            .key(Key::Shift, Direction::Press)
+            .map_err(|e| e.to_string())?;
+        enigo
+            .key(key, Direction::Click)
+            .map_err(|e| e.to_string())?;
+        enigo
+            .key(Key::Shift, Direction::Release)
+            .map_err(|e| e.to_string())?;
+        enigo
+            .key(Key::Control, Direction::Release)
+            .map_err(|e| e.to_string())?;
         Ok(())
     };
 
@@ -332,15 +357,15 @@ fn execute_well_known_shortcut(
         WellKnownShortcut::SelectAll => press_ctrl(enigo, Key::Unicode('a')),
         WellKnownShortcut::Undo => press_ctrl(enigo, Key::Unicode('z')),
         WellKnownShortcut::Redo => press_ctrl(enigo, Key::Unicode('y')),
-        WellKnownShortcut::CloseDialog => {
-            enigo.key(Key::Escape, Direction::Click).map_err(|e| e.to_string())
-        }
-        WellKnownShortcut::ConfirmDialog => {
-            enigo.key(Key::Return, Direction::Click).map_err(|e| e.to_string())
-        }
-        WellKnownShortcut::NextField => {
-            enigo.key(Key::Tab, Direction::Click).map_err(|e| e.to_string())
-        }
+        WellKnownShortcut::CloseDialog => enigo
+            .key(Key::Escape, Direction::Click)
+            .map_err(|e| e.to_string()),
+        WellKnownShortcut::ConfirmDialog => enigo
+            .key(Key::Return, Direction::Click)
+            .map_err(|e| e.to_string()),
+        WellKnownShortcut::NextField => enigo
+            .key(Key::Tab, Direction::Click)
+            .map_err(|e| e.to_string()),
     }
 }
 
@@ -396,8 +421,10 @@ async fn verify_action(
                         super::WellKnownShortcut::ConfirmDialog => "dialog confirmed or closed",
                         super::WellKnownShortcut::NextField => "focus moved to next field",
                     },
-                    CuaAction::KeyboardCombo { keys } => &format!("keyboard combo {:?} executed", keys),
-                    CuaAction::KeyboardType { text } => &format!("text '{}' typed", text),
+                    CuaAction::KeyboardCombo { keys } => {
+                        &format!("keyboard combo {keys:?} executed")
+                    }
+                    CuaAction::KeyboardType { text } => &format!("text '{text}' typed"),
                     CuaAction::MouseClick { .. } => "element clicked and UI state updated",
                     CuaAction::MouseDoubleClick { .. } => "element double-clicked",
                     CuaAction::MouseMove { .. } => "mouse moved to element",
@@ -406,8 +433,12 @@ async fn verify_action(
                     CuaAction::Delay { .. } => "delay elapsed",
                 };
 
-                super::world_model::VLM_INVOCATIONS.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                match bridge.verify_action(before_path, &after_path, expected).await {
+                super::world_model::VLM_INVOCATIONS
+                    .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                match bridge
+                    .verify_action(before_path, &after_path, expected)
+                    .await
+                {
                     Ok(vlm_resp) => {
                         return Ok(CuaVerification {
                             success: vlm_resp.success,
@@ -426,11 +457,15 @@ async fn verify_action(
 
     // Fallback: If before and after hashes differ, something changed — consider success
     if before_hash.is_empty() || after_hash.is_empty() {
-        return Err(ExecutorError::VerificationFailed("Verification screenshots unavailable".into()));
+        return Err(ExecutorError::VerificationFailed(
+            "Verification screenshots unavailable".into(),
+        ));
     }
 
     let success = match action {
-        CuaAction::KeyboardType { .. } | CuaAction::KeyboardCombo { .. } | CuaAction::KeyboardShortcut { .. } => {
+        CuaAction::KeyboardType { .. }
+        | CuaAction::KeyboardCombo { .. }
+        | CuaAction::KeyboardShortcut { .. } => {
             true // Keyboard actions assumed successful if no exception and screenshots are available
         }
         _ => {
@@ -456,7 +491,7 @@ async fn capture_screenshot() -> Option<String> {
     let kairo_dir = dirs::home_dir()?.join(".kairo-phantom").join("screenshots");
     std::fs::create_dir_all(&kairo_dir).ok()?;
 
-    let path = kairo_dir.join(format!("cua_after_{}.png", timestamp));
+    let path = kairo_dir.join(format!("cua_after_{timestamp}.png"));
 
     // Try farscry first
     let result = std::process::Command::new("farscry")
@@ -479,7 +514,7 @@ async fn capture_before_screenshot() -> Option<String> {
     let kairo_dir = dirs::home_dir()?.join(".kairo-phantom").join("screenshots");
     std::fs::create_dir_all(&kairo_dir).ok()?;
 
-    let path = kairo_dir.join(format!("cua_before_{}.png", timestamp));
+    let path = kairo_dir.join(format!("cua_before_{timestamp}.png"));
 
     // Try farscry first
     let result = std::process::Command::new("farscry")
@@ -510,7 +545,15 @@ fn hash_file(path: &str) -> Result<String, std::io::Error> {
 
 /// Append a CUA success entry to the audit log
 async fn audit_log_success(action: &CuaAction, ctx: &CuaContext, verification: &CuaVerification) {
-    audit_log(action, ctx, true, &verification.before_hash, &verification.after_hash, None).await;
+    audit_log(
+        action,
+        ctx,
+        true,
+        &verification.before_hash,
+        &verification.after_hash,
+        None,
+    )
+    .await;
 }
 
 /// Append a CUA failure entry to the audit log
@@ -546,7 +589,7 @@ async fn audit_log(
         success,
         before_hash,
         after_hash,
-        error.map(|e| format!(" error=\"{}\"", e)).unwrap_or_default()
+        error.map(|e| format!(" error=\"{e}\"")).unwrap_or_default()
     );
 
     // Append-only — O_APPEND flag ensures atomicity
@@ -562,3 +605,41 @@ async fn audit_log(
 
 // Needed import for scroll axis — enigo 0.2 uses Axis enum
 use enigo::Axis;
+
+/// Map a planner logical coordinate to a physical virtual-desktop pixel.
+/// On Windows this routes through the monitor under the active window
+/// (per-monitor origin + DPI, with dead-space clamping). On other platforms it
+/// preserves the legacy single global `dpi_scale` behaviour until per-platform
+/// enumeration lands.
+fn scale_to_physical(ctx: &CuaContext, x: i32, y: i32) -> (i32, i32) {
+    #[cfg(target_os = "windows")]
+    {
+        let layout = crate::platform::enumerate_monitors();
+        let center = (
+            (ctx.window_rect.left + ctx.window_rect.right) / 2,
+            (ctx.window_rect.top + ctx.window_rect.bottom) / 2,
+        );
+        // Apply the application-level dpi_scale (from CuaContext) to get
+        // physical pixels, then use the monitor layout for virtual-desktop
+        // offset and clamping. We do NOT use resolve_click here because that
+        // function applies the monitor's OS-reported scale, which would
+        // double-scale when ctx.dpi_scale already reflects the DPI.
+        let scaled_x = (x as f32 * ctx.dpi_scale) as i32;
+        let scaled_y = (y as f32 * ctx.dpi_scale) as i32;
+        match layout.monitor_at(center.0, center.1) {
+            Some(m) => {
+                let px = m.x + scaled_x;
+                let py = m.y + scaled_y;
+                layout.clamp_to_nearest(px, py)
+            }
+            None => layout.clamp_to_nearest(scaled_x, scaled_y),
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        (
+            (x as f32 * ctx.dpi_scale) as i32,
+            (y as f32 * ctx.dpi_scale) as i32,
+        )
+    }
+}

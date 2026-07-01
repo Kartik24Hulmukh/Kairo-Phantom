@@ -10,7 +10,10 @@ async fn test_offline_mode_egress_blocking() {
 
     // A request to a public external site should fail (either timed out or blocked/refused by dummy proxy)
     let res = client.get("https://www.google.com").send().await;
-    assert!(res.is_err(), "Public egress request should fail under KAIRO_OFFLINE=1");
+    assert!(
+        res.is_err(),
+        "Public egress request should fail under KAIRO_OFFLINE=1"
+    );
 }
 
 #[tokio::test]
@@ -21,6 +24,12 @@ async fn test_capture_context_not_constant() {
     let ctx_result = phantom_core::pipeline::HotkeyPipeline::capture_context_lazy(prompt).await;
     assert!(ctx_result.is_ok(), "Context capture should succeed");
     let ctx = ctx_result.unwrap();
-    assert_ne!(ctx.full_text, "Active window context", "Context should not be the hardcoded mock string");
-    assert_eq!(ctx.prompt_text, prompt, "Context should contain the passed prompt");
+    assert_ne!(
+        ctx.full_text, "Active window context",
+        "Context should not be the hardcoded mock string"
+    );
+    assert_eq!(
+        ctx.prompt_text, prompt,
+        "Context should contain the passed prompt"
+    );
 }

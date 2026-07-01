@@ -15,9 +15,9 @@ impl FeedbackClassifier {
     /// Analyzes the diff between rejected AI output and user's manual correction.
     pub fn classify(original: &str, corrected: &str) -> Vec<FeedbackSignal> {
         let mut signals = Vec::new();
-        
+
         let sim = normalized_levenshtein(original, corrected);
-        
+
         // 1. Check for format change (e.g., bullets to prose)
         if original.contains("- ") && !corrected.contains("- ") {
             signals.push(FeedbackSignal {
@@ -38,7 +38,7 @@ impl FeedbackClassifier {
         // 2. Check for length change
         let orig_len = original.split_whitespace().count();
         let corr_len = corrected.split_whitespace().count();
-        
+
         if corr_len < orig_len / 2 {
             signals.push(FeedbackSignal {
                 channel: "length_preference".into(),
@@ -96,7 +96,7 @@ pub const ABSTENTION_THRESHOLD: f32 = 0.60;
 pub struct ConfidenceEngine;
 
 impl ConfidenceEngine {
-    // ─── Unified Confidence Interface (Item 20) ───────────────────────────────
+    // ── Unified Confidence Interface (Item 20) ────────────────────────────
 
     /// **The single confidence interface for the entire system.**
     ///
@@ -133,7 +133,16 @@ impl ConfidenceEngine {
             score += 0.1 * (context_length as f32 / 500.0);
         }
 
-        let verbs = ["write", "summarize", "edit", "explain", "draft", "create", "make", "format"];
+        let verbs = [
+            "write",
+            "summarize",
+            "edit",
+            "explain",
+            "draft",
+            "create",
+            "make",
+            "format",
+        ];
         let prompt_lower = prompt.to_lowercase();
         if verbs.iter().any(|v| prompt_lower.contains(v)) {
             score += 0.2;
@@ -176,9 +185,15 @@ impl ConfidenceEngine {
         } else if calibrated_score >= ABSTENTION_THRESHOLD {
             (ConfidenceLevel::Medium, "◑ Kairo is estimating".to_string())
         } else if calibrated_score >= 0.35 {
-            (ConfidenceLevel::Low, "○ Kairo is guessing — review carefully".to_string())
+            (
+                ConfidenceLevel::Low,
+                "○ Kairo is guessing — review carefully".to_string(),
+            )
         } else {
-            (ConfidenceLevel::Abstain, "⚠ Confidence too low — Kairo is asking instead of suggesting".to_string())
+            (
+                ConfidenceLevel::Abstain,
+                "⚠ Confidence too low — Kairo is asking instead of suggesting".to_string(),
+            )
         };
 
         info!(
@@ -186,10 +201,16 @@ impl ConfidenceEngine {
             score, calibrated_score, level, should_abstain
         );
 
-        ConfidenceScore { score, calibrated_score, level, message, should_abstain }
+        ConfidenceScore {
+            score,
+            calibrated_score,
+            level,
+            message,
+            should_abstain,
+        }
     }
 
-    // ─── Calibration (Item 27) ────────────────────────────────────────────────
+    // ── Calibration (Item 27) ─────────────────────────────────────────────
 
     /// Platt-scaling calibration: maps raw [0,1] score to calibrated probability.
     ///
@@ -205,7 +226,7 @@ impl ConfidenceEngine {
         calibrated_score < ABSTENTION_THRESHOLD
     }
 
-    // ─── Legacy compatibility shims ───────────────────────────────────────────
+    // ── Legacy compatibility shims ────────────────────────────────────────
     //
     // These delegate to `unified_confidence` so that existing callers continue
     // to compile without change. They are intentionally kept but marked
@@ -226,21 +247,29 @@ impl ConfidenceEngine {
         waza_confidence: f32,
         memory_vault_hit: bool,
     ) -> ConfidenceScore {
-        Self::unified_confidence("", "", &[], context_length, prompt, waza_confidence, memory_vault_hit)
+        Self::unified_confidence(
+            "",
+            "",
+            &[],
+            context_length,
+            prompt,
+            waza_confidence,
+            memory_vault_hit,
+        )
     }
 
     /// Setup the floating Tauri window for the confidence band
     #[cfg(feature = "tauri")]
     pub fn show_confidence_band(app_handle: &tauri::AppHandle, score: &ConfidenceScore) {
-        use tauri::Manager;
-        if let Some(window) = app_handle.get_window("confidence_band") {
+        use tauri::{Emitter, Manager};
+        if let Some(window) = app_handle.get_webview_window("confidence_band") {
             let _ = window.emit("confidence_update", score);
             let _ = window.show();
         } else {
-            tauri::WindowBuilder::new(
+            tauri::WebviewWindowBuilder::new(
                 app_handle,
                 "confidence_band",
-                tauri::WindowUrl::App("confidence.html".into())
+                tauri::WebviewUrl::App("confidence.html".into()),
             )
             .inner_size(280.0, 36.0)
             .decorations(false)
@@ -253,7 +282,7 @@ impl ConfidenceEngine {
     }
 }
 
-// ─── Unit Tests ───────────────────────────────────────────────────────────────
+// ── Unit Tests ────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -262,11 +291,20 @@ mod tests {
     #[test]
     fn test_unified_confidence_high_context() {
         let score = ConfidenceEngine::unified_confidence(
-            "Microsoft Word", "Here is the prose.", &[],
-            1000, "write a summary", 0.9, true,
+            "Microsoft Word",
+            "Here is the prose.",
+            &[],
+            1000,
+            "write a summary",
+            0.9,
+            true,
         );
         // High context (>500) + verb + high waza + vault hit = raw≈1.0, calibrated≈0.94
-        assert!(score.calibrated_score >= 0.75, "Expected High band, got {:.3}", score.calibrated_score);
+        assert!(
+            score.calibrated_score >= 0.75,
+            "Expected High band, got {:.3}",
+            score.calibrated_score
+        );
         assert_eq!(score.level, ConfidenceLevel::High);
         assert!(!score.should_abstain);
     }
@@ -274,10 +312,12 @@ mod tests {
     #[test]
     fn test_unified_confidence_abstain_below_threshold() {
         // Zero context, no verb, low waza, no vault: raw=0.0, calibrated=0.06
-        let score = ConfidenceEngine::unified_confidence(
-            "Unknown", "", &[], 0, "hmm", 0.0, false,
+        let score = ConfidenceEngine::unified_confidence("Unknown", "", &[], 0, "hmm", 0.0, false);
+        assert!(
+            score.should_abstain,
+            "Expected abstention, got calibrated={:.3}",
+            score.calibrated_score
         );
-        assert!(score.should_abstain, "Expected abstention, got calibrated={:.3}", score.calibrated_score);
         assert!(
             score.level == ConfidenceLevel::Abstain || score.level == ConfidenceLevel::Low,
             "Expected Abstain or Low level"
@@ -316,14 +356,29 @@ mod tests {
         }];
         // Response still uses bullets → score should drop
         let score_with_bullets = ConfidenceEngine::unified_confidence(
-            "Microsoft Word", "- Bullet 1\n- Bullet 2", &history, 600, "write", 0.8, false,
+            "Microsoft Word",
+            "- Bullet 1\n- Bullet 2",
+            &history,
+            600,
+            "write",
+            0.8,
+            false,
         );
         let score_prose = ConfidenceEngine::unified_confidence(
-            "Microsoft Word", "Plain prose response here.", &history, 600, "write", 0.8, false,
+            "Microsoft Word",
+            "Plain prose response here.",
+            &history,
+            600,
+            "write",
+            0.8,
+            false,
         );
-        assert!(score_with_bullets.calibrated_score < score_prose.calibrated_score,
+        assert!(
+            score_with_bullets.calibrated_score < score_prose.calibrated_score,
             "Format penalty not applied: bullets={:.3}, prose={:.3}",
-            score_with_bullets.calibrated_score, score_prose.calibrated_score);
+            score_with_bullets.calibrated_score,
+            score_prose.calibrated_score
+        );
     }
 
     #[test]

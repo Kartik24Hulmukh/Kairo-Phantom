@@ -5,14 +5,14 @@
 import os
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 log = logging.getLogger("kairo-sidecar.multi_doc_context")
 
 # ---------------------------------------------------------------------------
 # Token-budget constants
 # ---------------------------------------------------------------------------
-_CHUNK_TOKEN_BUDGET = 512   # approximate tokens per chunk (words * 1.3 ≈ tokens)
+_CHUNK_TOKEN_BUDGET = 512  # approximate tokens per chunk (words * 1.3 ≈ tokens)
 _WORDS_PER_CHUNK = int(_CHUNK_TOKEN_BUDGET / 1.3)  # ~393 words
 
 
@@ -28,16 +28,20 @@ def _read_document_text(file_path: str) -> str:
     if ext == ".docx":
         try:
             from docx import Document
+
             doc = Document(str(p))
             return "\n".join(para.text for para in doc.paragraphs if para.text.strip())
         except ImportError:
-            log.warning("python-docx not installed; reading .docx as raw bytes (text quality may be poor)")
+            log.warning(
+                "python-docx not installed; reading .docx as raw bytes (text quality may be poor)"
+            )
         except Exception as e:
             log.warning(f"Failed to read .docx {p}: {e}")
 
     if ext == ".pdf":
         try:
             import fitz  # PyMuPDF
+
             doc = fitz.open(str(p))
             pages = [page.get_text() for page in doc]
             doc.close()
@@ -76,6 +80,7 @@ def _cosine_similarity(v1: List[float], v2: List[float]) -> float:
     """Cosine similarity between two equal-length vectors using numpy."""
     try:
         import numpy as np  # noqa: F401 – lazy import so we gracefully degrade
+
         a = np.array(v1, dtype=float)
         b = np.array(v2, dtype=float)
         denom = np.linalg.norm(a) * np.linalg.norm(b)

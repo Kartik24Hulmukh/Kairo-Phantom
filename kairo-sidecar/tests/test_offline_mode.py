@@ -9,7 +9,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from sidecar.updater import check_for_update
-from sidecar.telemetry import record_operation
+
 
 def test_updater_offline_mode():
     # Set offline mode env var
@@ -19,6 +19,7 @@ def test_updater_offline_mode():
             result = check_for_update()
             assert result is None
             mock_urlopen.assert_not_called()
+
 
 def test_socket_connect_blocks_non_local_under_offline_env():
     # Verify that socket connects are blocked for public IPs when offline
@@ -33,7 +34,7 @@ def test_socket_connect_blocks_non_local_under_offline_env():
             # localhost connection should be allowed (returns None)
             s = socket.socket()
             s.connect(("127.0.0.1", 11434))
-            
+
             # public connection should be blocked
             with pytest.raises(socket.error) as excinfo:
                 s.connect(("api.github.com", 443))

@@ -2,6 +2,7 @@
 Metamorphic and property-based test generator for Kairo Phantom.
 Auto-generates test scenario variations from seed scenarios to scale the test gauntlet from 40 to 200+ cases.
 """
+
 import copy
 import logging
 from typing import Dict, Any, List
@@ -16,10 +17,14 @@ class TestGenerator:
     def __init__(self):
         pass
 
-    def generate_variants(self, seed_scenarios: List[Dict[str, Any]], target_count: int = 200) -> List[Dict[str, Any]]:
+    def generate_variants(
+        self, seed_scenarios: List[Dict[str, Any]], target_count: int = 200
+    ) -> List[Dict[str, Any]]:
         """Scale seed scenarios to target count using metamorphic perturbations."""
-        log.info(f"[Test Gen] Scaling {len(seed_scenarios)} seed scenarios to {target_count} variants...")
-        
+        log.info(
+            f"[Test Gen] Scaling {len(seed_scenarios)} seed scenarios to {target_count} variants..."
+        )
+
         variants = []
         # Copy original seeds first
         for seed in seed_scenarios:
@@ -36,7 +41,7 @@ class TestGenerator:
                     else:
                         del cleaned_seed[key]
             variants.append(cleaned_seed)
-            
+
         if not seed_scenarios:
             return variants
 
@@ -44,20 +49,20 @@ class TestGenerator:
         while len(variants) < target_count:
             # Pick a seed to perturb
             seed = seed_scenarios[perturbation_index % len(seed_scenarios)]
-            
+
             # Apply a perturbation strategy
             strategy = perturbation_index % 4
             new_id = f"{seed.get('id')}_var_{perturbation_index}"
-            
+
             variant = copy.deepcopy(seed)
             variant["id"] = new_id
             variant["is_variant"] = True
-            
+
             # Ensure base fields are present before perturbing
             orig_prompt = seed.get("prompt")
             if orig_prompt is None or orig_prompt == "":
                 orig_prompt = "Default task prompt"
-                
+
             if strategy == 0:
                 # Metamorphic: Whitespace & Casing
                 variant["prompt"] = self._apply_whitespace_casing(orig_prompt)
@@ -74,7 +79,7 @@ class TestGenerator:
                 # Metamorphic: Append polite query wrapper
                 variant["prompt"] = self._apply_politeness_wrapper(orig_prompt)
                 variant["strategy"] = "politeness_wrapper"
-                
+
             # Clean up the generated variant to guarantee no empty prompts or null/invalid properties
             for key, val in list(variant.items()):
                 if val is None or val == "":
@@ -96,7 +101,7 @@ class TestGenerator:
             if not variant.get("prompt") or not variant["prompt"].strip():
                 variant["prompt"] = orig_prompt if orig_prompt.strip() else "Default task prompt"
 
-            # Structure consistency check: category, oracle, and fix_budget properties of the variant scenarios 
+            # Structure consistency check: category, oracle, and fix_budget properties of the variant scenarios
             # must be identical to their respective seed scenarios.
             for key in ["category", "oracle", "fix_budget"]:
                 if key in seed:
@@ -106,7 +111,7 @@ class TestGenerator:
 
             variants.append(variant)
             perturbation_index += 1
-            
+
         log.info(f"[Test Gen] Generated {len(variants)} total scenarios.")
         return variants[:target_count]
 
@@ -121,7 +126,7 @@ class TestGenerator:
 
         casing_strategy = st.sampled_from(["upper", "lower", "title", "swapcase", "keep"])
         whitespace_char_strategy = st.sampled_from([" ", "  ", "\t", "\n", " \n", "\n  "])
-        
+
         try:
             case = casing_strategy.example()
             pad_start = whitespace_char_strategy.example()
@@ -150,7 +155,7 @@ class TestGenerator:
             middle += w
             if i < len(seps):
                 middle += seps[i]
-        
+
         result = f"{pad_start}{middle}{pad_end}"
         if not result.strip():
             return prompt
@@ -166,13 +171,13 @@ class TestGenerator:
             "Regarding the current workspace context:",
             "Hello, hope you are doing well.",
         ]
-        
+
         noise_tag_strategy = st.text(
             alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_ ",
             min_size=3,
-            max_size=15
+            max_size=15,
         )
-        
+
         try:
             base_noise = st.sampled_from(noise_templates).example()
             tag = noise_tag_strategy.example().strip()
@@ -182,7 +187,7 @@ class TestGenerator:
                 preamble = base_noise
         except Exception:
             preamble = "Today is a sunny day and the birds are chirping. Regarding the document:"
-            
+
         return f"{preamble} {prompt}"
 
     def _apply_synonym_swap(self, prompt: str) -> str:
@@ -193,54 +198,58 @@ class TestGenerator:
             "edit": ["modify", "alter", "change", "update"],
             "verify": ["check", "validate", "confirm", "audit"],
             "indemnity": ["liability protection", "compensation", "insurance", "protection"],
-            "budget": ["allowance", "funding", "allocation", "finances"]
+            "budget": ["allowance", "funding", "allocation", "finances"],
         }
-        
+
         words = prompt.split()
         if not words:
             return prompt
-            
+
         perturbed_words = []
         for word in words:
             clean_word = word.lower().strip(".,;:!?()\"'")
             if clean_word in synonyms:
                 try:
                     syn = st.sampled_from(synonyms[clean_word]).example()
-                    
+
                     if word.istitle():
                         syn = syn.title()
                     elif word.isupper():
                         syn = syn.upper()
-                        
+
                     replaced = word.lower().replace(clean_word, syn)
                     perturbed_words.append(replaced)
                 except Exception:
                     perturbed_words.append(word)
             else:
                 perturbed_words.append(word)
-                
+
         return " ".join(perturbed_words)
 
     def _apply_politeness_wrapper(self, prompt: str) -> str:
         """Wrap with polite phrases dynamically using hypothesis."""
-        starters = st.sampled_from([
-            "Would you please be so kind as to assist me with the following task:",
-            "Could you help me with this, please:",
-            "If you have a moment, I would appreciate your help with:",
-            "Kindly assist with the following request:",
-            "Could you please perform this task:"
-        ])
-        
-        enders = st.sampled_from([
-            "Thank you very much!",
-            "Thanks in advance.",
-            "I appreciate your help.",
-            "Thank you!",
-            "Much appreciated."
-        ])
-        
+        starters = st.sampled_from(
+            [
+                "Would you please be so kind as to assist me with the following task:",
+                "Could you help me with this, please:",
+                "If you have a moment, I would appreciate your help with:",
+                "Kindly assist with the following request:",
+                "Could you please perform this task:",
+            ]
+        )
+
+        enders = st.sampled_from(
+            [
+                "Thank you very much!",
+                "Thanks in advance.",
+                "I appreciate your help.",
+                "Thank you!",
+                "Much appreciated.",
+            ]
+        )
+
         filler_space = st.text(alphabet=" \t", min_size=1, max_size=3)
-        
+
         try:
             start = starters.example()
             end = enders.example()
@@ -251,6 +260,5 @@ class TestGenerator:
             end = "Thank you very much!"
             sp1 = " "
             sp2 = " "
-            
-        return f"{start}{sp1}{prompt}{sp2}{end}"
 
+        return f"{start}{sp1}{prompt}{sp2}{end}"

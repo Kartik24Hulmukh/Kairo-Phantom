@@ -2,14 +2,13 @@
 // Context7: Fetches up-to-date, version-specific documentation to prevent hallucinated APIs.
 // Strategy: keyword detection → library resolution → cached doc fetch → inject into prompt.
 
-use tracing::{info, warn};
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use once_cell::sync::Lazy;
+use tracing::{info, warn};
 
 /// In-session cache: library_name → doc snippet (avoids redundant HTTP calls)
-static DOC_CACHE: Lazy<Mutex<HashMap<String, String>>> = 
-    Lazy::new(|| Mutex::new(HashMap::new()));
+static DOC_CACHE: Lazy<Mutex<HashMap<String, String>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
 /// Known library patterns → canonical documentation snippets
 /// In production, this fetches from the Context7 API endpoint.
@@ -157,9 +156,9 @@ impl Context7 {
 
         let body: serde_json::Value = resp.json().await?;
         let content = body["content"].as_str().unwrap_or("").to_string();
-        
+
         if content.is_empty() {
-            anyhow::bail!("Context7 returned empty content for '{}'", library);
+            anyhow::bail!("Context7 returned empty content for '{library}'");
         }
 
         Ok(content)
@@ -167,7 +166,9 @@ impl Context7 {
 }
 
 impl Default for Context7 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]
@@ -177,7 +178,9 @@ mod tests {
     #[tokio::test]
     async fn test_embedded_rust_docs() {
         let ctx = Context7::new();
-        let result = ctx.fetch_ground_truth("help me understand rust ownership and borrowing").await;
+        let result = ctx
+            .fetch_ground_truth("help me understand rust ownership and borrowing")
+            .await;
         assert!(result.is_some());
         assert!(result.unwrap().contains("Rust"));
     }
@@ -185,7 +188,9 @@ mod tests {
     #[tokio::test]
     async fn test_embedded_excel_docs() {
         let ctx = Context7::new();
-        let result = ctx.fetch_ground_truth("write a vlookup formula for excel").await;
+        let result = ctx
+            .fetch_ground_truth("write a vlookup formula for excel")
+            .await;
         assert!(result.is_some());
         assert!(result.unwrap().contains("VLOOKUP"));
     }
@@ -193,7 +198,9 @@ mod tests {
     #[tokio::test]
     async fn test_no_match_returns_none() {
         let ctx = Context7::new();
-        let result = ctx.fetch_ground_truth("rewrite this paragraph in formal tone").await;
+        let result = ctx
+            .fetch_ground_truth("rewrite this paragraph in formal tone")
+            .await;
         // Generic writing request — no library match expected
         // (may return Some if any keyword matches, None otherwise)
         // Just verifying it doesn't panic

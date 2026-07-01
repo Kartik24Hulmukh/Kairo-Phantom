@@ -64,7 +64,7 @@ class ScreenContextBridge:
                     "app_name": app_name,
                     "success": True,
                 }
-            except Exception as e:
+            except Exception:
                 pass  # Fall through to tesseract
 
         # Strategy 2: pytesseract (fallback OCR)
@@ -78,7 +78,7 @@ class ScreenContextBridge:
                     "app_name": app_name,
                     "success": True,
                 }
-            except Exception as e:
+            except Exception:
                 pass  # Fall through to metadata
 
         # Strategy 3: File metadata only

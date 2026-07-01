@@ -5,146 +5,179 @@ router.py, word_master.py, and excel_master.py.
 These tests exercise real code paths (no mocks of the function under test)
 to push coverage from 62-70% to >=80%.
 """
+
 import os
-import io
 import json
-import shutil
-import tempfile
-import threading
 import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import patch, PropertyMock
 
 
 # ============================================================
 # router.py — uncovered branches
 # ============================================================
 
+
 class TestRouterUncoveredBranches:
     """Target lines 51-64, 125, 135-145, 149-159, 166, 176, 189, 199, 207-216."""
 
     def test_get_doc_len_none(self):
         from sidecar.router import _get_doc_len
+
         assert _get_doc_len(None) == 0
 
     def test_get_doc_len_dict_full_text(self):
         from sidecar.router import _get_doc_len
+
         result = _get_doc_len({"full_text": "hello world"})
         assert result == 11
 
     def test_get_doc_len_dict_extracted_content(self):
         from sidecar.router import _get_doc_len
+
         result = _get_doc_len({"extracted_content": "abc"})
         assert result == 3
 
     def test_get_doc_len_dict_slide_text(self):
         from sidecar.router import _get_doc_len
+
         result = _get_doc_len({"slide_text": "slide content here"})
         assert result == 18
 
     def test_get_doc_len_dict_page_content_truncated(self):
         from sidecar.router import _get_doc_len
+
         result = _get_doc_len({"page_content_truncated": "12345"})
         assert result == 5
 
     def test_get_doc_len_dict_paragraphs_list_of_dicts(self):
         from sidecar.router import _get_doc_len
+
         ctx = {"paragraphs": [{"text": "hello"}, {"text": "world!"}]}
         assert _get_doc_len(ctx) == 11
 
     def test_get_doc_len_dict_paragraphs_list_of_objects(self):
         from sidecar.router import _get_doc_len
+
         class Para:
             def __init__(self, text):
                 self.text = text
+
         ctx = {"paragraphs": [Para("abc"), Para("de")]}
         assert _get_doc_len(ctx) == 5
 
     def test_get_doc_len_dict_cells_list(self):
         from sidecar.router import _get_doc_len
+
         ctx = {"cells": [{"value": "100"}, {"value": "200"}]}
         assert _get_doc_len(ctx) == 6  # "100" + "200"
 
     def test_get_doc_len_dict_cells_objects(self):
         from sidecar.router import _get_doc_len
+
         class Cell:
             def __init__(self, v):
                 self.value = v
+
         ctx = {"cells": [Cell("abc"), Cell("xy")]}
         assert _get_doc_len(ctx) == 5
 
     def test_get_doc_len_dict_empty(self):
         from sidecar.router import _get_doc_len
+
         assert _get_doc_len({}) == 0
 
     def test_get_doc_len_object_full_text(self):
         from sidecar.router import _get_doc_len
+
         class Ctx:
             full_text = "hello"
+
         assert _get_doc_len(Ctx()) == 5
 
     def test_get_doc_len_object_paragraphs(self):
         from sidecar.router import _get_doc_len
+
         class Para:
             text = "paragraph"
+
         class Ctx:
             paragraphs = [Para()]
+
         assert _get_doc_len(Ctx()) == 9
 
     def test_get_doc_len_object_cells(self):
         from sidecar.router import _get_doc_len
+
         class Cell:
             value = "val"
+
         class Ctx:
             cells = [Cell()]
+
         assert _get_doc_len(Ctx()) == 3
 
     def test_get_doc_len_object_no_attrs(self):
         from sidecar.router import _get_doc_len
+
         class Ctx:
             pass
+
         assert _get_doc_len(Ctx()) == 0
 
     def test_get_page_count_none(self):
         from sidecar.router import _get_page_count
+
         assert _get_page_count(None) == 0
 
     def test_get_page_count_dict_page_count(self):
         from sidecar.router import _get_page_count
+
         assert _get_page_count({"page_count": 5}) == 5
 
     def test_get_page_count_dict_total_slides(self):
         from sidecar.router import _get_page_count
+
         assert _get_page_count({"total_slides": 12}) == 12
 
     def test_get_page_count_dict_slide_count(self):
         from sidecar.router import _get_page_count
+
         assert _get_page_count({"slide_count": "8"}) == 8
 
     def test_get_page_count_dict_invalid_value(self):
         from sidecar.router import _get_page_count
+
         # non-numeric string → skips, returns 0
         assert _get_page_count({"page_count": "not_a_number"}) == 0
 
     def test_get_page_count_object_attr(self):
         from sidecar.router import _get_page_count
+
         class Ctx:
             page_count = 3
+
         assert _get_page_count(Ctx()) == 3
 
     def test_get_page_count_object_no_attr(self):
         from sidecar.router import _get_page_count
+
         class Ctx:
             pass
+
         assert _get_page_count(Ctx()) == 0
 
     def test_output_verifier_pptx_bullet_limit(self):
         """Lines 437-466: PPTX domain-specific quality checks."""
         from sidecar.router import OutputVerifier
+
         verifier = OutputVerifier()
         # 6 bullets > 5 limit → should flag
-        ops = [{"type": "update_shape_text", "paragraphs": [
-            {"bullet": True, "text": "one two three four five six seven"}
-        ] * 6}]
+        ops = [
+            {
+                "type": "update_shape_text",
+                "paragraphs": [{"bullet": True, "text": "one two three four five six seven"}] * 6,
+            }
+        ]
         output = json.dumps({"operations": ops})
         report = verifier.run_all_checks(output, domain="pptx")
         assert not report.all_passed
@@ -153,10 +186,14 @@ class TestRouterUncoveredBranches:
     def test_output_verifier_pptx_word_limit(self):
         """PPTX bullet word count > 7 triggers issue."""
         from sidecar.router import OutputVerifier
+
         verifier = OutputVerifier()
-        ops = [{"type": "update_shape_text", "paragraphs": [
-            {"bullet": True, "text": "one two three four five six seven eight"}
-        ]}]
+        ops = [
+            {
+                "type": "update_shape_text",
+                "paragraphs": [{"bullet": True, "text": "one two three four five six seven eight"}],
+            }
+        ]
         output = json.dumps({"operations": ops})
         report = verifier.run_all_checks(output, domain="pptx")
         assert not report.all_passed
@@ -165,6 +202,7 @@ class TestRouterUncoveredBranches:
     def test_output_verifier_pptx_add_slide_bullets(self):
         """PPTX add_slide op with >5 bullets."""
         from sidecar.router import OutputVerifier
+
         verifier = OutputVerifier()
         ops = [{"type": "add_slide", "bullets": ["a", "b", "c", "d", "e", "f"]}]
         output = json.dumps({"operations": ops})
@@ -174,6 +212,7 @@ class TestRouterUncoveredBranches:
     def test_output_verifier_pptx_invalid_json_passes(self):
         """PPTX with invalid JSON silently passes the domain check — only other checks fire."""
         from sidecar.router import OutputVerifier
+
         verifier = OutputVerifier()
         # "not-json" is non-empty so the empty check passes; JSON parse fails silently.
         report = verifier.run_all_checks("not-json-but-has-content", domain="pptx")
@@ -183,6 +222,7 @@ class TestRouterUncoveredBranches:
     def test_output_verifier_empty_response(self):
         """Empty response always fails."""
         from sidecar.router import OutputVerifier
+
         verifier = OutputVerifier()
         report = verifier.run_all_checks("", domain="word")
         assert not report.all_passed
@@ -191,6 +231,7 @@ class TestRouterUncoveredBranches:
     def test_output_verifier_kairo_leakage(self):
         """System prompt leakage detected."""
         from sidecar.router import OutputVerifier
+
         verifier = OutputVerifier()
         report = verifier.run_all_checks("waza agent system prompt leaked", domain="word")
         assert not report.all_passed
@@ -202,6 +243,7 @@ class TestRouterMapFileExtensions:
 
     def test_router_pdf_domain(self):
         from sidecar.router import DomainMasterRouter
+
         r = DomainMasterRouter.__new__(DomainMasterRouter)
         # Access the domain mapper helper if it exists as a staticmethod
         # Otherwise test via the public route method with mocks
@@ -210,6 +252,7 @@ class TestRouterMapFileExtensions:
     def test_kairo_request_pptx_extension(self):
         """KairoRequest with .pptx file_path maps to pptx domain."""
         from sidecar.router import KairoRequest
+
         req = KairoRequest(
             user_prompt="add a slide",
             file_path="presentation.pptx",
@@ -223,7 +266,8 @@ class TestRouterErrorHandling:
 
     def test_route_with_unknown_domain_raises(self):
         """Invalid domain returns error response."""
-        from sidecar.router import DomainMasterRouter, KairoRequest
+        from sidecar.router import DomainMasterRouter
+
         router = DomainMasterRouter.__new__(DomainMasterRouter)
         router.mem_machine = None
         router.quality_checker = None
@@ -236,6 +280,7 @@ class TestRouterErrorHandling:
 # word_master.py — uncovered branches
 # ============================================================
 
+
 class TestWordMasterContextExtractorFallback:
     """Lines 83-108: Docling integration fallback."""
 
@@ -243,7 +288,7 @@ class TestWordMasterContextExtractorFallback:
         """When _DOCLING_AVAILABLE is False, python-docx path runs."""
         from docx import Document
         from sidecar.masters.word_master import WordContextExtractor
-        
+
         doc_path = str(tmp_path / "test.docx")
         doc = Document()
         doc.add_paragraph("Hello world paragraph", style="Normal")
@@ -274,6 +319,7 @@ class TestWordMasterContextExtractorFallback:
 
         try:
             from sidecar.masters.word_master import WordContextExtractor
+
             extractor = WordContextExtractor()
             ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
             # Should have fallen back
@@ -303,6 +349,7 @@ class TestWordMasterContextExtractorFallback:
 
         try:
             from sidecar.masters.word_master import WordContextExtractor
+
             extractor = WordContextExtractor()
             ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
             assert ctx.total_paragraphs >= 1
@@ -327,7 +374,14 @@ class TestWordMasterWriterEdgeCases:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        ops = [{"type": "insert_paragraph", "text": "Appended paragraph", "after_paragraph_index": 9999, "style": "Normal"}]
+        ops = [
+            {
+                "type": "insert_paragraph",
+                "text": "Appended paragraph",
+                "after_paragraph_index": 9999,
+                "style": "Normal",
+            }
+        ]
         result = writer.apply_operations(doc_path, ops, ctx)
         # Should succeed without error
         assert "errors" in result
@@ -365,8 +419,15 @@ class TestWordMasterWriterEdgeCases:
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
         # NonExistentStyle999 will be rejected by validator; operation should error gracefully
-        ops = [{"type": "insert_paragraph", "text": "New line", "after_paragraph_index": 0, "style": "NonExistentStyle999"}]
-        result = writer.apply_operations(doc_path, ops, ctx)
+        ops = [
+            {
+                "type": "insert_paragraph",
+                "text": "New line",
+                "after_paragraph_index": 0,
+                "style": "NonExistentStyle999",
+            }
+        ]
+        writer.apply_operations(doc_path, ops, ctx)
         # Original file should still be readable
         doc2 = Document(doc_path)
         assert len(doc2.paragraphs) >= 1
@@ -377,6 +438,7 @@ class TestWordMasterValidation:
 
     def test_validation_result_invalid(self):
         from sidecar.masters.word_master import ValidationResult
+
         r = ValidationResult(valid=False, error="Bad style", op={"type": "insert_paragraph"})
         assert not r.valid
         assert r.error == "Bad style"
@@ -384,6 +446,7 @@ class TestWordMasterValidation:
 
     def test_validation_result_valid(self):
         from sidecar.masters.word_master import ValidationResult
+
         r = ValidationResult(valid=True)
         assert r.valid
         assert r.error == ""
@@ -414,6 +477,7 @@ class TestWordMasterContextToDict:
 # ============================================================
 # excel_master.py — uncovered branches
 # ============================================================
+
 
 class TestExcelMasterApplyOperations:
     """Lines 388-418, 454, 460, 466, 473, 480, 484-490, 494-570."""
@@ -473,11 +537,7 @@ class TestExcelMasterApplyOperations:
         wb.save(path)
 
         writer = ExcelWriter()
-        ops = [{
-            "type": "write_range",
-            "start_cell": "A1",
-            "values": [[1, 2, 3], [4, 5, 6]]
-        }]
+        ops = [{"type": "write_range", "start_cell": "A1", "values": [[1, 2, 3], [4, 5, 6]]}]
         result = writer.apply_operations(path, ops)
         assert result.get("applied_count", 0) >= 6
 
@@ -494,11 +554,7 @@ class TestExcelMasterApplyOperations:
         wb.save(path)
 
         writer = ExcelWriter()
-        ops = [{
-            "type": "write_range",
-            "start_cell": "C1",
-            "formulas": [["=A1+B1"]]
-        }]
+        ops = [{"type": "write_range", "start_cell": "C1", "formulas": [["=A1+B1"]]}]
         result = writer.apply_operations(path, ops)
         assert isinstance(result, dict)
 
@@ -506,7 +562,6 @@ class TestExcelMasterApplyOperations:
         """Protected sheet → PermissionError → added to errors list."""
         import openpyxl
         from sidecar.masters.excel_master import ExcelWriter
-        from openpyxl.worksheet.protection import SheetProtection
 
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -538,13 +593,15 @@ class TestExcelMasterApplyOperations:
         wb.save(path)
 
         writer = ExcelWriter()
-        ops = [{
-            "type": "create_chart",
-            "chart_type": "bar",
-            "title": "Monthly Sales",
-            "source_range": "A1:B3",
-            "target_sheet": "Sheet"
-        }]
+        ops = [
+            {
+                "type": "create_chart",
+                "chart_type": "bar",
+                "title": "Monthly Sales",
+                "source_range": "A1:B3",
+                "target_sheet": "Sheet",
+            }
+        ]
         result = writer.apply_operations(path, ops)
         # Chart creation should succeed
         assert isinstance(result, dict)
@@ -562,12 +619,14 @@ class TestExcelMasterApplyOperations:
         wb.save(path)
 
         writer = ExcelWriter()
-        ops = [{
-            "type": "create_chart",
-            "chart_type": "line",
-            "title": "Trend",
-            "source_range": "A1:A4",
-        }]
+        ops = [
+            {
+                "type": "create_chart",
+                "chart_type": "line",
+                "title": "Trend",
+                "source_range": "A1:A4",
+            }
+        ]
         result = writer.apply_operations(path, ops)
         assert isinstance(result, dict)
 
@@ -588,13 +647,15 @@ class TestExcelMasterApplyOperations:
         wb.save(path)
 
         writer = ExcelWriter()
-        ops = [{
-            "type": "create_pivot",
-            "source_range": "A1:B3",
-            "rows": ["Region"],
-            "values": ["Sales"],
-            "columns": []
-        }]
+        ops = [
+            {
+                "type": "create_pivot",
+                "source_range": "A1:B3",
+                "rows": ["Region"],
+                "values": ["Sales"],
+                "columns": [],
+            }
+        ]
         result = writer.apply_operations(path, ops)
         assert isinstance(result, dict)
 
@@ -639,7 +700,6 @@ class TestExcelContextExtractor:
 
     def test_extract_named_ranges(self, tmp_path):
         """Named ranges are populated in context."""
-        import openpyxl
         from openpyxl import Workbook
         from openpyxl.workbook.defined_name import DefinedName
         from sidecar.masters.excel_master import ExcelContextExtractor
@@ -698,12 +758,14 @@ class TestExcelValidationResult:
 
     def test_validation_result_invalid(self):
         from sidecar.masters.excel_master import ValidationResult
+
         r = ValidationResult(valid=False, error="bad op", op={"type": "write_cell"})
         assert not r.valid
         assert r.error == "bad op"
 
     def test_validation_result_valid(self):
         from sidecar.masters.excel_master import ValidationResult
+
         r = ValidationResult(valid=True)
         assert r.valid
         assert r.op is None
@@ -713,6 +775,7 @@ class TestExcelValidationResult:
 # Bridge feature-flag tests (P0 Fix 1 verification)
 # ============================================================
 
+
 class TestFigmaBridgeFeatureFlag:
     """Verify _mock_canvas is gated behind KAIRO_ENABLE_MOCK_CANVAS."""
 
@@ -721,8 +784,8 @@ class TestFigmaBridgeFeatureFlag:
         # Ensure flag is off
         os.environ.pop("KAIRO_ENABLE_MOCK_CANVAS", None)
         # Re-import to pick up env change is tricky, so test the flag value directly
-        import importlib
         import sidecar.parsers.figma_design_bridge as fdb
+
         # The module-level flag should be False in CI (no env var set)
         # In this test env the flag state depends on what was set at import time.
         # We verify the module EXPORTS the flag.
@@ -731,8 +794,8 @@ class TestFigmaBridgeFeatureFlag:
     def test_mock_canvas_with_flag_on(self, monkeypatch):
         """With flag on, _mock_canvas is populated after __init__."""
         monkeypatch.setenv("KAIRO_ENABLE_MOCK_CANVAS", "1")
-        import importlib
         import sidecar.parsers.figma_design_bridge as fdb
+
         # Patch the module-level flag to simulate re-import with flag on
         monkeypatch.setattr(fdb, "_MOCK_CANVAS_ENABLED", True)
         bridge = fdb.FigmaDesignBridge(offline_mode=True)
@@ -743,6 +806,7 @@ class TestFigmaBridgeFeatureFlag:
     def test_read_node_tree_blocked_without_flag(self, monkeypatch):
         """read_node_tree returns an error when mock canvas is disabled."""
         import sidecar.parsers.figma_design_bridge as fdb
+
         monkeypatch.setattr(fdb, "_MOCK_CANVAS_ENABLED", False)
         bridge = fdb.FigmaDesignBridge()
         result = bridge.read_node_tree()
@@ -751,6 +815,7 @@ class TestFigmaBridgeFeatureFlag:
     def test_set_fills_blocked_without_flag(self, monkeypatch):
         """set_fills returns error when mock canvas is disabled."""
         import sidecar.parsers.figma_design_bridge as fdb
+
         monkeypatch.setattr(fdb, "_MOCK_CANVAS_ENABLED", False)
         bridge = fdb.FigmaDesignBridge()
         result = bridge.set_fills("some-node", "#ff0000")
@@ -763,11 +828,13 @@ class TestTldrawBridgeFeatureFlag:
 
     def test_mock_shapes_disabled_by_default(self):
         import sidecar.parsers.tldraw_bridge as tdb
+
         assert hasattr(tdb, "_MOCK_CANVAS_ENABLED")
 
     def test_get_canvas_shapes_empty_without_flag(self, monkeypatch):
         """get_canvas_shapes returns [] when flag is off."""
         import sidecar.parsers.tldraw_bridge as tdb
+
         monkeypatch.setattr(tdb, "_MOCK_CANVAS_ENABLED", False)
         bridge = tdb.TldrawBridge()
         shapes = bridge.get_canvas_shapes()
@@ -776,6 +843,7 @@ class TestTldrawBridgeFeatureFlag:
     def test_update_shape_blocked_without_flag(self, monkeypatch):
         """update_shape returns error when mock is disabled."""
         import sidecar.parsers.tldraw_bridge as tdb
+
         monkeypatch.setattr(tdb, "_MOCK_CANVAS_ENABLED", False)
         bridge = tdb.TldrawBridge()
         result = bridge.update_shape("node-start", x=200)
@@ -785,6 +853,7 @@ class TestTldrawBridgeFeatureFlag:
     def test_delete_shape_blocked_without_flag(self, monkeypatch):
         """delete_shape returns error when mock is disabled."""
         import sidecar.parsers.tldraw_bridge as tdb
+
         monkeypatch.setattr(tdb, "_MOCK_CANVAS_ENABLED", False)
         bridge = tdb.TldrawBridge()
         result = bridge.delete_shape("node-start")
@@ -795,6 +864,7 @@ class TestTldrawBridgeFeatureFlag:
 # Additional WordMaster & Router coverage boost tests
 # ============================================================
 
+
 class TestWordMasterExtraCoverage:
     """Target additional uncovered branches in word_master.py."""
 
@@ -802,23 +872,23 @@ class TestWordMasterExtraCoverage:
         from docx import Document
         from docx.oxml import OxmlElement
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "track_replace.docx")
         doc = Document()
         doc.add_paragraph("Original text")
-        doc.settings.element.append(OxmlElement('w:trackRevisions'))
+        doc.settings.element.append(OxmlElement("w:trackRevisions"))
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [
             {
                 "type": "replace_paragraph",
                 "paragraph_index": 0,
                 "runs": [{"text": "Replaced text"}],
-                "comment": "Replaced style comment"
+                "comment": "Replaced style comment",
             }
         ]
         with patch("sidecar.parsers.adeu_bridge.adeu_apply_edits") as mock_edits:
@@ -828,138 +898,158 @@ class TestWordMasterExtraCoverage:
             assert mock_edits.call_count == 1
             args, kwargs = mock_edits.call_args
             assert args[0] == doc_path
-            assert args[1] == [{"target_text": "Original text", "new_text": "Replaced text", "comment": "Replaced style comment"}]
+            assert args[1] == [
+                {
+                    "target_text": "Original text",
+                    "new_text": "Replaced text",
+                    "comment": "Replaced style comment",
+                }
+            ]
 
     def test_writer_track_changes_delete_paragraph(self, tmp_path):
         from docx import Document
         from docx.oxml import OxmlElement
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "track_delete.docx")
         doc = Document()
         doc.add_paragraph("Original text")
-        doc.settings.element.append(OxmlElement('w:trackRevisions'))
+        doc.settings.element.append(OxmlElement("w:trackRevisions"))
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
-        ops = [
-            {
-                "type": "delete_paragraph",
-                "paragraph_index": 0,
-                "comment": "Delete comment"
-            }
-        ]
+
+        ops = [{"type": "delete_paragraph", "paragraph_index": 0, "comment": "Delete comment"}]
         with patch("sidecar.parsers.adeu_bridge.adeu_apply_edits") as mock_edits:
             mock_edits.return_value = {"ok": True, "applied_count": 1}
             result = writer.apply_operations(doc_path, ops, ctx)
             assert result["applied_count"] == 1
-            assert mock_edits.call_args[0][1] == [{"target_text": "Original text", "new_text": "", "comment": "Delete comment"}]
+            assert mock_edits.call_args[0][1] == [
+                {"target_text": "Original text", "new_text": "", "comment": "Delete comment"}
+            ]
 
     def test_writer_track_changes_append_to_run(self, tmp_path):
         from docx import Document
         from docx.oxml import OxmlElement
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "track_append.docx")
         doc = Document()
         doc.add_paragraph("Original text")
-        doc.settings.element.append(OxmlElement('w:trackRevisions'))
+        doc.settings.element.append(OxmlElement("w:trackRevisions"))
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [
             {
                 "type": "append_to_run",
                 "paragraph_index": 0,
                 "runs": [{"text": " plus append"}],
-                "comment": "Append comment"
+                "comment": "Append comment",
             }
         ]
         with patch("sidecar.parsers.adeu_bridge.adeu_apply_edits") as mock_edits:
             mock_edits.return_value = {"ok": True, "applied_count": 1}
             result = writer.apply_operations(doc_path, ops, ctx)
             assert result["applied_count"] == 1
-            assert mock_edits.call_args[0][1] == [{"target_text": "Original text", "new_text": "Original text plus append", "comment": "Append comment"}]
+            assert mock_edits.call_args[0][1] == [
+                {
+                    "target_text": "Original text",
+                    "new_text": "Original text plus append",
+                    "comment": "Append comment",
+                }
+            ]
 
     def test_writer_track_changes_insert_paragraph_after_index(self, tmp_path):
         from docx import Document
         from docx.oxml import OxmlElement
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "track_insert.docx")
         doc = Document()
         doc.add_paragraph("Original text")
-        doc.settings.element.append(OxmlElement('w:trackRevisions'))
+        doc.settings.element.append(OxmlElement("w:trackRevisions"))
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [
             {
                 "type": "insert_paragraph",
                 "after_paragraph_index": 0,
                 "runs": [{"text": "Inserted para"}],
-                "comment": "Insert comment"
+                "comment": "Insert comment",
             }
         ]
         with patch("sidecar.parsers.adeu_bridge.adeu_apply_edits") as mock_edits:
             mock_edits.return_value = {"ok": True, "applied_count": 1}
             result = writer.apply_operations(doc_path, ops, ctx)
             assert result["applied_count"] == 1
-            assert mock_edits.call_args[0][1] == [{"target_text": "Original text", "new_text": "Original text\nInserted para", "comment": "Insert comment"}]
+            assert mock_edits.call_args[0][1] == [
+                {
+                    "target_text": "Original text",
+                    "new_text": "Original text\nInserted para",
+                    "comment": "Insert comment",
+                }
+            ]
 
     def test_writer_track_changes_insert_paragraph_at_end(self, tmp_path):
         from docx import Document
         from docx.oxml import OxmlElement
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "track_insert_end.docx")
         doc = Document()
         doc.add_paragraph("Original text")
-        doc.settings.element.append(OxmlElement('w:trackRevisions'))
+        doc.settings.element.append(OxmlElement("w:trackRevisions"))
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [
             {
                 "type": "insert_paragraph",
                 "after_paragraph_index": -1,
                 "runs": [{"text": "Inserted para"}],
-                "comment": "Insert end comment"
+                "comment": "Insert end comment",
             }
         ]
         with patch("sidecar.parsers.adeu_bridge.adeu_apply_edits") as mock_edits:
             mock_edits.return_value = {"ok": True, "applied_count": 1}
             result = writer.apply_operations(doc_path, ops, ctx)
             assert result["applied_count"] == 1
-            assert mock_edits.call_args[0][1] == [{"target_text": "Original text", "new_text": "Original text\nInserted para", "comment": "Insert end comment"}]
+            assert mock_edits.call_args[0][1] == [
+                {
+                    "target_text": "Original text",
+                    "new_text": "Original text\nInserted para",
+                    "comment": "Insert end comment",
+                }
+            ]
 
     def test_writer_track_changes_routing_failure(self, tmp_path):
         from docx import Document
         from docx.oxml import OxmlElement
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "track_fail.docx")
         doc = Document()
         doc.add_paragraph("Original text")
-        doc.settings.element.append(OxmlElement('w:trackRevisions'))
+        doc.settings.element.append(OxmlElement("w:trackRevisions"))
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [{"type": "delete_paragraph", "paragraph_index": 0}]
         with patch("sidecar.parsers.adeu_bridge.adeu_apply_edits") as mock_edits:
             mock_edits.return_value = {"ok": False, "error": "Simulated adeu fail"}
@@ -970,7 +1060,7 @@ class TestWordMasterExtraCoverage:
     def test_writer_append_to_run_non_track_changes(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "normal_append.docx")
         doc = Document()
         doc.add_paragraph("Paragraph text")
@@ -979,18 +1069,24 @@ class TestWordMasterExtraCoverage:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
-        ops = [{"type": "append_to_run", "paragraph_index": 0, "runs": [{"text": " extra run", "bold": True, "italic": True}]}]
+
+        ops = [
+            {
+                "type": "append_to_run",
+                "paragraph_index": 0,
+                "runs": [{"text": " extra run", "bold": True, "italic": True}],
+            }
+        ]
         result = writer.apply_operations(doc_path, ops, ctx)
         assert result["applied_count"] == 1
-        
+
         doc2 = Document(doc_path)
         assert doc2.paragraphs[0].text == "Paragraph text extra run"
 
     def test_writer_unsupported_operation_error(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "unsupported.docx")
         doc = Document()
         doc.add_paragraph("Text")
@@ -999,7 +1095,7 @@ class TestWordMasterExtraCoverage:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [{"type": "unsupported_op_type"}]
         result = writer.apply_operations(doc_path, ops, ctx)
         assert len(result["errors"]) > 0
@@ -1008,7 +1104,7 @@ class TestWordMasterExtraCoverage:
     def test_writer_operation_failure_catch(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "op_fail.docx")
         doc = Document()
         doc.add_paragraph("Text")
@@ -1017,7 +1113,7 @@ class TestWordMasterExtraCoverage:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         # Let's force an exception by passing None to runs
         ops = [{"type": "replace_paragraph", "paragraph_index": 0, "runs": None}]
         result = writer.apply_operations(doc_path, ops, ctx)
@@ -1027,7 +1123,7 @@ class TestWordMasterExtraCoverage:
     def test_writer_permission_error_rollback(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "locked.docx")
         doc = Document()
         doc.add_paragraph("Initial state")
@@ -1036,9 +1132,9 @@ class TestWordMasterExtraCoverage:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [{"type": "insert_paragraph", "text": "Appended", "after_paragraph_index": -1}]
-        
+
         with patch("docx.document.Document.save", side_effect=PermissionError("File locked")):
             result = writer.apply_operations(doc_path, ops, ctx)
             assert "error" in result
@@ -1050,7 +1146,7 @@ class TestWordMasterExtraCoverage:
     def test_writer_general_exception_rollback(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "general_exc.docx")
         doc = Document()
         doc.add_paragraph("Initial state")
@@ -1059,9 +1155,9 @@ class TestWordMasterExtraCoverage:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
+
         ops = [{"type": "insert_paragraph", "text": "Appended", "after_paragraph_index": -1}]
-        
+
         with patch("docx.document.Document.save", side_effect=Exception("Disk full")):
             with pytest.raises(Exception) as excinfo:
                 writer.apply_operations(doc_path, ops, ctx)
@@ -1073,14 +1169,15 @@ class TestWordMasterExtraCoverage:
     def test_extractor_level_extraction_error(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordContextExtractor
-        
+
         doc_path = str(tmp_path / "level_err.docx")
         doc = Document()
         p = doc.add_paragraph("Text")
         from docx.oxml import OxmlElement
+
         pPr = p._p.get_or_add_pPr()
-        numPr = OxmlElement('w:numPr')
-        ilvl = OxmlElement('w:ilvl')
+        numPr = OxmlElement("w:numPr")
+        ilvl = OxmlElement("w:ilvl")
         numPr.append(ilvl)
         pPr.append(numPr)
         doc.save(doc_path)
@@ -1092,10 +1189,10 @@ class TestWordMasterExtraCoverage:
     def test_extractor_style_exception_handling(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordContextExtractor
-        
+
         doc_path = str(tmp_path / "style_err.docx")
         doc = Document()
-        p = doc.add_paragraph("Text")
+        doc.add_paragraph("Text")
         doc.save(doc_path)
 
         extractor = WordContextExtractor()
@@ -1107,7 +1204,7 @@ class TestWordMasterExtraCoverage:
     def test_word_master_cursor_fallback(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordMaster
-        
+
         doc_path = str(tmp_path / "cursor.docx")
         doc = Document()
         doc.add_paragraph("Text")
@@ -1119,25 +1216,27 @@ class TestWordMasterExtraCoverage:
 
     def test_word_master_generate_reasoning(self):
         from sidecar.masters.word_master import WordMaster
+
         master = WordMaster()
-        
+
         r1 = master._generate_reasoning(None, "Prefer bullet style formats")
         assert "List Bullet" in r1
-        
+
         r2 = master._generate_reasoning(None, "Use heading 2 style")
         assert "Heading 2" in r2
-        
+
         r3 = master._generate_reasoning(None, "")
         assert "Analyzing document structure" in r3
 
     def test_word_master_validate_operations_model_dump(self):
         from sidecar.masters.word_master import WordMaster, WordContext
+
         master = WordMaster()
-        
+
         class MockOp:
             def model_dump(self):
                 return {"type": "insert_paragraph", "text": "hello", "after_paragraph_index": 0}
-        
+
         class MockResponse:
             operations = [MockOp()]
             reasoning = "Test reasoning"
@@ -1163,38 +1262,50 @@ class TestRouterExtraCoverage:
 
     def test_get_page_count_attribute_value_error(self):
         from sidecar.router import _get_page_count
-        
+
         class BadCtx:
             page_count = "not_a_number"
-        
+
         assert _get_page_count(BadCtx()) == 0
 
     def test_reasoning_step_classify_all_domains(self):
         from sidecar.router import ReasoningStep
+
         rs = ReasoningStep()
-        
+
         class MockVal:
             is_ambiguous = False
             confidence = 1.0
             clarifying_question = None
 
-        with patch("sidecar.router.call_with_schema", return_value=MockVal()) as mock_call:
+        with patch("sidecar.router.call_with_schema", return_value=MockVal()):
             r = rs.classify("Calculate profit", None, "xlsx", "")
             assert r.domain == "excel"
-            
+
             r = rs.classify("Add slide", None, "pptx", "")
             assert r.domain == "powerpoint"
-            
-            from unittest.mock import ANY
-            for dom in ["code", "pdf", "browser", "terminal", "email", "notes", "design", "media", "data", "unknown_xxx"]:
+
+            for dom in [
+                "code",
+                "pdf",
+                "browser",
+                "terminal",
+                "email",
+                "notes",
+                "design",
+                "media",
+                "data",
+                "unknown_xxx",
+            ]:
                 r = rs.classify("prompt", None, dom, "")
                 expected = "unknown" if dom == "unknown_xxx" else dom
                 assert r.domain == expected
 
     def test_domain_master_router_prompt_only_mode(self):
         from sidecar.router import DomainMasterRouter, KairoRequest
+
         router = DomainMasterRouter()
-        
+
         with patch("sidecar.domain_registry.get_domain_mode", return_value="PromptOnly"):
             req = KairoRequest(user_prompt="Add paragraph", domain="word", file_path="doc.docx")
             resp = router.route(req)
@@ -1203,31 +1314,37 @@ class TestRouterExtraCoverage:
 
     def test_domain_master_router_intent_gate_exception_swallowed(self):
         from sidecar.router import DomainMasterRouter, KairoRequest
+
         router = DomainMasterRouter()
-        
+
         if router._intent_gate is not None:
-            with patch.object(router._intent_gate, "classify", side_effect=Exception("IntentGate crash")):
+            with patch.object(
+                router._intent_gate, "classify", side_effect=Exception("IntentGate crash")
+            ):
                 req = KairoRequest(user_prompt="Hello", domain="word", file_path="")
-                with patch.object(router.reasoning_step, "classify", side_effect=Exception("Stop execution")):
+                with patch.object(
+                    router.reasoning_step, "classify", side_effect=Exception("Stop execution")
+                ):
                     resp = router.route(req)
                     assert resp.type == "error"
                     assert "Stop execution" in resp.error
 
     def test_domain_master_router_planning_complex_request(self):
         from sidecar.router import DomainMasterRouter, KairoRequest, OrchestratorResponse
+
         router = DomainMasterRouter()
-        
-        req = KairoRequest(user_prompt="Write a document and format it", domain="word", file_path="")
-        
+
+        KairoRequest(user_prompt="Write a document and format it", domain="word", file_path="")
+
         classif = OrchestratorResponse(
             domain="word",
             confidence=0.9,
             is_ambiguous=False,
             task_type="generate",
             complexity="complex",
-            waza_agent="developer"
+            waza_agent="developer",
         )
-        
+
         with patch.object(router.reasoning_step, "classify", return_value=classif):
             plan = router._dispatch_plan_engine("word", "Write a document and format it", classif)
             assert len(plan) >= 3
@@ -1235,40 +1352,52 @@ class TestRouterExtraCoverage:
 
     def test_domain_master_router_create_from_scratch_no_file(self):
         from sidecar.router import DomainMasterRouter, KairoRequest, OrchestratorResponse
+
         router = DomainMasterRouter()
-        
-        req = KairoRequest(user_prompt="Create a 10-slide presentation", domain="powerpoint", file_path="")
-        
+
+        req = KairoRequest(
+            user_prompt="Create a 10-slide presentation", domain="powerpoint", file_path=""
+        )
+
         classif = OrchestratorResponse(
             domain="powerpoint",
             confidence=0.9,
             is_ambiguous=False,
             task_type="generate",
-            complexity="complex"
+            complexity="complex",
         )
-        
+
         with patch.object(router.reasoning_step, "classify", return_value=classif):
-            with patch.object(router, "_dispatch_create_from_scratch", return_value="presentation.pptx") as mock_dispatch:
+            with patch.object(
+                router, "_dispatch_create_from_scratch", return_value="presentation.pptx"
+            ) as mock_dispatch:
                 resp = router.route(req)
                 assert resp.type == "operations"
                 assert "presentation.pptx" in resp.context_summary
                 from unittest.mock import ANY
-                mock_dispatch.assert_called_once_with(domain="powerpoint", user_prompt="Create a 10-slide presentation", model=ANY)
+
+                mock_dispatch.assert_called_once_with(
+                    domain="powerpoint", user_prompt="Create a 10-slide presentation", model=ANY
+                )
 
     def test_domain_master_router_quality_gate_retry(self):
-        from sidecar.router import DomainMasterRouter, KairoRequest, OrchestratorResponse, QualityReport
-        router = DomainMasterRouter()
-        
-        req = KairoRequest(user_prompt="Summary", domain="word", file_path="test.docx")
-        
-        classif = OrchestratorResponse(
-            domain="word",
-            confidence=0.9,
-            is_ambiguous=False,
-            task_type="insert"
+        from sidecar.router import (
+            DomainMasterRouter,
+            KairoRequest,
+            OrchestratorResponse,
+            QualityReport,
         )
-        
+
+        router = DomainMasterRouter()
+
+        req = KairoRequest(user_prompt="Summary", domain="word", file_path="test.docx")
+
+        classif = OrchestratorResponse(
+            domain="word", confidence=0.9, is_ambiguous=False, task_type="insert"
+        )
+
         from sidecar.masters.word_master import WordContext
+
         dummy_ctx = WordContext(
             styles={"paragraph": [], "character": [], "table": []},
             paragraphs=[],
@@ -1277,35 +1406,41 @@ class TestRouterExtraCoverage:
             list_sequences=[],
             document_purpose="general",
             cursor_paragraph_index=0,
-            total_paragraphs=0
+            total_paragraphs=0,
         )
-        
+
         from sidecar.schemas.docx_schema import DocxResponse
+
         dummy_response = DocxResponse(operations=[], confidence=0.9, reasoning="No issue")
-        
-        with patch.object(router.masters["word"], "extract_context", return_value=dummy_ctx), \
-             patch.object(router.masters["word"], "build_prompt", return_value="prompt"), \
-             patch.object(router.reasoning_step, "classify", return_value=classif), \
-             patch("sidecar.router.call_with_schema", return_value=dummy_response) as mock_call, \
-             patch.object(router.quality_checker, "run_all_checks") as mock_quality:
-             
-             mock_quality.side_effect = [
-                 QualityReport(all_passed=False, issues=["leaked system prompt"], retry_recommended=True),
-                 QualityReport(all_passed=True, issues=[])
-             ]
-             
-             resp = router.route(req)
-             assert mock_call.call_count == 2
-             assert "leaked system prompt" in mock_call.call_args[0][0]
+
+        with (
+            patch.object(router.masters["word"], "extract_context", return_value=dummy_ctx),
+            patch.object(router.masters["word"], "build_prompt", return_value="prompt"),
+            patch.object(router.reasoning_step, "classify", return_value=classif),
+            patch("sidecar.router.call_with_schema", return_value=dummy_response) as mock_call,
+            patch.object(router.quality_checker, "run_all_checks") as mock_quality,
+        ):
+            mock_quality.side_effect = [
+                QualityReport(
+                    all_passed=False, issues=["leaked system prompt"], retry_recommended=True
+                ),
+                QualityReport(all_passed=True, issues=[]),
+            ]
+
+            router.route(req)
+            assert mock_call.call_count == 2
+            assert "leaked system prompt" in mock_call.call_args[0][0]
 
     def test_domain_master_router_memory_seeder_failure_swallowed(self):
         from sidecar.router import DomainMasterRouter, KairoRequest, OrchestratorResponse
+
         router = DomainMasterRouter()
-        
+
         req = KairoRequest(user_prompt="Hello", domain="word", file_path="test.docx")
         classif = OrchestratorResponse(domain="word", confidence=0.9, is_ambiguous=False)
-        
+
         from sidecar.masters.word_master import WordContext
+
         dummy_ctx = WordContext(
             styles={"paragraph": [], "character": [], "table": []},
             paragraphs=[],
@@ -1314,29 +1449,33 @@ class TestRouterExtraCoverage:
             list_sequences=[],
             document_purpose="general",
             cursor_paragraph_index=0,
-            total_paragraphs=0
+            total_paragraphs=0,
         )
         from sidecar.schemas.docx_schema import DocxResponse
+
         dummy_response = DocxResponse(operations=[], confidence=0.9, reasoning="reason")
-        
-        with patch.object(router.masters["word"], "extract_context", return_value=dummy_ctx), \
-             patch.object(router.masters["word"], "build_prompt", return_value="prompt"), \
-             patch.object(router.reasoning_step, "classify", return_value=classif), \
-             patch("sidecar.router.call_with_schema", return_value=dummy_response), \
-             patch("sidecar.router.mem_seeder") as mock_seeder:
-             
-             mock_seeder.seed_operation.side_effect = Exception("MemorySeeder crashed")
-             resp = router.route(req)
-             assert resp.type == "operations"
+
+        with (
+            patch.object(router.masters["word"], "extract_context", return_value=dummy_ctx),
+            patch.object(router.masters["word"], "build_prompt", return_value="prompt"),
+            patch.object(router.reasoning_step, "classify", return_value=classif),
+            patch("sidecar.router.call_with_schema", return_value=dummy_response),
+            patch("sidecar.router.mem_seeder") as mock_seeder,
+        ):
+            mock_seeder.seed_operation.side_effect = Exception("MemorySeeder crashed")
+            resp = router.route(req)
+            assert resp.type == "operations"
 
     def test_domain_master_router_audit_log_failure_swallowed(self):
         from sidecar.router import DomainMasterRouter, KairoRequest, OrchestratorResponse
+
         router = DomainMasterRouter()
-        
+
         req = KairoRequest(user_prompt="Hello", domain="word", file_path="test.docx")
         classif = OrchestratorResponse(domain="word", confidence=0.9, is_ambiguous=False)
-        
+
         from sidecar.masters.word_master import WordContext
+
         dummy_ctx = WordContext(
             styles={"paragraph": [], "character": [], "table": []},
             paragraphs=[],
@@ -1345,41 +1484,56 @@ class TestRouterExtraCoverage:
             list_sequences=[],
             document_purpose="general",
             cursor_paragraph_index=0,
-            total_paragraphs=0
+            total_paragraphs=0,
         )
         from sidecar.schemas.docx_schema import DocxResponse
+
         dummy_response = DocxResponse(operations=[], confidence=0.9, reasoning="reason")
-        
-        with patch.object(router.masters["word"], "extract_context", return_value=dummy_ctx), \
-             patch.object(router.masters["word"], "build_prompt", return_value="prompt"), \
-             patch.object(router.reasoning_step, "classify", return_value=classif), \
-             patch("sidecar.router.call_with_schema", return_value=dummy_response), \
-             patch("builtins.open", side_effect=IOError("Audit log read-only")):
-             resp = router.route(req)
-             assert resp.type == "operations"
+
+        with (
+            patch.object(router.masters["word"], "extract_context", return_value=dummy_ctx),
+            patch.object(router.masters["word"], "build_prompt", return_value="prompt"),
+            patch.object(router.reasoning_step, "classify", return_value=classif),
+            patch("sidecar.router.call_with_schema", return_value=dummy_response),
+            patch("builtins.open", side_effect=IOError("Audit log read-only")),
+        ):
+            resp = router.route(req)
+            assert resp.type == "operations"
 
     def test_swarm_orchestrator_classify_intent_exception_swallowed(self):
         from sidecar.router import SwarmOrchestrator
+
         orch = SwarmOrchestrator()
-        
+
         if orch._intent_gate is not None:
-            with patch.object(orch._intent_gate, "classify", side_effect=Exception("IntentGate crash")):
+            with patch.object(
+                orch._intent_gate, "classify", side_effect=Exception("IntentGate crash")
+            ):
                 res = orch.classify_intent("Hello", "word")
                 assert res is None
 
     def test_dispatch_create_from_scratch_exception(self):
         """Test that _dispatch_create_from_scratch falls back to default doc on LLM failure."""
         from sidecar.router import DomainMasterRouter
+
         router = DomainMasterRouter()
 
         fake_docx = "/tmp/kairo_test.docx"
         fake_pptx = "/tmp/kairo_test.pptx"
         fake_xlsx = "/tmp/kairo_test.xlsx"
 
-        with patch("urllib.request.urlopen", side_effect=Exception("Connection refused")), \
-             patch("sidecar.creators.docx_creator.DocxCreator.create_and_open", return_value=fake_docx), \
-             patch("sidecar.creators.pptx_creator.PptxCreator.create_and_open", return_value=fake_pptx), \
-             patch("sidecar.creators.xlsx_creator.XlsxCreator.create_and_open", return_value=fake_xlsx):
+        with (
+            patch("urllib.request.urlopen", side_effect=Exception("Connection refused")),
+            patch(
+                "sidecar.creators.docx_creator.DocxCreator.create_and_open", return_value=fake_docx
+            ),
+            patch(
+                "sidecar.creators.pptx_creator.PptxCreator.create_and_open", return_value=fake_pptx
+            ),
+            patch(
+                "sidecar.creators.xlsx_creator.XlsxCreator.create_and_open", return_value=fake_xlsx
+            ),
+        ):
             res = router._dispatch_create_from_scratch("word", "Create document")
             assert isinstance(res, str)
             assert res.endswith(".docx")
@@ -1417,14 +1571,15 @@ class TestWordMasterExtraCoveragePart2:
                     "style": "Heading 1",
                     "level": 1,
                     "page": 1,
-                    "index": 0
+                    "index": 0,
                 }
             ],
-            "metadata": {"tier": "docling"}
+            "metadata": {"tier": "docling"},
         }
 
         try:
             from sidecar.masters.word_master import WordContextExtractor
+
             extractor = WordContextExtractor()
             ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
             assert ctx.total_paragraphs == 1
@@ -1437,7 +1592,7 @@ class TestWordMasterExtraCoveragePart2:
     def test_replace_paragraph_style_exception(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordWriter, WordContextExtractor
-        
+
         doc_path = str(tmp_path / "replace_style_exc.docx")
         doc = Document()
         doc.add_paragraph("Paragraph")
@@ -1446,8 +1601,15 @@ class TestWordMasterExtraCoveragePart2:
         extractor = WordContextExtractor()
         ctx = extractor.extract(doc_path, cursor_paragraph_index=0)
         writer = WordWriter()
-        
-        ops = [{"type": "replace_paragraph", "paragraph_index": 0, "runs": [{"text": "Replaced"}], "style": "NonExistent"}]
+
+        ops = [
+            {
+                "type": "replace_paragraph",
+                "paragraph_index": 0,
+                "runs": [{"text": "Replaced"}],
+                "style": "NonExistent",
+            }
+        ]
         result = writer.apply_operations(doc_path, ops, ctx)
         assert result["applied_count"] == 1
         doc2 = Document(doc_path)
@@ -1455,12 +1617,13 @@ class TestWordMasterExtraCoveragePart2:
 
     def test_word_master_validate_operations_rejected(self):
         from sidecar.masters.word_master import WordMaster, WordContext
+
         master = WordMaster()
-        
+
         class MockOp:
             def model_dump(self):
                 return {"type": "insert_paragraph", "style": "TotallyInvalidStyleXYZ"}
-        
+
         class MockResponse:
             operations = [MockOp()]
 
@@ -1481,14 +1644,15 @@ class TestWordMasterExtraCoveragePart2:
     def test_word_master_apply_operations_none_context_exception(self, tmp_path):
         from docx import Document
         from sidecar.masters.word_master import WordMaster
-        
+
         doc_path = str(tmp_path / "valid_but_fails_extraction.docx")
         doc = Document()
         doc.add_paragraph("Paragraph")
         doc.save(doc_path)
-        
+
         master = WordMaster()
-        with patch.object(master._extractor, "extract", side_effect=Exception("Simulated extraction crash")):
+        with patch.object(
+            master._extractor, "extract", side_effect=Exception("Simulated extraction crash")
+        ):
             result = master.apply_operations(doc_path, [], context=None)
             assert result["applied_count"] == 0
-

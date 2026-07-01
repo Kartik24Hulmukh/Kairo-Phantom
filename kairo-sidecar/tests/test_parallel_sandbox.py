@@ -14,6 +14,7 @@ Acceptance criteria verified:
   ✓ At least 2 distinct worker_ids appear (proving parallel execution).
   ✓ Results table is printed to stdout.
 """
+
 from __future__ import annotations
 
 import os
@@ -22,7 +23,6 @@ import uuid
 import time
 import shutil
 import tempfile
-import textwrap
 from typing import Any, Dict, List
 
 import pytest
@@ -35,20 +35,16 @@ for _p in (_SIDECAR_ROOT, os.path.join(_SIDECAR_ROOT, "sidecar")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from sidecar.sandbox_runner import SandboxRunner
 from sidecar.oracle_dispatcher import dispatch
 from sidecar.scenario_store import (
     seed_scenarios,
     record_result,
     query_results,
-    load_scenarios,
 )
 
 # ── Shared state (process-level, not worker-level) ────────────────────────────
 _RUN_ID = str(uuid.uuid4())[:8]
-_DB_PATH = os.path.join(
-    tempfile.gettempdir(), f"kairo_phase5_test_{_RUN_ID}.duckdb"
-)
+_DB_PATH = os.path.join(tempfile.gettempdir(), f"kairo_phase5_test_{_RUN_ID}.duckdb")
 _BASE_DIR = tempfile.mkdtemp(prefix="kairo_phase5_base_")
 
 # ── Scenario definitions ──────────────────────────────────────────────────────
@@ -69,7 +65,7 @@ _SCENARIOS: List[Dict[str, Any]] = [
         "oracle": "fixture_exists",
         "category": "fixture",
         "fix_budget": 1,
-        "_create_fixture": True,   # internal flag: create the file in sandbox
+        "_create_fixture": True,  # internal flag: create the file in sandbox
     },
     {
         "id": "s02",
@@ -157,6 +153,7 @@ _SCENARIOS: List[Dict[str, Any]] = [
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session", autouse=True)
 def seed_db():
     """Seed all 10 scenarios into DuckDB once per session."""
@@ -179,6 +176,7 @@ def seed_db():
 
 
 # ── Parametrized test ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.parametrize("scenario", _SCENARIOS, ids=[s["id"] for s in _SCENARIOS])
 def test_scenario_in_sandbox(scenario, tmp_path, worker_id):
@@ -249,6 +247,7 @@ def test_scenario_in_sandbox(scenario, tmp_path, worker_id):
 
 # ── Session-level summary ─────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session", autouse=True)
 def print_results_table(request):
     """Print the results table after all scenarios complete."""
@@ -277,7 +276,7 @@ def print_results_table(request):
         if len(worker_ids) >= 2:
             print(f"[Phase 5] ✅ Parallel execution confirmed ({len(worker_ids)} workers)")
         else:
-            print(f"[Phase 5] ⚠️  Only 1 worker detected — re-run with -n 4 to confirm parallelism")
+            print("[Phase 5] ⚠️  Only 1 worker detected — re-run with -n 4 to confirm parallelism")
 
         unknown = [r for r in rows if r["oracle_verdict"] not in ("PASS", "FAIL")]
         if not unknown:
@@ -296,16 +295,20 @@ def _print_table(rows: List[Dict]) -> None:
         # Show only last 2 path components for brevity
         parts = sp.replace("\\", "/").split("/")
         sp_short = "/".join(parts[-2:]) if len(parts) >= 2 else sp
-        display.append([
-            r.get("scenario_id", ""),
-            r.get("category", ""),
-            r.get("worker_id", ""),
-            sp_short,
-            r.get("oracle_verdict", ""),
-            str(r.get("elapsed_s", "")),
-        ])
-    col_widths = [max(len(h), max((len(str(row[i])) for row in display), default=0))
-                  for i, h in enumerate(headers)]
+        display.append(
+            [
+                r.get("scenario_id", ""),
+                r.get("category", ""),
+                r.get("worker_id", ""),
+                sp_short,
+                r.get("oracle_verdict", ""),
+                str(r.get("elapsed_s", "")),
+            ]
+        )
+    col_widths = [
+        max(len(h), max((len(str(row[i])) for row in display), default=0))
+        for i, h in enumerate(headers)
+    ]
     sep = "+-" + "-+-".join("-" * w for w in col_widths) + "-+"
     header_row = "| " + " | ".join(h.ljust(col_widths[i]) for i, h in enumerate(headers)) + " |"
     print(f"\n{'─' * 80}")
@@ -319,6 +322,7 @@ def _print_table(rows: List[Dict]) -> None:
 
 
 # ── worker_id fixture (handles both xdist and non-xdist) ─────────────────────
+
 
 @pytest.fixture
 def worker_id(request):

@@ -1,5 +1,6 @@
 import re
 
+
 class SecurityAuditor:
     def __init__(self, strict: bool = False):
         self.strict = strict

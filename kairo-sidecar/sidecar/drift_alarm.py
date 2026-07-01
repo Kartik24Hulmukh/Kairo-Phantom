@@ -37,7 +37,11 @@ class DriftAlarm:
         except Exception as e:
             log.error(f"[Drift Alarm] Failed to write training_state.json: {e}")
 
-    def check_drift(self, synthetic_results: List[Dict[str, Any]], human_labels: Optional[Dict[str, bool]] = None) -> float:
+    def check_drift(
+        self,
+        synthetic_results: List[Dict[str, Any]],
+        human_labels: Optional[Dict[str, bool]] = None,
+    ) -> float:
         """
         Compute drift gap: |synthetic_pass_rate - human_pass_rate| on the calibration set.
         If gap > threshold, freeze training and persist metrics to DuckDB.
@@ -73,7 +77,9 @@ class DriftAlarm:
                     syn_passes += 1
 
         if syn_count == 0:
-            log.warning("[Drift Alarm] No overlapping calibration scenarios found between synthetic and human sets.")
+            log.warning(
+                "[Drift Alarm] No overlapping calibration scenarios found between synthetic and human sets."
+            )
             return 0.0
 
         synthetic_pass_rate = syn_passes / syn_count
@@ -85,8 +91,10 @@ class DriftAlarm:
         # Drift gap
         drift_gap = abs(synthetic_pass_rate - human_pass_rate)
         self.drift_history.append(drift_gap)
-        
-        log.info(f"[Drift Alarm] Synthetic pass rate: {synthetic_pass_rate:.3f} | Human pass rate: {human_pass_rate:.3f} | Drift gap: {drift_gap:.3f}")
+
+        log.info(
+            f"[Drift Alarm] Synthetic pass rate: {synthetic_pass_rate:.3f} | Human pass rate: {human_pass_rate:.3f} | Drift gap: {drift_gap:.3f}"
+        )
 
         if drift_gap > self.threshold:
             self.trigger_freeze(drift_gap)
@@ -116,17 +124,20 @@ class DriftAlarm:
                         timestamp TIMESTAMP
                     )
                 """)
-                con.execute("""
+                con.execute(
+                    """
                     INSERT INTO drift_metrics (synthetic_pass_rate, human_pass_rate, drift_gap, threshold, frozen, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, [
-                    float(synthetic_pass_rate),
-                    float(human_pass_rate),
-                    float(drift_gap),
-                    float(self.threshold),
-                    bool(self.training_frozen),
-                    datetime.datetime.utcnow()
-                ])
+                """,
+                    [
+                        float(synthetic_pass_rate),
+                        float(human_pass_rate),
+                        float(drift_gap),
+                        float(self.threshold),
+                        bool(self.training_frozen),
+                        datetime.datetime.utcnow(),
+                    ],
+                )
             finally:
                 con.close()
         except Exception as e:

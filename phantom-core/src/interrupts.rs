@@ -44,14 +44,14 @@ impl InterruptController {
         let _ = self.state_tx.send(InjectionState::Paused);
         
         // Open correction window
-        if let Some(window) = app_handle.get_window("correction") {
+        if let Some(window) = app_handle.get_webview_window("correction") {
             window.show().unwrap();
             window.set_focus().unwrap();
         } else {
-            tauri::WindowBuilder::new(
+            tauri::WebviewWindowBuilder::new(
                 app_handle,
                 "correction",
-                tauri::WindowUrl::App("correction.html".into())
+                tauri::WebviewUrl::App("correction.html".into())
             )
             .title("Correction")
             .inner_size(400.0, 60.0)
@@ -116,7 +116,7 @@ pub async fn word_by_word_inject(
 pub fn submit_correction(app: tauri::AppHandle, correction: String) {
     // In real usage: Appends correction to Context and resumes stream
     // Hide the correction window
-    if let Some(window) = app.get_window("correction") {
+    if let Some(window) = app.get_webview_window("correction") {
         window.hide().unwrap();
     }
     

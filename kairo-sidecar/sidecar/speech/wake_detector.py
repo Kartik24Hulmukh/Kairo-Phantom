@@ -11,10 +11,10 @@ Usage:
     result = detector.detect(audio_chunk_bytes)
     # → {detected: bool, confidence: float}
 """
+
 from __future__ import annotations
 
 import logging
-import struct
 from typing import Dict, List
 
 import numpy as np
@@ -27,10 +27,13 @@ HAS_OPENWAKEWORD: bool = False
 
 try:
     from openwakeword import Model as OWWModel  # type: ignore
+
     HAS_OPENWAKEWORD = True
 except ImportError:
-    log.info("openwakeword not installed — WakeDetector will raise on init. "
-             "Install: pip install openwakeword")
+    log.info(
+        "openwakeword not installed — WakeDetector will raise on init. "
+        "Install: pip install openwakeword"
+    )
     OWWModel = None  # type: ignore
 
 
@@ -43,9 +46,7 @@ class WakeDetector:
 
     def __init__(self, model_name: str = "hey_kairo"):
         if not HAS_OPENWAKEWORD:
-            raise RuntimeError(
-                "openwakeword not installed. pip install openwakeword"
-            )
+            raise RuntimeError("openwakeword not installed. pip install openwakeword")
 
         self.model_name = model_name
         self._model = None
@@ -103,12 +104,11 @@ class WakeDetector:
         This queries the openwakeword package for bundled models.
         """
         if not HAS_OPENWAKEWORD:
-            raise RuntimeError(
-                "openwakeword not installed. pip install openwakeword"
-            )
+            raise RuntimeError("openwakeword not installed. pip install openwakeword")
 
         try:
             from openwakeword import get_pretrained_model_names  # type: ignore
+
             return list(get_pretrained_model_names())
         except ImportError:
             # Fallback: return known default models

@@ -1,6 +1,6 @@
+use std::path::Path;
 use wasmtime::*;
 use wasmtime_wasi::WasiCtxBuilder;
-use std::path::Path;
 
 pub struct WasmSandbox {
     engine: Engine,
@@ -36,12 +36,12 @@ impl WasmSandbox {
         let module = Module::from_file(&self.engine, wasm_path)?;
 
         let instance = linker.instantiate(&mut store, &module)?;
-        
+
         let run_func = instance.get_typed_func::<(), ()>(&mut store, "run")?;
         run_func.call(&mut store, ())?;
 
         // In a real WASI module, we'd capture stdout or have it write to a specific memory location/result
         // This is a stub returning a mocked WASM output.
-        Ok(format!("[WASM Output for Prompt: {}]", input_prompt))
+        Ok(format!("[WASM Output for Prompt: {input_prompt}]"))
     }
 }

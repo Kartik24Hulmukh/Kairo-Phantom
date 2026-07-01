@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 import tempfile
 import time
 import unicodedata
@@ -30,8 +29,10 @@ log = logging.getLogger("kairo-sidecar.pdf_extraction_engine")
 # Enumerations & Data Structures
 # ---------------------------------------------------------------------------
 
+
 class ExtractionTier(Enum):
     """Identifies which extraction engine produced the result."""
+
     PYMUPDF = 1
     OPENDATALOADER = 2
     OLMOCR = 3
@@ -59,6 +60,7 @@ class PdfExtractionResult:
         confidence:       Estimated extraction quality, 0.0–1.0.
         language:         Dominant language code ('en', 'zh', 'ja', 'ko', 'ar').
     """
+
     text: str = ""
     markdown: str = ""
     tables: List[Dict[str, Any]] = field(default_factory=list)
@@ -75,6 +77,7 @@ class PdfExtractionResult:
 # Main Engine
 # ---------------------------------------------------------------------------
 
+
 class PdfExtractionEngine:
     """
     Orchestrates multi-tier PDF extraction with automatic fallback.
@@ -87,9 +90,9 @@ class PdfExtractionEngine:
     """
 
     # Minimum word-count ratios required to accept a tier's output
-    TIER1_THRESHOLD: float = 0.80   # 80 % of estimated word count
-    TIER2_THRESHOLD: float = 0.60   # 60 %
-    TIER3_THRESHOLD: float = 0.40   # 40 %
+    TIER1_THRESHOLD: float = 0.80  # 80 % of estimated word count
+    TIER2_THRESHOLD: float = 0.60  # 60 %
+    TIER3_THRESHOLD: float = 0.40  # 40 %
 
     def __init__(self, offline_mode: bool = True) -> None:
         self.offline_mode: bool = offline_mode
@@ -113,6 +116,7 @@ class PdfExtractionEngine:
     def _check_pymupdf(self) -> bool:
         try:
             import fitz  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -120,6 +124,7 @@ class PdfExtractionEngine:
     def _check_opendataloader(self) -> bool:
         try:
             import opendataloader  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -127,6 +132,7 @@ class PdfExtractionEngine:
     def _check_olmocr(self) -> bool:
         try:
             import olmocr  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -134,6 +140,7 @@ class PdfExtractionEngine:
     def _check_surya(self) -> bool:
         try:
             from surya.ocr import run_ocr  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -166,8 +173,7 @@ class PdfExtractionEngine:
         language: str = self._detect_language(file_path)
         estimated_words: int = self._estimate_word_count(file_path)
         log.info(
-            f"Extracting '{file_path}' | lang={language} | "
-            f"estimated_words≈{estimated_words}"
+            f"Extracting '{file_path}' | lang={language} | " f"estimated_words≈{estimated_words}"
         )
 
         result: Optional[PdfExtractionResult] = None
@@ -180,7 +186,9 @@ class PdfExtractionEngine:
                 ratio = word_count / max(estimated_words, 1)
                 log.debug(f"Tier 1 word ratio: {ratio:.2f}")
                 if ratio >= self.TIER1_THRESHOLD:
-                    result = self._build_result(raw, ExtractionTier.PYMUPDF, language, confidence=0.95)
+                    result = self._build_result(
+                        raw, ExtractionTier.PYMUPDF, language, confidence=0.95
+                    )
             except Exception as exc:
                 log.warning(f"Tier 1 (PyMuPDF) failed: {exc}")
 
@@ -192,7 +200,9 @@ class PdfExtractionEngine:
                 ratio = word_count / max(estimated_words, 1)
                 log.debug(f"Tier 2 word ratio: {ratio:.2f}")
                 if ratio >= self.TIER2_THRESHOLD:
-                    result = self._build_result(raw, ExtractionTier.OPENDATALOADER, language, confidence=0.85)
+                    result = self._build_result(
+                        raw, ExtractionTier.OPENDATALOADER, language, confidence=0.85
+                    )
             except Exception as exc:
                 log.warning(f"Tier 2 (OpenDataLoader) failed: {exc}")
 
@@ -204,7 +214,9 @@ class PdfExtractionEngine:
                 ratio = word_count / max(estimated_words, 1)
                 log.debug(f"Tier 3 word ratio: {ratio:.2f}")
                 if ratio >= self.TIER3_THRESHOLD:
-                    result = self._build_result(raw, ExtractionTier.OLMOCR, language, confidence=0.75)
+                    result = self._build_result(
+                        raw, ExtractionTier.OLMOCR, language, confidence=0.75
+                    )
             except Exception as exc:
                 log.warning(f"Tier 3 (olmOCR) failed: {exc}")
 
@@ -213,9 +225,13 @@ class PdfExtractionEngine:
             try:
                 raw = self._tier4_surya(file_path)
                 if raw.get("text", "").strip():
-                    surya_result = self._build_result(raw, ExtractionTier.SURYA, language, confidence=0.80)
+                    surya_result = self._build_result(
+                        raw, ExtractionTier.SURYA, language, confidence=0.80
+                    )
                     # Prefer Surya over partial results for non-English
-                    if result is None or (language != "en" and len(surya_result.text) > len(result.text)):
+                    if result is None or (
+                        language != "en" and len(surya_result.text) > len(result.text)
+                    ):
                         result = surya_result
             except Exception as exc:
                 log.warning(f"Tier 4 (Surya) failed: {exc}")
@@ -259,6 +275,7 @@ class PdfExtractionEngine:
         sample = ""
         try:
             import fitz
+
             with fitz.open(file_path) as doc:
                 for page in doc:
                     sample += page.get_text()
@@ -283,14 +300,12 @@ class PdfExtractionEngine:
             if ch.isspace():
                 continue
             total += 1
-            name = unicodedata.name(ch, "")
-            cat = unicodedata.category(ch)
+            unicodedata.name(ch, "")
+            unicodedata.category(ch)
             cp = ord(ch)
 
             # CJK Unified Ideographs (covers Chinese and Japanese Kanji)
-            if (0x4E00 <= cp <= 0x9FFF or
-                    0x3400 <= cp <= 0x4DBF or
-                    0x20000 <= cp <= 0x2A6DF):
+            if 0x4E00 <= cp <= 0x9FFF or 0x3400 <= cp <= 0x4DBF or 0x20000 <= cp <= 0x2A6DF:
                 cjk_count += 1
             # Hiragana / Katakana (Japanese-specific)
             elif 0x3040 <= cp <= 0x30FF:
@@ -315,9 +330,7 @@ class PdfExtractionEngine:
             return "ar"
         if cjk_ratio > 0.15:
             # Distinguish Japanese vs Chinese by Hiragana/Katakana presence
-            hira_kata = sum(
-                1 for ch in sample if 0x3040 <= ord(ch) <= 0x30FF
-            )
+            hira_kata = sum(1 for ch in sample if 0x3040 <= ord(ch) <= 0x30FF)
             return "ja" if hira_kata > 5 else "zh"
         return "en"
 
@@ -332,6 +345,7 @@ class PdfExtractionEngine:
         """
         try:
             import fitz
+
             word_count = 0
             page_count = 0
             with fitz.open(file_path) as doc:
@@ -391,11 +405,13 @@ class PdfExtractionEngine:
                     if block.get("type") != 0:  # type 0 = text
                         # Image block
                         bbox = block.get("bbox", [0, 0, 0, 0])
-                        images.append({
-                            "page": page_num,
-                            "bbox": list(bbox),
-                            "caption": "",
-                        })
+                        images.append(
+                            {
+                                "page": page_num,
+                                "bbox": list(bbox),
+                                "caption": "",
+                            }
+                        )
                         continue
 
                     block_text_lines: List[str] = []
@@ -432,11 +448,13 @@ class PdfExtractionEngine:
                     # Heading detection: font size > 14 → heading
                     if font_size > 14.0:
                         level = 1 if font_size > 20.0 else 2
-                        headings.append({
-                            "text": block_text.replace("\n", " "),
-                            "level": level,
-                            "page": page_num,
-                        })
+                        headings.append(
+                            {
+                                "text": block_text.replace("\n", " "),
+                                "level": level,
+                                "page": page_num,
+                            }
+                        )
                         md_prefix = "#" * level
                         markdown_parts.append(f"{md_prefix} {block_text.replace(chr(10), ' ')}")
                     else:
@@ -457,12 +475,14 @@ class PdfExtractionEngine:
                                 [str(c) if c is not None else "" for c in row]
                                 for row in extracted[1:]
                             ]
-                        tables.append({
-                            "headers": headers,
-                            "rows": rows,
-                            "page": page_num,
-                            "caption": "",
-                        })
+                        tables.append(
+                            {
+                                "headers": headers,
+                                "rows": rows,
+                                "page": page_num,
+                                "caption": "",
+                            }
+                        )
                 except Exception as exc:
                     log.debug(f"Table extraction skipped on page {page_num}: {exc}")
 
@@ -517,30 +537,36 @@ class PdfExtractionEngine:
             tables: List[Dict[str, Any]] = []
             for t in raw_tables:
                 if isinstance(t, dict):
-                    tables.append({
-                        "headers": t.get("headers", []),
-                        "rows": t.get("rows", []),
-                        "page": t.get("page", 0),
-                        "caption": t.get("caption", ""),
-                    })
+                    tables.append(
+                        {
+                            "headers": t.get("headers", []),
+                            "rows": t.get("rows", []),
+                            "page": t.get("page", 0),
+                            "caption": t.get("caption", ""),
+                        }
+                    )
 
             headings: List[Dict[str, Any]] = []
             for h in raw_headings:
                 if isinstance(h, dict):
-                    headings.append({
-                        "text": h.get("text", ""),
-                        "level": int(h.get("level", 1)),
-                        "page": int(h.get("page", 0)),
-                    })
+                    headings.append(
+                        {
+                            "text": h.get("text", ""),
+                            "level": int(h.get("level", 1)),
+                            "page": int(h.get("page", 0)),
+                        }
+                    )
 
             images: List[Dict[str, Any]] = []
             for img in raw_images:
                 if isinstance(img, dict):
-                    images.append({
-                        "page": img.get("page", 0),
-                        "bbox": img.get("bbox", [0, 0, 0, 0]),
-                        "caption": img.get("caption", ""),
-                    })
+                    images.append(
+                        {
+                            "page": img.get("page", 0),
+                            "bbox": img.get("bbox", [0, 0, 0, 0]),
+                            "caption": img.get("caption", ""),
+                        }
+                    )
 
             return {
                 "text": text,
@@ -552,7 +578,9 @@ class PdfExtractionEngine:
             }
 
         except Exception as exc:
-            log.warning(f"OpenDataLoader library raised an error: {exc}; falling back to enhanced fitz")
+            log.warning(
+                f"OpenDataLoader library raised an error: {exc}; falling back to enhanced fitz"
+            )
             return self._tier2_enhanced_fitz(file_path)
 
     def _tier2_enhanced_fitz(self, file_path: str) -> Dict[str, Any]:
@@ -568,7 +596,14 @@ class PdfExtractionEngine:
         try:
             import fitz
         except ImportError:
-            return {"text": "", "markdown": "", "tables": [], "images": [], "headings": [], "metadata": {}}
+            return {
+                "text": "",
+                "markdown": "",
+                "tables": [],
+                "images": [],
+                "headings": [],
+                "metadata": {},
+            }
 
         text_parts: List[str] = []
         markdown_parts: List[str] = []
@@ -610,11 +645,13 @@ class PdfExtractionEngine:
                 for block in raw_dict.get("blocks", []):
                     if block.get("type") != 0:
                         bbox = block.get("bbox", [0, 0, 0, 0])
-                        images.append({
-                            "page": page_num,
-                            "bbox": list(bbox),
-                            "caption": "",
-                        })
+                        images.append(
+                            {
+                                "page": page_num,
+                                "bbox": list(bbox),
+                                "caption": "",
+                            }
+                        )
                         continue
 
                     block_lines: List[str] = []
@@ -632,7 +669,7 @@ class PdfExtractionEngine:
                                     max_font_size = fs
                                 # flags bit 4 = bold
                                 flags = span.get("flags", 0)
-                                if flags & 2 ** 4:  # bold bit
+                                if flags & 2**4:  # bold bit
                                     bold_flag = 1
                         if line_spans:
                             block_lines.append(" ".join(line_spans))
@@ -649,7 +686,9 @@ class PdfExtractionEngine:
                 for _, _, block_text, font_size, is_bold in page_blocks:
                     text_parts.append(block_text)
                     is_heading = (font_size > heading_threshold) or (
-                        is_bold and font_size >= body_size and len(block_text.split("\n")) == 1
+                        is_bold
+                        and font_size >= body_size
+                        and len(block_text.split("\n")) == 1
                         and len(block_text) < 120
                     )
 
@@ -660,15 +699,15 @@ class PdfExtractionEngine:
                             level = 2
                         else:
                             level = 3
-                        headings.append({
-                            "text": block_text.replace("\n", " "),
-                            "level": level,
-                            "page": page_num,
-                        })
-                        md_prefix = "#" * level
-                        markdown_parts.append(
-                            f"{md_prefix} {block_text.replace(chr(10), ' ')}"
+                        headings.append(
+                            {
+                                "text": block_text.replace("\n", " "),
+                                "level": level,
+                                "page": page_num,
+                            }
                         )
+                        md_prefix = "#" * level
+                        markdown_parts.append(f"{md_prefix} {block_text.replace(chr(10), ' ')}")
                     else:
                         markdown_parts.append(block_text)
 
@@ -681,27 +720,30 @@ class PdfExtractionEngine:
                             continue
                         headers = [str(c) if c is not None else "" for c in extracted[0]]
                         rows = [
-                            [str(c) if c is not None else "" for c in row]
-                            for row in extracted[1:]
+                            [str(c) if c is not None else "" for c in row] for row in extracted[1:]
                         ]
                         # Attempt to find a caption line above/below the table bbox
                         caption = ""
                         try:
                             tab_bbox = tab.bbox  # (x0, y0, x1, y1)
-                            nearby_text = page.get_text("text", clip=fitz.Rect(
-                                tab_bbox[0], max(0, tab_bbox[1] - 20),
-                                tab_bbox[2], tab_bbox[1]
-                            )).strip()
+                            nearby_text = page.get_text(
+                                "text",
+                                clip=fitz.Rect(
+                                    tab_bbox[0], max(0, tab_bbox[1] - 20), tab_bbox[2], tab_bbox[1]
+                                ),
+                            ).strip()
                             if nearby_text and len(nearby_text) < 200:
                                 caption = nearby_text
                         except Exception:
                             pass
-                        tables.append({
-                            "headers": headers,
-                            "rows": rows,
-                            "page": page_num,
-                            "caption": caption,
-                        })
+                        tables.append(
+                            {
+                                "headers": headers,
+                                "rows": rows,
+                                "page": page_num,
+                                "caption": caption,
+                            }
+                        )
                 except Exception as exc:
                     log.debug(f"Enhanced table extraction skipped on page {page_num}: {exc}")
 
@@ -770,7 +812,14 @@ class PdfExtractionEngine:
         try:
             import fitz
         except ImportError:
-            return {"text": "", "markdown": "", "tables": [], "images": [], "headings": [], "metadata": {}}
+            return {
+                "text": "",
+                "markdown": "",
+                "tables": [],
+                "images": [],
+                "headings": [],
+                "metadata": {},
+            }
 
         pages_text: List[str] = []
         tmp_dir = tempfile.mkdtemp(prefix="kairo_ocr_")
@@ -790,6 +839,7 @@ class PdfExtractionEngine:
                     try:
                         import pytesseract  # type: ignore
                         from PIL import Image  # type: ignore
+
                         with Image.open(img_path) as img:
                             page_text = pytesseract.image_to_string(img)
                     except ImportError:
@@ -844,14 +894,28 @@ class PdfExtractionEngine:
         """
         if not self._has_surya:
             log.debug("Surya not installed; Tier 4 unavailable.")
-            return {"text": "", "markdown": "", "tables": [], "images": [], "headings": [], "metadata": {}}
+            return {
+                "text": "",
+                "markdown": "",
+                "tables": [],
+                "images": [],
+                "headings": [],
+                "metadata": {},
+            }
 
         try:
             import fitz
             from surya.ocr import run_ocr  # type: ignore
         except ImportError as exc:
             log.warning(f"Surya/fitz import failed: {exc}")
-            return {"text": "", "markdown": "", "tables": [], "images": [], "headings": [], "metadata": {}}
+            return {
+                "text": "",
+                "markdown": "",
+                "tables": [],
+                "images": [],
+                "headings": [],
+                "metadata": {},
+            }
 
         # Load Surya models (cached by the library after first load)
         det_processor = None
@@ -862,6 +926,7 @@ class PdfExtractionEngine:
         try:
             from surya.model.detection.model import load_model as load_det_model  # type: ignore
             from surya.model.detection.model import load_processor as load_det_processor  # type: ignore
+
             det_processor = load_det_processor()
             det_model = load_det_model()
         except Exception as exc:
@@ -870,6 +935,7 @@ class PdfExtractionEngine:
         try:
             from surya.model.recognition.model import load_model as load_rec_model  # type: ignore
             from surya.model.recognition.processor import load_processor as load_rec_processor  # type: ignore
+
             rec_model = load_rec_model()
             rec_processor = load_rec_processor()
         except Exception as exc:
@@ -891,6 +957,7 @@ class PdfExtractionEngine:
                     page_text = ""
                     try:
                         from PIL import Image  # type: ignore
+
                         with Image.open(img_path) as pil_img:
                             # Determine languages to pass to surya
                             surya_langs = self._surya_lang_codes(self._detect_language(file_path))
@@ -971,6 +1038,7 @@ class PdfExtractionEngine:
         """
         try:
             import fitz
+
             text_parts: List[str] = []
             with fitz.open(file_path) as doc:
                 for page in doc:

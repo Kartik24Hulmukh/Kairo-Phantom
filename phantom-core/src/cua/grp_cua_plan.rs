@@ -23,7 +23,11 @@ impl GrpCuaPlanDisplay {
 
         for (i, step_desc) in plan.step_descriptions.iter().enumerate() {
             let confidence = plan.step_confidences.get(i).cloned().unwrap_or(1.0);
-            let source = plan.step_sources.get(i).cloned().unwrap_or(TargetingSource::UIA);
+            let source = plan
+                .step_sources
+                .get(i)
+                .cloned()
+                .unwrap_or(TargetingSource::UIA);
 
             let icon = if confidence < 0.60 || source == TargetingSource::Coordinate {
                 "[⚠]"
@@ -38,18 +42,33 @@ impl GrpCuaPlanDisplay {
                 has_coordinate = true;
             }
 
-            lines.push(format!("  {} [{}] {} ({:.0}% via {:?})", icon, i + 1, step_desc, confidence * 100.0, source));
+            lines.push(format!(
+                "  {} [{}] {} ({:.0}% via {:?})",
+                icon,
+                i + 1,
+                step_desc,
+                confidence * 100.0,
+                source
+            ));
         }
 
         if has_low_confidence {
-            lines.push("WARNING: Plan contains low-confidence steps (<60%). Proceed with caution!".to_string());
+            lines.push(
+                "WARNING: Plan contains low-confidence steps (<60%). Proceed with caution!"
+                    .to_string(),
+            );
         }
         if has_coordinate {
-            lines.push("WARNING: Plan contains coordinate-based targeting (accuracy <43%).".to_string());
+            lines.push(
+                "WARNING: Plan contains coordinate-based targeting (accuracy <43%).".to_string(),
+            );
         }
 
         lines.push(String::new());
-        lines.push(format!("Source: {:?} | Risk: {:?}", plan.source, plan.estimated_risk));
+        lines.push(format!(
+            "Source: {:?} | Risk: {:?}",
+            plan.source, plan.estimated_risk
+        ));
         lines.push("[Tab: Execute] [Esc: Cancel]".to_string());
 
         lines.join("\n")
@@ -57,7 +76,7 @@ impl GrpCuaPlanDisplay {
 
     /// Generate a blocked action message (for forbidden windows, rate limits, etc.)
     pub fn format_blocked(reason: &str) -> String {
-        format!("CUA blocked: {}\n[Esc: Dismiss]", reason)
+        format!("CUA blocked: {reason}\n[Esc: Dismiss]")
     }
 
     /// Check if user pressed Tab (approve) vs Esc (cancel)
@@ -127,23 +146,53 @@ mod tests {
 
     #[test]
     fn test_parse_user_response_approve() {
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("Tab"), CuaUserResponse::Approve);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("tab"), CuaUserResponse::Approve);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("\t"), CuaUserResponse::Approve);
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("Tab"),
+            CuaUserResponse::Approve
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("tab"),
+            CuaUserResponse::Approve
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("\t"),
+            CuaUserResponse::Approve
+        );
     }
 
     #[test]
     fn test_parse_user_response_cancel() {
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("Escape"), CuaUserResponse::Cancel);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("Esc"), CuaUserResponse::Cancel);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("esc"), CuaUserResponse::Cancel);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("\x1b"), CuaUserResponse::Cancel);
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("Escape"),
+            CuaUserResponse::Cancel
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("Esc"),
+            CuaUserResponse::Cancel
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("esc"),
+            CuaUserResponse::Cancel
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("\x1b"),
+            CuaUserResponse::Cancel
+        );
     }
 
     #[test]
     fn test_parse_user_response_waiting() {
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("Enter"), CuaUserResponse::Waiting);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response("Space"), CuaUserResponse::Waiting);
-        assert_eq!(GrpCuaPlanDisplay::parse_user_response(""), CuaUserResponse::Waiting);
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("Enter"),
+            CuaUserResponse::Waiting
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response("Space"),
+            CuaUserResponse::Waiting
+        );
+        assert_eq!(
+            GrpCuaPlanDisplay::parse_user_response(""),
+            CuaUserResponse::Waiting
+        );
     }
 }

@@ -45,7 +45,7 @@ pub struct KpxExporter;
 impl KpxExporter {
     /// Export all memories from the SQLite database to a .kpx file.
     pub fn export(db_path: &Path, output_path: &Path, description: &str) -> Result<usize> {
-        use rusqlite::{Connection, params};
+        use rusqlite::{params, Connection};
 
         let conn = Connection::open(db_path)?;
 
@@ -53,7 +53,7 @@ impl KpxExporter {
         let mut stmt = conn.prepare(
             "SELECT id, timestamp, content, full_episode, app_context, context_key,
                     is_ground_truth, tags, storage_strength, embedding
-             FROM semantic_memory ORDER BY timestamp DESC"
+             FROM semantic_memory ORDER BY timestamp DESC",
         )?;
 
         let mut episodes = Vec::new();
@@ -105,13 +105,17 @@ impl KpxExporter {
         let json = serde_json::to_string_pretty(&kpx)?;
         std::fs::write(output_path, json)?;
 
-        tracing::info!("📦 KPX: exported {} episodes to {}", count, output_path.display());
+        tracing::info!(
+            "📦 KPX: exported {} episodes to {}",
+            count,
+            output_path.display()
+        );
         Ok(count)
     }
 
     /// Import a .kpx file into the SQLite database.
     pub fn import(kpx_path: &Path, db_path: &Path) -> Result<usize> {
-        use rusqlite::{Connection, params};
+        use rusqlite::{params, Connection};
 
         let content = std::fs::read_to_string(kpx_path)?;
         let kpx: KpxFile = serde_json::from_str(&content)?;
@@ -126,7 +130,8 @@ impl KpxExporter {
                 base64::Engine::decode(
                     &base64::engine::general_purpose::STANDARD,
                     &ep.embedding_b64,
-                ).ok()
+                )
+                .ok()
             };
 
             conn.execute(
@@ -135,21 +140,30 @@ impl KpxExporter {
                   is_ground_truth, tags, storage_strength, embedding)
                  VALUES (?1,?2,?3,'',?4,?5,?6,?7,?8,?9)",
                 params![
-                    ep.id, ep.timestamp, ep.content,
-                    ep.app_context, ep.context_key,
-                    ep.is_ground_truth as i32, ep.tags,
-                    ep.storage_strength, emb_blob
+                    ep.id,
+                    ep.timestamp,
+                    ep.content,
+                    ep.app_context,
+                    ep.context_key,
+                    ep.is_ground_truth as i32,
+                    ep.tags,
+                    ep.storage_strength,
+                    emb_blob
                 ],
             )?;
             imported += 1;
         }
 
-        tracing::info!("📥 KPX: imported {} episodes from {}", imported, kpx_path.display());
+        tracing::info!(
+            "📥 KPX: imported {} episodes from {}",
+            imported,
+            kpx_path.display()
+        );
         Ok(imported)
     }
 
     fn machine_id_hash() -> String {
-        use sha2::{Sha256, Digest};
+        use sha2::{Digest, Sha256};
         let id = std::env::var("COMPUTERNAME")
             .or_else(|_| std::env::var("HOSTNAME"))
             .unwrap_or_else(|_| "unknown".to_string());

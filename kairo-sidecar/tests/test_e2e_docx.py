@@ -8,20 +8,19 @@ No LLM or named pipe required.
 import os
 import sys
 import tempfile
-import pytest
 from pathlib import Path
 
 from docx import Document
-from docx.enum.style import WD_STYLE_TYPE
 
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from sidecar.masters.word_master import WordWriter, WordContextExtractor, WordContext
+from sidecar.masters.word_master import WordWriter, WordContextExtractor
 
 
 # ---------------------------------------------------------------------------
 # Helper: Create a temp docx with optional paragraphs and headings
 # ---------------------------------------------------------------------------
+
 
 def make_temp_docx(paragraphs=None, headings=None):
     doc = Document()
@@ -31,7 +30,7 @@ def make_temp_docx(paragraphs=None, headings=None):
     if paragraphs:
         for p in paragraphs:
             doc.add_paragraph(p)
-    tmp = tempfile.NamedTemporaryFile(suffix='.docx', delete=False)
+    tmp = tempfile.NamedTemporaryFile(suffix=".docx", delete=False)
     doc.save(tmp.name)
     tmp.close()
     return tmp.name
@@ -45,6 +44,7 @@ def get_context(path):
 # ---------------------------------------------------------------------------
 # W-01: insert_paragraph with style='Heading 2'
 # ---------------------------------------------------------------------------
+
 
 def test_w01_insert_paragraph_heading2():
     """insert_paragraph with style='Heading 2' → inserted para has style 'Heading 2'."""
@@ -61,15 +61,13 @@ def test_w01_insert_paragraph_heading2():
         ]
         writer = WordWriter()
         result = writer.apply_operations(path, ops, context)
-        assert result.get("applied_count", 0) >= 1 or result.get("errors") == [], (
-            f"apply_operations failed: {result}"
-        )
+        assert (
+            result.get("applied_count", 0) >= 1 or result.get("errors") == []
+        ), f"apply_operations failed: {result}"
 
         doc = Document(path)
         styles = [p.style.name for p in doc.paragraphs]
-        assert "Heading 2" in styles, (
-            f"Heading 2 style not found. Styles found: {styles}"
-        )
+        assert "Heading 2" in styles, f"Heading 2 style not found. Styles found: {styles}"
     finally:
         try:
             os.unlink(path)
@@ -87,6 +85,7 @@ def test_w01_insert_paragraph_heading2():
 # W-02: insert_paragraph with style='List Bullet'
 # ---------------------------------------------------------------------------
 
+
 def test_w02_insert_paragraph_list_bullet():
     """insert_paragraph with style='List Bullet' → style name contains 'Bullet'."""
     path = make_temp_docx(paragraphs=["Paragraph A", "Paragraph B"])
@@ -94,7 +93,9 @@ def test_w02_insert_paragraph_list_bullet():
         context = get_context(path)
 
         # Check if 'List Bullet' style exists in document, otherwise use a fallback
-        bullet_styles = [s for s in context.styles["paragraph"] if "bullet" in s.lower() or "Bullet" in s]
+        bullet_styles = [
+            s for s in context.styles["paragraph"] if "bullet" in s.lower() or "Bullet" in s
+        ]
         style_to_use = bullet_styles[0] if bullet_styles else "List Bullet"
 
         ops = [
@@ -107,17 +108,15 @@ def test_w02_insert_paragraph_list_bullet():
         ]
         writer = WordWriter()
         result = writer.apply_operations(path, ops, context)
-        assert result.get("errors", []) == [] or result.get("applied_count", 0) >= 1, (
-            f"apply_operations errors: {result.get('errors')}"
-        )
+        assert (
+            result.get("errors", []) == [] or result.get("applied_count", 0) >= 1
+        ), f"apply_operations errors: {result.get('errors')}"
 
         doc = Document(path)
         style_names = [p.style.name for p in doc.paragraphs]
         # The inserted paragraph should have a bullet-like style
         found_bullet = any("bullet" in s.lower() or "Bullet" in s for s in style_names)
-        assert found_bullet, (
-            f"No bullet style found in paragraphs. Styles: {style_names}"
-        )
+        assert found_bullet, f"No bullet style found in paragraphs. Styles: {style_names}"
     finally:
         try:
             os.unlink(path)
@@ -133,6 +132,7 @@ def test_w02_insert_paragraph_list_bullet():
 # ---------------------------------------------------------------------------
 # W-03: replace_paragraph → verify surrounding paragraphs unchanged
 # ---------------------------------------------------------------------------
+
 
 def test_w03_replace_paragraph_surrounding_unchanged():
     """replace_paragraph → surrounding paragraphs are unchanged."""
@@ -182,6 +182,7 @@ def test_w03_replace_paragraph_surrounding_unchanged():
 # W-04: insert_table with 3 headers, 2 rows
 # ---------------------------------------------------------------------------
 
+
 def test_w04_insert_table_3_headers_2_rows():
     """insert_table with 3 headers and 2 rows → table exists with correct dimensions."""
     path = make_temp_docx(paragraphs=["Before table", "After table"])
@@ -201,9 +202,9 @@ def test_w04_insert_table_3_headers_2_rows():
         ]
         writer = WordWriter()
         result = writer.apply_operations(path, ops, context)
-        assert result.get("errors") == [] or result.get("applied_count", 0) >= 1, (
-            f"insert_table failed: {result}"
-        )
+        assert (
+            result.get("errors") == [] or result.get("applied_count", 0) >= 1
+        ), f"insert_table failed: {result}"
 
         doc = Document(path)
         assert len(doc.tables) >= 1, "No table found in document"
@@ -226,6 +227,7 @@ def test_w04_insert_table_3_headers_2_rows():
 # ---------------------------------------------------------------------------
 # W-05: delete_paragraph → verify paragraph count decreases by 1
 # ---------------------------------------------------------------------------
+
 
 def test_w05_delete_paragraph_count_decreases():
     """delete_paragraph → paragraph count decreases by exactly 1."""
@@ -251,15 +253,15 @@ def test_w05_delete_paragraph_count_decreases():
         ]
         writer = WordWriter()
         result = writer.apply_operations(path, ops, context)
-        assert result.get("applied_count", 0) >= 1 or result.get("errors") == [], (
-            f"delete_paragraph failed: {result}"
-        )
+        assert (
+            result.get("applied_count", 0) >= 1 or result.get("errors") == []
+        ), f"delete_paragraph failed: {result}"
 
         doc_after = Document(path)
         count_after = len(doc_after.paragraphs)
-        assert count_after == count_before - 1, (
-            f"Expected {count_before - 1} paragraphs, got {count_after}"
-        )
+        assert (
+            count_after == count_before - 1
+        ), f"Expected {count_before - 1} paragraphs, got {count_after}"
         texts_after = [p.text for p in doc_after.paragraphs]
         assert "Para Two" not in texts_after, f"'Para Two' still present: {texts_after}"
     finally:
@@ -277,6 +279,7 @@ def test_w05_delete_paragraph_count_decreases():
 # ---------------------------------------------------------------------------
 # W-06: insert_paragraph after_index=-1 → paragraph appended to end
 # ---------------------------------------------------------------------------
+
 
 def test_w06_insert_paragraph_append_to_end():
     """insert_paragraph with after_paragraph_index=-1 → paragraph appended to end."""
@@ -301,9 +304,7 @@ def test_w06_insert_paragraph_append_to_end():
         assert sentinel in texts, f"Sentinel not found in paragraphs. Texts: {texts}"
         # Verify it's at the end (last non-empty paragraph)
         non_empty = [t for t in texts if t.strip()]
-        assert non_empty[-1] == sentinel, (
-            f"Sentinel not at end. Non-empty texts: {non_empty}"
-        )
+        assert non_empty[-1] == sentinel, f"Sentinel not at end. Non-empty texts: {non_empty}"
     finally:
         try:
             os.unlink(path)
@@ -319,6 +320,7 @@ def test_w06_insert_paragraph_append_to_end():
 # ---------------------------------------------------------------------------
 # W-07: Fuzzy style match → 'Heading1' resolves to a valid heading style
 # ---------------------------------------------------------------------------
+
 
 def test_w07_fuzzy_style_match():
     """Fuzzy style match → 'Heading1' resolves to a heading style that exists."""
@@ -339,12 +341,12 @@ def test_w07_fuzzy_style_match():
         assert result.valid, f"Validation failed: {result.error}"
         # Style should have been corrected to a real heading style
         corrected_style = op.get("style", "")
-        assert corrected_style in context.styles["paragraph"], (
-            f"Corrected style '{corrected_style}' not in available styles"
-        )
-        assert "heading" in corrected_style.lower(), (
-            f"Corrected style '{corrected_style}' does not look like a heading"
-        )
+        assert (
+            corrected_style in context.styles["paragraph"]
+        ), f"Corrected style '{corrected_style}' not in available styles"
+        assert (
+            "heading" in corrected_style.lower()
+        ), f"Corrected style '{corrected_style}' does not look like a heading"
     finally:
         try:
             os.unlink(path)
@@ -355,6 +357,7 @@ def test_w07_fuzzy_style_match():
 # ---------------------------------------------------------------------------
 # W-08: Multiple operations in one call → all applied correctly
 # ---------------------------------------------------------------------------
+
 
 def test_w08_multiple_operations_all_applied():
     """Multiple operations in one call → all applied correctly."""
@@ -379,7 +382,7 @@ def test_w08_multiple_operations_all_applied():
             },
         ]
         writer = WordWriter()
-        result = writer.apply_operations(path, ops, context)
+        writer.apply_operations(path, ops, context)
 
         doc = Document(path)
         texts = [p.text for p in doc.paragraphs]
@@ -401,10 +404,11 @@ def test_w08_multiple_operations_all_applied():
 # W-09: Empty document → insert_paragraph works
 # ---------------------------------------------------------------------------
 
+
 def test_w09_empty_document_insert_paragraph():
     """Empty document → insert_paragraph works without crash."""
     doc = Document()
-    tmp = tempfile.NamedTemporaryFile(suffix='.docx', delete=False)
+    tmp = tempfile.NamedTemporaryFile(suffix=".docx", delete=False)
     doc.save(tmp.name)
     tmp.close()
     path = tmp.name
@@ -443,6 +447,7 @@ def test_w09_empty_document_insert_paragraph():
 # W-10: extract() on real docx → returns correct paragraph count and styles
 # ---------------------------------------------------------------------------
 
+
 def test_w10_extract_returns_correct_context():
     """extract() on a real docx → returns correct paragraph count and available styles."""
     path = make_temp_docx(
@@ -454,21 +459,21 @@ def test_w10_extract_returns_correct_context():
         context = extractor.extract(path, 0)
 
         # Paragraph count should cover headings + body
-        assert context.total_paragraphs >= 5, (
-            f"Expected >= 5 paragraphs (2 headings + 3 body), got {context.total_paragraphs}"
-        )
+        assert (
+            context.total_paragraphs >= 5
+        ), f"Expected >= 5 paragraphs (2 headings + 3 body), got {context.total_paragraphs}"
 
         # Styles dict should have paragraph key with at least 'Normal'
         assert "paragraph" in context.styles, "Missing 'paragraph' key in styles"
         assert len(context.styles["paragraph"]) > 0, "Paragraph styles list is empty"
-        assert "Normal" in context.styles["paragraph"], (
-            f"'Normal' not found in styles: {context.styles['paragraph'][:10]}"
-        )
+        assert (
+            "Normal" in context.styles["paragraph"]
+        ), f"'Normal' not found in styles: {context.styles['paragraph'][:10]}"
 
         # Paragraphs list should be populated
-        assert len(context.paragraphs) >= 5, (
-            f"Expected >= 5 paragraph dicts, got {len(context.paragraphs)}"
-        )
+        assert (
+            len(context.paragraphs) >= 5
+        ), f"Expected >= 5 paragraph dicts, got {len(context.paragraphs)}"
 
         # Check a sample paragraph has required fields
         sample = context.paragraphs[0]
@@ -485,6 +490,7 @@ def test_w10_extract_returns_correct_context():
 # ---------------------------------------------------------------------------
 # W-11: append_to_run → text appended to existing paragraph
 # ---------------------------------------------------------------------------
+
 
 def test_w11_append_to_run():
     """append_to_run → appends text to an existing paragraph."""
@@ -524,4 +530,3 @@ def test_w11_append_to_run():
                 os.unlink(path + suffix)
             except Exception:
                 pass
-

@@ -1,5 +1,5 @@
 use std::env;
-use tokio::time::{Duration, sleep};
+use tokio::time::{sleep, Duration};
 
 // Kairo Phantom - Layer 7: Universal E2E Test Matrix
 // Validates end-to-end functionality across simulated application boundaries
@@ -15,12 +15,19 @@ async fn execute_universal_test_matrix() {
     let is_chaos_enabled = env::var("KAIRO_ENABLE_CHAOS").is_ok();
 
     println!("🚀 Deploying Kairo Phantom E2E Swarm");
-    println!("⚙️ Target Iterations: {}", iterations);
-    println!("🌪️ Chaos Engineering: {}", if is_chaos_enabled { "ACTIVE" } else { "INACTIVE" });
+    println!("⚙️ Target Iterations: {iterations}");
+    println!(
+        "🌪️ Chaos Engineering: {}",
+        if is_chaos_enabled {
+            "ACTIVE"
+        } else {
+            "INACTIVE"
+        }
+    );
 
     for i in 1..=iterations {
-        println!("\n--- 🏁 Iteration {}/{} ---", i, iterations);
-        
+        println!("\n--- 🏁 Iteration {i}/{iterations} ---");
+
         run_t1_basic_ghost_write().await;
         run_t2_streaming_cancel().await;
         run_t3_offline_mode().await;
@@ -28,12 +35,12 @@ async fn execute_universal_test_matrix() {
         run_t5_complex_document_context().await;
         run_t6_clipboard_failure_fallback().await;
         run_t7_rapid_hotkey_spam().await;
-        
+
         #[cfg(target_os = "macos")]
         run_t8_macos_background_injection().await;
     }
 
-    println!("\n✅ All {} E2E iterations completed successfully across the matrix.", iterations);
+    println!("\n✅ All {iterations} E2E iterations completed successfully across the matrix.");
 }
 
 // ─── Scenarios ─────────────────────────────────────────────────────────────
@@ -84,7 +91,10 @@ async fn run_t7_rapid_hotkey_spam() {
     for _ in 0..10 {
         sleep(Duration::from_millis(20)).await;
     }
-    assert!(true, "T7 Failed: Ghost session duplicated or leaked memory.");
+    assert!(
+        true,
+        "T7 Failed: Ghost session duplicated or leaked memory."
+    );
 }
 
 #[cfg(target_os = "macos")]

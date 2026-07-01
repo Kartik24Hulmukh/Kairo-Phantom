@@ -24,7 +24,6 @@ import tempfile
 import traceback
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 
 log = logging.getLogger("kairo-sidecar.adeu_bridge")
 
@@ -33,17 +32,28 @@ log = logging.getLogger("kairo-sidecar.adeu_bridge")
 # Capability detection (safe — never raises)
 # ---------------------------------------------------------------------------
 
+
 def _get_adeu_cmd() -> str:
     """Resolve the absolute path to adeu.exe, falling back to python scripts folder on Windows."""
     which_res = shutil.which("adeu")
     if which_res is not None:
         return which_res
     import sys
+
     if sys.platform == "win32":
         import os
+
         user_profile = os.environ.get("USERPROFILE", "")
         # Standard Python User Scripts path
-        fallback_path = os.path.join(user_profile, "AppData", "Roaming", "Python", f"Python{sys.version_info.major}{sys.version_info.minor}", "Scripts", "adeu.exe")
+        fallback_path = os.path.join(
+            user_profile,
+            "AppData",
+            "Roaming",
+            "Python",
+            f"Python{sys.version_info.major}{sys.version_info.minor}",
+            "Scripts",
+            "adeu.exe",
+        )
         if os.path.exists(fallback_path):
             return fallback_path
         # Alternative path
@@ -66,6 +76,7 @@ def _adeu_sdk_available() -> bool:
     """True if the adeu Python package is importable."""
     try:
         import adeu  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -78,13 +89,17 @@ def _word_is_open_with_file(file_path: str) -> bool:
     """
     try:
         import sys
+
         if sys.platform != "win32":
             return False
-        
+
         import subprocess
+
         word_running = False
         try:
-            out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True)
+            out = subprocess.run(
+                ["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True
+            )
             word_running = "winword.exe" in out.stdout.lower()
         except Exception:
             pass
@@ -93,6 +108,7 @@ def _word_is_open_with_file(file_path: str) -> bool:
             return False
 
         import win32com.client
+
         target = Path(file_path).resolve()
         try:
             doc = win32com.client.GetObject(str(target))
@@ -113,6 +129,7 @@ def _word_is_open_with_file(file_path: str) -> bool:
 # ---------------------------------------------------------------------------
 # Public interface
 # ---------------------------------------------------------------------------
+
 
 def adeu_read_document(file_path: str) -> dict:
     """
@@ -140,7 +157,7 @@ def adeu_read_document(file_path: str) -> dict:
     tmp_fd, tmp_path = tempfile.mkstemp(suffix=".md")
     os.close(tmp_fd)
     try:
-        result = subprocess.run(
+        subprocess.run(
             [_get_adeu_cmd(), "extract", file_path, "-o", tmp_path],
             check=True,
             capture_output=True,
@@ -163,12 +180,16 @@ def adeu_read_document(file_path: str) -> dict:
                 "level": p["level"],
                 "text": p["text"],
             }
-            for p in paragraphs if p["is_heading"]
+            for p in paragraphs
+            if p["is_heading"]
         ]
 
         log.info(
             "adeu_read_document OK: %d chars, %d paragraphs, %d headings from %s",
-            len(markdown), len(paragraphs), len(headings), file_path,
+            len(markdown),
+            len(paragraphs),
+            len(headings),
+            file_path,
         )
         return {
             "ok": True,
@@ -223,7 +244,9 @@ def adeu_apply_edits(
         if live_result["ok"]:
             res = live_result
         else:
-            log.warning("Live COM injection failed, falling back to SDK: %s", live_result.get("error"))
+            log.warning(
+                "Live COM injection failed, falling back to SDK: %s", live_result.get("error")
+            )
 
     if res is None:
         # --- Strategy 2: Python SDK file-based injection
@@ -243,11 +266,11 @@ def adeu_apply_edits(
         applied = res.get("applied_count", data.get("applied_count", len(edits)))
         skipped = res.get("skipped_count", data.get("skipped_count", 0))
         backend = res.get("backend", data.get("backend", "unknown"))
-        
+
         data["applied_count"] = applied
         data["skipped_count"] = skipped
         data["backend"] = backend
-        
+
         res["applied_count"] = applied
         res["skipped_count"] = skipped
         res["backend"] = backend
@@ -285,7 +308,8 @@ def adeu_read_live_document() -> dict:
                 "level": p["level"],
                 "text": p["text"],
             }
-            for p in paragraphs if p["is_heading"]
+            for p in paragraphs
+            if p["is_heading"]
         ]
 
         return {
@@ -341,6 +365,7 @@ def adeu_sanitize(file_path: str, output_path: str | None = None) -> dict:
 # Internal strategies
 # ---------------------------------------------------------------------------
 
+
 def _adeu_sdk_apply(
     file_path: str,
     edits: list[dict],
@@ -368,9 +393,7 @@ def _adeu_sdk_apply(
             if not target or not new:
                 log.warning("Skipping edit with empty target_text or new_text: %r", edit)
                 continue
-            modify_ops.append(
-                ModifyText(target_text=target, new_text=new, comment=comment or None)
-            )
+            modify_ops.append(ModifyText(target_text=target, new_text=new, comment=comment or None))
 
         if not modify_ops:
             return _error("All edits were invalid (empty target_text or new_text)")
@@ -380,7 +403,8 @@ def _adeu_sdk_apply(
         if validation_errors:
             log.warning(
                 "adeu validate_edits found %d issues: %s",
-                len(validation_errors), validation_errors[:3]
+                len(validation_errors),
+                validation_errors[:3],
             )
             # Non-fatal: apply anyway (engine skips unresolvable edits gracefully)
 
@@ -392,7 +416,9 @@ def _adeu_sdk_apply(
 
         log.info(
             "adeu_sdk_apply OK: %d applied, %d skipped → %s",
-            applied_count, skipped_count, output_path
+            applied_count,
+            skipped_count,
+            output_path,
         )
         return {
             "ok": True,
@@ -412,6 +438,7 @@ def _adeu_sdk_apply(
     except Exception:
         return _error(traceback.format_exc())
 
+
 def _python_docx_tracked_fallback(
     file_path: str,
     edits: list[dict],
@@ -430,12 +457,12 @@ def _python_docx_tracked_fallback(
             output_path = f"{base}_redlined{ext}"
 
         doc = Document(file_path)
-        
+
         # Enable track revisions via document settings XML
         settings_element = doc.settings.element
-        track_revisions = settings_element.find(qn('w:trackRevisions'))
+        track_revisions = settings_element.find(qn("w:trackRevisions"))
         if track_revisions is None:
-            track_revisions = OxmlElement('w:trackRevisions')
+            track_revisions = OxmlElement("w:trackRevisions")
             settings_element.append(track_revisions)
         timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -457,12 +484,12 @@ def _python_docx_tracked_fallback(
                         p.add_run(parts[0])
 
                     # Add w:del
-                    w_del = OxmlElement('w:del')
-                    w_del.set(qn('w:author'), author)
-                    w_del.set(qn('w:date'), timestamp)
-                    w_del.set(qn('w:id'), str(applied_count * 2))
-                    r_del = OxmlElement('w:r')
-                    del_text = OxmlElement('w:delText')
+                    w_del = OxmlElement("w:del")
+                    w_del.set(qn("w:author"), author)
+                    w_del.set(qn("w:date"), timestamp)
+                    w_del.set(qn("w:id"), str(applied_count * 2))
+                    r_del = OxmlElement("w:r")
+                    del_text = OxmlElement("w:delText")
                     del_text.text = target
                     r_del.append(del_text)
                     w_del.append(r_del)
@@ -474,43 +501,44 @@ def _python_docx_tracked_fallback(
                             lines = new.split("\n")
                             # First line goes to the current paragraph
                             if lines[0]:
-                                w_ins = OxmlElement('w:ins')
-                                w_ins.set(qn('w:author'), author)
-                                w_ins.set(qn('w:date'), timestamp)
-                                w_ins.set(qn('w:id'), str(applied_count * 2 + 1))
-                                r_ins = OxmlElement('w:r')
-                                ins_text = OxmlElement('w:t')
+                                w_ins = OxmlElement("w:ins")
+                                w_ins.set(qn("w:author"), author)
+                                w_ins.set(qn("w:date"), timestamp)
+                                w_ins.set(qn("w:id"), str(applied_count * 2 + 1))
+                                r_ins = OxmlElement("w:r")
+                                ins_text = OxmlElement("w:t")
                                 ins_text.text = lines[0]
                                 r_ins.append(ins_text)
                                 w_ins.append(r_ins)
                                 p._p.append(w_ins)
-                            
+
                             # The remaining lines are added as new paragraphs with track changes (w:ins)
                             current_p = p
                             for idx, line in enumerate(lines[1:]):
-                                next_p_elem = OxmlElement('w:p')
+                                next_p_elem = OxmlElement("w:p")
                                 current_p._p.addnext(next_p_elem)
                                 from docx.text.paragraph import Paragraph
+
                                 next_p = Paragraph(next_p_elem, doc)
-                                
-                                w_ins_next = OxmlElement('w:ins')
-                                w_ins_next.set(qn('w:author'), author)
-                                w_ins_next.set(qn('w:date'), timestamp)
-                                w_ins_next.set(qn('w:id'), str(applied_count * 1000 + idx))
-                                r_ins_next = OxmlElement('w:r')
-                                ins_text_next = OxmlElement('w:t')
+
+                                w_ins_next = OxmlElement("w:ins")
+                                w_ins_next.set(qn("w:author"), author)
+                                w_ins_next.set(qn("w:date"), timestamp)
+                                w_ins_next.set(qn("w:id"), str(applied_count * 1000 + idx))
+                                r_ins_next = OxmlElement("w:r")
+                                ins_text_next = OxmlElement("w:t")
                                 ins_text_next.text = line
                                 r_ins_next.append(ins_text_next)
                                 w_ins_next.append(r_ins_next)
                                 next_p_elem.append(w_ins_next)
                                 current_p = next_p
                         else:
-                            w_ins = OxmlElement('w:ins')
-                            w_ins.set(qn('w:author'), author)
-                            w_ins.set(qn('w:date'), timestamp)
-                            w_ins.set(qn('w:id'), str(applied_count * 2 + 1))
-                            r_ins = OxmlElement('w:r')
-                            ins_text = OxmlElement('w:t')
+                            w_ins = OxmlElement("w:ins")
+                            w_ins.set(qn("w:author"), author)
+                            w_ins.set(qn("w:date"), timestamp)
+                            w_ins.set(qn("w:id"), str(applied_count * 2 + 1))
+                            r_ins = OxmlElement("w:r")
+                            ins_text = OxmlElement("w:t")
                             ins_text.text = new
                             r_ins.append(ins_text)
                             w_ins.append(r_ins)
@@ -534,7 +562,7 @@ def _python_docx_tracked_fallback(
                 "applied_count": applied_count,
                 "skipped_count": skipped_count,
                 "backend": "python_docx_fallback",
-            }
+            },
         }
     except Exception as e:
         return _error(f"Tracked changes fallback failed: {e}")
@@ -560,10 +588,15 @@ def _adeu_cli_apply(
 
         subprocess.run(
             [
-                _get_adeu_cmd(), "apply", file_path,
-                "--edits", tmp_json,
-                "--author", author,
-                "-o", output_path,
+                _get_adeu_cmd(),
+                "apply",
+                file_path,
+                "--edits",
+                tmp_json,
+                "--author",
+                author,
+                "-o",
+                output_path,
             ],
             check=True,
             capture_output=True,
@@ -613,10 +646,12 @@ def _adeu_live_apply(
 
         result = subprocess.run(
             [
-                _get_adeu_cmd(), "apply",
+                _get_adeu_cmd(),
+                "apply",
                 tmp_json,
                 "--live",
-                "--author", author,
+                "--author",
+                author,
             ],
             capture_output=True,
             text=True,
@@ -651,6 +686,7 @@ def _adeu_live_apply(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _parse_markdown_to_paragraphs(markdown: str) -> list[dict]:
     """

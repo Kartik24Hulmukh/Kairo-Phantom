@@ -61,17 +61,24 @@ impl KairoMemory {
 
     pub fn learn_from_interaction(&mut self, interaction: Interaction) {
         info!("🧠 Memory learning from interaction in {}", interaction.app);
-        
+
         if interaction.accepted {
-            if interaction.response.contains("struct") || interaction.response.contains("impl") || interaction.response.contains("pub fn") {
+            if interaction.response.contains("struct")
+                || interaction.response.contains("impl")
+                || interaction.response.contains("pub fn")
+            {
                 self.add_preference("technical_level", "highly technical / code-centric", 0.2);
-            } else if interaction.response.contains("strategic") || interaction.response.contains("roadmap") {
+            } else if interaction.response.contains("strategic")
+                || interaction.response.contains("roadmap")
+            {
                 self.add_preference("technical_level", "executive / strategic", 0.2);
             }
 
             if interaction.response.contains("!") || interaction.response.contains("exciting") {
                 self.add_preference("tone", "energetic / optimistic", 0.1);
-            } else if interaction.response.contains("shall") || interaction.response.contains("hereby") {
+            } else if interaction.response.contains("shall")
+                || interaction.response.contains("hereby")
+            {
                 self.add_preference("tone", "formal / legalistic", 0.3);
             }
 
@@ -84,7 +91,7 @@ impl KairoMemory {
 
             self.graph_update(&interaction.prompt, &interaction.response);
         }
-        
+
         self.interactions.push(interaction);
     }
 
@@ -95,11 +102,13 @@ impl KairoMemory {
                 self.graph.nodes.push(concept);
             }
         }
-        
+
         if self.graph.nodes.len() >= 2 {
             let last = self.graph.nodes.len() - 1;
             let prev = last - 1;
-            self.graph.edges.push((prev, last, "related_to".to_string()));
+            self.graph
+                .edges
+                .push((prev, last, "related_to".to_string()));
         }
     }
 
@@ -107,7 +116,10 @@ impl KairoMemory {
         let mut concepts = Vec::new();
         for word in response.split_whitespace() {
             if word.len() > 3 && word.chars().next().unwrap().is_uppercase() {
-                concepts.push(word.trim_matches(|c: char| !c.is_alphanumeric()).to_string());
+                concepts.push(
+                    word.trim_matches(|c: char| !c.is_alphanumeric())
+                        .to_string(),
+                );
             }
         }
         concepts.truncate(5);
@@ -116,7 +128,11 @@ impl KairoMemory {
 
     pub fn add_preference(&mut self, category: &str, value: &str, boost: f32) {
         let key = category.to_string();
-        if let Some(pref) = self.preferences.iter_mut().find(|p| p.key == key && p.value == value) {
+        if let Some(pref) = self
+            .preferences
+            .iter_mut()
+            .find(|p| p.key == key && p.value == value)
+        {
             pref.weight += boost;
         } else {
             self.preferences.push(UserPreference {
@@ -130,27 +146,27 @@ impl KairoMemory {
     pub fn build_memory_fragment(&self, app_name: &str) -> String {
         let mut parts = Vec::new();
         parts.push("## USER MEMORY (PERSISTENT)".to_string());
-        
+
         for pref in self.preferences.iter().filter(|p| p.weight > 0.5) {
             parts.push(format!("- {}: {}", pref.key, pref.value));
         }
-        
+
         if let Some(bias) = self.app_bias.get(app_name) {
-            parts.push(format!("- App-specific pattern: {}", bias));
+            parts.push(format!("- App-specific pattern: {bias}"));
         }
 
         parts.push("\n## USER MODEL".to_string());
         for (k, v) in &self.user_model.word_preferences {
-            parts.push(format!("- Word Pref {}: {}", k, v));
+            parts.push(format!("- Word Pref {k}: {v}"));
         }
         for (k, v) in &self.user_model.ppt_preferences {
-            parts.push(format!("- PPT Pref {}: {}", k, v));
+            parts.push(format!("- PPT Pref {k}: {v}"));
         }
-        
+
         if parts.len() <= 2 {
             return "".into();
         }
-        
+
         parts.join("\n")
     }
 
@@ -164,17 +180,19 @@ impl KairoMemory {
 
         if app_lower.contains("word") || app_lower.contains("winword") {
             if let Some(tone) = self.user_model.word_preferences.get("tone") {
-                hints.push(format!("User prefers {} tone in Word documents", tone));
+                hints.push(format!("User prefers {tone} tone in Word documents"));
             }
         } else if app_lower.contains("powerpnt") {
             if let Some(style) = self.user_model.ppt_preferences.get("style") {
-                hints.push(format!("User prefers {} slides in PowerPoint", style));
+                hints.push(format!("User prefers {style} slides in PowerPoint"));
             }
         }
 
         let task_key = format!("REJECTED:{}:{}", app, &task[..task.len().min(50)]);
         if self.skill.reusable_patterns.contains_key(&task_key) {
-            hints.push("NOTE: User previously rejected a similar response. Vary the approach.".to_string());
+            hints.push(
+                "NOTE: User previously rejected a similar response. Vary the approach.".to_string(),
+            );
         }
 
         if hints.is_empty() {

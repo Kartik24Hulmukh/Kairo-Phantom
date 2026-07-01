@@ -1,6 +1,5 @@
 use yrs::{Doc, GetString, Options, ReadTxn, Text, Transact, WriteTxn};
 
-
 pub struct CrdtSession {
     /// The Yrs document (pure Rust Yjs)
     doc: Doc,
@@ -25,7 +24,7 @@ impl CrdtSession {
     pub fn insert_human_text(&self, text: &str) {
         let mut txn = self.doc.transact_mut();
         let content = txn.get_or_insert_text("content");
-        
+
         let current_len = content.get_string(&txn).len() as u32;
         if current_len > 0 {
             content.remove_range(&mut txn, 0, current_len);
@@ -68,9 +67,7 @@ impl CrdtSession {
 
     /// Get word count of current document
     pub fn word_count(&self) -> usize {
-        self.get_human_text()
-            .split_whitespace()
-            .count()
+        self.get_human_text().split_whitespace().count()
     }
 
     /// Export CRDT state as binary (for syncing with @docscode/core)

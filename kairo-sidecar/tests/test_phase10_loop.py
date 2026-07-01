@@ -19,12 +19,12 @@ a deliberate TypeError — runs TestFixLoop against it, and verifies:
 Run:
     python -m pytest tests/test_phase10_loop.py -v -s
 """
+
 from __future__ import annotations
 
 import json
 import os
 import sys
-import tempfile
 import textwrap
 import time
 from pathlib import Path
@@ -38,8 +38,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from sidecar.test_fix_loop import (
     AttemptRecord,
     LoopResult,
-    OscillationDetected,
-    ProtectedPathViolation,
     TestFixLoop,
     REWARD_ESCALATE,
     REWARD_PASS,
@@ -82,6 +80,7 @@ def tmp_db(tmp_path: Path) -> str:
 
 
 # ── Helper callbacks ─────────────────────────────────────────────────────────
+
 
 def _make_callbacks(
     workspace: Path,
@@ -145,7 +144,7 @@ def _make_always_fail_callbacks(workspace: Path) -> Tuple[Any, Any, Any, Any]:
         return diff, {str(target_file)}
 
     def apply_patch_fn(patch_diff: str) -> None:
-        pass   # no-op
+        pass  # no-op
 
     def rollback_fn() -> None:
         pass
@@ -155,12 +154,15 @@ def _make_always_fail_callbacks(workspace: Path) -> Tuple[Any, Any, Any, Any]:
 
 # ── Audit table printer ───────────────────────────────────────────────────────
 
+
 def _print_audit_table(result: LoopResult) -> None:
     """Print a formatted ASCII table of the loop's attempt audit trail."""
     print("\n" + "=" * 75)
     print(f"  PHASE 10 AUDIT — scenario={result.scenario_id}")
-    print(f"  terminal_state={result.terminal_state}  reward={result.reward:+.1f}  "
-          f"elapsed={result.elapsed_s:.3f}s  attempts={result.attempts_used}")
+    print(
+        f"  terminal_state={result.terminal_state}  reward={result.reward:+.1f}  "
+        f"elapsed={result.elapsed_s:.3f}s  attempts={result.attempts_used}"
+    )
     if result.failure_reason:
         print(f"  failure_reason={result.failure_reason}")
     if result.ticket_path:
@@ -180,6 +182,7 @@ def _print_audit_table(result: LoopResult) -> None:
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
+
 class TestPhase10Loop:
     """Full proof tests for Item 35 (temporal loop) and Item 37 (outcome store)."""
 
@@ -193,8 +196,7 @@ class TestPhase10Loop:
             budget_attempts=5,
             budget_seconds=60.0,
         )
-        run_tests_fn, generate_fix_fn, apply_patch_fn, rollback_fn = \
-            _make_callbacks(tmp_workspace)
+        run_tests_fn, generate_fix_fn, apply_patch_fn, rollback_fn = _make_callbacks(tmp_workspace)
 
         result = loop.run_loop(
             scenario_id=SCENARIO_ID,
@@ -203,16 +205,20 @@ class TestPhase10Loop:
             generate_fix_fn=generate_fix_fn,
             apply_patch_fn=apply_patch_fn,
             rollback_fn=rollback_fn,
-            log_to_store=False,   # we log manually below to our test DB
+            log_to_store=False,  # we log manually below to our test DB
         )
 
         _print_audit_table(result)
 
         # ── Core assertions ────────────────────────────────────────────────
-        assert result.terminal_state in ("PASS", "QUARANTINE", "ESCALATE"), \
-            f"terminal_state must be one of the 3 states, got: {result.terminal_state!r}"
-        assert result.terminal_state == "PASS", \
-            f"Expected PASS for auto-fixing scenario, got {result.terminal_state}"
+        assert result.terminal_state in (
+            "PASS",
+            "QUARANTINE",
+            "ESCALATE",
+        ), f"terminal_state must be one of the 3 states, got: {result.terminal_state!r}"
+        assert (
+            result.terminal_state == "PASS"
+        ), f"Expected PASS for auto-fixing scenario, got {result.terminal_state}"
         assert result.reward == REWARD_PASS
         assert result.attempts_used >= 1
         assert result.elapsed_s >= 0  # non-negative; may be 0.0 on fast machines
@@ -239,8 +245,15 @@ class TestPhase10Loop:
         assert row["reward"] == REWARD_PASS
         assert isinstance(row["attempts"], list)
         assert len(row["attempts"]) >= 1
-        attempt_keys = {"attempt", "timestamp", "patch_hash", "guardrails_checked",
-                        "test_result", "action_taken", "elapsed_ms"}
+        attempt_keys = {
+            "attempt",
+            "timestamp",
+            "patch_hash",
+            "guardrails_checked",
+            "test_result",
+            "action_taken",
+            "elapsed_ms",
+        }
         for a in row["attempts"]:
             missing = attempt_keys - set(a.keys())
             assert not missing, f"AttemptRecord missing keys: {missing}"
@@ -255,8 +268,9 @@ class TestPhase10Loop:
             budget_attempts=3,
             budget_seconds=120.0,
         )
-        run_tests_fn, generate_fix_fn, apply_patch_fn, rollback_fn = \
-            _make_always_fail_callbacks(tmp_workspace)
+        run_tests_fn, generate_fix_fn, apply_patch_fn, rollback_fn = _make_always_fail_callbacks(
+            tmp_workspace
+        )
 
         result = loop.run_loop(
             scenario_id="phase10-quarantine-001",
@@ -271,18 +285,20 @@ class TestPhase10Loop:
         _print_audit_table(result)
 
         # Terminal state must be QUARANTINE
-        assert result.terminal_state == "QUARANTINE", \
-            f"Expected QUARANTINE on budget exhaustion, got {result.terminal_state}"
+        assert (
+            result.terminal_state == "QUARANTINE"
+        ), f"Expected QUARANTINE on budget exhaustion, got {result.terminal_state}"
         assert result.reward == REWARD_QUARANTINE
         assert result.attempts_used == 3
 
         # ── Quarantine ticket ──────────────────────────────────────────────
-        ticket_dir = tmp_workspace / "target" / "quarantine_tickets"
+        tmp_workspace / "target" / "quarantine_tickets"
         # The ticket path from the loop should exist (loop uses workspace_root)
         # Re-write ticket to our tmp dir for assertion since loop writes to workspace_root
         assert result.ticket_path is not None, "QUARANTINE must emit a ticket_path"
-        assert os.path.exists(result.ticket_path), \
-            f"Quarantine ticket file does not exist: {result.ticket_path}"
+        assert os.path.exists(
+            result.ticket_path
+        ), f"Quarantine ticket file does not exist: {result.ticket_path}"
         with open(result.ticket_path, encoding="utf-8") as fh:
             ticket = json.load(fh)
         assert ticket["scenario_id"] == "phase10-quarantine-001"
@@ -297,7 +313,7 @@ class TestPhase10Loop:
         assert len(lines) >= 1, "Argilla queue must have ≥ 1 record"
         record = json.loads(lines[-1])
         assert record["terminal_state"] == "QUARANTINE"
-        assert record["label"] is None   # pending human review
+        assert record["label"] is None  # pending human review
 
         # ── DuckDB audit ───────────────────────────────────────────────────
         store = OutcomeStore(tmp_db)
@@ -336,7 +352,7 @@ class TestPhase10Loop:
 
         assert result.terminal_state == "ESCALATE"
         assert result.reward == REWARD_ESCALATE
-        assert result.attempts_used == 1   # halts immediately
+        assert result.attempts_used == 1  # halts immediately
 
     def test_quarantine_on_oscillation(self, tmp_workspace: Path, tmp_db: str):
         """
@@ -353,7 +369,7 @@ class TestPhase10Loop:
 
         def generate_fix_fn(fail):
             call_count["n"] += 1
-            return IDENTICAL_DIFF, set()   # same hash on attempt 2 → oscillation
+            return IDENTICAL_DIFF, set()  # same hash on attempt 2 → oscillation
 
         result = loop.run_loop(
             scenario_id="phase10-oscillation-001",
@@ -376,15 +392,15 @@ class TestPhase10Loop:
         """
         loop = TestFixLoop(
             workspace_root=str(tmp_workspace),
-            budget_attempts=100,      # very large attempt budget
-            budget_seconds=0.01,      # 10 ms — expires immediately
+            budget_attempts=100,  # very large attempt budget
+            budget_seconds=0.01,  # 10 ms — expires immediately
         )
 
         call_count = {"n": 0}
 
         def generate_fix_fn(fail):
             call_count["n"] += 1
-            time.sleep(0.05)          # each attempt takes 50ms > 10ms budget
+            time.sleep(0.05)  # each attempt takes 50ms > 10ms budget
             return f"diff-{call_count['n']}", set()
 
         result = loop.run_loop(
@@ -400,7 +416,7 @@ class TestPhase10Loop:
         _print_audit_table(result)
 
         assert result.terminal_state == "QUARANTINE"
-        assert result.elapsed_s < 5.0   # should finish fast, not run 100 attempts
+        assert result.elapsed_s < 5.0  # should finish fast, not run 100 attempts
 
     def test_duckdb_episode_api_backward_compat(self, tmp_db: str):
         """
@@ -415,7 +431,7 @@ class TestPhase10Loop:
             outcome="ACCEPTED",
             accepted=True,
         )
-        assert ep_id > 0 or ep_id == -1   # -1 only on hard DB error
+        assert ep_id > 0 or ep_id == -1  # -1 only on hard DB error
 
         episodes = store.get_episodes("compat-test-001")
         assert len(episodes) >= 1
@@ -447,8 +463,9 @@ class TestPhase10Loop:
             budget_attempts=3,
             budget_seconds=30.0,
         )
-        run_tests_fn, generate_fix_fn, apply_patch_fn, rollback_fn = \
-            _make_callbacks(tmp_workspace, attempt_cap=3)
+        run_tests_fn, generate_fix_fn, apply_patch_fn, rollback_fn = _make_callbacks(
+            tmp_workspace, attempt_cap=3
+        )
 
         result = env.run_fix_loop_episode(
             fix_loop=loop,
@@ -485,8 +502,12 @@ class TestPhase10OutcomeStore:
                 attempt=2,
                 timestamp=time.time(),
                 patch_hash="def456",
-                guardrails_checked=["oracle_immutability", "protected_paths",
-                                    "convergence", "regression_gate"],
+                guardrails_checked=[
+                    "oracle_immutability",
+                    "protected_paths",
+                    "convergence",
+                    "regression_gate",
+                ],
                 test_result="PASS",
                 action_taken="APPLY_PATCH",
                 elapsed_ms=98.0,
@@ -514,7 +535,7 @@ class TestPhase10OutcomeStore:
 
     def test_get_all_loop_results(self, tmp_db: str):
         """get_all_loop_results returns rows from multiple scenarios."""
-        from sidecar.test_fix_loop import AttemptRecord, LoopResult
+        from sidecar.test_fix_loop import LoopResult
 
         store = OutcomeStore(tmp_db)
         for i in range(3):

@@ -7,8 +7,8 @@
 //   "Return None for any selection that does not start with //, ///, //!, or //?"
 //   "If parse() returns None, do NOTHING — no ghost overlay, no LLM call, no injection."
 
-use phantom_core::prompt_parser::PromptParser;
 use phantom_core::command_protocol::CommandMode;
+use phantom_core::prompt_parser::PromptParser;
 
 /// PRIMARY GATE TEST: Non-// text must be completely rejected.
 ///
@@ -33,8 +33,8 @@ fn test_prompt_parser_ignores_non_command_text() {
         "\t\n",
         // Single slash (common mistake)
         "/ this is not a command",
-        "// ",       // bare // with only space
-        "//  ",      // bare // with only spaces
+        "// ",  // bare // with only space
+        "//  ", // bare // with only spaces
         // Looks like a URL, not a command
         "https://example.com/page",
         "http://localhost:8080",
@@ -51,9 +51,8 @@ fn test_prompt_parser_ignores_non_command_text() {
         let result = PromptParser::parse(text);
         assert!(
             result.is_none(),
-            "PROTOCOL GATE FAIL: PromptParser::parse({:?}) returned Some but expected None.\n\
-             This means the hot-path would incorrectly trigger an LLM call for regular document text.",
-            text
+            "PROTOCOL GATE FAIL: PromptParser::parse({text:?}) returned Some but expected None.\n\
+             This means the hot-path would incorrectly trigger an LLM call for regular document text."
         );
     }
 }
@@ -99,16 +98,14 @@ fn test_all_valid_command_prefixes_accepted() {
         let result = PromptParser::parse(cmd);
         assert!(
             result.is_some(),
-            "PROTOCOL GATE FAIL: PromptParser::parse({:?}) returned None but expected Some.\n\
-             This means a valid // command would be silently dropped.",
-            cmd
+            "PROTOCOL GATE FAIL: PromptParser::parse({cmd:?}) returned None but expected Some.\n\
+             This means a valid // command would be silently dropped."
         );
         let parsed = result.unwrap();
         assert_ne!(
             parsed.mode,
             CommandMode::None,
-            "Parsed mode must not be None for valid command: {:?}",
-            cmd
+            "Parsed mode must not be None for valid command: {cmd:?}"
         );
     }
 }
@@ -156,7 +153,10 @@ fn test_protocol_gate_preserves_instruction() {
 fn test_protocol_gate_handles_whitespace() {
     let padded = "   // fix this typo in the intro   ";
     let result = PromptParser::parse(padded);
-    assert!(result.is_some(), "Padded // command should parse successfully");
+    assert!(
+        result.is_some(),
+        "Padded // command should parse successfully"
+    );
     let parsed = result.unwrap();
     assert_eq!(parsed.instruction, "fix this typo in the intro");
 }
@@ -176,8 +176,7 @@ fn test_protocol_gate_accepts_extracted_command_line() {
     for line in &extracted_lines {
         assert!(
             PromptParser::is_command(line),
-            "Extracted // line should be recognized as a command: {:?}",
-            line
+            "Extracted // line should be recognized as a command: {line:?}"
         );
     }
 }
@@ -186,17 +185,13 @@ fn test_protocol_gate_accepts_extracted_command_line() {
 /// This covers an edge case where someone selects a URL line.
 #[test]
 fn test_protocol_gate_rejects_url_at_start() {
-    let url_texts = [
-        "https://kairo.ai",
-        "http://localhost:8080/api",
-    ];
+    let url_texts = ["https://kairo.ai", "http://localhost:8080/api"];
 
     for text in &url_texts {
         let result = PromptParser::parse(text);
         assert!(
             result.is_none(),
-            "URL text {:?} should not be parsed as a // command",
-            text
+            "URL text {text:?} should not be parsed as a // command"
         );
     }
 }

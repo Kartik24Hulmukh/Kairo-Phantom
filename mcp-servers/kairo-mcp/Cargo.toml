@@ -3,6 +3,7 @@ name = "kairo-mcp"
 version = "0.3.0"
 edition = "2021"
 description = "Kairo Phantom MCP Server — expose ghost-writing to Claude Code, Cursor, Goose, Windsurf"
+license = "MIT"
 
 [[bin]]
 name = "kairo-mcp"

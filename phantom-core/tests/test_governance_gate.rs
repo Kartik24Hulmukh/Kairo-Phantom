@@ -121,7 +121,10 @@ fn test_gate_18_validate_tool_case_sensitivity() {
 fn test_gate_19_allowed_nested_path() {
     let gate = ToolGate::default();
     if let Some(home) = dirs::home_dir() {
-        let path = home.join(".kairo-phantom").join("skills").join("manifest.toml");
+        let path = home
+            .join(".kairo-phantom")
+            .join("skills")
+            .join("manifest.toml");
         assert!(gate.validate_file_access(&path.to_string_lossy()));
     }
 }
@@ -150,13 +153,11 @@ fn test_gate_23_system_directory_is_blocked_even_if_allowed() {
     gate.add_allowed_path("/etc".to_string());
     gate.add_allowed_path("c:\\windows".to_string());
     gate.add_allowed_path("/my_allowed_dir".to_string());
-    
+
     // System directories must be blocked
     assert!(!gate.validate_file_access("/etc/passwd"));
     assert!(!gate.validate_file_access("c:\\windows\\system32\\cmd.exe"));
-    
+
     // Non-system allowed directory must be allowed
     assert!(gate.validate_file_access("/my_allowed_dir/file.txt"));
 }
-
-

@@ -2,6 +2,7 @@ import os
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
 
+
 def main():
     dir_path = os.path.dirname(os.path.abspath(__file__))
     oracles_path = os.path.join(dir_path, "oracles.py")
@@ -14,8 +15,7 @@ def main():
 
     # Save public key as PEM
     pub_bytes = public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
     with open(pub_path, "wb") as f:
         f.write(pub_bytes)
@@ -24,11 +24,12 @@ def main():
     # Sign the contents of oracles.py
     with open(oracles_path, "rb") as f:
         data = f.read()
-    
+
     signature = private_key.sign(data)
     with open(sig_path, "wb") as f:
         f.write(signature)
     print(f"Signature saved to {sig_path}")
+
 
 if __name__ == "__main__":
     main()

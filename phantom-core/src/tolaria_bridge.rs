@@ -1,8 +1,8 @@
 // phantom-core/src/tolaria_bridge.rs
 use crate::mcp_client::McpClient;
+use anyhow::Result;
 use serde_json::json;
 use tracing::{info, warn};
-use anyhow::Result;
 
 pub struct TolariaBridge {
     client: McpClient,
@@ -18,8 +18,11 @@ impl TolariaBridge {
     }
 
     pub async fn fetch_enterprise_context(&self, query: &str) -> Result<String> {
-        info!("Fetching enterprise context from Tolaria for query: {}", query);
-        
+        info!(
+            "Fetching enterprise context from Tolaria for query: {}",
+            query
+        );
+
         let args = json!({
             "query": query,
             "limit": 5

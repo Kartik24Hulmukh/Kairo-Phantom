@@ -10,15 +10,11 @@ DISABLED by default. Enabled via: kairo connectors enable discord --token <BOT_T
 from __future__ import annotations
 
 import logging
-import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, Callable
+from typing import Any, Callable, Dict, Optional
 
 from sidecar.connectors.telegram_connector import (
-    screen_inbound_message,
-    screen_outbound_message,
     is_airgap_mode,
-    is_connector_enabled,
 )
 
 log = logging.getLogger("kairo-sidecar.connectors.discord")
@@ -27,6 +23,7 @@ log = logging.getLogger("kairo-sidecar.connectors.discord")
 @dataclass
 class DiscordInboundMessage:
     """A message received from Discord."""
+
     channel_id: int
     guild_id: Optional[int]
     text: str

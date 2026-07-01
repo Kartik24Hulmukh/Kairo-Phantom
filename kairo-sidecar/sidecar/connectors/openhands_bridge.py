@@ -91,13 +91,9 @@ class OpenHandsBridge:
                     return json.loads(raw)
                 return {}
         except urllib.error.URLError as exc:
-            raise ConnectionError(
-                _INSTALL_INSTRUCTIONS.format(url=self.base_url)
-            ) from exc
+            raise ConnectionError(_INSTALL_INSTRUCTIONS.format(url=self.base_url)) from exc
         except ConnectionError as exc:
-            raise ConnectionError(
-                _INSTALL_INSTRUCTIONS.format(url=self.base_url)
-            ) from exc
+            raise ConnectionError(_INSTALL_INSTRUCTIONS.format(url=self.base_url)) from exc
 
     # ── Public API ─────────────────────────────────────────────────────
 
@@ -118,9 +114,7 @@ class OpenHandsBridge:
             raise
         except Exception as exc:  # noqa: BLE001
             log.warning("OpenHands health check failed: %s", exc)
-            raise ConnectionError(
-                _INSTALL_INSTRUCTIONS.format(url=self.base_url)
-            ) from exc
+            raise ConnectionError(_INSTALL_INSTRUCTIONS.format(url=self.base_url)) from exc
 
     def is_available(self) -> bool:
         """
@@ -151,13 +145,12 @@ class OpenHandsBridge:
             RuntimeError — if the env flag is not set.
         """
         if not is_openhands_enabled():
-            raise RuntimeError(
-                f"OpenHands bridge is disabled. Set {ENV_FLAG}=1 to enable."
-            )
+            raise RuntimeError(f"OpenHands bridge is disabled. Set {ENV_FLAG}=1 to enable.")
 
         # Security: scan task description for injection attempts
         try:
             from sidecar.safety.prompt_shield import PromptShield
+
             shield = PromptShield()
             if not shield.scan(task):
                 raise ValueError(

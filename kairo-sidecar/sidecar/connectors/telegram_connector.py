@@ -24,7 +24,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Callable
 
 log = logging.getLogger("kairo-sidecar.connectors.telegram")
 
@@ -32,6 +32,7 @@ log = logging.getLogger("kairo-sidecar.connectors.telegram")
 @dataclass
 class InboundMessage:
     """A message received from Telegram."""
+
     chat_id: int
     text: str
     sender_username: str
@@ -42,6 +43,7 @@ class InboundMessage:
 @dataclass
 class SecurityDecision:
     """Result of security screening on an inbound message."""
+
     allowed: bool
     reason: str = ""
     blocked_patterns: list[str] = field(default_factory=list)
@@ -59,6 +61,7 @@ def screen_inbound_message(text: str) -> SecurityDecision:
     """
     try:
         from sidecar.safety.prompt_shield import PromptShield
+
         shield = PromptShield()
         is_safe = shield.scan(text)
 
@@ -73,6 +76,7 @@ def screen_inbound_message(text: str) -> SecurityDecision:
         redacted = text
         try:
             from sidecar.safety.pii_guard import PiiGuard
+
             guard = PiiGuard()
             redacted = guard.redact(text)
         except Exception:
@@ -96,13 +100,16 @@ def screen_outbound_message(text: str) -> str:
     """
     try:
         from sidecar.safety.pii_guard import PiiGuard
+
         guard = PiiGuard()
         redacted = guard.redact(text)
         if redacted != text:
             log.info("PiiGuard redacted PII in outbound message")
         return redacted
     except Exception as e:
-        log.warning(f"PiiGuard screening failed: {e} — message sent without redaction (fail-open for outbound)")
+        log.warning(
+            f"PiiGuard screening failed: {e} — message sent without redaction (fail-open for outbound)"
+        )
     return text
 
 

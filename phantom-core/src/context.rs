@@ -1,3 +1,7 @@
+#[cfg(windows)]
+use windows::Win32::System::Threading::{
+    OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+};
 /// Context Engine — The brain of Kairo's document awareness.
 /// Extracts the user's EXACT prompt (last paragraph/selection) and
 /// identifies the precise application environment for context-aware AI responses.
@@ -8,10 +12,6 @@
 #[cfg(windows)]
 use windows::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetWindowTextW, GetWindowThreadProcessId,
-};
-#[cfg(windows)]
-use windows::Win32::System::Threading::{
-    OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW, PROCESS_NAME_WIN32,
 };
 
 /// Identifies the exact type of application the user is writing in.
@@ -117,12 +117,13 @@ impl AppEnvironment {
 
     /// Returns true if this app is Yjs-powered — triggers CRDT peer injection.
     pub fn is_yjs_app(&self) -> bool {
-        matches!(self,
-            AppEnvironment::GoogleDocs |
-            AppEnvironment::GoogleSlides |
-            AppEnvironment::LinearApp |
-            AppEnvironment::TiptapEditor |
-            AppEnvironment::Liveblocks
+        matches!(
+            self,
+            AppEnvironment::GoogleDocs
+                | AppEnvironment::GoogleSlides
+                | AppEnvironment::LinearApp
+                | AppEnvironment::TiptapEditor
+                | AppEnvironment::Liveblocks
         )
     }
 
@@ -143,9 +144,9 @@ impl AppEnvironment {
             | AppEnvironment::Numbers
             | AppEnvironment::LibreOfficeCalc => DocKind::ExcelSpreadsheet,
 
-            AppEnvironment::Notion
-            | AppEnvironment::TiptapEditor
-            | AppEnvironment::Liveblocks => DocKind::NotionPage,
+            AppEnvironment::Notion | AppEnvironment::TiptapEditor | AppEnvironment::Liveblocks => {
+                DocKind::NotionPage
+            }
 
             AppEnvironment::GoogleDocs => DocKind::YjsDocument,
             AppEnvironment::GoogleSlides => DocKind::YjsDocument,
@@ -154,9 +155,9 @@ impl AppEnvironment {
             AppEnvironment::Figma => DocKind::FigmaDesign,
             AppEnvironment::Canva => DocKind::CanvaDesign,
 
-            AppEnvironment::VSCode
-            | AppEnvironment::Vim
-            | AppEnvironment::NotepadPlusPlus => DocKind::CodeFile,
+            AppEnvironment::VSCode | AppEnvironment::Vim | AppEnvironment::NotepadPlusPlus => {
+                DocKind::CodeFile
+            }
 
             AppEnvironment::WindowsTerminal
             | AppEnvironment::PowerShell
@@ -165,9 +166,9 @@ impl AppEnvironment {
             | AppEnvironment::MacTerminal
             | AppEnvironment::ITerm2 => DocKind::Terminal,
 
-            AppEnvironment::Notepad
-            | AppEnvironment::TextEdit
-            | AppEnvironment::Gedit => DocKind::PlainText,
+            AppEnvironment::Notepad | AppEnvironment::TextEdit | AppEnvironment::Gedit => {
+                DocKind::PlainText
+            }
 
             _ => DocKind::UnknownApp,
         }
@@ -207,10 +208,18 @@ impl AppFingerprinter for DefaultFingerprinter {
         let title = window_title.to_lowercase();
 
         // ── Windows Office Suite ──────────────────────────────────────────────
-        if proc.contains("winword") { return Some(AppEnvironment::MicrosoftWord); }
-        if proc.contains("powerpnt") { return Some(AppEnvironment::MicrosoftPowerPoint); }
-        if proc.contains("excel") { return Some(AppEnvironment::MicrosoftExcel); }
-        if proc.contains("outlook") { return Some(AppEnvironment::MicrosoftOutlook); }
+        if proc.contains("winword") {
+            return Some(AppEnvironment::MicrosoftWord);
+        }
+        if proc.contains("powerpnt") {
+            return Some(AppEnvironment::MicrosoftPowerPoint);
+        }
+        if proc.contains("excel") {
+            return Some(AppEnvironment::MicrosoftExcel);
+        }
+        if proc.contains("outlook") {
+            return Some(AppEnvironment::MicrosoftOutlook);
+        }
 
         // ── macOS Native Apps ─────────────────────────────────────────────────
         // Process names on macOS match the .app bundle name exactly
@@ -226,8 +235,12 @@ impl AppFingerprinter for DefaultFingerprinter {
         if proc == "textedit" || proc.contains("textedit") {
             return Some(AppEnvironment::TextEdit);
         }
-        if proc == "safari" { return Some(AppEnvironment::Safari); }
-        if proc.contains("iterm2") || proc == "iterm" { return Some(AppEnvironment::ITerm2); }
+        if proc == "safari" {
+            return Some(AppEnvironment::Safari);
+        }
+        if proc.contains("iterm2") || proc == "iterm" {
+            return Some(AppEnvironment::ITerm2);
+        }
         if proc == "terminal" && cfg!(target_os = "macos") {
             return Some(AppEnvironment::MacTerminal);
         }
@@ -247,26 +260,51 @@ impl AppFingerprinter for DefaultFingerprinter {
             // Generic LibreOffice — default to Writer
             return Some(AppEnvironment::LibreOfficeWriter);
         }
-        if proc == "gedit" || proc.contains("gedit") { return Some(AppEnvironment::Gedit); }
-        if proc.contains("gnome-terminal") || proc.contains("gnome_terminal") || title.contains("gnome terminal") {
+        if proc == "gedit" || proc.contains("gedit") {
+            return Some(AppEnvironment::Gedit);
+        }
+        if proc.contains("gnome-terminal")
+            || proc.contains("gnome_terminal")
+            || title.contains("gnome terminal")
+        {
             return Some(AppEnvironment::GnomeTerminal);
         }
 
         // ── Code Editors (cross-platform) ─────────────────────────────────────
-        if proc.contains("code") && !proc.contains("discord") { return Some(AppEnvironment::VSCode); }
-        if proc.contains("notepad++") || proc.contains("notepadplusplus") { return Some(AppEnvironment::NotepadPlusPlus); }
-        if proc.contains("notepad") { return Some(AppEnvironment::Notepad); }
-        if proc.contains("vim") || proc.contains("nvim") { return Some(AppEnvironment::Vim); }
+        if proc.contains("code") && !proc.contains("discord") {
+            return Some(AppEnvironment::VSCode);
+        }
+        if proc.contains("notepad++") || proc.contains("notepadplusplus") {
+            return Some(AppEnvironment::NotepadPlusPlus);
+        }
+        if proc.contains("notepad") {
+            return Some(AppEnvironment::Notepad);
+        }
+        if proc.contains("vim") || proc.contains("nvim") {
+            return Some(AppEnvironment::Vim);
+        }
 
         // ── Terminals (Windows-specific) ──────────────────────────────────────
-        if proc.contains("windowsterminal") { return Some(AppEnvironment::WindowsTerminal); }
-        if proc.contains("powershell") || title.contains("powershell") { return Some(AppEnvironment::PowerShell); }
-        if proc.contains("cmd") || title.contains("command prompt") { return Some(AppEnvironment::CommandPrompt); }
+        if proc.contains("windowsterminal") {
+            return Some(AppEnvironment::WindowsTerminal);
+        }
+        if proc.contains("powershell") || title.contains("powershell") {
+            return Some(AppEnvironment::PowerShell);
+        }
+        if proc.contains("cmd") || title.contains("command prompt") {
+            return Some(AppEnvironment::CommandPrompt);
+        }
 
         // ── Design Tools ──────────────────────────────────────────────────────
-        if title.contains("notion") || proc.contains("notion") { return Some(AppEnvironment::Notion); }
-        if title.contains("figma") || proc.contains("figma") { return Some(AppEnvironment::Figma); }
-        if title.contains("canva") || proc.contains("canva") { return Some(AppEnvironment::Canva); }
+        if title.contains("notion") || proc.contains("notion") {
+            return Some(AppEnvironment::Notion);
+        }
+        if title.contains("figma") || proc.contains("figma") {
+            return Some(AppEnvironment::Figma);
+        }
+        if title.contains("canva") || proc.contains("canva") {
+            return Some(AppEnvironment::Canva);
+        }
 
         // ── Yjs-powered collaborative apps ────────────────────────────────────
         if title.contains("google docs") || title.contains("docs.google.com") {
@@ -278,19 +316,37 @@ impl AppFingerprinter for DefaultFingerprinter {
         if title.contains("linear") && (proc.contains("linear") || title.contains("linear.app")) {
             return Some(AppEnvironment::LinearApp);
         }
-        if title.contains("tiptap") { return Some(AppEnvironment::TiptapEditor); }
-        if title.contains("liveblocks") { return Some(AppEnvironment::Liveblocks); }
+        if title.contains("tiptap") {
+            return Some(AppEnvironment::TiptapEditor);
+        }
+        if title.contains("liveblocks") {
+            return Some(AppEnvironment::Liveblocks);
+        }
 
         // ── Browsers (cross-platform) ─────────────────────────────────────────
-        if proc.contains("chromium") { return Some(AppEnvironment::Chromium); }
-        if proc.contains("chrome") { return Some(AppEnvironment::Chrome); }
-        if proc.contains("firefox") { return Some(AppEnvironment::Firefox); }
-        if proc.contains("msedge") { return Some(AppEnvironment::Edge); }
+        if proc.contains("chromium") {
+            return Some(AppEnvironment::Chromium);
+        }
+        if proc.contains("chrome") {
+            return Some(AppEnvironment::Chrome);
+        }
+        if proc.contains("firefox") {
+            return Some(AppEnvironment::Firefox);
+        }
+        if proc.contains("msedge") {
+            return Some(AppEnvironment::Edge);
+        }
 
         // ── Communication ─────────────────────────────────────────────────────
-        if proc.contains("slack") { return Some(AppEnvironment::Slack); }
-        if proc.contains("teams") { return Some(AppEnvironment::Teams); }
-        if proc.contains("discord") { return Some(AppEnvironment::Discord); }
+        if proc.contains("slack") {
+            return Some(AppEnvironment::Slack);
+        }
+        if proc.contains("teams") {
+            return Some(AppEnvironment::Teams);
+        }
+        if proc.contains("discord") {
+            return Some(AppEnvironment::Discord);
+        }
 
         None
     }
@@ -316,7 +372,9 @@ impl ContextEngine {
     /// Captures the complete application context at hotkey press time.
     pub fn capture(&self, full_text: &str) -> AppContext {
         let (process_name, window_title) = self.get_active_app_info();
-        let environment = self.registry.identify(&process_name, &window_title)
+        let environment = self
+            .registry
+            .identify(&process_name, &window_title)
             .unwrap_or(AppEnvironment::Unknown(process_name.clone()));
 
         let prompt_text = Self::extract_last_paragraph(full_text);
@@ -328,7 +386,10 @@ impl ContextEngine {
         tracing::info!(
             "📍 Context: env={} | file={:?} | slide={:?} | prompt='{}...' ({} chars)",
             environment.label(),
-            file_path.as_ref().and_then(|p| p.file_name()).and_then(|n| n.to_str()),
+            file_path
+                .as_ref()
+                .and_then(|p| p.file_name())
+                .and_then(|n| n.to_str()),
             active_slide,
             &prompt_text.chars().take(30).collect::<String>(),
             prompt_char_count
@@ -347,7 +408,10 @@ impl ContextEngine {
     }
 
     /// Resolve the document file path from the window title.
-    pub fn resolve_file_path(window_title: &str, _process_name: &str) -> Option<std::path::PathBuf> {
+    pub fn resolve_file_path(
+        window_title: &str,
+        _process_name: &str,
+    ) -> Option<std::path::PathBuf> {
         // Pattern: "Document.docx - Microsoft Word" or "Report.pptx - PowerPoint"
         let parts: Vec<&str> = window_title.splitn(2, " - ").collect();
         let candidate = parts.first()?.trim();
@@ -367,9 +431,18 @@ impl ContextEngine {
 
         let known_ext = matches!(
             ext.as_deref(),
-            Some("docx") | Some("doc") | Some("pptx") | Some("ppt")
-            | Some("xlsx") | Some("xls") | Some("odt") | Some("odp") | Some("ods")
-            | Some("pdf") | Some("md") | Some("txt")
+            Some("docx")
+                | Some("doc")
+                | Some("pptx")
+                | Some("ppt")
+                | Some("xlsx")
+                | Some("xls")
+                | Some("odt")
+                | Some("odp")
+                | Some("ods")
+                | Some("pdf")
+                | Some("md")
+                | Some("txt")
         );
 
         if !known_ext {
@@ -507,9 +580,7 @@ fn get_active_app_info_macos() -> (String, String) {
         return appName & "|" & winTitle
     end tell"#;
 
-    let output = Command::new("osascript")
-        .args(["-e", script])
-        .output();
+    let output = Command::new("osascript").args(["-e", script]).output();
 
     match output {
         Ok(out) if out.status.success() => {
@@ -518,7 +589,14 @@ fn get_active_app_info_macos() -> (String, String) {
             let app_name = parts.next().unwrap_or("Unknown").trim().to_string();
             let win_title = parts.next().unwrap_or("").trim().to_string();
             // On macOS, process name = app name (e.g., "Pages", "Microsoft Word")
-            (app_name.clone(), if win_title.is_empty() { app_name } else { win_title })
+            (
+                app_name.clone(),
+                if win_title.is_empty() {
+                    app_name
+                } else {
+                    win_title
+                },
+            )
         }
         Ok(out) => {
             tracing::warn!(
@@ -542,13 +620,18 @@ fn get_macos_frontmost_app_name() -> String {
     use std::process::Command;
     // Try a simpler AppleScript
     let out = Command::new("osascript")
-        .args(["-e", "tell app \"System Events\" to get name of first process whose frontmost is true"])
+        .args([
+            "-e",
+            "tell app \"System Events\" to get name of first process whose frontmost is true",
+        ])
         .output()
         .ok();
-    out.and_then(|o| if o.status.success() {
-        Some(String::from_utf8_lossy(&o.stdout).trim().to_string())
-    } else {
-        None
+    out.and_then(|o| {
+        if o.status.success() {
+            Some(String::from_utf8_lossy(&o.stdout).trim().to_string())
+        } else {
+            None
+        }
     })
     .unwrap_or_else(|| "Unknown".to_string())
 }
@@ -557,7 +640,7 @@ fn get_macos_frontmost_app_name() -> String {
 
 #[cfg(target_os = "linux")]
 fn get_active_app_info_linux() -> (String, String) {
-    use crate::platform::linux::{get_active_window_title, get_active_process_name};
+    use crate::platform::linux::{get_active_process_name, get_active_window_title};
 
     let title = get_active_window_title().unwrap_or_else(|| "Unknown".into());
     let proc = get_active_process_name().unwrap_or_else(|| "Unknown".into());
@@ -571,43 +654,109 @@ mod tests {
     #[test]
     fn test_fingerprinter_windows_apps() {
         let fp = DefaultFingerprinter;
-        assert_eq!(fp.fingerprint("WINWORD.EXE", "Document1 - Word"), Some(AppEnvironment::MicrosoftWord));
-        assert_eq!(fp.fingerprint("POWERPNT.EXE", "Presentation1 - PowerPoint"), Some(AppEnvironment::MicrosoftPowerPoint));
-        assert_eq!(fp.fingerprint("EXCEL.EXE", "Book1 - Excel"), Some(AppEnvironment::MicrosoftExcel));
-        assert_eq!(fp.fingerprint("OUTLOOK.EXE", "Inbox"), Some(AppEnvironment::MicrosoftOutlook));
-        assert_eq!(fp.fingerprint("notepad.exe", "Untitled - Notepad"), Some(AppEnvironment::Notepad));
-        assert_eq!(fp.fingerprint("Code.exe", "main.rs - VSCode"), Some(AppEnvironment::VSCode));
+        assert_eq!(
+            fp.fingerprint("WINWORD.EXE", "Document1 - Word"),
+            Some(AppEnvironment::MicrosoftWord)
+        );
+        assert_eq!(
+            fp.fingerprint("POWERPNT.EXE", "Presentation1 - PowerPoint"),
+            Some(AppEnvironment::MicrosoftPowerPoint)
+        );
+        assert_eq!(
+            fp.fingerprint("EXCEL.EXE", "Book1 - Excel"),
+            Some(AppEnvironment::MicrosoftExcel)
+        );
+        assert_eq!(
+            fp.fingerprint("OUTLOOK.EXE", "Inbox"),
+            Some(AppEnvironment::MicrosoftOutlook)
+        );
+        assert_eq!(
+            fp.fingerprint("notepad.exe", "Untitled - Notepad"),
+            Some(AppEnvironment::Notepad)
+        );
+        assert_eq!(
+            fp.fingerprint("Code.exe", "main.rs - VSCode"),
+            Some(AppEnvironment::VSCode)
+        );
     }
 
     #[test]
     fn test_fingerprinter_macos_apps() {
         let fp = DefaultFingerprinter;
-        assert_eq!(fp.fingerprint("Pages", "Report.pages"), Some(AppEnvironment::Pages));
-        assert_eq!(fp.fingerprint("Keynote", "Pitch.key"), Some(AppEnvironment::Keynote));
-        assert_eq!(fp.fingerprint("Numbers", "Budget.numbers"), Some(AppEnvironment::Numbers));
-        assert_eq!(fp.fingerprint("TextEdit", "notes.txt"), Some(AppEnvironment::TextEdit));
-        assert_eq!(fp.fingerprint("Safari", "Google"), Some(AppEnvironment::Safari));
-        assert_eq!(fp.fingerprint("iTerm2", "bash"), Some(AppEnvironment::ITerm2));
+        assert_eq!(
+            fp.fingerprint("Pages", "Report.pages"),
+            Some(AppEnvironment::Pages)
+        );
+        assert_eq!(
+            fp.fingerprint("Keynote", "Pitch.key"),
+            Some(AppEnvironment::Keynote)
+        );
+        assert_eq!(
+            fp.fingerprint("Numbers", "Budget.numbers"),
+            Some(AppEnvironment::Numbers)
+        );
+        assert_eq!(
+            fp.fingerprint("TextEdit", "notes.txt"),
+            Some(AppEnvironment::TextEdit)
+        );
+        assert_eq!(
+            fp.fingerprint("Safari", "Google"),
+            Some(AppEnvironment::Safari)
+        );
+        assert_eq!(
+            fp.fingerprint("iTerm2", "bash"),
+            Some(AppEnvironment::ITerm2)
+        );
     }
 
     #[test]
     fn test_fingerprinter_linux_apps() {
         let fp = DefaultFingerprinter;
-        assert_eq!(fp.fingerprint("soffice", "report.odt - LibreOffice Writer"), Some(AppEnvironment::LibreOfficeWriter));
-        assert_eq!(fp.fingerprint("soffice", "slides.odp - LibreOffice Impress"), Some(AppEnvironment::LibreOfficeImpress));
-        assert_eq!(fp.fingerprint("soffice", "budget.ods - LibreOffice Calc"), Some(AppEnvironment::LibreOfficeCalc));
-        assert_eq!(fp.fingerprint("gedit", "notes.txt - gedit"), Some(AppEnvironment::Gedit));
-        assert_eq!(fp.fingerprint("chromium", "GitHub"), Some(AppEnvironment::Chromium));
-        assert_eq!(fp.fingerprint("gnome-terminal", "bash"), Some(AppEnvironment::GnomeTerminal));
+        assert_eq!(
+            fp.fingerprint("soffice", "report.odt - LibreOffice Writer"),
+            Some(AppEnvironment::LibreOfficeWriter)
+        );
+        assert_eq!(
+            fp.fingerprint("soffice", "slides.odp - LibreOffice Impress"),
+            Some(AppEnvironment::LibreOfficeImpress)
+        );
+        assert_eq!(
+            fp.fingerprint("soffice", "budget.ods - LibreOffice Calc"),
+            Some(AppEnvironment::LibreOfficeCalc)
+        );
+        assert_eq!(
+            fp.fingerprint("gedit", "notes.txt - gedit"),
+            Some(AppEnvironment::Gedit)
+        );
+        assert_eq!(
+            fp.fingerprint("chromium", "GitHub"),
+            Some(AppEnvironment::Chromium)
+        );
+        assert_eq!(
+            fp.fingerprint("gnome-terminal", "bash"),
+            Some(AppEnvironment::GnomeTerminal)
+        );
     }
 
     #[test]
     fn test_fingerprinter_cross_platform_apps() {
         let fp = DefaultFingerprinter;
-        assert_eq!(fp.fingerprint("code", "main.rs"), Some(AppEnvironment::VSCode));
-        assert_eq!(fp.fingerprint("firefox", "Mozilla Firefox"), Some(AppEnvironment::Firefox));
-        assert_eq!(fp.fingerprint("slack", "Slack"), Some(AppEnvironment::Slack));
-        assert_eq!(fp.fingerprint("discord", "Discord"), Some(AppEnvironment::Discord));
+        assert_eq!(
+            fp.fingerprint("code", "main.rs"),
+            Some(AppEnvironment::VSCode)
+        );
+        assert_eq!(
+            fp.fingerprint("firefox", "Mozilla Firefox"),
+            Some(AppEnvironment::Firefox)
+        );
+        assert_eq!(
+            fp.fingerprint("slack", "Slack"),
+            Some(AppEnvironment::Slack)
+        );
+        assert_eq!(
+            fp.fingerprint("discord", "Discord"),
+            Some(AppEnvironment::Discord)
+        );
     }
 
     #[test]
@@ -630,7 +779,8 @@ mod tests {
         // Should return None because the file doesn't exist on disk — but
         // the parsing logic itself is verified: it must not panic or return
         // a path to a file that doesn't exist.
-        let result = ContextEngine::resolve_file_path("report.docx - Microsoft Word", "WINWORD.EXE");
+        let result =
+            ContextEngine::resolve_file_path("report.docx - Microsoft Word", "WINWORD.EXE");
         // Either None (file not on disk) or Some(path) if it happens to exist
         // The key assertion is it doesn't panic
         let _ = result;
@@ -638,7 +788,10 @@ mod tests {
 
     #[test]
     fn test_slide_number_extraction() {
-        assert_eq!(ContextEngine::extract_slide_number("Deck.pptx [Slide 3 of 12]"), Some(3));
+        assert_eq!(
+            ContextEngine::extract_slide_number("Deck.pptx [Slide 3 of 12]"),
+            Some(3)
+        );
         assert_eq!(ContextEngine::extract_slide_number("No slide info"), None);
     }
 
@@ -655,11 +808,26 @@ mod tests {
         use crate::document_context::DocKind;
         assert_eq!(AppEnvironment::Pages.to_doc_kind(), DocKind::WordDocument);
         assert_eq!(AppEnvironment::Keynote.to_doc_kind(), DocKind::PowerPoint);
-        assert_eq!(AppEnvironment::Numbers.to_doc_kind(), DocKind::ExcelSpreadsheet);
-        assert_eq!(AppEnvironment::LibreOfficeWriter.to_doc_kind(), DocKind::WordDocument);
-        assert_eq!(AppEnvironment::LibreOfficeImpress.to_doc_kind(), DocKind::PowerPoint);
-        assert_eq!(AppEnvironment::LibreOfficeCalc.to_doc_kind(), DocKind::ExcelSpreadsheet);
-        assert_eq!(AppEnvironment::GnomeTerminal.to_doc_kind(), DocKind::Terminal);
+        assert_eq!(
+            AppEnvironment::Numbers.to_doc_kind(),
+            DocKind::ExcelSpreadsheet
+        );
+        assert_eq!(
+            AppEnvironment::LibreOfficeWriter.to_doc_kind(),
+            DocKind::WordDocument
+        );
+        assert_eq!(
+            AppEnvironment::LibreOfficeImpress.to_doc_kind(),
+            DocKind::PowerPoint
+        );
+        assert_eq!(
+            AppEnvironment::LibreOfficeCalc.to_doc_kind(),
+            DocKind::ExcelSpreadsheet
+        );
+        assert_eq!(
+            AppEnvironment::GnomeTerminal.to_doc_kind(),
+            DocKind::Terminal
+        );
         assert_eq!(AppEnvironment::MacTerminal.to_doc_kind(), DocKind::Terminal);
     }
 }

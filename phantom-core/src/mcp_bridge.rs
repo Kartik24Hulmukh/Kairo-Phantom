@@ -1,7 +1,6 @@
 /// MCP Bridge — Phase 2: Subprocess MCP client for Office-PPTX-Bridge, Figma-Bridge, etc.
 /// Kairo spawns Python MCP servers as stdio subprocesses and communicates via JSON-RPC.
 /// This is the "route to best available MCP server" layer described in the phase2 plan.
-
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -57,20 +56,31 @@ impl McpBridgeClient {
 
         let mut cmd = Command::new("python");
         cmd.arg(script_path);
-        for a in extra_args { cmd.arg(a); }
+        for a in extra_args {
+            cmd.arg(a);
+        }
         cmd.stdin(Stdio::piped())
-           .stdout(Stdio::piped())
-           .stderr(Stdio::inherit());
+            .stdout(Stdio::piped())
+            .stderr(Stdio::inherit());
 
-        let mut child = cmd.spawn()
-            .with_context(|| format!("Failed to spawn {} — is Python installed?", server_id))?;
+        let mut child = cmd
+            .spawn()
+            .with_context(|| format!("Failed to spawn {server_id} — is Python installed?"))?;
 
-        let stdin = child.stdin.take()
+        let stdin = child
+            .stdin
+            .take()
             .context("Could not capture subprocess stdin")?;
-        let stdout = child.stdout.take()
+        let stdout = child
+            .stdout
+            .take()
             .context("Could not capture subprocess stdout")?;
 
-        info!("✅ MCP bridge '{}' started (PID: {})", server_id, child.id());
+        info!(
+            "✅ MCP bridge '{}' started (PID: {})",
+            server_id,
+            child.id()
+        );
 
         Ok(Self {
             child: Mutex::new(child),
@@ -98,7 +108,11 @@ impl McpBridgeClient {
         };
 
         let req_line = serde_json::to_string(&req).unwrap();
-        debug!("→ MCP[{}]: {}", self.server_id, &req_line[..req_line.len().min(200)]);
+        debug!(
+            "→ MCP[{}]: {}",
+            self.server_id,
+            &req_line[..req_line.len().min(200)]
+        );
 
         {
             let mut stdin = self.stdin.lock().unwrap();
@@ -116,12 +130,18 @@ impl McpBridgeClient {
                 anyhow::bail!("MCP server '{}' closed stdout unexpectedly", self.server_id);
             }
             let line = line.trim();
-            if line.is_empty() { continue; }
+            if line.is_empty() {
+                continue;
+            }
 
-            debug!("← MCP[{}]: {}", self.server_id, &line[..line.len().min(300)]);
+            debug!(
+                "← MCP[{}]: {}",
+                self.server_id,
+                &line[..line.len().min(300)]
+            );
 
             let resp: JsonRpcResponse = serde_json::from_str(line)
-                .with_context(|| format!("Failed to parse MCP response: {}", line))?;
+                .with_context(|| format!("Failed to parse MCP response: {line}"))?;
 
             if resp.id == Some(id) {
                 if let Some(err) = resp.error {
@@ -134,12 +154,19 @@ impl McpBridgeClient {
 
     /// Initialize the MCP session (required by MCP protocol)
     pub fn initialize(&self) -> Result<()> {
-        let result = self.call("initialize", json!({
-            "protocolVersion": "2024-11-05",
-            "capabilities": {},
-            "clientInfo": {"name": "kairo-phantom", "version": env!("CARGO_PKG_VERSION")}
-        }))?;
-        info!("🤝 MCP '{}' initialized: {}", self.server_id, result.get("serverInfo").unwrap_or(&json!({})));
+        let result = self.call(
+            "initialize",
+            json!({
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "kairo-phantom", "version": env!("CARGO_PKG_VERSION")}
+            }),
+        )?;
+        info!(
+            "🤝 MCP '{}' initialized: {}",
+            self.server_id,
+            result.get("serverInfo").unwrap_or(&json!({}))
+        );
         Ok(())
     }
 
@@ -174,30 +201,33 @@ impl PptxBridge {
 
     /// Create a new presentation with given slides.
     /// Each slide is a (title, content, image_base64?) tuple.
-    pub fn create_presentation(
-        &self,
-        output_path: &str,
-        slides: &[SlideSpec],
-    ) -> Result<()> {
-        let slides_json: Vec<Value> = slides.iter().map(|s| {
-            let mut obj = json!({
-                "title": s.title,
-                "content": s.content
-            });
-            if let Some(ref img) = s.image_base64 {
-                obj["image_base64"] = Value::String(img.clone());
-                obj["image_mime"] = Value::String(s.image_mime.clone().unwrap_or_else(|| "image/png".into()));
-            }
-            obj
-        }).collect();
+    pub fn create_presentation(&self, output_path: &str, slides: &[SlideSpec]) -> Result<()> {
+        let slides_json: Vec<Value> = slides
+            .iter()
+            .map(|s| {
+                let mut obj = json!({
+                    "title": s.title,
+                    "content": s.content
+                });
+                if let Some(ref img) = s.image_base64 {
+                    obj["image_base64"] = Value::String(img.clone());
+                    obj["image_mime"] =
+                        Value::String(s.image_mime.clone().unwrap_or_else(|| "image/png".into()));
+                }
+                obj
+            })
+            .collect();
 
-        self.client.call("tools/call", json!({
-            "name": "create_presentation",
-            "arguments": {
-                "output_path": output_path,
-                "slides": slides_json
-            }
-        }))?;
+        self.client.call(
+            "tools/call",
+            json!({
+                "name": "create_presentation",
+                "arguments": {
+                    "output_path": output_path,
+                    "slides": slides_json
+                }
+            }),
+        )?;
 
         info!("📊 PPTX created: {}", output_path);
         Ok(())
@@ -210,14 +240,17 @@ impl PptxBridge {
         slide_index: u32,
         image_base64: &str,
     ) -> Result<()> {
-        self.client.call("tools/call", json!({
-            "name": "add_image_to_slide",
-            "arguments": {
-                "pptx_path": pptx_path,
-                "slide_index": slide_index,
-                "image_base64": image_base64
-            }
-        }))?;
+        self.client.call(
+            "tools/call",
+            json!({
+                "name": "add_image_to_slide",
+                "arguments": {
+                    "pptx_path": pptx_path,
+                    "slide_index": slide_index,
+                    "image_base64": image_base64
+                }
+            }),
+        )?;
         info!("🖼️  Image added to slide {} in {}", slide_index, pptx_path);
         Ok(())
     }
@@ -248,27 +281,33 @@ impl FigmaBridge {
 
     /// Import an image (base64) into the current Figma frame.
     pub fn import_image(&self, name: &str, image_base64: &str) -> Result<Value> {
-        let result = self.client.call("tools/call", json!({
-            "name": "import_image",
-            "arguments": {
-                "name": name,
-                "image_base64": image_base64
-            }
-        }))?;
+        let result = self.client.call(
+            "tools/call",
+            json!({
+                "name": "import_image",
+                "arguments": {
+                    "name": name,
+                    "image_base64": image_base64
+                }
+            }),
+        )?;
         info!("🎨 Image imported to Figma frame: {}", name);
         Ok(result)
     }
 
     /// Create a text node in Figma.
     pub fn create_text(&self, text: &str, x: f32, y: f32) -> Result<Value> {
-        let result = self.client.call("tools/call", json!({
-            "name": "create_text",
-            "arguments": {
-                "text": text,
-                "x": x,
-                "y": y
-            }
-        }))?;
+        let result = self.client.call(
+            "tools/call",
+            json!({
+                "name": "create_text",
+                "arguments": {
+                    "text": text,
+                    "x": x,
+                    "y": y
+                }
+            }),
+        )?;
         Ok(result)
     }
 }
@@ -295,7 +334,8 @@ impl McpBridgeRegistry {
                 Some(candidate.to_string_lossy().to_string())
             } else {
                 // Also check relative to cwd
-                let cwd_candidate = std::path::Path::new("mcp-servers/office-pptx-bridge/server.py");
+                let cwd_candidate =
+                    std::path::Path::new("mcp-servers/office-pptx-bridge/server.py");
                 if cwd_candidate.exists() {
                     Some(cwd_candidate.to_string_lossy().to_string())
                 } else {
@@ -325,9 +365,16 @@ impl McpBridgeRegistry {
             info!("🎨 Figma bridge discovered");
         }
 
-        Self { pptx_script, figma_script }
+        Self {
+            pptx_script,
+            figma_script,
+        }
     }
 
-    pub fn has_pptx_bridge(&self) -> bool { self.pptx_script.is_some() }
-    pub fn has_figma_bridge(&self) -> bool { self.figma_script.is_some() }
+    pub fn has_pptx_bridge(&self) -> bool {
+        self.pptx_script.is_some()
+    }
+    pub fn has_figma_bridge(&self) -> bool {
+        self.figma_script.is_some()
+    }
 }

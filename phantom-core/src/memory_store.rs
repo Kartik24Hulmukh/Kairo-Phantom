@@ -5,10 +5,10 @@
 // and garrytan/gbrain (cross-session Postgres+pgvector learning patterns).
 // Context optimization via ncmonx/icm-graph concepts (memory + knowledge graph).
 
+use crate::memory::{Interaction, KairoMemory, UserPreference};
+use rusqlite::{params, Connection};
 use std::path::PathBuf;
 use tracing::{info, warn};
-use crate::memory::{KairoMemory, Interaction, UserPreference};
-use rusqlite::{Connection, params};
 
 pub struct MemoryStore {
     path: PathBuf,
@@ -99,14 +99,20 @@ impl MemoryStore {
     pub fn load(&self) -> KairoMemory {
         let mut memory = KairoMemory::new();
         if !self.path.exists() {
-            info!("📭 No SQLite memory file found at {:?} — starting fresh.", self.path);
+            info!(
+                "📭 No SQLite memory file found at {:?} — starting fresh.",
+                self.path
+            );
             return memory;
         }
 
         let conn = match self.get_connection() {
             Ok(c) => c,
             Err(e) => {
-                warn!("⚠️  Could not open SQLite memory database ({}). Starting fresh.", e);
+                warn!(
+                    "⚠️  Could not open SQLite memory database ({}). Starting fresh.",
+                    e
+                );
                 return memory;
             }
         };
@@ -167,13 +173,21 @@ impl MemoryStore {
 
         if let Ok(mut stmt) = conn.prepare("SELECT category, key, value FROM user_model") {
             let models = stmt.query_map([], |row| {
-                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                ))
             });
             if let Ok(models) = models {
                 for m in models.flatten() {
                     match m.0.as_str() {
-                        "word" => { memory.user_model.word_preferences.insert(m.1, m.2); },
-                        "ppt" => { memory.user_model.ppt_preferences.insert(m.1, m.2); },
+                        "word" => {
+                            memory.user_model.word_preferences.insert(m.1, m.2);
+                        }
+                        "ppt" => {
+                            memory.user_model.ppt_preferences.insert(m.1, m.2);
+                        }
                         _ => {}
                     }
                 }
@@ -191,7 +205,11 @@ impl MemoryStore {
 
         if let Ok(mut stmt) = conn.prepare("SELECT from_id, to_id, relationship FROM graph_edges") {
             let edges = stmt.query_map([], |row| {
-                Ok((row.get::<_, i64>(0)? as usize, row.get::<_, i64>(1)? as usize, row.get::<_, String>(2)?))
+                Ok((
+                    row.get::<_, i64>(0)? as usize,
+                    row.get::<_, i64>(1)? as usize,
+                    row.get::<_, String>(2)?,
+                ))
             });
             if let Ok(edges) = edges {
                 for e in edges.flatten() {
@@ -200,9 +218,14 @@ impl MemoryStore {
             }
         }
 
-        info!("🧠 SQLite Memory loaded: {} preferences, {} interactions, {} patterns from {:?}", 
-            memory.preferences.len(), memory.interactions.len(), memory.skill.reusable_patterns.len(), self.path);
-        
+        info!(
+            "🧠 SQLite Memory loaded: {} preferences, {} interactions, {} patterns from {:?}",
+            memory.preferences.len(),
+            memory.interactions.len(),
+            memory.skill.reusable_patterns.len(),
+            self.path
+        );
+
         memory
     }
 
@@ -229,7 +252,8 @@ impl MemoryStore {
             tx.execute(
                 "INSERT INTO preferences (key, value, weight) VALUES (?1, ?2, ?3)",
                 params![p.key, p.value, p.weight],
-            ).ok();
+            )
+            .ok();
         }
 
         tx.execute("DELETE FROM interactions", []).ok();
@@ -245,7 +269,8 @@ impl MemoryStore {
             tx.execute(
                 "INSERT INTO app_bias (app, bias) VALUES (?1, ?2)",
                 params![app, bias],
-            ).ok();
+            )
+            .ok();
         }
 
         tx.execute("DELETE FROM skill_patterns", []).ok();
@@ -253,7 +278,8 @@ impl MemoryStore {
             tx.execute(
                 "INSERT INTO skill_patterns (prompt, pattern) VALUES (?1, ?2)",
                 params![prompt, pattern],
-            ).ok();
+            )
+            .ok();
         }
 
         tx.execute("DELETE FROM user_model", []).ok();
@@ -261,13 +287,15 @@ impl MemoryStore {
             tx.execute(
                 "INSERT INTO user_model (category, key, value) VALUES (?1, ?2, ?3)",
                 params!["word", k, v],
-            ).ok();
+            )
+            .ok();
         }
         for (k, v) in &memory.user_model.ppt_preferences {
             tx.execute(
                 "INSERT INTO user_model (category, key, value) VALUES (?1, ?2, ?3)",
                 params!["ppt", k, v],
-            ).ok();
+            )
+            .ok();
         }
 
         tx.execute("DELETE FROM graph_nodes", []).ok();
@@ -275,7 +303,8 @@ impl MemoryStore {
             tx.execute(
                 "INSERT INTO graph_nodes (id, name) VALUES (?1, ?2)",
                 params![i as i64, node],
-            ).ok();
+            )
+            .ok();
         }
 
         tx.execute("DELETE FROM graph_edges", []).ok();
@@ -283,12 +312,17 @@ impl MemoryStore {
             tx.execute(
                 "INSERT INTO graph_edges (from_id, to_id, relationship) VALUES (?1, ?2, ?3)",
                 params![*from as i64, *to as i64, rel],
-            ).ok();
+            )
+            .ok();
         }
 
         match tx.commit() {
             Ok(_) => {
-                info!("💾 SQLite Memory saved ({} preferences, {} interactions)", memory.preferences.len(), memory.interactions.len());
+                info!(
+                    "💾 SQLite Memory saved ({} preferences, {} interactions)",
+                    memory.preferences.len(),
+                    memory.interactions.len()
+                );
                 true
             }
             Err(e) => {

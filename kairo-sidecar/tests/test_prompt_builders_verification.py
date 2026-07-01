@@ -1,8 +1,5 @@
 import json
-import urllib.request
-import urllib.error
 from unittest.mock import patch
-import pytest
 from pydantic import BaseModel
 
 from sidecar.prompt_builder import (
@@ -17,9 +14,10 @@ from sidecar.prompt_builder import (
     build_notes_prompt,
     build_design_prompt,
     build_media_prompt,
-    build_data_prompt
+    build_data_prompt,
 )
-from sidecar.llm_caller import call_with_schema, StructuredOutputError
+from sidecar.llm_caller import call_with_schema
+
 
 class MockHTTPResponse:
     def __init__(self, data: bytes):
@@ -34,8 +32,10 @@ class MockHTTPResponse:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+
 class SimpleSchema(BaseModel):
     status: str
+
 
 def test_prompt_builders_ordering_and_reminder():
     builders = [
@@ -130,7 +130,7 @@ def test_prompt_builders_ordering_and_reminder():
 
     for name, builder_func in builders:
         prompt = builder_func(user_prompt, doc_context, mem_context, classification)
-        
+
         idx_app = prompt.find("=== APP CONTEXT ===")
         idx_doc = prompt.find("=== DOCUMENT CONTEXT ===")
         idx_mem = prompt.find("=== MEMORY CONTEXT ===")
@@ -150,14 +150,20 @@ def test_prompt_builders_ordering_and_reminder():
         assert idx_app < idx_doc, f"{name}: APP CONTEXT must precede DOCUMENT CONTEXT"
         assert idx_doc < idx_mem, f"{name}: DOCUMENT CONTEXT must precede MEMORY CONTEXT"
         assert idx_mem < idx_intent, f"{name}: MEMORY CONTEXT must precede INTENT CLASSIFICATION"
-        assert idx_intent < idx_reminder, f"{name}: INTENT CLASSIFICATION must precede JSON reminder"
-        assert idx_reminder < idx_instruction, f"{name}: JSON reminder must precede USER INSTRUCTION"
+        assert (
+            idx_intent < idx_reminder
+        ), f"{name}: INTENT CLASSIFICATION must precede JSON reminder"
+        assert (
+            idx_reminder < idx_instruction
+        ), f"{name}: JSON reminder must precede USER INSTRUCTION"
 
         # Assert that the JSON reminder immediately precedes the User Instruction
-        between_reminder_and_instruction = prompt[idx_reminder + len(json_reminder_str):idx_instruction]
-        assert "===" not in between_reminder_and_instruction, (
-            f"{name}: The JSON reminder must immediately precede the USER INSTRUCTION without other blocks in between"
-        )
+        between_reminder_and_instruction = prompt[
+            idx_reminder + len(json_reminder_str) : idx_instruction
+        ]
+        assert (
+            "===" not in between_reminder_and_instruction
+        ), f"{name}: The JSON reminder must immediately precede the USER INSTRUCTION without other blocks in between"
 
 
 def test_llm_caller_json_decode_retry():
@@ -170,25 +176,11 @@ def test_llm_caller_json_decode_retry():
         if len(requests_captured) == 1:
             # First attempt: Return invalid JSON in choice message content
             response_payload = {
-                "choices": [
-                    {
-                        "message": {
-                            "content": "{invalid json structure here"
-                        }
-                    }
-                ]
+                "choices": [{"message": {"content": "{invalid json structure here"}}]
             }
         else:
             # Second attempt: Return valid JSON matching SimpleSchema
-            response_payload = {
-                "choices": [
-                    {
-                        "message": {
-                            "content": '{"status": "ok"}'
-                        }
-                    }
-                ]
-            }
+            response_payload = {"choices": [{"message": {"content": '{"status": "ok"}'}}]}
 
         return MockHTTPResponse(json.dumps(response_payload).encode("utf-8"))
 
@@ -216,7 +208,7 @@ def test_llm_caller_json_decode_retry():
     assert second_payload["model"] == "ollama/qwen2.5:7b"
     assert second_payload["temperature"] == 0.0
     assert second_payload["response_format"] == {"type": "json_object"}
-    
+
     expected_retry_prompt = (
         "initial prompt\n\n"
         "Your previous response was not valid JSON. Output ONLY the JSON object, nothing else."

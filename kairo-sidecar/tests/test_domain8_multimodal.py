@@ -4,7 +4,6 @@ Domain 8: Multimodal Input — Python Test Suite
 Tests for voice_bridge.py and screen_context_bridge.py sidecar modules.
 """
 
-import asyncio
 import os
 import sys
 import json
@@ -19,6 +18,7 @@ from sidecar.screen_context_bridge import ScreenContextBridge
 
 
 # ── VoiceBridge Tests ────────────────────────────────────────────────────────
+
 
 class TestVoiceBridge:
     """Tests for voice transcription post-processing."""
@@ -45,8 +45,7 @@ class TestVoiceBridge:
         assert "um" not in text.lower().split()
         assert "uh" not in text.lower().split()
         # "like" should be removed when used as filler
-        assert "I want to write a paragraph about testing" in text or \
-               "want to write" in text
+        assert "I want to write a paragraph about testing" in text or "want to write" in text
 
     @pytest.mark.asyncio
     async def test_punctuation_restoration(self):
@@ -72,9 +71,7 @@ class TestVoiceBridge:
     @pytest.mark.asyncio
     async def test_command_detection_write(self):
         """'hey kairo write me an email' → '// write email'."""
-        result = await self.bridge.post_process_transcription(
-            "hey kairo write me an email"
-        )
+        result = await self.bridge.post_process_transcription("hey kairo write me an email")
         assert result["is_command"] is True
         assert result["command"] is not None
         assert result["command"].startswith("//")
@@ -83,18 +80,14 @@ class TestVoiceBridge:
     @pytest.mark.asyncio
     async def test_command_detection_design(self):
         """'kairo design a header' → '// design a header'."""
-        result = await self.bridge.post_process_transcription(
-            "kairo design a header"
-        )
+        result = await self.bridge.post_process_transcription("kairo design a header")
         assert result["is_command"] is True
         assert "// design" in result["command"]
 
     @pytest.mark.asyncio
     async def test_command_detection_health(self):
         """'hey kairo health' → '// health'."""
-        result = await self.bridge.post_process_transcription(
-            "hey kairo health"
-        )
+        result = await self.bridge.post_process_transcription("hey kairo health")
         assert result["is_command"] is True
         assert result["command"] == "// health"
 
@@ -118,17 +111,13 @@ class TestVoiceBridge:
     @pytest.mark.asyncio
     async def test_low_confidence_for_noise(self):
         """[blank_audio] markers lower confidence."""
-        result = await self.bridge.post_process_transcription(
-            "[blank_audio] some text"
-        )
+        result = await self.bridge.post_process_transcription("[blank_audio] some text")
         assert result["confidence"] < 0.5
 
     @pytest.mark.asyncio
     async def test_format_voice_prompt_command(self):
         """Voice prompt with command is formatted correctly."""
-        result = await self.bridge.format_voice_prompt(
-            "hey kairo write an email"
-        )
+        result = await self.bridge.format_voice_prompt("hey kairo write an email")
         assert "prompt" in result
         assert result["prompt"].startswith("//")
         assert result["mode"] == "command"
@@ -136,9 +125,7 @@ class TestVoiceBridge:
     @pytest.mark.asyncio
     async def test_format_voice_prompt_default(self):
         """Non-command voice prompt wrapped as // voice."""
-        result = await self.bridge.format_voice_prompt(
-            "the weather is nice today"
-        )
+        result = await self.bridge.format_voice_prompt("the weather is nice today")
         assert "prompt" in result
         assert result["prompt"].startswith("//")
 
@@ -146,13 +133,13 @@ class TestVoiceBridge:
     async def test_format_voice_prompt_dictation(self):
         """Dictation mode outputs raw text."""
         result = await self.bridge.format_voice_prompt(
-            "the weather is nice today",
-            mode="dictation"
+            "the weather is nice today", mode="dictation"
         )
         assert not result["prompt"].startswith("//")
 
 
 # ── ScreenContextBridge Tests ────────────────────────────────────────────────
+
 
 class TestScreenContextBridge:
     """Tests for screen context extraction."""
@@ -163,9 +150,7 @@ class TestScreenContextBridge:
     @pytest.mark.asyncio
     async def test_missing_image(self):
         """Non-existent image returns error."""
-        result = await self.bridge.extract_context(
-            "/nonexistent/path/to/image.png"
-        )
+        result = await self.bridge.extract_context("/nonexistent/path/to/image.png")
         assert result["success"] is False
         assert "error" in result
 
@@ -201,16 +186,14 @@ class TestScreenContextBridge:
             temp_path = f.name
 
         try:
-            result = await self.bridge.extract_context(
-                temp_path,
-                {"app_name": "Microsoft Word"}
-            )
+            result = await self.bridge.extract_context(temp_path, {"app_name": "Microsoft Word"})
             assert result["app_name"] == "Microsoft Word"
         finally:
             os.unlink(temp_path)
 
 
 # ── Sidecar Routing Tests ────────────────────────────────────────────────────
+
 
 class TestSidecarRouting:
     """Tests for action routing in main.py handle_request."""
@@ -221,15 +204,17 @@ class TestSidecarRouting:
         # Import handle_request
         from sidecar.main import handle_request
 
-        result = await handle_request({
-            "id": "test-voice-1",
-            "action": "voice_process",
-            "path": "",
-            "payload": {
-                "transcription": "hey kairo write an email",
-                "app_context": {"app": "test"},
+        result = await handle_request(
+            {
+                "id": "test-voice-1",
+                "action": "voice_process",
+                "path": "",
+                "payload": {
+                    "transcription": "hey kairo write an email",
+                    "app_context": {"app": "test"},
+                },
             }
-        })
+        )
 
         assert result["ok"] is True
         assert "data" in result
@@ -240,15 +225,17 @@ class TestSidecarRouting:
         """voice_format action routes correctly."""
         from sidecar.main import handle_request
 
-        result = await handle_request({
-            "id": "test-voice-2",
-            "action": "voice_format",
-            "path": "",
-            "payload": {
-                "transcription": "write a summary",
-                "mode": "ghost_write",
+        result = await handle_request(
+            {
+                "id": "test-voice-2",
+                "action": "voice_format",
+                "path": "",
+                "payload": {
+                    "transcription": "write a summary",
+                    "mode": "ghost_write",
+                },
             }
-        })
+        )
 
         assert result["ok"] is True
         assert "data" in result
@@ -259,15 +246,17 @@ class TestSidecarRouting:
         """screen_extract action routes correctly (missing file graceful)."""
         from sidecar.main import handle_request
 
-        result = await handle_request({
-            "id": "test-screen-1",
-            "action": "screen_extract",
-            "path": "",
-            "payload": {
-                "image_path": "/nonexistent/screenshot.bmp",
-                "app_context": {"app_name": "Test"},
+        result = await handle_request(
+            {
+                "id": "test-screen-1",
+                "action": "screen_extract",
+                "path": "",
+                "payload": {
+                    "image_path": "/nonexistent/screenshot.bmp",
+                    "app_context": {"app_name": "Test"},
+                },
             }
-        })
+        )
 
         # Should not crash — returns ok=False for missing file
         assert result["ok"] is False or "error" in result.get("data", {})
@@ -282,7 +271,6 @@ if __name__ == "__main__":
 # ═══════════════════════════════════════════════════════════════════════════════
 
 import struct
-import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
@@ -314,10 +302,12 @@ class TestMoonshineServiceHelpers:
 
     def test_confidence_empty(self):
         from sidecar.speech.moonshine_service import _estimate_confidence
+
         assert _estimate_confidence("", 1.0) == 0.0
 
     def test_confidence_normal_speech(self):
         from sidecar.speech.moonshine_service import _estimate_confidence
+
         score = _estimate_confidence(
             "Hello this is a test of the Kairo voice dictation system", 3.0
         )
@@ -325,34 +315,39 @@ class TestMoonshineServiceHelpers:
 
     def test_confidence_repetitive_text_penalized(self):
         from sidecar.speech.moonshine_service import _estimate_confidence
-        score = _estimate_confidence(
-            "the the the the the the the the the", 4.0
-        )
+
+        score = _estimate_confidence("the the the the the the the the the", 4.0)
         assert score < 0.4, f"Repetitive text should score < 0.4, got {score}"
 
     def test_confidence_noise_markers(self):
         from sidecar.speech.moonshine_service import _estimate_confidence
+
         score = _estimate_confidence("[blank_audio]", 3.0)
         assert score < 0.3
 
     def test_detect_language_english(self):
         from sidecar.speech.moonshine_service import _detect_language
+
         assert _detect_language("Hello world this is a test") == "en"
 
     def test_detect_language_empty(self):
         from sidecar.speech.moonshine_service import _detect_language
+
         assert _detect_language("") == "en"
 
     def test_detect_language_cjk(self):
         from sidecar.speech.moonshine_service import _detect_language
+
         assert _detect_language("你好世界") == "zh"
 
     def test_detect_language_arabic(self):
         from sidecar.speech.moonshine_service import _detect_language
+
         assert _detect_language("مرحبا بالعالم") == "ar"
 
     def test_detect_language_cyrillic(self):
         from sidecar.speech.moonshine_service import _detect_language
+
         assert _detect_language("Привет мир") == "ru"
 
 
@@ -361,21 +356,25 @@ class TestMoonshineClient:
 
     def test_default_url(self):
         from sidecar.voice_bridge import MoonshineClient
+
         assert MoonshineClient().service_url == "http://localhost:7439"
 
     def test_custom_url(self):
         from sidecar.voice_bridge import MoonshineClient
+
         client = MoonshineClient("http://localhost:9999/")
         assert client.service_url == "http://localhost:9999"  # strips trailing slash
 
     def test_is_available_unreachable(self):
         from sidecar.voice_bridge import MoonshineClient
+
         client = MoonshineClient("http://localhost:39998")  # unused port
         assert client.is_available() is False
 
     @pytest.mark.asyncio
     async def test_transcribe_file_missing(self):
         from sidecar.voice_bridge import MoonshineClient
+
         result = await MoonshineClient().transcribe_file("/tmp/does_not_exist_12345678.wav")
         assert result is None
 
@@ -387,12 +386,14 @@ class TestMoonshineClient:
             wav_path = tmp.name
         try:
             _write_wav(wav_path)
-            mock_resp_data = json.dumps({
-                "text": "mocked transcription",
-                "confidence": 0.88,
-                "language": "en",
-                "duration_ms": 120.0,
-            }).encode()
+            mock_resp_data = json.dumps(
+                {
+                    "text": "mocked transcription",
+                    "confidence": 0.88,
+                    "language": "en",
+                    "duration_ms": 120.0,
+                }
+            ).encode()
             mock_resp = MagicMock()
             mock_resp.__enter__ = lambda s: s
             mock_resp.__exit__ = MagicMock(return_value=False)
@@ -409,6 +410,7 @@ class TestMoonshineClient:
 
     def test_get_languages_fallback(self):
         from sidecar.voice_bridge import MoonshineClient
+
         langs = MoonshineClient("http://localhost:39998").get_supported_languages()
         assert langs == ["en"]
 
@@ -445,13 +447,16 @@ class TestTranscribeFallback:
             wav_path = tmp.name
         try:
             _write_wav(wav_path)
-            with patch(
-                "sidecar.voice_bridge.MoonshineClient.transcribe_file",
-                new_callable=AsyncMock,
-                return_value={"text": "mumble", "confidence": 0.2, "language": "en"},
-            ), patch(
-                "sidecar.voice_bridge._transcribe_with_whisper_cli",
-                return_value="hello from whisper fallback",
+            with (
+                patch(
+                    "sidecar.voice_bridge.MoonshineClient.transcribe_file",
+                    new_callable=AsyncMock,
+                    return_value={"text": "mumble", "confidence": 0.2, "language": "en"},
+                ),
+                patch(
+                    "sidecar.voice_bridge._transcribe_with_whisper_cli",
+                    return_value="hello from whisper fallback",
+                ),
             ):
                 result = await transcribe_with_moonshine_or_fallback(wav_path)
             assert result["engine"] == "whisper"
@@ -467,13 +472,16 @@ class TestTranscribeFallback:
             wav_path = tmp.name
         try:
             _write_wav(wav_path)
-            with patch(
-                "sidecar.voice_bridge.MoonshineClient.transcribe_file",
-                new_callable=AsyncMock,
-                return_value=None,
-            ), patch(
-                "sidecar.voice_bridge._transcribe_with_whisper_cli",
-                return_value=None,
+            with (
+                patch(
+                    "sidecar.voice_bridge.MoonshineClient.transcribe_file",
+                    new_callable=AsyncMock,
+                    return_value=None,
+                ),
+                patch(
+                    "sidecar.voice_bridge._transcribe_with_whisper_cli",
+                    return_value=None,
+                ),
             ):
                 result = await transcribe_with_moonshine_or_fallback(wav_path)
             assert result["engine"] == "none"
@@ -489,13 +497,16 @@ class TestTranscribeFallback:
             wav_path = tmp.name
         try:
             _write_wav(wav_path)
-            with patch(
-                "sidecar.voice_bridge.MoonshineClient.transcribe_file",
-                new_callable=AsyncMock,
-                return_value=None,
-            ), patch(
-                "sidecar.voice_bridge._transcribe_with_whisper_cli",
-                return_value="whisper fallback text",
+            with (
+                patch(
+                    "sidecar.voice_bridge.MoonshineClient.transcribe_file",
+                    new_callable=AsyncMock,
+                    return_value=None,
+                ),
+                patch(
+                    "sidecar.voice_bridge._transcribe_with_whisper_cli",
+                    return_value="whisper fallback text",
+                ),
             ):
                 result = await transcribe_with_moonshine_or_fallback(wav_path)
             assert result["engine"] == "whisper"
@@ -509,15 +520,18 @@ class TestTtsService:
 
     def test_import(self):
         from sidecar.speech.tts_service import TtsService
+
         assert TtsService is not None
 
     def test_speak_empty_is_noop(self):
         from sidecar.speech.tts_service import TtsService
+
         svc = TtsService()
         assert svc.speak("") is True
 
     def test_speak_all_engines_fail(self):
         from sidecar.speech.tts_service import TtsService
+
         svc = TtsService()
         with (
             patch.object(svc, "_has_sherpa", return_value=False),
@@ -532,6 +546,7 @@ class TestTtsService:
 
     def test_speak_sherpa_primary(self):
         from sidecar.speech.tts_service import TtsService
+
         svc = TtsService()
         with (
             patch.object(svc, "_has_sherpa", return_value=True),
@@ -547,22 +562,26 @@ class TestWakeWordService:
 
     def test_import(self):
         from sidecar.speech.wake_word_service import WakeWordDetector, FallbackWakeWordDetector
+
         assert WakeWordDetector is not None
         assert FallbackWakeWordDetector is not None
 
     def test_init_defaults(self):
         from sidecar.speech.wake_word_service import WakeWordDetector
+
         d = WakeWordDetector()
         assert 0.0 <= d.sensitivity <= 1.0
         assert d.cooldown_secs > 0
 
     def test_check_detection_below_threshold(self):
         from sidecar.speech.wake_word_service import WakeWordDetector
+
         d = WakeWordDetector(sensitivity=0.5)  # threshold ≈ 0.6
         assert d._check_detection({"hey_jarvis": 0.1}) is None
 
     def test_check_detection_above_threshold(self):
         from sidecar.speech.wake_word_service import WakeWordDetector
+
         d = WakeWordDetector(sensitivity=0.5)
         result = d._check_detection({"hey_jarvis": 0.95})
         assert result is not None
@@ -570,6 +589,7 @@ class TestWakeWordService:
 
     def test_check_detection_empty(self):
         from sidecar.speech.wake_word_service import WakeWordDetector
+
         d = WakeWordDetector()
         assert d._check_detection({}) is None
 
@@ -580,12 +600,15 @@ class TestDomain8SidecarActions:
     @pytest.mark.asyncio
     async def test_moonshine_health_action(self):
         from sidecar.main import handle_request
+
         with patch("sidecar.voice_bridge.MoonshineClient.is_available", return_value=False):
-            result = await handle_request({
-                "id": "d8-001",
-                "action": "moonshine_health",
-                "payload": {"moonshine_url": "http://localhost:39999"},
-            })
+            result = await handle_request(
+                {
+                    "id": "d8-001",
+                    "action": "moonshine_health",
+                    "payload": {"moonshine_url": "http://localhost:39999"},
+                }
+            )
         assert result["ok"] is True
         assert result["data"]["available"] is False
         assert isinstance(result["data"]["supported_languages"], list)
@@ -609,11 +632,13 @@ class TestDomain8SidecarActions:
                 new_callable=AsyncMock,
                 return_value=mock_result,
             ):
-                result = await handle_request({
-                    "id": "d8-002",
-                    "action": "moonshine_transcribe",
-                    "payload": {"wav_path": wav_path},
-                })
+                result = await handle_request(
+                    {
+                        "id": "d8-002",
+                        "action": "moonshine_transcribe",
+                        "payload": {"wav_path": wav_path},
+                    }
+                )
             assert result["ok"] is True
             assert result["data"]["engine"] == "moonshine"
         finally:
@@ -622,21 +647,27 @@ class TestDomain8SidecarActions:
     @pytest.mark.asyncio
     async def test_tts_speak_empty_skipped(self):
         from sidecar.main import handle_request
-        result = await handle_request({
-            "id": "d8-003",
-            "action": "tts_speak",
-            "payload": {"text": ""},
-        })
+
+        result = await handle_request(
+            {
+                "id": "d8-003",
+                "action": "tts_speak",
+                "payload": {"text": ""},
+            }
+        )
         assert result["ok"] is True
         assert result["data"]["skipped"] is True
 
     @pytest.mark.asyncio
     async def test_unknown_action_returns_error(self):
         from sidecar.main import handle_request
-        result = await handle_request({
-            "id": "d8-999",
-            "action": "nonexistent_domain8_xyz",
-            "payload": {},
-        })
+
+        result = await handle_request(
+            {
+                "id": "d8-999",
+                "action": "nonexistent_domain8_xyz",
+                "payload": {},
+            }
+        )
         assert result["ok"] is False
         assert "Unknown action" in result["error"]

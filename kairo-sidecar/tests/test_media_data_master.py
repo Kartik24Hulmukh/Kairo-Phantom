@@ -2,9 +2,7 @@ import os
 import sys
 import tempfile
 import json
-import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
@@ -15,6 +13,7 @@ from sidecar.schemas.domain_schemas import MediaResponse, DataResponse
 # ==========================================
 # MediaMaster Tests
 # ==========================================
+
 
 def test_media_master_extract_context_default():
     master = MediaMaster()
@@ -94,6 +93,7 @@ def test_media_master_get_schema_class():
 # DataMaster Tests
 # ==========================================
 
+
 def test_data_master_extract_context_default():
     master = DataMaster()
     ctx = master.extract_context(None, None)
@@ -106,12 +106,24 @@ def test_data_master_extract_context_default():
 def test_data_master_detects_jupyter_notebook():
     master = DataMaster()
     # Create a temp .ipynb file
-    with tempfile.NamedTemporaryFile(suffix=".ipynb", mode="w", delete=False, encoding="utf-8") as f:
+    with tempfile.NamedTemporaryFile(
+        suffix=".ipynb", mode="w", delete=False, encoding="utf-8"
+    ) as f:
         nb = {
             "cells": [
-                {"cell_type": "code", "source": ["import pandas as pd\n", "import numpy as np\n", "df = pd.DataFrame()\n"]},
+                {
+                    "cell_type": "code",
+                    "source": [
+                        "import pandas as pd\n",
+                        "import numpy as np\n",
+                        "df = pd.DataFrame()\n",
+                    ],
+                },
                 {"cell_type": "markdown", "source": ["# Title"]},
-                {"cell_type": "code", "source": ["from sklearn.model_selection import train_test_split\n"]}
+                {
+                    "cell_type": "code",
+                    "source": ["from sklearn.model_selection import train_test_split\n"],
+                },
             ]
         }
         json.dump(nb, f)
@@ -173,7 +185,9 @@ def test_data_master_detects_r_language():
 def test_data_master_detects_python_data_libraries():
     master = DataMaster()
     with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False, encoding="utf-8") as f:
-        f.write("import pandas as pd\nimport matplotlib.pyplot as plt\nfrom sklearn import datasets\n")
+        f.write(
+            "import pandas as pd\nimport matplotlib.pyplot as plt\nfrom sklearn import datasets\n"
+        )
         temp_path = f.name
 
     try:
@@ -217,7 +231,9 @@ def test_data_master_build_prompt_python_idioms():
         "cursor_line": 3,
         "file_path": "analysis.py",
     }
-    prompt = master.build_prompt("group by region and sum sales", context, mem_context="Use vectorized ops")
+    prompt = master.build_prompt(
+        "group by region and sum sales", context, mem_context="Use vectorized ops"
+    )
     assert "pandas" in prompt.lower() or "numpy" in prompt.lower()
     assert "vectorized" in prompt.lower()
     assert "group by region and sum sales" in prompt

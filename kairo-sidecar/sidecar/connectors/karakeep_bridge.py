@@ -27,17 +27,20 @@ log = logging.getLogger("kairo-sidecar.connectors.karakeep")
 
 class KarakeepConnectionError(ConnectionError):
     """Raised when Karakeep is unreachable."""
+
     pass
 
 
 class KarakeepAuthError(PermissionError):
     """Raised when the Karakeep token is invalid."""
+
     pass
 
 
 @dataclass
 class KarakeepBookmark:
     """A bookmark retrieved from Karakeep."""
+
     id: str
     title: str
     url: str
@@ -90,21 +93,17 @@ class KarakeepBridge:
                     return json_module.loads(response.read().decode("utf-8"))
                 elif response.status == 401:
                     raise KarakeepAuthError(
-                        f"Karakeep rejected auth token (HTTP 401). "
-                        f"Check your token: kairo connectors enable karakeep --token <TOKEN>"
+                        "Karakeep rejected auth token (HTTP 401). "
+                        "Check your token: kairo connectors enable karakeep --token <TOKEN>"
                     )
                 else:
-                    raise KarakeepConnectionError(
-                        f"Karakeep returned HTTP {response.status}"
-                    )
+                    raise KarakeepConnectionError(f"Karakeep returned HTTP {response.status}")
         except urllib.error.HTTPError as e:
             if e.code == 401:
                 raise KarakeepAuthError(
-                    f"Karakeep rejected auth token (HTTP 401). Check your token."
+                    "Karakeep rejected auth token (HTTP 401). Check your token."
                 )
-            raise KarakeepConnectionError(
-                f"Karakeep returned HTTP {e.code}: {e.reason}"
-            )
+            raise KarakeepConnectionError(f"Karakeep returned HTTP {e.code}: {e.reason}")
         except urllib.error.URLError as e:
             raise KarakeepConnectionError(
                 f"Karakeep unreachable at {self.base_url}: {e.reason}. "

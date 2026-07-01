@@ -105,7 +105,10 @@ impl CuaConfig {
                             cua
                         }
                         Err(e) => {
-                            tracing::warn!("[CUA] Failed to parse config.toml: {} — using defaults", e);
+                            tracing::warn!(
+                                "[CUA] Failed to parse config.toml: {} — using defaults",
+                                e
+                            );
                             Self::default()
                         }
                     }

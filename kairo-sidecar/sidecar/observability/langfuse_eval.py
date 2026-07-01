@@ -13,13 +13,14 @@ This module provides:
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional, Callable
+from typing import Dict, List, Callable
 
 log = logging.getLogger("kairo-sidecar.langfuse_eval")
 
 # ── Detect langfuse availability ──
 try:
     from langfuse import Langfuse as _Langfuse
+
     HAS_LANGFUSE = True
 except ImportError:
     HAS_LANGFUSE = False
@@ -36,9 +37,7 @@ class LangfuseEval:
 
     def __init__(self):
         if not HAS_LANGFUSE:
-            raise RuntimeError(
-                "langfuse not installed. pip install langfuse"
-            )
+            raise RuntimeError("langfuse not installed. pip install langfuse")
         self.client = _Langfuse()
 
     def create_dataset(self, name: str) -> str:
@@ -120,12 +119,14 @@ class LangfuseEval:
             else:
                 failed += 1
 
-            results.append({
-                "input": input_text,
-                "expected": expected,
-                "recalled_count": len(recalled),
-                "passed": is_pass,
-            })
+            results.append(
+                {
+                    "input": input_text,
+                    "expected": expected,
+                    "recalled_count": len(recalled),
+                    "passed": is_pass,
+                }
+            )
 
         return {
             "total": len(results),

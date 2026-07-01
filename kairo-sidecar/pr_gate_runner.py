@@ -3,6 +3,7 @@ pr_gate_runner.py — Kairo Phantom Production Gate Runner
 Executes every check that can be measured programmatically.
 Checks requiring live Word/Excel UI are marked MANUAL.
 """
+
 import os
 import sys
 import time
@@ -18,6 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pathlib import Path
 from unittest.mock import patch
 
+
 def safe_rmtree(path):
     gc.collect()
     for _ in range(10):
@@ -29,17 +31,16 @@ def safe_rmtree(path):
             gc.collect()
     shutil.rmtree(path)
 
+
 from docx import Document
 import openpyxl
 
 from sidecar.masters.word_master import WordContextExtractor, WordOperationValidator, WordWriter
-from sidecar.masters.excel_master import ExcelContextExtractor, ExcelOperationValidator, ExcelWriter
+from sidecar.masters.excel_master import ExcelWriter
 from sidecar.router import OutputVerifier, DomainMasterRouter
 from sidecar.mem_machine import MemMachineClient
 from sidecar.kairo_eye.context_assembler import ContextAssembler
 from sidecar.kairo_eye.app_watcher import AppWatcher, Domain
-from sidecar.schemas.domain_schemas import TerminalResponse
-from sidecar.masters.other_masters import TerminalMaster
 
 results = {}
 
@@ -162,9 +163,11 @@ connections_attempted = []
 
 original_connect = socket.socket.connect
 
+
 def mock_block_connect(self, address):
     connections_attempted.append(address)
     raise socket.error("Network blocked in offline test mode")
+
 
 with patch.object(socket.socket, "connect", mock_block_connect):
     try:
@@ -178,7 +181,9 @@ if not connections_attempted:
         "netstat -n | findstr ESTABLISHED | findstr -v 127.0.0.1 = (empty)"
     )
 else:
-    results["PR-04"] = f"FAIL — {len(connections_attempted)} connection(s) attempted: {connections_attempted}"
+    results["PR-04"] = (
+        f"FAIL — {len(connections_attempted)} connection(s) attempted: {connections_attempted}"
+    )
 
 print(f"  {results['PR-04']}")
 
@@ -240,9 +245,16 @@ tmp = tempfile.mkdtemp()
 fp = os.path.join(tmp, "pr06.xlsx")
 wb = openpyxl.Workbook()
 ws = wb.active
-ws["A1"] = "Product"; ws["B1"] = "Revenue"; ws["C1"] = "Cost"; ws["D1"] = "Margin"
-ws["A2"] = "Widget A"; ws["B2"] = 10000.0; ws["C2"] = 6000.0
-ws["A3"] = "Widget B"; ws["B3"] = 8000.0;  ws["C3"] = 5000.0
+ws["A1"] = "Product"
+ws["B1"] = "Revenue"
+ws["C1"] = "Cost"
+ws["D1"] = "Margin"
+ws["A2"] = "Widget A"
+ws["B2"] = 10000.0
+ws["C2"] = 6000.0
+ws["A3"] = "Widget B"
+ws["B3"] = 8000.0
+ws["C3"] = 5000.0
 wb.save(fp)
 
 # Snapshot all cells before
@@ -256,12 +268,17 @@ target_cell = "D2"
 target_formula = "=IFERROR((B2-C2)/B2,0)"
 sheet_name = wb_snap.active.title
 
-ExcelWriter().apply_operations(fp, [{
-    "type": "write_cell",
-    "sheet": sheet_name,
-    "cell": target_cell,
-    "formula": target_formula,
-}])
+ExcelWriter().apply_operations(
+    fp,
+    [
+        {
+            "type": "write_cell",
+            "sheet": sheet_name,
+            "cell": target_cell,
+            "formula": target_formula,
+        }
+    ],
+)
 
 # Snapshot after
 snap_after = {}
@@ -271,8 +288,7 @@ for row in wb_snap2.active.iter_rows():
         snap_after[cell.coordinate] = cell.value
 
 changed_besides_target = [
-    c for c in snap_after
-    if snap_after[c] != snap_before.get(c) and c != target_cell
+    c for c in snap_after if snap_after[c] != snap_before.get(c) and c != target_cell
 ]
 target_new = snap_after.get(target_cell)
 
@@ -311,7 +327,7 @@ op_pr07 = {
     "runs": [{"text": "Should fail due to crash", "bold": False, "italic": False}],
 }
 
-import pytest
+
 with patch("win32com.client.GetActiveObject", side_effect=Exception("Word not running")):
     with patch("docx.document.Document.save", side_effect=IOError("Simulated disk crash")):
         try:
@@ -392,6 +408,7 @@ print(f"  {results['PR-09']}")
 print("Running PR-10...")
 try:
     from sidecar.debounce_guard import DebounceGuard
+
     guard = DebounceGuard(interval_seconds=0.2)
     allowed = 0
     denied = 0
@@ -402,7 +419,7 @@ try:
         else:
             denied += 1
         time.sleep(0.01)
-    
+
     if allowed == 1 and denied == 9:
         results["PR-10"] = (
             f"PASS — Programmatic Alt+Ctrl+M stress test: 10 presses in <0.2s. "
@@ -486,13 +503,13 @@ for proc_name, expected_domain in test_cases:
     if detected == expected_domain:
         correct += 1
     else:
-        incorrect_list.append(f"{proc_name}: expected={expected_domain.value}, got={detected.value}")
+        incorrect_list.append(
+            f"{proc_name}: expected={expected_domain.value}, got={detected.value}"
+        )
 
 pct = (correct / len(test_cases)) * 100
 if correct >= 47:  # 94%+ pass threshold
-    results["PR-11"] = (
-        f"PASS — Correct={correct}/{len(test_cases)} ({pct:.1f}%) domain detections"
-    )
+    results["PR-11"] = f"PASS — Correct={correct}/{len(test_cases)} ({pct:.1f}%) domain detections"
 else:
     results["PR-11"] = (
         f"FAIL — Correct={correct}/{len(test_cases)} ({pct:.1f}%). "
@@ -535,14 +552,11 @@ try:
         )
     else:
         results["PR-12"] = (
-            f"FAIL — Session 2 did not recall Session 1 style. "
-            f"Recalled: '{recalled[:80]}'"
+            f"FAIL — Session 2 did not recall Session 1 style. " f"Recalled: '{recalled[:80]}'"
         )
 finally:
-    if "client1" in locals() or "client1" in globals():
-        del client1
-    if "client2" in locals() or "client2" in globals():
-        del client2
+    locals().pop("client1", None)
+    locals().pop("client2", None)
     gc.collect()
     if os.path.exists(tmp_db):
         try:
@@ -559,18 +573,25 @@ print(f"  {results['PR-12']}")
 # PR-13: Memory benchmark score
 # ============================================================
 print("Running PR-13...")
-bench_script = Path(r"c:\Users\praja\OneDrive\Desktop\test-env\repositories\kairo-phantom\scripts\memory_benchmark.py")
+bench_script = Path(
+    r"c:\Users\praja\OneDrive\Desktop\test-env\repositories\kairo-phantom\scripts\memory_benchmark.py"
+)
 _pr13_done = False
 if bench_script.exists():
     import subprocess
+
     proc = subprocess.run(
         [sys.executable, str(bench_script)],
         cwd=str(bench_script.parent.parent),
-        capture_output=True, text=True, timeout=120
+        capture_output=True,
+        text=True,
+        timeout=120,
     )
     output = proc.stdout.strip() + proc.stderr.strip()
     # Find meaningful score lines
-    score_lines = [l for l in output.split("\n") if "Composite Score" in l or "Benchmark Result" in l]
+    score_lines = [
+        l for l in output.split("\n") if "Composite Score" in l or "Benchmark Result" in l
+    ]
     if score_lines:
         # Composite = 0.0000 means sidecar was offline — fall through to inline benchmark
         composite_zero = any("0.0000" in l and "Composite Score" in l for l in score_lines)
@@ -593,7 +614,8 @@ if not _pr13_done:
         t0 = time.perf_counter()
         for i in range(N):
             client.record_interaction(
-                domain="word", task_type="insert",
+                domain="word",
+                task_type="insert",
                 user_prompt=f"write memo {i}",
                 style_notes=f"Style note {i}: use bullets and formal tone.",
                 output_preview=f"- Item {i}\n- Item {i+1}",
@@ -694,6 +716,7 @@ print(f"  {results['PR-14']}")
 # PR-CUA: CUA Module Gate Checks
 # ============================================================
 
+
 def run_cua_gates():
     """Run CUA-specific production gate checks.
 
@@ -718,8 +741,7 @@ def run_cua_gates():
     missing = [str(f) for f in required_files if not f.exists()]
     if not missing:
         cua_results["PR-CUA-01"] = (
-            "PASS — CUA module files present: "
-            "canva_cua.py, driver_service.py, __init__.py"
+            "PASS — CUA module files present: " "canva_cua.py, driver_service.py, __init__.py"
         )
     else:
         cua_results["PR-CUA-01"] = f"FAIL — Missing CUA module files: {missing}"
@@ -734,8 +756,7 @@ def run_cua_gates():
         missing_entries = [e for e in required_blocklist if e not in gate_text]
         if not missing_entries:
             cua_results["PR-CUA-02"] = (
-                f"PASS — cua_gate.rs blocklist contains required entries: "
-                f"{required_blocklist}"
+                f"PASS — cua_gate.rs blocklist contains required entries: " f"{required_blocklist}"
             )
         else:
             cua_results["PR-CUA-02"] = (
@@ -757,10 +778,7 @@ def run_cua_gates():
             or "pub enabled: bool" in config_text  # field exists, check default
         )
         # More specific: check the default impl sets enabled to false
-        default_disabled = (
-            ("enabled: false" in config_text)
-            or ("enabled = false" in config_text)
-        )
+        default_disabled = ("enabled: false" in config_text) or ("enabled = false" in config_text)
         if default_disabled:
             cua_results["PR-CUA-03"] = (
                 "PASS — CuaConfig default has enabled=false "
@@ -770,8 +788,7 @@ def run_cua_gates():
             # Check if the struct has enabled field and look for Default impl
             if "impl Default for CuaConfig" in config_text and "false" in config_text:
                 cua_results["PR-CUA-03"] = (
-                    "PASS — CuaConfig Default impl contains false "
-                    "(CUA disabled by default)"
+                    "PASS — CuaConfig Default impl contains false " "(CUA disabled by default)"
                 )
             else:
                 cua_results["PR-CUA-03"] = (
@@ -780,8 +797,8 @@ def run_cua_gates():
                 )
         else:
             cua_results["PR-CUA-03"] = (
-                f"FAIL — CuaConfig does not clearly set enabled=false in defaults. "
-                f"CUA must be opt-in."
+                "FAIL — CuaConfig does not clearly set enabled=false in defaults. "
+                "CUA must be opt-in."
             )
     else:
         cua_results["PR-CUA-03"] = f"FAIL — config.rs not found at {config_path}"
@@ -793,7 +810,6 @@ def run_cua_gates():
     if notices_path.exists():
         notices_text = notices_path.read_text(encoding="utf-8", errors="replace")
         has_cua_driver = "cua-driver" in notices_text
-        has_mit = "MIT" in notices_text
         has_trycua_url = "trycua/cua" in notices_text
         if has_cua_driver and has_trycua_url:
             cua_results["PR-CUA-04"] = (
@@ -801,9 +817,7 @@ def run_cua_gates():
                 "with MIT license and trycua/cua source URL"
             )
         elif has_cua_driver:
-            cua_results["PR-CUA-04"] = (
-                "PASS — THIRD_PARTY_NOTICES.md contains cua-driver entry"
-            )
+            cua_results["PR-CUA-04"] = "PASS — THIRD_PARTY_NOTICES.md contains cua-driver entry"
         else:
             cua_results["PR-CUA-04"] = (
                 "FAIL — THIRD_PARTY_NOTICES.md missing cua-driver entry. "
@@ -846,14 +860,30 @@ def run_cua_gates():
     filtered_ps_files = []
     for f in ps_files:
         p_str = str(f.resolve())
-        if "target" not in p_str and ".agents" not in p_str and "venv" not in p_str and ".git" not in p_str:
+        if (
+            "target" not in p_str
+            and ".agents" not in p_str
+            and "venv" not in p_str
+            and ".git" not in p_str
+        ):
             filtered_ps_files.append(f)
 
     if not filtered_ps_files:
         cua_results["PR-CUA-06"] = "FAIL — No PowerShell script files (.ps1) found in repository."
     else:
         errors = []
-        required_patterns = ["$env:", "$ErrorActionPreference", "Join-Path", "Test-Path", "New-Item", "Set-StrictMode", "pwsh", "Write-Host", "Start-Sleep", "Get-Random"]
+        required_patterns = [
+            "$env:",
+            "$ErrorActionPreference",
+            "Join-Path",
+            "Test-Path",
+            "New-Item",
+            "Set-StrictMode",
+            "pwsh",
+            "Write-Host",
+            "Start-Sleep",
+            "Get-Random",
+        ]
         for f in filtered_ps_files:
             try:
                 content = f.read_text(encoding="utf-8", errors="replace")
@@ -862,7 +892,7 @@ def run_cua_gates():
                     errors.append(f"File {f.name} missing PowerShell environment-specific strings")
             except Exception as e:
                 errors.append(f"Failed to read {f.name}: {e}")
-        
+
         if not errors:
             cua_results["PR-CUA-06"] = (
                 f"PASS — Verified {len(filtered_ps_files)} PowerShell script files "
@@ -916,9 +946,28 @@ failed = 0
 manual = 0
 blocking = []
 
-for gate in ["PR-01","PR-02","PR-03","PR-04","PR-05","PR-06",
-             "PR-07","PR-08","PR-09","PR-10","PR-11","PR-12","PR-13","PR-14",
-             "PR-CUA-01","PR-CUA-02","PR-CUA-03","PR-CUA-04","PR-CUA-05","PR-CUA-06"]:
+for gate in [
+    "PR-01",
+    "PR-02",
+    "PR-03",
+    "PR-04",
+    "PR-05",
+    "PR-06",
+    "PR-07",
+    "PR-08",
+    "PR-09",
+    "PR-10",
+    "PR-11",
+    "PR-12",
+    "PR-13",
+    "PR-14",
+    "PR-CUA-01",
+    "PR-CUA-02",
+    "PR-CUA-03",
+    "PR-CUA-04",
+    "PR-CUA-05",
+    "PR-CUA-06",
+]:
     r = results.get(gate, "NOT RUN")
     label = gate_labels.get(gate, "")
     status = "PASS" if r.startswith("PASS") else ("MANUAL" if r.startswith("MANUAL") else "FAIL")
@@ -941,13 +990,13 @@ if failed == 0:
     print("\nLAUNCH DECISION: READY (all automated gates pass; manual UI checks pending)")
     print("\nCUA MODULE: Gates PR-CUA-01 through PR-CUA-05 all passed.")
 else:
-    print(f"\nLAUNCH DECISION: NOT READY")
+    print("\nLAUNCH DECISION: NOT READY")
     print(f"BLOCKING ITEMS: {blocking}")
 
 if results:
     out_path = os.path.join(
         r"c:\Users\praja\.gemini\antigravity\brain\f9c3416a-cc0c-480a-bd9a-10bde3874615",
-        "pr_gate_results.json"
+        "pr_gate_results.json",
     )
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w") as f:

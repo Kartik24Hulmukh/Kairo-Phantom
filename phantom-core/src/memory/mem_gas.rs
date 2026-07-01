@@ -14,9 +14,12 @@ impl MemGasRouter {
     /// Adaptive granularity selection based on prompt entropy/specificity.
     pub fn route(doc_ctx: &DocumentContext) -> Vec<String> {
         let mut granularities = Vec::new();
-        
+
         // 1. App-level (Always included as baseline)
-        granularities.push(format!("app:{}", doc_ctx.app_name.as_deref().unwrap_or("unknown")));
+        granularities.push(format!(
+            "app:{}",
+            doc_ctx.app_name.as_deref().unwrap_or("unknown")
+        ));
 
         // 2. Specific sub-context (Hierarchical)
         if let Some(app_name) = &doc_ctx.app_name {

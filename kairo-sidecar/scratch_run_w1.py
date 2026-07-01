@@ -20,12 +20,13 @@ from sidecar.prompt_builder import (
     build_notes_prompt,
     build_design_prompt,
     build_media_prompt,
-    build_data_prompt
+    build_data_prompt,
 )
-from sidecar.llm_caller import call_with_schema, StructuredOutputError
+from sidecar.llm_caller import call_with_schema
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("challenger_1_verifier")
+
 
 class MockHTTPResponse:
     def __init__(self, data: bytes):
@@ -40,12 +41,14 @@ class MockHTTPResponse:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+
 class SimpleSchema(BaseModel):
     status: str
 
+
 def verify_prompt_builders():
     logger.info("Starting verification of 12 domain prompt builders...")
-    
+
     builders = [
         ("word", build_word_prompt),
         ("excel", build_excel_prompt),
@@ -139,7 +142,7 @@ def verify_prompt_builders():
     for name, builder_func in builders:
         logger.info(f"Testing builder: {name}")
         prompt = builder_func(user_prompt, doc_context, mem_context, classification)
-        
+
         idx_app = prompt.find("=== APP CONTEXT ===")
         idx_doc = prompt.find("=== DOCUMENT CONTEXT ===")
         idx_mem = prompt.find("=== MEMORY CONTEXT ===")
@@ -159,11 +162,17 @@ def verify_prompt_builders():
         assert idx_app < idx_doc, f"{name}: APP CONTEXT must precede DOCUMENT CONTEXT"
         assert idx_doc < idx_mem, f"{name}: DOCUMENT CONTEXT must precede MEMORY CONTEXT"
         assert idx_mem < idx_intent, f"{name}: MEMORY CONTEXT must precede INTENT CLASSIFICATION"
-        assert idx_intent < idx_reminder, f"{name}: INTENT CLASSIFICATION must precede JSON reminder"
-        assert idx_reminder < idx_instruction, f"{name}: JSON reminder must precede USER INSTRUCTION"
+        assert (
+            idx_intent < idx_reminder
+        ), f"{name}: INTENT CLASSIFICATION must precede JSON reminder"
+        assert (
+            idx_reminder < idx_instruction
+        ), f"{name}: JSON reminder must precede USER INSTRUCTION"
 
         # Assert that the JSON reminder immediately precedes the User Instruction
-        between_reminder_and_instruction = prompt[idx_reminder + len(json_reminder_str):idx_instruction]
+        between_reminder_and_instruction = prompt[
+            idx_reminder + len(json_reminder_str) : idx_instruction
+        ]
         # Allow only whitespace/newlines between reminder and instruction
         assert between_reminder_and_instruction.strip() == "", (
             f"{name}: The JSON reminder must immediately precede the USER INSTRUCTION without other content in between. "
@@ -172,6 +181,7 @@ def verify_prompt_builders():
         logger.info(f"Builder {name} PASSED.")
 
     logger.info("All 12 prompt builders verified successfully!")
+
 
 def test_llm_caller_json_decode_retry():
     logger.info("Testing llm_caller retry logic on JSONDecodeError...")
@@ -184,25 +194,11 @@ def test_llm_caller_json_decode_retry():
         if len(requests_captured) == 1:
             # First attempt: Return invalid JSON in choice message content
             response_payload = {
-                "choices": [
-                    {
-                        "message": {
-                            "content": "{invalid json structure here"
-                        }
-                    }
-                ]
+                "choices": [{"message": {"content": "{invalid json structure here"}}]
             }
         else:
             # Second attempt: Return valid JSON matching SimpleSchema
-            response_payload = {
-                "choices": [
-                    {
-                        "message": {
-                            "content": '{"status": "ok"}'
-                        }
-                    }
-                ]
-            }
+            response_payload = {"choices": [{"message": {"content": '{"status": "ok"}'}}]}
 
         return MockHTTPResponse(json.dumps(response_payload).encode("utf-8"))
 
@@ -225,6 +221,7 @@ def test_llm_caller_json_decode_retry():
     )
     assert second_payload["messages"] == [{"role": "user", "content": expected_retry_prompt}]
     logger.info("llm_caller retry logic verified successfully!")
+
 
 if __name__ == "__main__":
     try:

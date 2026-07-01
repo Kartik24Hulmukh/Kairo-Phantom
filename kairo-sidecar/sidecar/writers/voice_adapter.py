@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 
 # ─── Voice Fingerprint ────────────────────────────────────────────────────────
 
+
 @dataclass
 class VoiceFingerprint:
     """
@@ -63,30 +64,31 @@ class VoiceFingerprint:
     Computed from 3+ user-provided documents (≥500 words each).
     Used to inject voice-matching instructions into document generation prompts.
     """
+
     # Sentence structure
-    avg_sentence_length: float = 15.0       # Average words per sentence
-    sentence_length_stddev: float = 5.0     # Variation in sentence length
-    max_sentence_length: int = 35           # Maximum sentence length (for run-on detection)
-    pct_short_sentences: float = 0.2        # % sentences with <8 words
+    avg_sentence_length: float = 15.0  # Average words per sentence
+    sentence_length_stddev: float = 5.0  # Variation in sentence length
+    max_sentence_length: int = 35  # Maximum sentence length (for run-on detection)
+    pct_short_sentences: float = 0.2  # % sentences with <8 words
 
     # Vocabulary
-    common_transition_words: list[str] = field(default_factory=lambda: [
-        "however", "therefore", "additionally", "furthermore", "notably"
-    ])
-    avg_word_length: float = 4.5            # Average characters per word
-    vocabulary_richness: float = 0.7        # Type-token ratio (unique/total words)
+    common_transition_words: list[str] = field(
+        default_factory=lambda: ["however", "therefore", "additionally", "furthermore", "notably"]
+    )
+    avg_word_length: float = 4.5  # Average characters per word
+    vocabulary_richness: float = 0.7  # Type-token ratio (unique/total words)
 
     # Style
-    formality_score: float = 0.7           # 0=casual, 1=formal
-    uses_oxford_comma: bool = True          # Comma before final item in list
-    uses_contractions: float = 0.1         # Fraction of sentences with contractions
-    active_voice_ratio: float = 0.8        # Ratio of active vs passive voice
-    first_person_ratio: float = 0.1        # Ratio of first-person sentences
+    formality_score: float = 0.7  # 0=casual, 1=formal
+    uses_oxford_comma: bool = True  # Comma before final item in list
+    uses_contractions: float = 0.1  # Fraction of sentences with contractions
+    active_voice_ratio: float = 0.8  # Ratio of active vs passive voice
+    first_person_ratio: float = 0.1  # Ratio of first-person sentences
 
     # Punctuation patterns
-    uses_em_dash: bool = False              # Uses — (em dash)
-    uses_semicolons: bool = False           # Uses ; for compound sentences
-    uses_parentheses: float = 0.05         # Fraction of sentences with parentheses
+    uses_em_dash: bool = False  # Uses — (em dash)
+    uses_semicolons: bool = False  # Uses ; for compound sentences
+    uses_parentheses: float = 0.05  # Fraction of sentences with parentheses
 
     # Document meta
     sample_sentences: list[str] = field(default_factory=list)  # 3 example sentences
@@ -103,6 +105,7 @@ class VoiceFingerprint:
 
 # ─── Voice Adapter ────────────────────────────────────────────────────────────
 
+
 class VoiceAdapter:
     """
     Extracts writing style fingerprints and generates voice-adapted prompts.
@@ -117,9 +120,9 @@ class VoiceAdapter:
         # Inject system_addon into the document generation system prompt
     """
 
-    MIN_WORDS_PER_DOC = 300     # Minimum words to consider a document usable
-    MIN_DOCUMENTS = 1           # Minimum documents needed (3 recommended)
-    RECOMMENDED_DOCUMENTS = 3   # Recommended for best results
+    MIN_WORDS_PER_DOC = 300  # Minimum words to consider a document usable
+    MIN_DOCUMENTS = 1  # Minimum documents needed (3 recommended)
+    RECOMMENDED_DOCUMENTS = 3  # Recommended for best results
 
     def extract_fingerprint(
         self,
@@ -169,7 +172,9 @@ class VoiceAdapter:
         sent_lengths = [len(s.split()) for s in sentences if s.strip()]
         if sent_lengths:
             fp.avg_sentence_length = statistics.mean(sent_lengths)
-            fp.sentence_length_stddev = statistics.stdev(sent_lengths) if len(sent_lengths) > 1 else 0
+            fp.sentence_length_stddev = (
+                statistics.stdev(sent_lengths) if len(sent_lengths) > 1 else 0
+            )
             fp.max_sentence_length = max(sent_lengths)
             fp.pct_short_sentences = sum(1 for l in sent_lengths if l < 8) / len(sent_lengths)
 
@@ -191,8 +196,7 @@ class VoiceAdapter:
         fp.uses_semicolons = all_text.count(";") > len(sentences) * 0.05
         fp.uses_parentheses = sum(1 for s in sentences if "(" in s) / len(sentences)
         fp.first_person_ratio = sum(
-            1 for s in sentences
-            if re.search(r"\b(i|i\'m|i\'ve|i\'ll|i\'d|my|me)\b", s.lower())
+            1 for s in sentences if re.search(r"\b(i|i\'m|i\'ve|i\'ll|i\'d|my|me)\b", s.lower())
         ) / len(sentences)
         fp.formality_score = self._estimate_formality(all_text, sentences)
 
@@ -226,18 +230,26 @@ class VoiceAdapter:
 
         # Sentence structure
         if fp.avg_sentence_length < 12:
-            parts.append("- Use SHORT sentences (avg 8-12 words). Prefer punchy, direct statements.")
+            parts.append(
+                "- Use SHORT sentences (avg 8-12 words). Prefer punchy, direct statements."
+            )
         elif fp.avg_sentence_length > 20:
-            parts.append("- Use LONGER sentences (avg 18-25 words) with subordinate clauses and flow.")
+            parts.append(
+                "- Use LONGER sentences (avg 18-25 words) with subordinate clauses and flow."
+            )
         else:
-            parts.append(f"- Use moderate sentence lengths (avg ~{fp.avg_sentence_length:.0f} words).")
+            parts.append(
+                f"- Use moderate sentence lengths (avg ~{fp.avg_sentence_length:.0f} words)."
+            )
 
         if fp.pct_short_sentences > 0.3:
             parts.append("- Mix in frequent short sentences for emphasis.")
 
         # Formality
         if fp.formality_score < 0.4:
-            parts.append("- Conversational, casual tone. Contractions are fine. Avoid stiff phrases.")
+            parts.append(
+                "- Conversational, casual tone. Contractions are fine. Avoid stiff phrases."
+            )
         elif fp.formality_score > 0.7:
             parts.append("- Professional, formal tone. No contractions. No colloquialisms.")
         else:
@@ -296,11 +308,30 @@ class VoiceAdapter:
     def _extract_transition_words(self, sentences: list[str]) -> list[str]:
         """Extract the most-used transition words/phrases from the text."""
         TRANSITION_CANDIDATES = [
-            "however", "therefore", "thus", "consequently", "additionally",
-            "furthermore", "moreover", "nevertheless", "nonetheless", "meanwhile",
-            "subsequently", "accordingly", "notably", "specifically", "importantly",
-            "indeed", "ultimately", "essentially", "in contrast", "on the other hand",
-            "as a result", "for example", "for instance", "in addition",
+            "however",
+            "therefore",
+            "thus",
+            "consequently",
+            "additionally",
+            "furthermore",
+            "moreover",
+            "nevertheless",
+            "nonetheless",
+            "meanwhile",
+            "subsequently",
+            "accordingly",
+            "notably",
+            "specifically",
+            "importantly",
+            "indeed",
+            "ultimately",
+            "essentially",
+            "in contrast",
+            "on the other hand",
+            "as a result",
+            "for example",
+            "for instance",
+            "in addition",
         ]
 
         all_text_lower = " ".join(sentences).lower()
@@ -331,7 +362,7 @@ class VoiceAdapter:
     def _estimate_formality(self, text: str, sentences: list[str]) -> float:
         """
         Estimate formality on a 0–1 scale.
-        
+
         Signals of formality:
         + Long words, passive voice, no contractions, no first person
         - Short words, contractions, slang, first person
@@ -363,10 +394,7 @@ class VoiceAdapter:
     def _select_sample_sentences(self, sentences: list[str]) -> list[str]:
         """Select 3 representative sample sentences from the user's writing."""
         # Filter to medium-length sentences (not too short, not too long)
-        candidates = [
-            s for s in sentences
-            if 12 <= len(s.split()) <= 30 and not s.startswith("//")
-        ]
+        candidates = [s for s in sentences if 12 <= len(s.split()) <= 30 and not s.startswith("//")]
 
         if not candidates:
             return sentences[:3]
@@ -384,6 +412,7 @@ class VoiceAdapter:
 
 
 # ─── Voice Store ──────────────────────────────────────────────────────────────
+
 
 class VoiceStore:
     """

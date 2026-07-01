@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 
 log = logging.getLogger("kairo-sidecar.context_assembler")
 
+
 class ContextAssembler:
     """
     Assembles the final context package sent to the domain master.

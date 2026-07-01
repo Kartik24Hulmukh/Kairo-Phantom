@@ -10,6 +10,7 @@ from sidecar.parsers.pdf_parser import parse_pdf
 
 log = logging.getLogger("kairo-sidecar.context_extractor")
 
+
 def extract_context(file_path: str, active_cell: Optional[str] = None) -> dict:
     """
     Route to correct reader based on file extension.
@@ -17,7 +18,7 @@ def extract_context(file_path: str, active_cell: Optional[str] = None) -> dict:
     """
     ext = Path(file_path).suffix.lower()
     log.info(f"Extracting context from format '{ext}' for path: {file_path}")
-    
+
     if ext == ".docx":
         return parse_docx(file_path)
     elif ext in (".xlsx", ".xlsm"):
@@ -34,4 +35,3 @@ def extract_context(file_path: str, active_cell: Optional[str] = None) -> dict:
         return parse_pdf(file_path)
     else:
         return {"error": f"Unsupported format: {ext}", "ext": ext}
-

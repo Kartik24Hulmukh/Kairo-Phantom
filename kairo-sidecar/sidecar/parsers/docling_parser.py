@@ -30,6 +30,7 @@ log = logging.getLogger("kairo-sidecar.docling_parser")
 
 try:
     from docling.document_converter import DocumentConverter as _DoclingConverter
+
     _DOCLING_AVAILABLE = True
     log.debug("Docling is available.")
 except ImportError:
@@ -39,6 +40,7 @@ except ImportError:
 
 try:
     import mammoth as _mammoth
+
     _MAMMOTH_AVAILABLE = True
 except ImportError:
     _mammoth = None  # type: ignore
@@ -46,6 +48,7 @@ except ImportError:
 
 try:
     from docx2python import docx2python as _docx2python
+
     _DOCX2PYTHON_AVAILABLE = True
 except ImportError:
     _docx2python = None  # type: ignore
@@ -54,6 +57,7 @@ except ImportError:
 try:
     from docx import Document as _DocxDocument
     from docx.enum.style import WD_STYLE_TYPE as _WD_STYLE_TYPE
+
     _PYTHON_DOCX_AVAILABLE = True
 except ImportError:
     _DocxDocument = None  # type: ignore
@@ -108,6 +112,7 @@ _HEADING_STYLE_MAP = {
     "chapter": ("Heading 1", 1),
 }
 
+
 def _heading_level_from_style(style_name: str) -> int:
     """
     Extract numeric heading level from style name strings like
@@ -118,7 +123,7 @@ def _heading_level_from_style(style_name: str) -> int:
     # Explicit level patterns: "Heading 3", "heading3", "h3"
     for prefix in ("heading ", "heading", "h"):
         if lower.startswith(prefix):
-            remainder = lower[len(prefix):].strip()
+            remainder = lower[len(prefix) :].strip()
             if remainder.isdigit():
                 return min(int(remainder), 6)
     # Fuzzy: title → level 1
@@ -137,6 +142,7 @@ def _map_heading_to_word_style(level: int) -> str:
 # ---------------------------------------------------------------------------
 # DoclingParser class
 # ---------------------------------------------------------------------------
+
 
 class DoclingParser:
     """
@@ -279,13 +285,17 @@ class DoclingParser:
 
                 # ---- Paragraph / Heading / List ----
                 if item_type in (
-                    "TextItem", "SectionHeaderItem", "ListItem",
-                    "text", "section_header", "list_item",
+                    "TextItem",
+                    "SectionHeaderItem",
+                    "ListItem",
+                    "text",
+                    "section_header",
+                    "list_item",
                 ):
                     text = (item.get("text") or "").strip()
                     level = 0
                     style = "Normal"
-                    list_level = item.get("enumerated_level", item.get("level", None))
+                    item.get("enumerated_level", item.get("level", None))
 
                     # Determine heading level
                     if item_type in ("SectionHeaderItem", "section_header"):
@@ -308,23 +318,27 @@ class DoclingParser:
                     # Build runs from inline formatting if available
                     runs = _extract_docling_runs(item, text)
 
-                    paragraphs.append({
-                        "index": p_idx,
-                        "text": text,
-                        "style": style,
-                        "level": level,
-                        "page": _extract_page(item),
-                        "runs": runs,
-                    })
+                    paragraphs.append(
+                        {
+                            "index": p_idx,
+                            "text": text,
+                            "style": style,
+                            "level": level,
+                            "page": _extract_page(item),
+                            "runs": runs,
+                        }
+                    )
                     p_idx += 1
 
                 # ---- Table ----
                 elif item_type in ("TableItem", "table"):
                     rows = _extract_docling_table_rows(item)
-                    tables.append({
-                        "after_paragraph_index": max(p_idx - 1, 0),
-                        "rows": rows,
-                    })
+                    tables.append(
+                        {
+                            "after_paragraph_index": max(p_idx - 1, 0),
+                            "rows": rows,
+                        }
+                    )
 
                 # ---- Recurse into groups ----
                 children = item.get("children", [])
@@ -369,8 +383,7 @@ class DoclingParser:
             if not tag:
                 continue
 
-            if tag in ("p", "h1", "h2", "h3", "h4", "h5", "h6",
-                       "ul", "ol", "li"):
+            if tag in ("p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li"):
                 # Handle list items
                 if tag in ("ul", "ol"):
                     for li in child.find_all("li"):
@@ -378,14 +391,16 @@ class DoclingParser:
                         list_style = "List Bullet" if tag == "ul" else "List Number"
                         # Estimate nesting level by count of parent ul/ol
                         nest = len(li.find_parents(["ul", "ol"]))
-                        paragraphs.append({
-                            "index": p_idx,
-                            "text": li_text,
-                            "style": list_style,
-                            "level": nest,
-                            "page": None,
-                            "runs": [{"text": li_text, "bold": False, "italic": False}],
-                        })
+                        paragraphs.append(
+                            {
+                                "index": p_idx,
+                                "text": li_text,
+                                "style": list_style,
+                                "level": nest,
+                                "page": None,
+                                "runs": [{"text": li_text, "bold": False, "italic": False}],
+                            }
+                        )
                         p_idx += 1
                     continue
 
@@ -408,32 +423,38 @@ class DoclingParser:
                         item_tag = getattr(item, "name", "")
                         bold = item_tag in ("strong", "b") or bool(item.find("strong"))
                         italic = item_tag in ("em", "i") or bool(item.find("em"))
-                        runs.append({
-                            "text": item.get_text(),
-                            "bold": bold,
-                            "italic": italic,
-                        })
+                        runs.append(
+                            {
+                                "text": item.get_text(),
+                                "bold": bold,
+                                "italic": italic,
+                            }
+                        )
                 if not runs:
                     runs = [{"text": text, "bold": False, "italic": False}]
 
-                paragraphs.append({
-                    "index": p_idx,
-                    "text": text,
-                    "style": style,
-                    "level": level,
-                    "page": None,
-                    "runs": runs,
-                })
+                paragraphs.append(
+                    {
+                        "index": p_idx,
+                        "text": text,
+                        "style": style,
+                        "level": level,
+                        "page": None,
+                        "runs": runs,
+                    }
+                )
                 p_idx += 1
 
             elif tag == "table":
                 rows = []
                 for tr in child.find_all("tr"):
                     rows.append([td.get_text().strip() for td in tr.find_all(["td", "th"])])
-                tables.append({
-                    "after_paragraph_index": max(p_idx - 1, 0),
-                    "rows": rows,
-                })
+                tables.append(
+                    {
+                        "after_paragraph_index": max(p_idx - 1, 0),
+                        "rows": rows,
+                    }
+                )
 
         return {
             "paragraphs": paragraphs,
@@ -463,25 +484,31 @@ class DoclingParser:
                             # Could be table row or paragraph parts
                             flat = " ".join(str(p) for p in para_parts).strip()
                             if flat:
-                                level = _heading_level_from_style("")
-                                paragraphs.append({
+                                _heading_level_from_style("")
+                                paragraphs.append(
+                                    {
+                                        "index": p_idx,
+                                        "text": flat,
+                                        "style": "Normal",
+                                        "level": 0,
+                                        "page": None,
+                                        "runs": [{"text": flat, "bold": False, "italic": False}],
+                                    }
+                                )
+                                p_idx += 1
+                        elif isinstance(para_parts, str) and para_parts.strip():
+                            paragraphs.append(
+                                {
                                     "index": p_idx,
-                                    "text": flat,
+                                    "text": para_parts.strip(),
                                     "style": "Normal",
                                     "level": 0,
                                     "page": None,
-                                    "runs": [{"text": flat, "bold": False, "italic": False}],
-                                })
-                                p_idx += 1
-                        elif isinstance(para_parts, str) and para_parts.strip():
-                            paragraphs.append({
-                                "index": p_idx,
-                                "text": para_parts.strip(),
-                                "style": "Normal",
-                                "level": 0,
-                                "page": None,
-                                "runs": [{"text": para_parts.strip(), "bold": False, "italic": False}],
-                            })
+                                    "runs": [
+                                        {"text": para_parts.strip(), "bold": False, "italic": False}
+                                    ],
+                                }
+                            )
                             p_idx += 1
 
         _flatten_body(content.body)
@@ -517,29 +544,35 @@ class DoclingParser:
             # Detect list style
             list_level = None
             try:
-                if (p._p.pPr is not None
-                        and p._p.pPr.numPr is not None
-                        and p._p.pPr.numPr.ilvl is not None):
+                if (
+                    p._p.pPr is not None
+                    and p._p.pPr.numPr is not None
+                    and p._p.pPr.numPr.ilvl is not None
+                ):
                     list_level = p._p.pPr.numPr.ilvl.val
             except Exception:
                 pass
 
             runs = []
             for r in p.runs:
-                runs.append({
-                    "text": r.text,
-                    "bold": bool(r.bold),
-                    "italic": bool(r.italic),
-                })
+                runs.append(
+                    {
+                        "text": r.text,
+                        "bold": bool(r.bold),
+                        "italic": bool(r.italic),
+                    }
+                )
 
-            paragraphs.append({
-                "index": i,
-                "text": p.text.strip(),
-                "style": style_name,
-                "level": level if level else (list_level if list_level is not None else 0),
-                "page": None,
-                "runs": runs,
-            })
+            paragraphs.append(
+                {
+                    "index": i,
+                    "text": p.text.strip(),
+                    "style": style_name,
+                    "level": level if level else (list_level if list_level is not None else 0),
+                    "page": None,
+                    "runs": runs,
+                }
+            )
 
         # Walk body XML to get accurate table positions
         paragraph_idx = -1
@@ -551,12 +584,13 @@ class DoclingParser:
                 if table_idx < len(doc.tables):
                     table_el = doc.tables[table_idx]
                     table_idx += 1
-                    rows = [[cell.text.strip() for cell in row.cells]
-                            for row in table_el.rows]
-                    tables.append({
-                        "after_paragraph_index": max(paragraph_idx, 0),
-                        "rows": rows,
-                    })
+                    rows = [[cell.text.strip() for cell in row.cells] for row in table_el.rows]
+                    tables.append(
+                        {
+                            "after_paragraph_index": max(paragraph_idx, 0),
+                            "rows": rows,
+                        }
+                    )
 
         return {
             "paragraphs": paragraphs,
@@ -571,6 +605,7 @@ class DoclingParser:
 # ---------------------------------------------------------------------------
 # Docling helper utilities
 # ---------------------------------------------------------------------------
+
 
 def _extract_page(item: dict) -> Optional[int]:
     """Try to pull page number from Docling item provenance."""
@@ -655,23 +690,27 @@ def _iterate_docling_doc(dl_doc) -> Tuple[List, List, int]:
                     rows = [[str(v) for v in row] for row in rows]
                 except Exception:
                     pass
-                tables.append({
-                    "after_paragraph_index": max(p_idx - 1, 0),
-                    "rows": rows,
-                })
+                tables.append(
+                    {
+                        "after_paragraph_index": max(p_idx - 1, 0),
+                        "rows": rows,
+                    }
+                )
                 continue
             elif "List" in item_cls:
                 style = "List Bullet"
 
             if text:
-                paragraphs.append({
-                    "index": p_idx,
-                    "text": text,
-                    "style": style,
-                    "level": level,
-                    "page": None,
-                    "runs": [{"text": text, "bold": False, "italic": False}],
-                })
+                paragraphs.append(
+                    {
+                        "index": p_idx,
+                        "text": text,
+                        "style": style,
+                        "level": level,
+                        "page": None,
+                        "runs": [{"text": text, "bold": False, "italic": False}],
+                    }
+                )
                 p_idx += 1
     except AttributeError:
         pass
@@ -689,6 +728,7 @@ _parser_instance = DoclingParser()
 # ---------------------------------------------------------------------------
 # Public convenience function: parse_docx_structured
 # ---------------------------------------------------------------------------
+
 
 def parse_docx_structured(file_path: str) -> Dict[str, Any]:
     """

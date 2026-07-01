@@ -35,7 +35,7 @@ Usage
 import os
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 log = logging.getLogger("kairo-sidecar.xlsx_creator")
 
@@ -132,7 +132,7 @@ class XlsxCreator:
                         ws.cell(
                             row=totals_row,
                             column=col_idx,
-                            value=f"=IFERROR(SUM({col_letter}{data_start_row}:{col_letter}{end_row}),\"\")"
+                            value=f'=IFERROR(SUM({col_letter}{data_start_row}:{col_letter}{end_row}),"")',
                         ).font = Font(bold=True)
 
                 # Ad-hoc cell writes
@@ -166,9 +166,10 @@ class XlsxCreator:
         # Resolve output path
         if not output_path:
             KAIRO_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-            safe_title = "".join(
-                c if c.isalnum() or c in " _-" else "_" for c in title
-            ).strip()[:50] or "Workbook"
+            safe_title = (
+                "".join(c if c.isalnum() or c in " _-" else "_" for c in title).strip()[:50]
+                or "Workbook"
+            )
             output_path = str(KAIRO_DOCS_DIR / f"{safe_title}.xlsx")
 
         wb.save(output_path)

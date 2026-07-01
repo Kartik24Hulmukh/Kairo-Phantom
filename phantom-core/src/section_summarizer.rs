@@ -2,8 +2,8 @@
 //! Uses DocumentContext outline structure to summarize selected sections into 3 bullets.
 //! Triggered when docKind is any and user types "summarize" or "summary".
 
-use anyhow::Result;
 use crate::document_context::DocumentContext;
+use anyhow::Result;
 
 pub struct SectionSummarizer;
 
@@ -13,8 +13,16 @@ impl SectionSummarizer {
         let outline_preview = if doc.outline.is_empty() {
             "No outline detected — summarizing full document text.".to_string()
         } else {
-            doc.outline.iter().take(10)
-                .map(|s| format!("  {} {}", "  ".repeat((s.level as usize).saturating_sub(1)), s.text))
+            doc.outline
+                .iter()
+                .take(10)
+                .map(|s| {
+                    format!(
+                        "  {} {}",
+                        "  ".repeat((s.level as usize).saturating_sub(1)),
+                        s.text
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join("\n")
         };
@@ -22,7 +30,11 @@ impl SectionSummarizer {
         let word_count = doc.full_text.split_whitespace().count();
         let char_limit = 3000usize;
         let context_text = if doc.full_text.len() > char_limit {
-            format!("{}... [truncated — {} total words]", &doc.full_text[..char_limit], word_count)
+            format!(
+                "{}... [truncated — {} total words]",
+                &doc.full_text[..char_limit],
+                word_count
+            )
         } else {
             doc.full_text.clone()
         };
@@ -48,29 +60,54 @@ impl SectionSummarizer {
 
     /// Detect if a user prompt is requesting a summary.
     pub fn is_summary_request(prompt: &str) -> bool {
-        let keywords = ["summarize", "summary", "tldr", "tl;dr", "key points",
-                        "bullet points", "3 bullets", "highlights", "brief", "digest"];
+        let keywords = [
+            "summarize",
+            "summary",
+            "tldr",
+            "tl;dr",
+            "key points",
+            "bullet points",
+            "3 bullets",
+            "highlights",
+            "brief",
+            "digest",
+        ];
         let pl = prompt.to_lowercase();
         keywords.iter().any(|k| pl.contains(k))
     }
 
     /// Post-process LLM output — ensure exactly 3 bullets in correct format.
     pub fn normalize_bullets(raw: &str) -> String {
-        let bullets: Vec<&str> = raw.lines()
+        let bullets: Vec<&str> = raw
+            .lines()
             .map(|l| l.trim())
-            .filter(|l| l.starts_with("• ") || l.starts_with("- ") || l.starts_with("* ")
-                     || (l.starts_with(char::is_numeric) && l.contains(". ")))
+            .filter(|l| {
+                l.starts_with("• ")
+                    || l.starts_with("- ")
+                    || l.starts_with("* ")
+                    || (l.starts_with(char::is_numeric) && l.contains(". "))
+            })
             .collect();
 
         if bullets.is_empty() {
             // Try to extract sentences as bullets
-            let sentences: Vec<&str> = raw.split('.').map(|s| s.trim()).filter(|s| s.len() > 15).collect();
-            return sentences.iter().take(3).enumerate()
-                .map(|(i, s)| format!("• {}", s))
-                .collect::<Vec<_>>().join("\n");
+            let sentences: Vec<&str> = raw
+                .split('.')
+                .map(|s| s.trim())
+                .filter(|s| s.len() > 15)
+                .collect();
+            return sentences
+                .iter()
+                .take(3)
+                .enumerate()
+                .map(|(i, s)| format!("• {s}"))
+                .collect::<Vec<_>>()
+                .join("\n");
         }
 
-        bullets.iter().take(3)
+        bullets
+            .iter()
+            .take(3)
             .map(|b| {
                 // Normalize bullet char
                 let text = b.trim_start_matches(|c: char| !c.is_alphabetic());
@@ -87,10 +124,16 @@ mod tests {
 
     #[test]
     fn test_is_summary_request() {
-        assert!(SectionSummarizer::is_summary_request("Can you summarize this?"));
+        assert!(SectionSummarizer::is_summary_request(
+            "Can you summarize this?"
+        ));
         assert!(SectionSummarizer::is_summary_request("Give me tldr"));
-        assert!(SectionSummarizer::is_summary_request("What are the key points?"));
-        assert!(!SectionSummarizer::is_summary_request("Rewrite this in formal tone"));
+        assert!(SectionSummarizer::is_summary_request(
+            "What are the key points?"
+        ));
+        assert!(!SectionSummarizer::is_summary_request(
+            "Rewrite this in formal tone"
+        ));
     }
 
     #[test]

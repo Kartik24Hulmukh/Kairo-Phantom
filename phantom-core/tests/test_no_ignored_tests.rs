@@ -10,7 +10,7 @@ fn scan_dir(dir: &Path, errors: &mut Vec<String>) {
         let path = entry.path();
         if path.is_dir() {
             scan_dir(&path, errors);
-        } else if path.extension().map_or(false, |ext| ext == "rs") {
+        } else if path.extension().is_some_and(|ext| ext == "rs") {
             let content = fs::read_to_string(&path).unwrap();
             let ignore_pattern = format!("{}[ignore]", '#');
             for (line_idx, line) in content.lines().enumerate() {
@@ -35,7 +35,7 @@ fn scan_dir(dir: &Path, errors: &mut Vec<String>) {
 #[test]
 fn test_no_ignored_rust_tests() {
     let mut errors = Vec::new();
-    
+
     // Find phantom-core root directory
     let root = if Path::new("../phantom-core").exists() {
         Path::new("../phantom-core")
@@ -44,10 +44,10 @@ fn test_no_ignored_rust_tests() {
     } else {
         Path::new(".")
     };
-    
+
     scan_dir(&root.join("src"), &mut errors);
     scan_dir(&root.join("tests"), &mut errors);
-    
+
     if !errors.is_empty() {
         panic!(
             "❌ Ignored Rust tests are strictly forbidden! Please remove all ignored annotations:\n{}",

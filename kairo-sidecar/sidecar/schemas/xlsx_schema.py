@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Literal, Union, List, Any, Optional
 import re
 
+
 def validate_excel_formula(formula: str) -> bool:
     """
     Basic validation for Excel formulas:
@@ -11,11 +12,11 @@ def validate_excel_formula(formula: str) -> bool:
     """
     if not formula:
         return False
-    
+
     formula = formula.strip()
     if not formula.startswith("="):
         return False
-        
+
     # Check balanced parentheses
     stack = []
     for idx, char in enumerate(formula):
@@ -27,21 +28,44 @@ def validate_excel_formula(formula: str) -> bool:
             stack.pop()
     if stack:
         return False
-        
+
     # Check function name format (e.g., if there's an alphabet string followed by '(', it should be uppercase standard functions)
-    funcs = re.findall(r'([a-zA-Z_][a-zA-Z0-9_\.]*)\(', formula)
+    funcs = re.findall(r"([a-zA-Z_][a-zA-Z0-9_\.]*)\(", formula)
     known_funcs = {
-        "SUM", "AVERAGE", "MIN", "MAX", "IF", "COUNT", "VLOOKUP", "CONCAT", 
-        "AND", "OR", "NOT", "INDEX", "MATCH", "ROUND", "PRODUCT", "SUMIF", 
-        "COUNTIF", "STDEV", "MEDIAN", "ABS", "TODAY", "NOW", "YEAR", "MONTH", "DAY"
+        "SUM",
+        "AVERAGE",
+        "MIN",
+        "MAX",
+        "IF",
+        "COUNT",
+        "VLOOKUP",
+        "CONCAT",
+        "AND",
+        "OR",
+        "NOT",
+        "INDEX",
+        "MATCH",
+        "ROUND",
+        "PRODUCT",
+        "SUMIF",
+        "COUNTIF",
+        "STDEV",
+        "MEDIAN",
+        "ABS",
+        "TODAY",
+        "NOW",
+        "YEAR",
+        "MONTH",
+        "DAY",
     }
     for func in funcs:
         # Excel is case-insensitive, but standard practice in playbook is uppercase
         if func.upper() not in known_funcs:
             # Let it pass if it matches basic word character but maybe warn/log, or keep it strict
             pass
-            
+
     return True
+
 
 class WriteCellOp(BaseModel):
     type: Literal["write_cell"] = "write_cell"
@@ -58,21 +82,25 @@ class WriteCellOp(BaseModel):
                 raise ValueError(f"Invalid Excel formula: {v}")
         return v
 
+
 class WriteRangeOp(BaseModel):
     type: Literal["write_range"] = "write_range"
     sheet: str = "Sheet1"
     start_cell: str
     values: List[List[Any]]
 
+
 class ExplainFormulaOp(BaseModel):
     type: Literal["explain_formula"] = "explain_formula"
     sheet: str = "Sheet1"
     cell: str
 
+
 class GenerateFormulaOp(BaseModel):
     type: Literal["generate_formula"] = "generate_formula"
     description: str
     target_cell: str
+
 
 class CreateChartOp(BaseModel):
     type: Literal["create_chart"] = "create_chart"
@@ -82,6 +110,7 @@ class CreateChartOp(BaseModel):
     title: str = "Chart"
     target_sheet: Optional[str] = None
     cell: Optional[str] = None
+
 
 class CreatePivotOp(BaseModel):
     type: Literal["create_pivot"] = "create_pivot"
@@ -93,7 +122,11 @@ class CreatePivotOp(BaseModel):
     target_sheet: str
     cell: Optional[str] = None
 
-ExcelOperation = Union[WriteCellOp, WriteRangeOp, ExplainFormulaOp, GenerateFormulaOp, CreateChartOp, CreatePivotOp]
+
+ExcelOperation = Union[
+    WriteCellOp, WriteRangeOp, ExplainFormulaOp, GenerateFormulaOp, CreateChartOp, CreatePivotOp
+]
+
 
 class ExcelResponse(BaseModel):
     operations: List[ExcelOperation]

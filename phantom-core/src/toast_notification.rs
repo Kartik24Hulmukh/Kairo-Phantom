@@ -2,18 +2,18 @@
 //! Custom topmost, click-through GDI-rendered overlay window for premium visual feedback.
 //! Replaces native system balloon notifications with a sleek dark-mode card near the text cursor.
 
-use std::sync::atomic::{AtomicBool, Ordering, AtomicIsize};
-use std::sync::Arc;
 use once_cell::sync::Lazy;
+use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
+use std::sync::Arc;
 use std::sync::Mutex;
 
 // ─── Shared State for Custom Overlay ──────────────────────────────────────────
 
 #[derive(Clone, Copy, Debug)]
 pub enum OverlayColor {
-    Info,     // Blue/Indigo
-    Success,  // Green
-    Error,    // Red
+    Info,    // Blue/Indigo
+    Success, // Green
+    Error,   // Red
 }
 
 struct OverlayData {
@@ -41,13 +41,12 @@ mod win_balloon {
     use windows::core::PCWSTR;
     use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, WPARAM};
     use windows::Win32::UI::Shell::{
-        Shell_NotifyIconW, NIF_ICON, NIF_INFO, NIF_MESSAGE, NIF_TIP, NIM_ADD,
-        NIM_MODIFY, NOTIFYICONDATAW, NOTIFYICONDATAW_0,
+        Shell_NotifyIconW, NIF_ICON, NIF_INFO, NIF_MESSAGE, NIF_TIP, NIM_ADD, NIM_MODIFY,
+        NOTIFYICONDATAW, NOTIFYICONDATAW_0,
     };
     use windows::Win32::UI::WindowsAndMessaging::{
-        CreateWindowExW, DefWindowProcW, LoadIconW, RegisterClassW, CS_HREDRAW,
-        CS_VREDRAW, IDI_APPLICATION, WINDOW_EX_STYLE, WM_USER, WNDCLASSW,
-        WS_OVERLAPPEDWINDOW,
+        CreateWindowExW, DefWindowProcW, LoadIconW, RegisterClassW, CS_HREDRAW, CS_VREDRAW,
+        IDI_APPLICATION, WINDOW_EX_STYLE, WM_USER, WNDCLASSW, WS_OVERLAPPEDWINDOW,
     };
 
     #[repr(u32)]
@@ -110,7 +109,8 @@ mod win_balloon {
                 None,
                 HINSTANCE::default(),
                 None,
-            ).unwrap_or(HWND::default())
+            )
+            .unwrap_or(HWND::default())
         }
     }
 
@@ -122,9 +122,13 @@ mod win_balloon {
             })
         });
 
-        let Ok(mut guard) = state.lock() else { return; };
+        let Ok(mut guard) = state.lock() else {
+            return;
+        };
         let hwnd = guard.hwnd;
-        if hwnd == HWND::default() { return; }
+        if hwnd == HWND::default() {
+            return;
+        }
 
         unsafe {
             let h_icon = LoadIconW(HINSTANCE::default(), IDI_APPLICATION).unwrap_or_default();
@@ -158,9 +162,12 @@ mod win_balloon {
 
 #[cfg(windows)]
 fn get_target_position() -> (i32, i32) {
-    use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowThreadProcessId, GetGUIThreadInfo, GUITHREADINFO, GetCursorPos};
-    use windows::Win32::Graphics::Gdi::ClientToScreen;
     use windows::Win32::Foundation::{HWND, POINT};
+    use windows::Win32::Graphics::Gdi::ClientToScreen;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        GetCursorPos, GetForegroundWindow, GetGUIThreadInfo, GetWindowThreadProcessId,
+        GUITHREADINFO,
+    };
 
     unsafe {
         let active_hwnd = GetForegroundWindow();
@@ -169,7 +176,10 @@ fn get_target_position() -> (i32, i32) {
             let mut gui = GUITHREADINFO::default();
             gui.cbSize = std::mem::size_of::<GUITHREADINFO>() as u32;
             if GetGUIThreadInfo(thread_id, &mut gui).is_ok() && gui.hwndCaret != HWND::default() {
-                let mut pt = POINT { x: gui.rcCaret.left, y: gui.rcCaret.bottom };
+                let mut pt = POINT {
+                    x: gui.rcCaret.left,
+                    y: gui.rcCaret.bottom,
+                };
                 if ClientToScreen(gui.hwndCaret, &mut pt).as_bool() && (pt.x != 0 || pt.y != 0) {
                     return (pt.x + 15, pt.y + 15);
                 }
@@ -190,29 +200,29 @@ unsafe extern "system" fn overlay_wnd_proc(
     wparam: windows::Win32::Foundation::WPARAM,
     lparam: windows::Win32::Foundation::LPARAM,
 ) -> windows::Win32::Foundation::LRESULT {
-    use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM, COLORREF};
+    use windows::core::PCWSTR;
+    use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, LRESULT, WPARAM};
     use windows::Win32::Graphics::Gdi::{
-        BeginPaint, EndPaint, PAINTSTRUCT, CreateSolidBrush, FillRect, SetBkMode,
-        SetTextColor, DrawTextW, CreateFontW, SelectObject, DeleteObject, TRANSPARENT,
-        DT_LEFT, DT_WORDBREAK, DT_NOPREFIX, HFONT, HBRUSH, HDC, InvalidateRect,
+        BeginPaint, CreateFontW, CreateSolidBrush, DeleteObject, DrawTextW, EndPaint, FillRect,
+        InvalidateRect, SelectObject, SetBkMode, SetTextColor, DT_LEFT, DT_NOPREFIX, DT_WORDBREAK,
+        HBRUSH, HDC, HFONT, PAINTSTRUCT, TRANSPARENT,
     };
     use windows::Win32::UI::WindowsAndMessaging::{
-        DefWindowProcW, SetWindowPos, SetTimer, KillTimer, ShowWindow,
-        HWND_TOPMOST, SWP_NOACTIVATE, SWP_SHOWWINDOW, SW_HIDE,
+        DefWindowProcW, KillTimer, SetTimer, SetWindowPos, ShowWindow, HWND_TOPMOST,
+        SWP_NOACTIVATE, SWP_SHOWWINDOW, SW_HIDE,
     };
-    use windows::core::PCWSTR;
 
     match msg {
         windows::Win32::UI::WindowsAndMessaging::WM_PAINT => {
             let mut ps = PAINTSTRUCT::default();
             let hdc = BeginPaint(hwnd, &mut ps);
-            
+
             // Draw background (#181825 in BBGGRR -> 0x00251818)
             let bg_brush = CreateSolidBrush(COLORREF(0x00251818));
             let mut rect = ps.rcPaint;
             FillRect(hdc, &rect, bg_brush);
             let _ = DeleteObject(bg_brush);
-            
+
             let msg_data = PENDING_OVERLAY_DATA.lock().unwrap();
             if let Some(ref data) = *msg_data {
                 // Accent indicator bar on the left (6px wide)
@@ -230,16 +240,29 @@ unsafe extern "system" fn overlay_wnd_proc(
                 };
                 FillRect(hdc, &accent_rect, accent_brush);
                 let _ = DeleteObject(accent_brush);
-                
+
                 // Draw title
                 let font_name: Vec<u16> = "Segoe UI\0".encode_utf16().collect();
                 let font_title = CreateFontW(
-                    16, 0, 0, 0, 700, 0, 0, 0, 0, 0, 0, 0, 0, PCWSTR(font_name.as_ptr())
+                    16,
+                    0,
+                    0,
+                    0,
+                    700,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    PCWSTR(font_name.as_ptr()),
                 );
                 let old_font = SelectObject(hdc, font_title);
                 let _ = SetBkMode(hdc, TRANSPARENT);
                 let _ = SetTextColor(hdc, COLORREF(0x00f4d6cd)); // #cdd6f4
-                
+
                 let mut title_rect = windows::Win32::Foundation::RECT {
                     left: 16,
                     top: 10,
@@ -250,14 +273,27 @@ unsafe extern "system" fn overlay_wnd_proc(
                 let _ = DrawTextW(hdc, &mut wide_title, &mut title_rect, DT_LEFT | DT_NOPREFIX);
                 let _ = SelectObject(hdc, old_font);
                 let _ = DeleteObject(font_title);
-                
+
                 // Draw body text
                 let font_body = CreateFontW(
-                    13, 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, PCWSTR(font_name.as_ptr())
+                    13,
+                    0,
+                    0,
+                    0,
+                    400,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    PCWSTR(font_name.as_ptr()),
                 );
                 let old_font = SelectObject(hdc, font_body);
                 let _ = SetTextColor(hdc, COLORREF(0x00c8adad)); // #a6adc8
-                
+
                 let mut body_rect = windows::Win32::Foundation::RECT {
                     left: 16,
                     top: 32,
@@ -265,17 +301,22 @@ unsafe extern "system" fn overlay_wnd_proc(
                     bottom: rect.bottom - 5,
                 };
                 let mut wide_body: Vec<u16> = data.body.encode_utf16().collect();
-                let _ = DrawTextW(hdc, &mut wide_body, &mut body_rect, DT_LEFT | DT_WORDBREAK | DT_NOPREFIX);
-                
+                let _ = DrawTextW(
+                    hdc,
+                    &mut wide_body,
+                    &mut body_rect,
+                    DT_LEFT | DT_WORDBREAK | DT_NOPREFIX,
+                );
+
                 let _ = SelectObject(hdc, old_font);
                 let _ = DeleteObject(font_body);
             }
-            
+
             // Border outline (#cba6f7 in BBGGRR -> 0x00f7a6cb)
             let border_brush = CreateSolidBrush(COLORREF(0x00f7a6cb));
             windows::Win32::Graphics::Gdi::FrameRect(hdc, &rect, border_brush);
             let _ = DeleteObject(border_brush);
-            
+
             let _ = EndPaint(hwnd, &ps);
             LRESULT(0)
         }
@@ -285,9 +326,9 @@ unsafe extern "system" fn overlay_wnd_proc(
             } else {
                 3000
             };
-            
+
             let (x, y) = get_target_position();
-            
+
             let _ = SetWindowPos(
                 hwnd,
                 HWND_TOPMOST,
@@ -297,9 +338,9 @@ unsafe extern "system" fn overlay_wnd_proc(
                 80,
                 SWP_NOACTIVATE | SWP_SHOWWINDOW,
             );
-            
+
             let _ = InvalidateRect(hwnd, None, true);
-            
+
             let _ = KillTimer(hwnd, 1);
             let _ = SetTimer(hwnd, 1, duration, None);
             LRESULT(0)
@@ -317,11 +358,11 @@ unsafe extern "system" fn overlay_wnd_proc(
 fn spawn_overlay_thread() {
     std::thread::spawn(|| unsafe {
         use windows::core::PCWSTR;
-        use windows::Win32::Foundation::{HINSTANCE, HWND, COLORREF};
+        use windows::Win32::Foundation::{COLORREF, HINSTANCE, HWND};
         use windows::Win32::UI::WindowsAndMessaging::{
-            RegisterClassW, CreateWindowExW, GetMessageW, TranslateMessage, DispatchMessageW,
-            CS_HREDRAW, CS_VREDRAW, WNDCLASSW, WS_POPUP, WS_EX_TOPMOST, WS_EX_TRANSPARENT,
-            WS_EX_LAYERED, WS_EX_TOOLWINDOW, SetLayeredWindowAttributes, LWA_ALPHA, MSG, PostMessageW,
+            CreateWindowExW, DispatchMessageW, GetMessageW, PostMessageW, RegisterClassW,
+            SetLayeredWindowAttributes, TranslateMessage, CS_HREDRAW, CS_VREDRAW, LWA_ALPHA, MSG,
+            WNDCLASSW, WS_EX_LAYERED, WS_EX_TOOLWINDOW, WS_EX_TOPMOST, WS_EX_TRANSPARENT, WS_POPUP,
         };
 
         let class_name = win_balloon::encode_wide::<64>("KairoOverlayWindowClass");
@@ -333,30 +374,39 @@ fn spawn_overlay_thread() {
             ..Default::default()
         };
         RegisterClassW(&wc);
-        
+
         let font_title_name: Vec<u16> = "Kairo Overlay\0".encode_utf16().collect();
         let hwnd = CreateWindowExW(
             WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW,
             PCWSTR(class_name.as_ptr()),
             PCWSTR(font_title_name.as_ptr()),
             WS_POPUP,
-            100, 100, 320, 80,
+            100,
+            100,
+            320,
+            80,
             HWND::default(),
             None,
             HINSTANCE::default(),
             None,
-        ).unwrap_or(HWND::default());
-        
+        )
+        .unwrap_or(HWND::default());
+
         if hwnd == HWND::default() {
             tracing::error!("Failed to create overlay window");
             return;
         }
-        
+
         let _ = SetLayeredWindowAttributes(hwnd, COLORREF(0), 235, LWA_ALPHA);
         OVERLAY_HWND.store(hwnd.0 as isize, Ordering::SeqCst);
-        
-        let _ = PostMessageW(hwnd, WM_SHOWOVERLAY, windows::Win32::Foundation::WPARAM(0), windows::Win32::Foundation::LPARAM(0));
-        
+
+        let _ = PostMessageW(
+            hwnd,
+            WM_SHOWOVERLAY,
+            windows::Win32::Foundation::WPARAM(0),
+            windows::Win32::Foundation::LPARAM(0),
+        );
+
         let mut msg = MSG::default();
         while GetMessageW(&mut msg, None, 0, 0).as_bool() {
             let _ = TranslateMessage(&msg);
@@ -378,7 +428,7 @@ pub fn show_overlay(title: &str, body: &str, color: OverlayColor, duration_ms: u
                 duration_ms,
             });
         }
-        
+
         let hwnd_val = OVERLAY_HWND.load(Ordering::SeqCst);
         if hwnd_val == 0 {
             spawn_overlay_thread();
@@ -391,7 +441,7 @@ pub fn show_overlay(title: &str, body: &str, color: OverlayColor, duration_ms: u
                             windows::Win32::Foundation::HWND(h as *mut std::ffi::c_void),
                             WM_SHOWOVERLAY,
                             windows::Win32::Foundation::WPARAM(0),
-                            windows::Win32::Foundation::LPARAM(0)
+                            windows::Win32::Foundation::LPARAM(0),
                         );
                     }
                     break;
@@ -404,7 +454,7 @@ pub fn show_overlay(title: &str, body: &str, color: OverlayColor, duration_ms: u
                     windows::Win32::Foundation::HWND(hwnd_val as *mut std::ffi::c_void),
                     WM_SHOWOVERLAY,
                     windows::Win32::Foundation::WPARAM(0),
-                    windows::Win32::Foundation::LPARAM(0)
+                    windows::Win32::Foundation::LPARAM(0),
                 );
             }
         }
@@ -425,33 +475,18 @@ pub fn show_clarification_toast(question: &str) {
 
 /// Show a completion overlay when Kairo finishes generating.
 pub fn show_completion_toast(chars_injected: usize, agent_name: &str) {
-    let body = format!("{} injected {} characters", agent_name, chars_injected);
-    show_overlay(
-        "Generation Complete ✅",
-        &body,
-        OverlayColor::Success,
-        4000,
-    );
+    let body = format!("{agent_name} injected {chars_injected} characters");
+    show_overlay("Generation Complete ✅", &body, OverlayColor::Success, 4000);
 }
 
 /// Show a progress overlay for long-running operations.
 pub fn show_progress_toast(message: &str) {
-    show_overlay(
-        "Kairo Assistant 🧠",
-        message,
-        OverlayColor::Info,
-        3000,
-    );
+    show_overlay("Kairo Assistant 🧠", message, OverlayColor::Info, 3000);
 }
 
 /// Show an error overlay for failures and warnings.
 pub fn show_error_toast(message: &str) {
-    show_overlay(
-        "Error Encountered ❌",
-        message,
-        OverlayColor::Error,
-        5000,
-    );
+    show_overlay("Error Encountered ❌", message, OverlayColor::Error, 5000);
 }
 
 // ─── V4: Streaming Indicator (Pulsing Ghost Icon) ─────────────────────────────
@@ -461,7 +496,11 @@ pub fn start_streaming_indicator(agent_id: &str, timeout_secs: u64) -> Arc<Atomi
     let stop_clone = stop_flag.clone();
     let agent_label = agent_id.to_string();
 
-    tracing::info!("👻 Streaming indicator: starting (agent={}, timeout={}s)", agent_id, timeout_secs);
+    tracing::info!(
+        "👻 Streaming indicator: starting (agent={}, timeout={}s)",
+        agent_id,
+        timeout_secs
+    );
 
     std::thread::spawn(move || {
         let frames = ["👻", "👁", "💫", "✨"];
@@ -471,16 +510,24 @@ pub fn start_streaming_indicator(agent_id: &str, timeout_secs: u64) -> Arc<Atomi
 
         while !stop_clone.load(Ordering::Relaxed) && start.elapsed() < timeout {
             let icon = frames[frame_idx % frames.len()];
-            tracing::debug!("[StreamingIndicator] {} Kairo AI ({}) — generating...", icon, agent_label);
+            tracing::debug!(
+                "[StreamingIndicator] {} Kairo AI ({}) — generating...",
+                icon,
+                agent_label
+            );
 
             #[cfg(windows)]
             {
                 let _ = std::process::Command::new("powershell")
                     .args([
-                        "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+                        "-NoProfile",
+                        "-NonInteractive",
+                        "-WindowStyle",
+                        "Hidden",
                         "-Command",
-                        &format!("$Host.UI.RawUI.WindowTitle = '{} Kairo Phantom — {} generating…'",
-                            icon, agent_label),
+                        &format!(
+                            "$Host.UI.RawUI.WindowTitle = '{icon} Kairo Phantom — {agent_label} generating…'"
+                        ),
                     ])
                     .spawn();
             }
@@ -495,8 +542,12 @@ pub fn start_streaming_indicator(agent_id: &str, timeout_secs: u64) -> Arc<Atomi
         {
             let _ = std::process::Command::new("powershell")
                 .args([
-                    "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
-                    "-Command", "$Host.UI.RawUI.WindowTitle = 'Kairo Phantom'",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    "$Host.UI.RawUI.WindowTitle = 'Kairo Phantom'",
                 ])
                 .spawn();
         }
@@ -512,11 +563,14 @@ pub fn log_agent_selection(agent_id: &str, score: u8, doc_kind: &str, prompt_pre
     let log_path = kairo_dir.join("agent_debug.jsonl");
 
     let timestamp = chrono::Utc::now().to_rfc3339();
-    let safe_prompt = prompt_preview.chars().take(120).collect::<String>().replace('"', "'");
+    let safe_prompt = prompt_preview
+        .chars()
+        .take(120)
+        .collect::<String>()
+        .replace('"', "'");
 
     let entry = format!(
-        r#"{{"ts":"{}","agent":"{}","score":{},"doc_kind":"{}","prompt":"{}"}}"#,
-        timestamp, agent_id, score, doc_kind, safe_prompt
+        r#"{{"ts":"{timestamp}","agent":"{agent_id}","score":{score},"doc_kind":"{doc_kind}","prompt":"{safe_prompt}"}}"#
     );
 
     if let Ok(mut file) = std::fs::OpenOptions::new()
@@ -525,7 +579,7 @@ pub fn log_agent_selection(agent_id: &str, score: u8, doc_kind: &str, prompt_pre
         .open(&log_path)
     {
         use std::io::Write;
-        let _ = writeln!(file, "{}", entry);
+        let _ = writeln!(file, "{entry}");
     }
 
     tracing::debug!("[AgentDebug] {}", entry);
@@ -539,10 +593,18 @@ fn check_vlm_availability() -> bool {
         let cache_dir = home.join(".kairo-phantom").join("models");
         let model_3b = cache_dir.join("qwen2.5-vl-3b-instruct-Q4_K_M.gguf");
         let model_7b = cache_dir.join("qwen2.5-vl-7b-instruct-Q4_K_M.gguf");
-        
-        let is_3b_ok = model_3b.exists() && model_3b.metadata().map(|m| m.len() > 100_000_000).unwrap_or(false);
-        let is_7b_ok = model_7b.exists() && model_7b.metadata().map(|m| m.len() > 100_000_000).unwrap_or(false);
-        
+
+        let is_3b_ok = model_3b.exists()
+            && model_3b
+                .metadata()
+                .map(|m| m.len() > 100_000_000)
+                .unwrap_or(false);
+        let is_7b_ok = model_7b.exists()
+            && model_7b
+                .metadata()
+                .map(|m| m.len() > 100_000_000)
+                .unwrap_or(false);
+
         is_3b_ok || is_7b_ok
     } else {
         false
@@ -552,10 +614,20 @@ fn check_vlm_availability() -> bool {
 #[cfg(windows)]
 fn check_driver_status() -> bool {
     let candidates = [
-        dirs::data_local_dir().map(|d| d.join("Programs").join("Cua").join("cua-driver").join("bin").join("cua-driver.exe")),
+        dirs::data_local_dir().map(|d| {
+            d.join("Programs")
+                .join("Cua")
+                .join("cua-driver")
+                .join("bin")
+                .join("cua-driver.exe")
+        }),
         dirs::home_dir().map(|h| h.join(".cua").join("bin").join("cua-driver.exe")),
-        Some(std::path::PathBuf::from("C:/Program Files/cua-driver/cua-driver.exe")),
-        Some(std::path::PathBuf::from("C:/ProgramData/cua-driver/cua-driver.exe")),
+        Some(std::path::PathBuf::from(
+            "C:/Program Files/cua-driver/cua-driver.exe",
+        )),
+        Some(std::path::PathBuf::from(
+            "C:/ProgramData/cua-driver/cua-driver.exe",
+        )),
     ];
 
     for candidate in candidates.into_iter().flatten() {
@@ -593,15 +665,15 @@ pub fn start_periodic_health_checks() {
                 let vlm_ok = check_vlm_availability();
                 let driver_ok = check_driver_status();
                 let enigo_ok = check_enigo_status();
-                
+
                 let title = "Kairo System Health 🟢";
                 let mut body = String::new();
                 let mut color = OverlayColor::Success;
-                
+
                 if !vlm_ok || !driver_ok || !enigo_ok {
                     let mut err_title = "Kairo Health Alert ⚠️".to_string();
                     color = OverlayColor::Error;
-                    
+
                     if !vlm_ok {
                         body.push_str("• VLM (Qwen2.5-VL) model is missing/downloading.\n");
                     }
@@ -616,10 +688,9 @@ pub fn start_periodic_health_checks() {
                     body.push_str("• VLM (Qwen2.5-VL) Active\n• CUA Driver Active\n• Keyboard/Mouse Emulation Active");
                     show_overlay(title, &body, color, 4000);
                 }
-                
+
                 std::thread::sleep(Duration::from_secs(60));
             }
         });
     }
 }
-

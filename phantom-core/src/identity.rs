@@ -1,18 +1,17 @@
+use serde::{Deserialize, Serialize};
 /// Enterprise Identity — V6 Production-Grade
 /// F1: Real Ed25519 keypair via ed25519-dalek + OsRng (replaces pseudo-random)
 /// F2: Append-only audit log (JSONL) with tamper-evident hash chain
 /// F3: JIT permission revocation with scoped TTL tokens
-
 use std::path::{Path, PathBuf};
-use serde::{Deserialize, Serialize};
 use tracing::{info, warn};
 
 // ─── F1: Real Ed25519 Agent Identity ─────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentIdentity {
-    pub agent_id: String,         // Public key hex (64 chars)
-    pub private_key_hex: String,  // Ed25519 signing key hex (128 chars — full keypair)
+    pub agent_id: String,        // Public key hex (64 chars)
+    pub private_key_hex: String, // Ed25519 signing key hex (128 chars — full keypair)
     pub display_name: String,
     pub instance: String,
     pub created_at: u64,
@@ -35,9 +34,14 @@ impl AgentIdentity {
 
         let created_at = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default().as_secs();
+            .unwrap_or_default()
+            .as_secs();
 
-        info!("[Identity] Generated Ed25519 agent_id: {}...{}", &agent_id[..8], &agent_id[56..]);
+        info!(
+            "[Identity] Generated Ed25519 agent_id: {}...{}",
+            &agent_id[..8],
+            &agent_id[56..]
+        );
 
         Self {
             agent_id,
@@ -72,17 +76,20 @@ impl AgentIdentity {
         let _ = std::fs::create_dir_all(config_dir);
         let path = config_dir.join("identity.json");
         match serde_json::to_string_pretty(self) {
-            Ok(json) => { let _ = std::fs::write(&path, json); }
+            Ok(json) => {
+                let _ = std::fs::write(&path, json);
+            }
             Err(e) => warn!("[Identity] Save failed: {}", e),
         }
     }
 
     /// Sign arbitrary bytes with this agent's Ed25519 private key.
     pub fn sign(&self, data: &[u8]) -> Result<String, String> {
-        use ed25519_dalek::{SigningKey, Signer};
-        let key_bytes = hex_decode(&self.private_key_hex)
-            .map_err(|e| format!("Key decode error: {}", e))?;
-        let key_arr: [u8; 32] = key_bytes.try_into()
+        use ed25519_dalek::{Signer, SigningKey};
+        let key_bytes =
+            hex_decode(&self.private_key_hex).map_err(|e| format!("Key decode error: {e}"))?;
+        let key_arr: [u8; 32] = key_bytes
+            .try_into()
             .map_err(|_| "Invalid key length".to_string())?;
         let signing_key = SigningKey::from_bytes(&key_arr);
         let signature = signing_key.sign(data);
@@ -93,7 +100,8 @@ impl AgentIdentity {
     pub fn create_jit_token(&self, scope: &str, ttl_secs: u64) -> JitToken {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default().as_secs();
+            .unwrap_or_default()
+            .as_secs();
         let payload = format!("{}:{}:{}", self.agent_id, scope, now + ttl_secs);
         let signature = self.sign(payload.as_bytes()).unwrap_or_default();
         JitToken {
@@ -105,7 +113,9 @@ impl AgentIdentity {
         }
     }
 
-    pub fn agent_id_header(&self) -> String { self.agent_id.clone() }
+    pub fn agent_id_header(&self) -> String {
+        self.agent_id.clone()
+    }
 }
 
 // ─── F3: JIT Permission Token ─────────────────────────────────────────────────
@@ -123,7 +133,8 @@ impl JitToken {
     pub fn is_valid(&self) -> bool {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default().as_secs();
+            .unwrap_or_default()
+            .as_secs();
         now < self.expires_at
     }
     pub fn scope_matches(&self, required: &str) -> bool {
@@ -139,12 +150,19 @@ pub struct RbacTable {
 }
 
 impl RbacTable {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
     pub fn allow(&mut self, agent_id: &str, patterns: Vec<String>) {
-        self.rules.entry(agent_id.to_string()).or_default().extend(patterns);
+        self.rules
+            .entry(agent_id.to_string())
+            .or_default()
+            .extend(patterns);
     }
     pub fn is_allowed(&self, agent_id: &str, file_path: &str) -> bool {
-        if matches!(agent_id, "auto" | "content" | "reasoning") { return true; }
+        if matches!(agent_id, "auto" | "content" | "reasoning") {
+            return true;
+        }
         match self.rules.get(agent_id) {
             None => true,
             Some(patterns) => patterns.iter().any(|p| glob_match(p, file_path)),
@@ -153,8 +171,12 @@ impl RbacTable {
 }
 
 fn glob_match(pattern: &str, path: &str) -> bool {
-    if pattern == "*" || pattern == "**" { return true; }
-    if pattern.starts_with("*.") { return path.ends_with(&pattern[1..]); }
+    if pattern == "*" || pattern == "**" {
+        return true;
+    }
+    if pattern.starts_with("*.") {
+        return path.ends_with(&pattern[1..]);
+    }
     path.contains(pattern.trim_matches('*'))
 }
 
@@ -182,12 +204,19 @@ impl SessionIdentity {
             scope: scope.to_string(),
         }
     }
-    pub fn elapsed_ms(&self) -> u128 { self.started_at.elapsed().as_millis() }
-    pub fn is_still_valid(&self) -> bool { self.jit_token.is_valid() }
+    pub fn elapsed_ms(&self) -> u128 {
+        self.started_at.elapsed().as_millis()
+    }
+    pub fn is_still_valid(&self) -> bool {
+        self.jit_token.is_valid()
+    }
     pub fn auth_headers(&self) -> Vec<(String, String)> {
         vec![
             ("X-Kairo-Agent-ID".into(), self.agent_id.clone()),
-            ("X-Kairo-JIT-Expires".into(), self.jit_token.expires_at.to_string()),
+            (
+                "X-Kairo-JIT-Expires".into(),
+                self.jit_token.expires_at.to_string(),
+            ),
             ("X-Kairo-User-ID".into(), self.user_id.clone()),
         ]
     }
@@ -212,10 +241,18 @@ pub struct AuditChainEntry {
 }
 
 impl AuditChainEntry {
-    pub fn new(agent_id: &str, user_id: &str, action: &str, doc_path: &str, result: &str, prev_hash: &str) -> Self {
+    pub fn new(
+        agent_id: &str,
+        user_id: &str,
+        action: &str,
+        doc_path: &str,
+        result: &str,
+        prev_hash: &str,
+    ) -> Self {
         let timestamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default().as_secs();
+            .unwrap_or_default()
+            .as_secs();
         let mut entry = Self {
             agent_id: agent_id.to_string(),
             user_id: user_id.to_string(),
@@ -243,12 +280,21 @@ impl TamperEvidentAuditLog {
     pub fn new(path: PathBuf) -> Self {
         // Read last hash from existing log (for chain continuity)
         let last_hash = Self::read_last_hash(&path);
-        info!("[AuditLog] Initialized chain at {:?}, last_hash={}...", path, &last_hash[..8.min(last_hash.len())]);
-        Self { path, last_hash: std::sync::Mutex::new(last_hash) }
+        info!(
+            "[AuditLog] Initialized chain at {:?}, last_hash={}...",
+            path,
+            &last_hash[..8.min(last_hash.len())]
+        );
+        Self {
+            path,
+            last_hash: std::sync::Mutex::new(last_hash),
+        }
     }
 
     fn read_last_hash(path: &Path) -> String {
-        if !path.exists() { return "genesis".to_string(); }
+        if !path.exists() {
+            return "genesis".to_string();
+        }
         let contents = std::fs::read_to_string(path).unwrap_or_default();
         // Find last non-empty line
         for line in contents.lines().rev() {
@@ -261,32 +307,60 @@ impl TamperEvidentAuditLog {
         "genesis".to_string()
     }
 
-    pub fn append(&self, identity: &AgentIdentity, user_id: &str, action: &str, doc_path: &str, result: &str) {
+    pub fn append(
+        &self,
+        identity: &AgentIdentity,
+        user_id: &str,
+        action: &str,
+        doc_path: &str,
+        result: &str,
+    ) {
         let mut last = self.last_hash.lock().unwrap();
-        let mut entry = AuditChainEntry::new(&identity.agent_id, user_id, action, doc_path, result, &last);
-        entry.signature = identity.sign(entry.self_hash.as_bytes()).unwrap_or_default();
+        let mut entry =
+            AuditChainEntry::new(&identity.agent_id, user_id, action, doc_path, result, &last);
+        entry.signature = identity
+            .sign(entry.self_hash.as_bytes())
+            .unwrap_or_default();
         *last = entry.self_hash.clone();
 
         let line = serde_json::to_string(&entry).unwrap_or_default();
-        if let Some(parent) = self.path.parent() { let _ = std::fs::create_dir_all(parent); }
-        use std::io::Write;
-        if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(&self.path) {
-            let _ = writeln!(file, "{}", line);
+        if let Some(parent) = self.path.parent() {
+            let _ = std::fs::create_dir_all(parent);
         }
-        tracing::debug!("[AuditChain] Logged: {} → {} (hash: {}...)", action, result, &entry.self_hash[..8]);
+        use std::io::Write;
+        if let Ok(mut file) = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.path)
+        {
+            let _ = writeln!(file, "{line}");
+        }
+        tracing::debug!(
+            "[AuditChain] Logged: {} → {} (hash: {}...)",
+            action,
+            result,
+            &entry.self_hash[..8]
+        );
     }
 
     /// Verify the chain integrity — returns number of violations found.
     pub fn verify_chain(&self) -> usize {
-        if !self.path.exists() { return 0; }
+        if !self.path.exists() {
+            return 0;
+        }
         let contents = std::fs::read_to_string(&self.path).unwrap_or_default();
         let mut prev_hash = "genesis".to_string();
         let mut violations = 0;
         for (i, line) in contents.lines().enumerate() {
-            if line.trim().is_empty() { continue; }
+            if line.trim().is_empty() {
+                continue;
+            }
             if let Ok(entry) = serde_json::from_str::<AuditChainEntry>(line) {
                 if entry.prev_hash != prev_hash {
-                    warn!("[AuditChain] CHAIN VIOLATION at line {}: prev_hash mismatch", i+1);
+                    warn!(
+                        "[AuditChain] CHAIN VIOLATION at line {}: prev_hash mismatch",
+                        i + 1
+                    );
                     violations += 1;
                 }
 
@@ -297,19 +371,32 @@ impl TamperEvidentAuditLog {
                 let json = serde_json::to_string(&temp_entry).unwrap_or_default();
                 let computed_hash = sha256_hex(json.as_bytes());
                 if computed_hash != entry.self_hash {
-                    warn!("[AuditChain] CHAIN VIOLATION at line {}: self_hash mismatch", i+1);
+                    warn!(
+                        "[AuditChain] CHAIN VIOLATION at line {}: self_hash mismatch",
+                        i + 1
+                    );
                     violations += 1;
                 }
 
                 // Verify signature
-                if !Self::verify_signature(&entry.agent_id, entry.self_hash.as_bytes(), &entry.signature) {
-                    warn!("[AuditChain] CHAIN VIOLATION at line {}: invalid signature", i+1);
+                if !Self::verify_signature(
+                    &entry.agent_id,
+                    entry.self_hash.as_bytes(),
+                    &entry.signature,
+                ) {
+                    warn!(
+                        "[AuditChain] CHAIN VIOLATION at line {}: invalid signature",
+                        i + 1
+                    );
                     violations += 1;
                 }
 
                 prev_hash = entry.self_hash.clone();
             } else {
-                warn!("[AuditChain] CHAIN VIOLATION at line {}: failed to parse line", i+1);
+                warn!(
+                    "[AuditChain] CHAIN VIOLATION at line {}: failed to parse line",
+                    i + 1
+                );
                 violations += 1;
             }
         }
@@ -320,7 +407,7 @@ impl TamperEvidentAuditLog {
     }
 
     pub fn verify_signature(agent_id: &str, data: &[u8], signature_hex: &str) -> bool {
-        use ed25519_dalek::{VerifyingKey, Signature, Verifier};
+        use ed25519_dalek::{Signature, Verifier, VerifyingKey};
         let public_key_bytes = match hex_decode(agent_id) {
             Ok(b) => b,
             Err(_) => return false,
@@ -329,7 +416,7 @@ impl TamperEvidentAuditLog {
             Ok(b) => b,
             Err(_) => return false,
         };
-        
+
         let public_key_arr: [u8; 32] = match public_key_bytes.try_into() {
             Ok(arr) => arr,
             Err(_) => return false,
@@ -438,7 +525,9 @@ impl ReceiptLog {
         let (last_hash, next_seq) = Self::read_tail(&path);
         info!(
             "[ReceiptLog] Opened {:?} — seq={}, tail_hash={}...",
-            path, next_seq, &last_hash[..8.min(last_hash.len())]
+            path,
+            next_seq,
+            &last_hash[..8.min(last_hash.len())]
         );
         Self {
             path,
@@ -463,7 +552,9 @@ impl ReceiptLog {
         let mut last_hash = "genesis".to_string();
         let mut seq: u64 = 0;
         for line in contents.lines() {
-            if line.trim().is_empty() { continue; }
+            if line.trim().is_empty() {
+                continue;
+            }
             if let Ok(r) = serde_json::from_str::<ProvenanceReceipt>(line) {
                 last_hash = r.self_hash.clone();
                 seq = r.seq + 1;
@@ -509,7 +600,9 @@ impl ReceiptLog {
             opik_trace_url,
             domain,
         );
-        receipt.signature = identity.sign(receipt.self_hash.as_bytes()).unwrap_or_default();
+        receipt.signature = identity
+            .sign(receipt.self_hash.as_bytes())
+            .unwrap_or_default();
 
         *last = receipt.self_hash.clone();
         *seq_guard += 1;
@@ -524,35 +617,50 @@ impl ReceiptLog {
             .append(true)
             .open(&self.path)
         {
-            let _ = writeln!(file, "{}", line);
+            let _ = writeln!(file, "{line}");
         }
         tracing::debug!(
             "[ReceiptLog] Emitted seq={} action={} outcome={} hash={}...",
-            receipt.seq, receipt.action, receipt.outcome, &receipt.self_hash[..8]
+            receipt.seq,
+            receipt.action,
+            receipt.outcome,
+            &receipt.self_hash[..8]
         );
         receipt
     }
 
     /// Verify the entire receipts chain. Returns number of violations found.
     pub fn verify_chain(&self) -> usize {
-        if !self.path.exists() { return 0; }
+        if !self.path.exists() {
+            return 0;
+        }
         let contents = std::fs::read_to_string(&self.path).unwrap_or_default();
         let mut prev_hash = "genesis".to_string();
         let mut violations = 0;
         let mut expected_seq: u64 = 0;
 
         for (i, line) in contents.lines().enumerate() {
-            if line.trim().is_empty() { continue; }
+            if line.trim().is_empty() {
+                continue;
+            }
             match serde_json::from_str::<ProvenanceReceipt>(line) {
                 Ok(r) => {
                     // 1. Check prev_hash continuity
                     if r.prev_hash != prev_hash {
-                        warn!("[ReceiptLog] Chain break at line {}: prev_hash mismatch", i + 1);
+                        warn!(
+                            "[ReceiptLog] Chain break at line {}: prev_hash mismatch",
+                            i + 1
+                        );
                         violations += 1;
                     }
                     // 2. Check sequence
                     if r.seq != expected_seq {
-                        warn!("[ReceiptLog] Seq gap at line {}: expected {}, got {}", i + 1, expected_seq, r.seq);
+                        warn!(
+                            "[ReceiptLog] Seq gap at line {}: expected {}, got {}",
+                            i + 1,
+                            expected_seq,
+                            r.seq
+                        );
                         violations += 1;
                     }
                     // 3. Re-compute self_hash
@@ -586,7 +694,10 @@ impl ReceiptLog {
         }
 
         if violations == 0 {
-            info!("[ReceiptLog] Chain verified OK — {} receipts, no tampering", expected_seq);
+            info!(
+                "[ReceiptLog] Chain verified OK — {} receipts, no tampering",
+                expected_seq
+            );
         }
         violations
     }
@@ -605,7 +716,10 @@ pub struct IdentityManager {
 impl IdentityManager {
     pub fn load(config_dir: &Path) -> Self {
         let identity = AgentIdentity::load_or_create(config_dir);
-        info!("[IdentityManager] Agent: {} | Instance: {}", identity.display_name, identity.instance);
+        info!(
+            "[IdentityManager] Agent: {} | Instance: {}",
+            identity.display_name, identity.instance
+        );
 
         let audit_path = config_dir.join("audit_chain.jsonl");
         let audit_log = Some(TamperEvidentAuditLog::new(audit_path));
@@ -613,7 +727,12 @@ impl IdentityManager {
         let receipts_path = ReceiptLog::default_path();
         let receipt_log = Some(ReceiptLog::new(receipts_path));
 
-        Self { identity, rbac: RbacTable::new(), audit_log, receipt_log }
+        Self {
+            identity,
+            rbac: RbacTable::new(),
+            audit_log,
+            receipt_log,
+        }
     }
 
     pub fn check_permission(&self, agent_id: &str, file_path: &str) -> bool {
@@ -636,7 +755,9 @@ impl IdentityManager {
 
     pub fn log_action(&self, action: &str, doc_path: &str, result: &str) {
         if let Some(log) = &self.audit_log {
-            let user = std::env::var("USERNAME").or_else(|_| std::env::var("USER")).unwrap_or_else(|_| "local".into());
+            let user = std::env::var("USERNAME")
+                .or_else(|_| std::env::var("USER"))
+                .unwrap_or_else(|_| "local".into());
             log.append(&self.identity, &user, action, doc_path, result);
         }
         // Also emit a provenance receipt for every logged action
@@ -661,9 +782,12 @@ pub struct OidcClient {
 
 impl OidcClient {
     pub fn verify_token(&self, token: &str) -> bool {
-        info!("🔐 [Tier 8] Verifying OIDC token via issuer: {}", self.config.issuer);
+        info!(
+            "🔐 [Tier 8] Verifying OIDC token via issuer: {}",
+            self.config.issuer
+        );
         // Mock verification logic
-        !token.is_empty() && token.starts_with("eyJ") 
+        !token.is_empty() && token.starts_with("eyJ")
     }
 }
 
@@ -673,7 +797,10 @@ pub struct CloudSyncManager {
 
 impl CloudSyncManager {
     pub async fn sync_to_cloud(&self, _data: &str) -> Result<(), String> {
-        info!("☁️  [Tier 8] Syncing memory nexus to SurrealDB Cloud: {}", self.surreal_endpoint);
+        info!(
+            "☁️  [Tier 8] Syncing memory nexus to SurrealDB Cloud: {}",
+            self.surreal_endpoint
+        );
         // Mock sync logic
         Ok(())
     }
@@ -688,13 +815,16 @@ fn sha256_hex(data: &[u8]) -> String {
 }
 
 fn hex_encode(bytes: &[u8]) -> String {
-    bytes.iter().map(|b| format!("{:02x}", b)).collect()
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
 fn hex_decode(hex: &str) -> Result<Vec<u8>, &'static str> {
-    if !hex.len().is_multiple_of(2) { return Err("Odd hex length"); }
-    (0..hex.len()).step_by(2)
-        .map(|i| u8::from_str_radix(&hex[i..i+2], 16).map_err(|_| "Invalid hex"))
+    if !hex.len().is_multiple_of(2) {
+        return Err("Odd hex length");
+    }
+    (0..hex.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).map_err(|_| "Invalid hex"))
         .collect()
 }
 // "?"?"? SPIFFE Agent Identity & SSO (Gap 3) "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
@@ -712,8 +842,10 @@ impl SpiffeIdentity {
         let trust_domain = "kairo-phantom.io";
         Self {
             trust_domain: trust_domain.to_string(),
-            spiffe_id: format!("spiffe://{}/agent/{}", trust_domain, agent_name),
-            certificate_pem: "-----BEGIN CERTIFICATE-----\nMOCK_SPIFFE_CERT...\n-----END CERTIFICATE-----".to_string(),
+            spiffe_id: format!("spiffe://{trust_domain}/agent/{agent_name}"),
+            certificate_pem:
+                "-----BEGIN CERTIFICATE-----\nMOCK_SPIFFE_CERT...\n-----END CERTIFICATE-----"
+                    .to_string(),
             sso_provider: sso_provider.to_string(),
         }
     }
@@ -737,7 +869,12 @@ pub struct LdapGroupMatcher {
 }
 
 impl LdapGroupMatcher {
-    pub fn new(enabled: bool, admin_groups: Vec<String>, legal_groups: Vec<String>, standard_groups: Vec<String>) -> Self {
+    pub fn new(
+        enabled: bool,
+        admin_groups: Vec<String>,
+        legal_groups: Vec<String>,
+        standard_groups: Vec<String>,
+    ) -> Self {
         Self {
             enabled,
             admin_groups,
@@ -756,7 +893,11 @@ impl LdapGroupMatcher {
                     let mut groups = Vec::new();
                     for line in stdout.lines() {
                         let trimmed = line.trim();
-                        if trimmed.is_empty() || trimmed.starts_with("---") || trimmed.starts_with("GROUP INFORMATION") || trimmed.starts_with("Group Name") {
+                        if trimmed.is_empty()
+                            || trimmed.starts_with("---")
+                            || trimmed.starts_with("GROUP INFORMATION")
+                            || trimmed.starts_with("Group Name")
+                        {
                             continue;
                         }
                         let parts: Vec<&str> = trimmed.split_whitespace().collect();
@@ -796,12 +937,18 @@ impl LdapGroupMatcher {
             return PermissionRing::Admin;
         }
         for admin_group in &self.admin_groups {
-            if system_groups.iter().any(|g| g.eq_ignore_ascii_case(admin_group) || g.contains(admin_group)) {
+            if system_groups
+                .iter()
+                .any(|g| g.eq_ignore_ascii_case(admin_group) || g.contains(admin_group))
+            {
                 return PermissionRing::Admin;
             }
         }
         for legal_group in &self.legal_groups {
-            if system_groups.iter().any(|g| g.eq_ignore_ascii_case(legal_group) || g.contains(legal_group)) {
+            if system_groups
+                .iter()
+                .any(|g| g.eq_ignore_ascii_case(legal_group) || g.contains(legal_group))
+            {
                 return PermissionRing::Legal;
             }
         }
@@ -846,15 +993,15 @@ impl SignatureVault {
                 let _ = std::fs::create_dir_all(parent);
             }
             let json = serde_json::to_string_pretty(&tk)
-                .map_err(|e| format!("Failed to serialize trusted keys: {}", e))?;
+                .map_err(|e| format!("Failed to serialize trusted keys: {e}"))?;
             std::fs::write(&self.trusted_keys_path, json)
-                .map_err(|e| format!("Failed to write trusted keys: {}", e))?;
+                .map_err(|e| format!("Failed to write trusted keys: {e}"))?;
         }
         Ok(())
     }
 
     pub fn verify_signature(&self, data: &[u8], signature_hex_or_b64: &str) -> bool {
-        use ed25519_dalek::{VerifyingKey, Signature, Verifier};
+        use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 
         let sig_bytes = if let Ok(bytes) = hex_decode(signature_hex_or_b64) {
             bytes
@@ -887,8 +1034,9 @@ impl SignatureVault {
 }
 
 fn base64_decode(input: &str) -> Result<Vec<u8>, &'static str> {
-    use base64::{Engine as _, engine::general_purpose};
-    general_purpose::STANDARD.decode(input.trim())
+    use base64::{engine::general_purpose, Engine as _};
+    general_purpose::STANDARD
+        .decode(input.trim())
         .map_err(|_| "Invalid base64")
 }
 
@@ -920,12 +1068,13 @@ impl AesGcmEncrypter {
         rand::thread_rng().fill_bytes(&mut nonce_bytes);
 
         let key_bytes = Self::derive_key(private_key_hex, &salt);
-        let cipher = Aes256Gcm::new_from_slice(&key_bytes)
-            .map_err(|e| format!("Cipher init error: {}", e))?;
-        
+        let cipher =
+            Aes256Gcm::new_from_slice(&key_bytes).map_err(|e| format!("Cipher init error: {e}"))?;
+
         let nonce = Nonce::from_slice(&nonce_bytes);
-        let ciphertext = cipher.encrypt(nonce, plaintext)
-            .map_err(|e| format!("Encryption error: {}", e))?;
+        let ciphertext = cipher
+            .encrypt(nonce, plaintext)
+            .map_err(|e| format!("Encryption error: {e}"))?;
 
         let mut output = Vec::new();
         output.extend_from_slice(&salt);
@@ -949,12 +1098,13 @@ impl AesGcmEncrypter {
         let ciphertext = &encrypted_data[28..];
 
         let key_bytes = Self::derive_key(private_key_hex, salt);
-        let cipher = Aes256Gcm::new_from_slice(&key_bytes)
-            .map_err(|e| format!("Cipher init error: {}", e))?;
-        
+        let cipher =
+            Aes256Gcm::new_from_slice(&key_bytes).map_err(|e| format!("Cipher init error: {e}"))?;
+
         let nonce = Nonce::from_slice(nonce_bytes);
-        let plaintext = cipher.decrypt(nonce, ciphertext)
-            .map_err(|e| format!("Decryption error: {}", e))?;
+        let plaintext = cipher
+            .decrypt(nonce, ciphertext)
+            .map_err(|e| format!("Decryption error: {e}"))?;
 
         Ok(plaintext)
     }
@@ -982,9 +1132,15 @@ impl CloudEncryptedSyncManager {
     }
 
     pub async fn sync_to_cloud_encrypted(&self, plaintext_data: &[u8]) -> Result<(), String> {
-        info!("☁️  [E2EE Sync] Encrypting memory packet for cloud endpoint: {}", self.surreal_endpoint);
+        info!(
+            "☁️  [E2EE Sync] Encrypting memory packet for cloud endpoint: {}",
+            self.surreal_endpoint
+        );
         let encrypted = self.encrypt_payload(plaintext_data)?;
-        info!("🔐 [E2EE Sync] Successfully encrypted memory packet: {} bytes", encrypted.len());
+        info!(
+            "🔐 [E2EE Sync] Successfully encrypted memory packet: {} bytes",
+            encrypted.len()
+        );
         Ok(())
     }
 }
@@ -997,36 +1153,60 @@ mod tests {
     fn test_ldap_group_matcher() {
         let matcher = LdapGroupMatcher {
             enabled: true,
-            admin_groups: vec!["Enterprise Admins".to_string(), "BUILTIN\\Administrators".to_string()],
+            admin_groups: vec![
+                "Enterprise Admins".to_string(),
+                "BUILTIN\\Administrators".to_string(),
+            ],
             legal_groups: vec!["Legal Compliance".to_string()],
             standard_groups: vec!["Domain Users".to_string()],
         };
 
         // If disabled, defaults to Admin
-        let disabled_matcher = LdapGroupMatcher { enabled: false, ..Default::default() };
-        assert_eq!(disabled_matcher.get_user_ring_for_groups(&[]), PermissionRing::Admin);
+        let disabled_matcher = LdapGroupMatcher {
+            enabled: false,
+            ..Default::default()
+        };
+        assert_eq!(
+            disabled_matcher.get_user_ring_for_groups(&[]),
+            PermissionRing::Admin
+        );
 
         // Test matching Admin ring
-        let admin_groups = vec!["Domain Users".to_string(), "BUILTIN\\Administrators".to_string()];
-        assert_eq!(matcher.get_user_ring_for_groups(&admin_groups), PermissionRing::Admin);
+        let admin_groups = vec![
+            "Domain Users".to_string(),
+            "BUILTIN\\Administrators".to_string(),
+        ];
+        assert_eq!(
+            matcher.get_user_ring_for_groups(&admin_groups),
+            PermissionRing::Admin
+        );
 
         // Test matching Legal ring
         let legal_groups = vec!["Domain Users".to_string(), "Legal Compliance".to_string()];
-        assert_eq!(matcher.get_user_ring_for_groups(&legal_groups), PermissionRing::Legal);
+        assert_eq!(
+            matcher.get_user_ring_for_groups(&legal_groups),
+            PermissionRing::Legal
+        );
 
         // Test matching Standard ring
         let standard_groups = vec!["Domain Users".to_string()];
-        assert_eq!(matcher.get_user_ring_for_groups(&standard_groups), PermissionRing::Standard);
+        assert_eq!(
+            matcher.get_user_ring_for_groups(&standard_groups),
+            PermissionRing::Standard
+        );
 
         // Test fallback when no groups match
-        assert_eq!(matcher.get_user_ring_for_groups(&["Guest".to_string()]), PermissionRing::Standard);
+        assert_eq!(
+            matcher.get_user_ring_for_groups(&["Guest".to_string()]),
+            PermissionRing::Standard
+        );
     }
 
     #[test]
     fn test_signature_vault_verification() {
-        use tempfile::tempdir;
-        use ed25519_dalek::{SigningKey, Signer};
+        use ed25519_dalek::{Signer, SigningKey};
         use rand::rngs::OsRng;
+        use tempfile::tempdir;
 
         let dir = tempdir().unwrap();
         let vault = SignatureVault::new(dir.path());
@@ -1064,8 +1244,9 @@ mod tests {
         let instance = "Prod-Win11";
         let identity = AgentIdentity::generate(display_name, instance);
 
-        let plaintext = b"Agent memory: client confidential doc draft v2. Extremely sensitive content.";
-        
+        let plaintext =
+            b"Agent memory: client confidential doc draft v2. Extremely sensitive content.";
+
         // Encrypt using helper
         let ciphertext = AesGcmEncrypter::encrypt(plaintext, &identity.private_key_hex).unwrap();
         assert_ne!(ciphertext, plaintext.to_vec());
@@ -1075,7 +1256,10 @@ mod tests {
         assert_eq!(decrypted, plaintext.to_vec());
 
         // Encrypted sync manager
-        let sync_mgr = CloudEncryptedSyncManager::new("https://surreal-cloud.local:8000", &identity.private_key_hex);
+        let sync_mgr = CloudEncryptedSyncManager::new(
+            "https://surreal-cloud.local:8000",
+            &identity.private_key_hex,
+        );
         let encrypted_payload = sync_mgr.encrypt_payload(plaintext).unwrap();
         let decrypted_payload = sync_mgr.decrypt_payload(&encrypted_payload).unwrap();
         assert_eq!(decrypted_payload, plaintext.to_vec());

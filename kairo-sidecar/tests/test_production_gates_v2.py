@@ -18,11 +18,9 @@ from __future__ import annotations
 import os
 import sys
 import time
-import shutil
 import tempfile
-import dataclasses
 from pathlib import Path
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from docx import Document
@@ -32,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
+
 
 def _make_temp_docx(n_paragraphs: int = 5) -> str:
     """Return a path to a temp .docx file with n_paragraphs of content."""
@@ -65,16 +64,16 @@ def test_gate01_user_prompt_always_last():
     )
 
     # Find positions in the final string
-    pos_app      = prompt.index("APP CONTEXT")
-    pos_doc      = prompt.index("DOCUMENT CONTEXT")
-    pos_mem      = prompt.index("MEMORY CONTEXT")
-    pos_cls      = prompt.index("INTENT CLASSIFICATION")
-    pos_user     = prompt.index("USER INSTRUCTION")
+    pos_app = prompt.index("APP CONTEXT")
+    pos_doc = prompt.index("DOCUMENT CONTEXT")
+    pos_mem = prompt.index("MEMORY CONTEXT")
+    pos_cls = prompt.index("INTENT CLASSIFICATION")
+    pos_user = prompt.index("USER INSTRUCTION")
 
     # Strict ordering assertion
-    assert pos_app < pos_doc,  "app_name must precede doc_context"
-    assert pos_doc < pos_mem,  "doc_context must precede mem_context"
-    assert pos_mem < pos_cls,  "mem_context must precede classification"
+    assert pos_app < pos_doc, "app_name must precede doc_context"
+    assert pos_doc < pos_mem, "doc_context must precede mem_context"
+    assert pos_mem < pos_cls, "mem_context must precede classification"
     assert pos_cls < pos_user, "classification must precede user_prompt"
 
 
@@ -102,9 +101,9 @@ def test_gate02_user_instruction_content_last():
     # All section headers must appear before the user text
     for header in ["APP CONTEXT", "DOCUMENT CONTEXT", "MEMORY CONTEXT", "INTENT CLASSIFICATION"]:
         pos_header = prompt.index(header)
-        assert pos_header < pos_user_text, (
-            f"Header '{header}' (pos={pos_header}) must appear before user text (pos={pos_user_text})"
-        )
+        assert (
+            pos_header < pos_user_text
+        ), f"Header '{header}' (pos={pos_header}) must appear before user text (pos={pos_user_text})"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -142,7 +141,9 @@ def test_gate04_prompt_builder_dataclass_classification():
     from sidecar.intent_gate import IntentClassification
 
     pb = PromptBuilder()
-    cls = IntentClassification(intent="rewrite", domain="word", target_element="paragraph", confidence=0.85)
+    cls = IntentClassification(
+        intent="rewrite", domain="word", target_element="paragraph", confidence=0.85
+    )
     prompt = pb.build(
         app_name="Word",
         doc_context={"title": "Q4 Report"},
@@ -199,9 +200,7 @@ def test_gate06_intent_gate_json_fallback():
     import sys
     from sidecar.intent_gate import IntentGate
 
-    mock_response = {
-        "message": {"content": "I cannot parse this at all {{{{"}
-    }
+    mock_response = {"message": {"content": "I cannot parse this at all {{{{"}}
 
     fake_ollama = types.ModuleType("ollama")
     fake_ollama.chat = MagicMock(return_value=mock_response)
@@ -255,8 +254,10 @@ def test_gate08_word_extractor_performance():
     ctx = extractor.extract(doc)
     elapsed_ms = (time.perf_counter() - t0) * 1000
 
-    assert elapsed_ms < 1500, f"Extraction took {elapsed_ms:.1f}ms — CI threshold 1500ms (production target 200ms)"
-    assert len(ctx.paragraphs) == 100   # exactly 100 paragraphs added above
+    assert (
+        elapsed_ms < 1500
+    ), f"Extraction took {elapsed_ms:.1f}ms — CI threshold 1500ms (production target 200ms)"
+    assert len(ctx.paragraphs) == 100  # exactly 100 paragraphs added above
     assert ctx.total_words > 0
 
 
@@ -280,9 +281,7 @@ def test_gate09_word_writer_insertion_position():
 
     # After insertion after index 0, NEW PARA should be at index 1
     texts = [p.text for p in doc.paragraphs]
-    assert texts[1] == "NEW PARA", (
-        f"Expected 'NEW PARA' at index 1 but got: {texts}"
-    )
+    assert texts[1] == "NEW PARA", f"Expected 'NEW PARA' at index 1 but got: {texts}"
     assert texts[2] == "Para 1 — after insert target"
     assert texts[3] == "Para 2 — should stay at end"
 
@@ -331,17 +330,17 @@ def test_gate11_farscry_domain_resolution():
     from sidecar.farscry_service import _label_for_process, _domain_for_label
 
     cases = [
-        ("WINWORD.EXE",          "word"),
-        ("EXCEL.EXE",            "excel"),
-        ("POWERPNT.EXE",         "powerpoint"),
-        ("Code.exe",             "code"),
-        ("chrome.exe",           "browser"),
-        ("msedge.exe",           "browser"),
-        ("Acrobat.exe",          "pdf"),
-        ("powershell.exe",       "terminal"),
-        ("WindowsTerminal.exe",  "terminal"),
-        ("notepad.exe",          "notes"),
-        ("unknown_app.exe",      "general"),
+        ("WINWORD.EXE", "word"),
+        ("EXCEL.EXE", "excel"),
+        ("POWERPNT.EXE", "powerpoint"),
+        ("Code.exe", "code"),
+        ("chrome.exe", "browser"),
+        ("msedge.exe", "browser"),
+        ("Acrobat.exe", "pdf"),
+        ("powershell.exe", "terminal"),
+        ("WindowsTerminal.exe", "terminal"),
+        ("notepad.exe", "notes"),
+        ("unknown_app.exe", "general"),
     ]
 
     for process_name, expected_domain in cases:
@@ -421,9 +420,8 @@ def test_gate14_intent_gate_classification_attached_to_request():
         intent="rewrite", domain="word", target_element="paragraph", confidence=0.88
     )
 
-    original_classify = None
     if router._intent_gate is not None:
-        original_classify = router._intent_gate.classify
+        pass
 
     # Patch IntentGate.classify to capture the request and return a known classification
     def fake_classify(user_prompt, app_name=""):
@@ -448,6 +446,7 @@ def test_gate14_intent_gate_classification_attached_to_request():
 
     # Intercept master.execute to capture the modified request
     original_execute = fake_master.execute
+
     def capturing_execute(request):
         captured_requests.append(request)
         return original_execute(request)
@@ -468,9 +467,9 @@ def test_gate14_intent_gate_classification_attached_to_request():
         pass  # We only care about the request mutation
 
     # The request should have _gate_classification attached
-    assert "_gate_classification" in request.__dict__, (
-        "_gate_classification was not attached to request by DomainMasterRouter.route()"
-    )
+    assert (
+        "_gate_classification" in request.__dict__
+    ), "_gate_classification was not attached to request by DomainMasterRouter.route()"
     attached = request.__dict__["_gate_classification"]
     assert attached.intent == "rewrite"
     assert attached.confidence == pytest.approx(0.88, abs=0.01)
@@ -483,13 +482,24 @@ def test_pr_cua_06_powershell_validation_logic():
     """
     Verify the logic of the PowerShell environment specific strings checker.
     """
-    required_patterns = ["$env:", "$ErrorActionPreference", "Join-Path", "Test-Path", "New-Item", "Set-StrictMode", "pwsh", "Write-Host", "Start-Sleep", "Get-Random"]
-    
+    required_patterns = [
+        "$env:",
+        "$ErrorActionPreference",
+        "Join-Path",
+        "Test-Path",
+        "New-Item",
+        "Set-StrictMode",
+        "pwsh",
+        "Write-Host",
+        "Start-Sleep",
+        "Get-Random",
+    ]
+
     # 1. Valid content containing at least one pattern
     valid_content = "Write-Host 'Hello World'"
     has_pattern_valid = any(pat in valid_content for pat in required_patterns)
     assert has_pattern_valid is True
-    
+
     # 2. Invalid content containing no patterns
     invalid_content = "echo 'Hello World'"
     has_pattern_invalid = any(pat in invalid_content for pat in required_patterns)

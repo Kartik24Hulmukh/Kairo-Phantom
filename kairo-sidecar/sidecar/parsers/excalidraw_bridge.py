@@ -10,7 +10,6 @@ Figma or tldraw set up.
 
 import json
 import logging
-import os
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -37,8 +36,9 @@ class ExcalidrawBridge:
         """Generate a unique element ID."""
         return str(uuid.uuid4())
 
-    def _base_element(self, element_type: str, x: float, y: float,
-                      width: float, height: float) -> Dict[str, Any]:
+    def _base_element(
+        self, element_type: str, x: float, y: float, width: float, height: float
+    ) -> Dict[str, Any]:
         """Create a base Excalidraw element with common properties."""
         return {
             "id": self._new_id(),
@@ -83,12 +83,18 @@ class ExcalidrawBridge:
             "elements_count": 0,
         }
 
-    def create_rectangle(self, x: float, y: float, width: float, height: float,
-                         stroke_color: str = "#1e1e1e",
-                         background_color: str = "transparent",
-                         fill_style: str = "solid",
-                         stroke_width: int = 2,
-                         roundness: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def create_rectangle(
+        self,
+        x: float,
+        y: float,
+        width: float,
+        height: float,
+        stroke_color: str = "#1e1e1e",
+        background_color: str = "transparent",
+        fill_style: str = "solid",
+        stroke_width: int = 2,
+        roundness: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Create a rectangle element in Excalidraw format."""
         elem = self._base_element("rectangle", x, y, width, height)
         elem["strokeColor"] = stroke_color
@@ -101,13 +107,18 @@ class ExcalidrawBridge:
         log.info(f"Excalidraw rectangle created: {elem['id']} at ({x},{y}) {width}x{height}")
         return {"ok": True, "element_id": elem["id"], "element": elem}
 
-    def create_text(self, x: float, y: float, text: str,
-                    font_size: int = 20,
-                    font_family: int = 1,
-                    stroke_color: str = "#1e1e1e",
-                    text_align: str = "left",
-                    width: Optional[float] = None,
-                    height: Optional[float] = None) -> Dict[str, Any]:
+    def create_text(
+        self,
+        x: float,
+        y: float,
+        text: str,
+        font_size: int = 20,
+        font_family: int = 1,
+        stroke_color: str = "#1e1e1e",
+        text_align: str = "left",
+        width: Optional[float] = None,
+        height: Optional[float] = None,
+    ) -> Dict[str, Any]:
         """Create a text element in Excalidraw format.
 
         font_family: 1=Virgil (hand-drawn), 2=Helvetica, 3=Cascadia
@@ -133,12 +144,17 @@ class ExcalidrawBridge:
         log.info(f"Excalidraw text created: {elem['id']} -> '{text[:30]}'")
         return {"ok": True, "element_id": elem["id"], "element": elem}
 
-    def create_arrow(self, start_x: float, start_y: float,
-                     end_x: float, end_y: float,
-                     stroke_color: str = "#1e1e1e",
-                     stroke_width: int = 2,
-                     start_arrowhead: Optional[str] = None,
-                     end_arrowhead: str = "arrow") -> Dict[str, Any]:
+    def create_arrow(
+        self,
+        start_x: float,
+        start_y: float,
+        end_x: float,
+        end_y: float,
+        stroke_color: str = "#1e1e1e",
+        stroke_width: int = 2,
+        start_arrowhead: Optional[str] = None,
+        end_arrowhead: str = "arrow",
+    ) -> Dict[str, Any]:
         """Create an arrow element in Excalidraw format.
 
         start_arrowhead/end_arrowhead: None, "arrow", "bar", "dot", "triangle"
@@ -152,10 +168,7 @@ class ExcalidrawBridge:
         elem["strokeColor"] = stroke_color
         elem["strokeWidth"] = stroke_width
         elem["backgroundColor"] = "transparent"
-        elem["points"] = [
-            [start_x - x, start_y - y],
-            [end_x - x, end_y - y]
-        ]
+        elem["points"] = [[start_x - x, start_y - y], [end_x - x, end_y - y]]
         elem["startArrowhead"] = start_arrowhead
         elem["endArrowhead"] = end_arrowhead
         elem["startBinding"] = None
@@ -165,11 +178,17 @@ class ExcalidrawBridge:
         log.info(f"Excalidraw arrow created: {elem['id']} ({start_x},{start_y})->({end_x},{end_y})")
         return {"ok": True, "element_id": elem["id"], "element": elem}
 
-    def create_ellipse(self, x: float, y: float, width: float, height: float,
-                       stroke_color: str = "#1e1e1e",
-                       background_color: str = "transparent",
-                       fill_style: str = "solid",
-                       stroke_width: int = 2) -> Dict[str, Any]:
+    def create_ellipse(
+        self,
+        x: float,
+        y: float,
+        width: float,
+        height: float,
+        stroke_color: str = "#1e1e1e",
+        background_color: str = "transparent",
+        fill_style: str = "solid",
+        stroke_width: int = 2,
+    ) -> Dict[str, Any]:
         """Create an ellipse element in Excalidraw format."""
         elem = self._base_element("ellipse", x, y, width, height)
         elem["strokeColor"] = stroke_color
@@ -180,11 +199,17 @@ class ExcalidrawBridge:
         log.info(f"Excalidraw ellipse created: {elem['id']} at ({x},{y}) {width}x{height}")
         return {"ok": True, "element_id": elem["id"], "element": elem}
 
-    def create_diamond(self, x: float, y: float, width: float, height: float,
-                       stroke_color: str = "#1e1e1e",
-                       background_color: str = "transparent",
-                       fill_style: str = "solid",
-                       stroke_width: int = 2) -> Dict[str, Any]:
+    def create_diamond(
+        self,
+        x: float,
+        y: float,
+        width: float,
+        height: float,
+        stroke_color: str = "#1e1e1e",
+        background_color: str = "transparent",
+        fill_style: str = "solid",
+        stroke_width: int = 2,
+    ) -> Dict[str, Any]:
         """Create a diamond element in Excalidraw format."""
         elem = self._base_element("diamond", x, y, width, height)
         elem["strokeColor"] = stroke_color
@@ -195,8 +220,9 @@ class ExcalidrawBridge:
         log.info(f"Excalidraw diamond created: {elem['id']} at ({x},{y}) {width}x{height}")
         return {"ok": True, "element_id": elem["id"], "element": elem}
 
-    def draw_flowchart(self, nodes: List[Dict[str, Any]],
-                       edges: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def draw_flowchart(
+        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Draw a flowchart using Excalidraw elements.
 
         nodes: list of {"id", "name", "shape" ("rectangle"/"diamond"/"ellipse"), "color"}
@@ -222,18 +248,26 @@ class ExcalidrawBridge:
                 y_pos -= 15.0
 
             if shape == "diamond":
-                res = self.create_diamond(x_pos, y_pos, w, h,
-                                          background_color=color, fill_style="solid")
+                res = self.create_diamond(
+                    x_pos, y_pos, w, h, background_color=color, fill_style="solid"
+                )
             elif shape == "ellipse":
-                res = self.create_ellipse(x_pos, y_pos, w, h,
-                                          background_color=color, fill_style="solid")
+                res = self.create_ellipse(
+                    x_pos, y_pos, w, h, background_color=color, fill_style="solid"
+                )
             else:
-                res = self.create_rectangle(x_pos, y_pos, w, h,
-                                            background_color=color, fill_style="solid")
+                res = self.create_rectangle(
+                    x_pos, y_pos, w, h, background_color=color, fill_style="solid"
+                )
 
             # Add text label
-            text_res = self.create_text(x_pos + 10, y_pos + h/2 - 10, name,
-                                        font_size=16, stroke_color="#ffffff" if color != "transparent" else "#1e1e1e")
+            self.create_text(
+                x_pos + 10,
+                y_pos + h / 2 - 10,
+                name,
+                font_size=16,
+                stroke_color="#ffffff" if color != "transparent" else "#1e1e1e",
+            )
 
             created_ids[n.get("id", str(idx))] = {
                 "element_id": res["element_id"],
@@ -251,8 +285,10 @@ class ExcalidrawBridge:
                 s = created_ids[source_key]
                 t = created_ids[target_key]
                 self.create_arrow(
-                    s["x"] + s["w"], s["y"] + s["h"] / 2.0,
-                    t["x"], t["y"] + t["h"] / 2.0,
+                    s["x"] + s["w"],
+                    s["y"] + s["h"] / 2.0,
+                    t["x"],
+                    t["y"] + t["h"] / 2.0,
                 )
 
         return {

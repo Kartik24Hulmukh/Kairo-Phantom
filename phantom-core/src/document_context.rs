@@ -158,8 +158,12 @@ impl DocumentContext {
             n if n.contains("powerpoint") || n.contains("impress") => DocKind::PowerPoint,
             n if n.contains("word") || n.contains("writer") => DocKind::WordDocument,
             n if n.contains("excel") || n.contains("calc") => DocKind::ExcelSpreadsheet,
-            n if n.contains("visual studio code") || n.contains("nvim") || n.contains("vim") => DocKind::CodeFile,
-            n if n.contains("terminal") || n.contains("cmd") || n.contains("powershell") => DocKind::Terminal,
+            n if n.contains("visual studio code") || n.contains("nvim") || n.contains("vim") => {
+                DocKind::CodeFile
+            }
+            n if n.contains("terminal") || n.contains("cmd") || n.contains("powershell") => {
+                DocKind::Terminal
+            }
             _ => DocKind::UnknownApp,
         };
         let mut ctx = Self::from_raw_text(prompt, full_text, doc_kind);
@@ -214,7 +218,7 @@ impl DocumentContext {
             "You are assisting inside a {}. ",
             self.doc_kind.human_name()
         );
-        
+
         // Add specific formatting constraints based on DocKind (Priority 5 implementation)
         let format_rules = match self.doc_kind {
             DocKind::WordDocument | DocKind::OpenDocumentText => "FORMATTING RULES: Write in professional prose. Use markdown headings (#, ##) ONLY if requested to structure the document, otherwise use standard paragraphs. If continuing a numbered list, maintain strict sequential numbering.",
@@ -238,7 +242,7 @@ impl DocumentContext {
         }
 
         if let (Some(current), Some(total)) = (self.active_slide, self.total_slides) {
-            frag.push_str(&format!("Currently on slide {}/{}. ", current, total));
+            frag.push_str(&format!("Currently on slide {current}/{total}. "));
         }
 
         if !self.tables.is_empty() {
@@ -253,7 +257,9 @@ impl DocumentContext {
         }
 
         if !self.format_metadata.style_names.is_empty() {
-            let styles: Vec<&str> = self.format_metadata.style_names
+            let styles: Vec<&str> = self
+                .format_metadata
+                .style_names
                 .iter()
                 .take(5)
                 .map(|s| s.as_str())
@@ -278,7 +284,7 @@ impl DocumentContext {
             frag.push_str("\n[CODE SYNTAX CONTEXT]\n");
             frag.push_str(&format!("Language: {}\n", cc.language));
             if let Some(ref class) = cc.enclosing_class {
-                frag.push_str(&format!("Enclosing Symbol/Class/Struct: {}\n", class));
+                frag.push_str(&format!("Enclosing Symbol/Class/Struct: {class}\n"));
             }
             if let Some(ref func) = cc.enclosing_function {
                 frag.push_str(&format!(
@@ -289,16 +295,19 @@ impl DocumentContext {
             if !cc.imports.is_empty() {
                 frag.push_str("Imports/Use declarations:\n");
                 for imp in cc.imports.iter().take(10) {
-                    frag.push_str(&format!("  - {}\n", imp));
+                    frag.push_str(&format!("  - {imp}\n"));
                 }
             }
             if !cc.nearby_symbols.is_empty() {
                 frag.push_str("Nearby symbols:\n");
                 for sym in cc.nearby_symbols.iter().take(10) {
-                    frag.push_str(&format!("  - {}\n", sym));
+                    frag.push_str(&format!("  - {sym}\n"));
                 }
             }
-            frag.push_str(&format!("Current Indentation: '{}' ({} spaces/tabs)\n", cc.indentation, cc.cursor_col));
+            frag.push_str(&format!(
+                "Current Indentation: '{}' ({} spaces/tabs)\n",
+                cc.indentation, cc.cursor_col
+            ));
             frag.push_str("\nSurrounding Code (30 lines around cursor):\n");
             frag.push_str(&cc.surrounding_code);
             frag.push_str("\n[END CODE CONTEXT]\n");
@@ -319,7 +328,8 @@ pub trait DocumentContextExtractor: Send + Sync {
     fn supported_extensions(&self) -> &[&str];
 
     fn can_handle_extension(&self, ext: &str) -> bool {
-        self.supported_extensions().contains(&ext.to_lowercase().as_str())
+        self.supported_extensions()
+            .contains(&ext.to_lowercase().as_str())
     }
 
     /// Extract structured context from the file at `path`.
@@ -340,7 +350,9 @@ pub struct PlainTextExtractor;
 
 impl DocumentContextExtractor for PlainTextExtractor {
     fn supported_extensions(&self) -> &[&str] {
-        &["txt", "md", "markdown", "rst", "log", "csv", "json", "yaml", "yml", "toml", "ini"]
+        &[
+            "txt", "md", "markdown", "rst", "log", "csv", "json", "yaml", "yml", "toml", "ini",
+        ]
     }
 
     fn extract(
@@ -349,7 +361,8 @@ impl DocumentContextExtractor for PlainTextExtractor {
         prompt_text: &str,
         _active_slide: Option<usize>,
     ) -> Option<DocumentContext> {
-        let ext = path.extension()
+        let ext = path
+            .extension()
             .and_then(|e| e.to_str())
             .unwrap_or("")
             .to_lowercase();
@@ -361,7 +374,11 @@ impl DocumentContextExtractor for PlainTextExtractor {
 
         let full_text = std::fs::read_to_string(path).ok()?;
 
-        Some(DocumentContext::from_raw_text(prompt_text, &full_text, doc_kind))
+        Some(DocumentContext::from_raw_text(
+            prompt_text,
+            &full_text,
+            doc_kind,
+        ))
     }
 }
 
@@ -369,7 +386,10 @@ pub struct CodeFileExtractor;
 
 impl DocumentContextExtractor for CodeFileExtractor {
     fn supported_extensions(&self) -> &[&str] {
-        &["rs", "py", "go", "cs", "java", "ts", "tsx", "js", "jsx", "c", "cpp", "h", "hpp", "sh", "bat", "ps1"]
+        &[
+            "rs", "py", "go", "cs", "java", "ts", "tsx", "js", "jsx", "c", "cpp", "h", "hpp", "sh",
+            "bat", "ps1",
+        ]
     }
 
     fn extract(
@@ -379,10 +399,10 @@ impl DocumentContextExtractor for CodeFileExtractor {
         _active_slide: Option<usize>,
     ) -> Option<DocumentContext> {
         let file_path = path.to_string_lossy().to_string();
-        
+
         let source_code = std::fs::read_to_string(path).ok()?;
         let mut cursor_line = 1;
-        
+
         let clean_prompt = prompt_text.trim();
         if !clean_prompt.is_empty() {
             for (idx, line) in source_code.lines().enumerate() {
@@ -392,13 +412,17 @@ impl DocumentContextExtractor for CodeFileExtractor {
                 }
             }
         }
-        
+
         let code_ctx = crate::code_context::extract_code_context(&file_path, cursor_line).ok()?;
-        
-        let mut doc_ctx = DocumentContext::from_raw_text(prompt_text, &code_ctx.surrounding_code, DocKind::CodeFile);
+
+        let mut doc_ctx = DocumentContext::from_raw_text(
+            prompt_text,
+            &code_ctx.surrounding_code,
+            DocKind::CodeFile,
+        );
         doc_ctx.file_path = Some(path.to_path_buf());
         doc_ctx = doc_ctx.with_code_context(code_ctx);
-        
+
         Some(doc_ctx)
     }
 }
@@ -418,11 +442,7 @@ pub struct OfficeExtractor;
 
 impl OfficeExtractor {
     /// Parse DOCX: extract headings, text, tables from word/document.xml
-    fn extract_docx(
-        &self,
-        path: &std::path::Path,
-        prompt_text: &str,
-    ) -> Option<DocumentContext> {
+    fn extract_docx(&self, path: &std::path::Path, prompt_text: &str) -> Option<DocumentContext> {
         use std::io::Read;
 
         let file = std::fs::File::open(path).ok()?;
@@ -461,7 +481,8 @@ impl OfficeExtractor {
             None,
             has_tracked_changes,
             FormatMetadata {
-                original_format: "application/vnd.openxmlformats-officedocument.wordprocessingml.document".into(),
+                original_format:
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document".into(),
                 style_names,
                 slide_layout: None,
             },
@@ -506,7 +527,7 @@ impl OfficeExtractor {
 
         let mut full_text = String::new();
         for (num, text) in &slide_texts {
-            full_text.push_str(&format!("\n--- Slide {} ---\n{}", num, text));
+            full_text.push_str(&format!("\n--- Slide {num} ---\n{text}"));
         }
 
         Some(DocumentContext::from_parsed(
@@ -521,7 +542,9 @@ impl OfficeExtractor {
             Some(total_slides),
             false,
             FormatMetadata {
-                original_format: "application/vnd.openxmlformats-officedocument.presentationml.presentation".into(),
+                original_format:
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                        .into(),
                 style_names: vec![],
                 slide_layout: None,
             },
@@ -529,11 +552,7 @@ impl OfficeExtractor {
     }
 
     /// Parse XLSX: extract sheet names and cell data
-    fn extract_xlsx(
-        &self,
-        path: &std::path::Path,
-        prompt_text: &str,
-    ) -> Option<DocumentContext> {
+    fn extract_xlsx(&self, path: &std::path::Path, prompt_text: &str) -> Option<DocumentContext> {
         use std::io::Read;
 
         let file = std::fs::File::open(path).ok()?;
@@ -558,7 +577,11 @@ impl OfficeExtractor {
         let full_text = if sheet_names.is_empty() {
             shared_strings.join(", ")
         } else {
-            format!("Sheets: {}\nData: {}", sheet_names.join(", "), shared_strings.join(", "))
+            format!(
+                "Sheets: {}\nData: {}",
+                sheet_names.join(", "),
+                shared_strings.join(", ")
+            )
         };
 
         Some(DocumentContext::from_raw_text(
@@ -581,11 +604,10 @@ impl OfficeExtractor {
                 '<' => {
                     in_tag = true;
                     // Check for paragraph tag to insert newlines
-                    if xml[xml.find('<').unwrap_or(0)..].starts_with("</w:p>")
-                        && !last_was_para {
-                            result.push('\n');
-                            last_was_para = true;
-                        }
+                    if xml[xml.find('<').unwrap_or(0)..].starts_with("</w:p>") && !last_was_para {
+                        result.push('\n');
+                        last_was_para = true;
+                    }
                 }
                 '>' => {
                     in_tag = false;
@@ -618,7 +640,9 @@ impl OfficeExtractor {
         // Find all <w:p> blocks and check for heading styles
         let mut search = xml;
         while let Some(para_start) = search.find("<w:p ").or_else(|| search.find("<w:p>")) {
-            let para_end_offset = search[para_start..].find("</w:p>").map(|e| para_start + e + 6);
+            let para_end_offset = search[para_start..]
+                .find("</w:p>")
+                .map(|e| para_start + e + 6);
             let para_end = para_end_offset.unwrap_or(search.len());
             let para_xml = &search[para_start..para_end];
 
@@ -636,13 +660,19 @@ impl OfficeExtractor {
 
                     let text = Self::xml_to_plain_text(para_xml);
                     if !text.is_empty() {
-                        outline.push(OutlineItem { level, text, position: pos });
+                        outline.push(OutlineItem {
+                            level,
+                            text,
+                            position: pos,
+                        });
                     }
                 }
             }
 
             pos += para_end;
-            if para_end >= search.len() { break; }
+            if para_end >= search.len() {
+                break;
+            }
             search = &search[para_end..];
         }
 
@@ -663,7 +693,10 @@ impl OfficeExtractor {
                 // Extract rows
                 let mut rows: Vec<Vec<String>> = Vec::new();
                 let mut row_search = tbl_xml;
-                while let Some(row_start) = row_search.find("<w:tr ").or_else(|| row_search.find("<w:tr>")) {
+                while let Some(row_start) = row_search
+                    .find("<w:tr ")
+                    .or_else(|| row_search.find("<w:tr>"))
+                {
                     if let Some(row_end_off) = row_search[row_start..].find("</w:tr>") {
                         let row_end = row_start + row_end_off + 7;
                         let row_xml = &row_search[row_start..row_end];
@@ -671,27 +704,43 @@ impl OfficeExtractor {
                         // Extract cells
                         let mut cells = Vec::new();
                         let mut cell_search = row_xml;
-                        while let Some(c_start) = cell_search.find("<w:tc>").or_else(|| cell_search.find("<w:tc ")) {
+                        while let Some(c_start) = cell_search
+                            .find("<w:tc>")
+                            .or_else(|| cell_search.find("<w:tc "))
+                        {
                             if let Some(c_end_off) = cell_search[c_start..].find("</w:tc>") {
                                 let c_end = c_start + c_end_off + 7;
                                 cells.push(Self::xml_to_plain_text(&cell_search[c_start..c_end]));
                                 cell_search = &cell_search[c_end..];
-                            } else { break; }
+                            } else {
+                                break;
+                            }
                         }
-                        if !cells.is_empty() { rows.push(cells); }
+                        if !cells.is_empty() {
+                            rows.push(cells);
+                        }
                         row_search = &row_search[row_end..];
-                    } else { break; }
+                    } else {
+                        break;
+                    }
                 }
 
                 if !rows.is_empty() {
                     let headers = rows.first().cloned().unwrap_or_default();
                     let data_rows = rows.into_iter().skip(1).collect();
-                    tables.push(TableData { caption: None, headers, rows: data_rows, position: pos });
+                    tables.push(TableData {
+                        caption: None,
+                        headers,
+                        rows: data_rows,
+                        position: pos,
+                    });
                 }
 
                 pos += tbl_end;
                 search = &search[tbl_end..];
-            } else { break; }
+            } else {
+                break;
+            }
         }
         tables
     }
@@ -725,7 +774,9 @@ impl OfficeExtractor {
                     strings.push(text);
                 }
                 search = &search[si_start + si_end + 5..];
-            } else { break; }
+            } else {
+                break;
+            }
         }
         strings
     }
@@ -756,7 +807,8 @@ impl DocumentContextExtractor for OfficeExtractor {
         prompt_text: &str,
         active_slide: Option<usize>,
     ) -> Option<DocumentContext> {
-        let ext = path.extension()
+        let ext = path
+            .extension()
             .and_then(|e| e.to_str())
             .unwrap_or("")
             .to_lowercase();
@@ -791,13 +843,27 @@ impl ExtractorRegistry {
     /// 10. PlainTextExtractor (txt, md, rst — always last fallback)
     pub fn with_defaults() -> Self {
         let mut r = Self { extractors: vec![] };
-        r.register(Box::new(crate::extractors::kreuzberg_ext::OlgaExtractorAdapter));
-        r.register(Box::new(crate::extractors::kreuzberg_ext::DoclingExtractorAdapter));
-        r.register(Box::new(crate::extractors::kreuzberg_ext::SuryaOcrExtractorAdapter));
-        r.register(Box::new(crate::extractors::kreuzberg_ext::OlmOcrExtractorAdapter));
-        r.register(Box::new(crate::extractors::kreuzberg_ext::OcrRsExtractorAdapter));
-        r.register(Box::new(crate::extractors::kreuzberg_ext::PdfExtractorAdapter));
-        r.register(Box::new(crate::extractors::kreuzberg_ext::KreuzbergExtractorAdapter));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::OlgaExtractorAdapter,
+        ));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::DoclingExtractorAdapter,
+        ));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::SuryaOcrExtractorAdapter,
+        ));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::OlmOcrExtractorAdapter,
+        ));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::OcrRsExtractorAdapter,
+        ));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::PdfExtractorAdapter,
+        ));
+        r.register(Box::new(
+            crate::extractors::kreuzberg_ext::KreuzbergExtractorAdapter,
+        ));
         r.register(Box::new(OfficeExtractor));
         r.register(Box::new(CodeFileExtractor));
         r.register(Box::new(PlainTextExtractor));
@@ -816,9 +882,7 @@ impl ExtractorRegistry {
         prompt_text: &str,
         active_slide: Option<usize>,
     ) -> Option<DocumentContext> {
-        let ext = path.extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("");
+        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
 
         for extractor in &self.extractors {
             if extractor.can_handle_extension(ext) {

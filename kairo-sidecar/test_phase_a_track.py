@@ -1,12 +1,11 @@
 """
 Phase A1: Verify @track decorator on 8 remaining domain masters.
 
-For each master: call extract_context (or query for MemMachine) → 
+For each master: call extract_context (or query for MemMachine) →
 assert JSONL trace is non-empty with correct domain + trace_id.
 Fails if trace is empty or faked.
 """
-import json
-import os
+
 import sys
 import tempfile
 import pytest
@@ -33,6 +32,7 @@ class TestTrackOnRemainingMasters:
     def test_code_master_trace(self, temp_tracer):
         """CodeMaster.extract_context emits a trace with domain='code'."""
         from sidecar.masters.other_masters import CodeMaster
+
         master = CodeMaster()
         # Create a temp Python file for context extraction
         with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
@@ -47,6 +47,7 @@ class TestTrackOnRemainingMasters:
     def test_browser_master_trace(self, temp_tracer):
         """BrowserMaster.extract_context emits a trace with domain='browser'."""
         from sidecar.masters.other_masters import BrowserMaster
+
         master = BrowserMaster()
         master.extract_context("https://example.com", None)
         traces = temp_tracer.read_traces()
@@ -57,6 +58,7 @@ class TestTrackOnRemainingMasters:
     def test_terminal_master_trace(self, temp_tracer):
         """TerminalMaster.extract_context emits a trace with domain='terminal'."""
         from sidecar.masters.other_masters import TerminalMaster
+
         master = TerminalMaster()
         master.extract_context(None, None)
         traces = temp_tracer.read_traces()
@@ -67,6 +69,7 @@ class TestTrackOnRemainingMasters:
     def test_email_master_trace(self, temp_tracer):
         """EmailMaster.extract_context emits a trace with domain='email'."""
         from sidecar.masters.other_masters import EmailMaster
+
         master = EmailMaster()
         master.extract_context(None, None)
         traces = temp_tracer.read_traces()
@@ -77,6 +80,7 @@ class TestTrackOnRemainingMasters:
     def test_notes_master_trace(self, temp_tracer):
         """NotesMaster.extract_context emits a trace with domain='notes'."""
         from sidecar.masters.other_masters import NotesMaster
+
         master = NotesMaster()
         master.extract_context("notes.md", None)
         traces = temp_tracer.read_traces()
@@ -87,6 +91,7 @@ class TestTrackOnRemainingMasters:
     def test_media_master_trace(self, temp_tracer):
         """MediaMaster.extract_context emits a trace with domain='media'."""
         from sidecar.masters.other_masters import MediaMaster
+
         master = MediaMaster()
         master.extract_context(None, None)
         traces = temp_tracer.read_traces()
@@ -97,6 +102,7 @@ class TestTrackOnRemainingMasters:
     def test_data_master_trace(self, temp_tracer):
         """DataMaster.extract_context emits a trace with domain='data'."""
         from sidecar.masters.other_masters import DataMaster
+
         master = DataMaster()
         master.extract_context(None, None)
         traces = temp_tracer.read_traces()
@@ -107,11 +113,11 @@ class TestTrackOnRemainingMasters:
     def test_memory_recall_trace(self, temp_tracer, tmp_path):
         """MemMachineClient.query emits a trace with domain='memory'."""
         from sidecar.mem_machine import MemMachineClient
+
         db_path = str(tmp_path / "test_mem.db")
         client = MemMachineClient(db_path=db_path)
         client.record_interaction(
-            domain="word", task_type="writing",
-            user_prompt="test", style_notes="test style"
+            domain="word", task_type="writing", user_prompt="test", style_notes="test style"
         )
         client.query(domain="word")
         traces = temp_tracer.read_traces()

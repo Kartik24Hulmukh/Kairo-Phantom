@@ -12,7 +12,7 @@ async fn simulate_pipeline_run() {
 
 fn benchmark_latency(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
-    
+
     c.bench_function("hotkey_to_first_token", |b| {
         b.to_async(&rt).iter_custom(|iters| async move {
             let start = std::time::Instant::now();

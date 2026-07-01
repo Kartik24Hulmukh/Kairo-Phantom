@@ -11,6 +11,7 @@ Usage:
     result = tts.synthesize('Hello world')
     # → {audio_path, duration, sample_rate}
 """
+
 from __future__ import annotations
 
 import logging
@@ -31,10 +32,10 @@ HAS_PIPER: bool = False
 
 try:
     import piper  # type: ignore
+
     HAS_PIPER = True
 except ImportError:
-    log.info("piper not installed — PiperTTS will raise on init. "
-             "Install: pip install piper-tts")
+    log.info("piper not installed — PiperTTS will raise on init. " "Install: pip install piper-tts")
     piper = None  # type: ignore
 
 
@@ -47,9 +48,7 @@ class PiperTTS:
 
     def __init__(self, voice_model_path: Optional[str] = None):
         if not HAS_PIPER:
-            raise RuntimeError(
-                "Piper not installed. pip install piper-tts"
-            )
+            raise RuntimeError("Piper not installed. pip install piper-tts")
 
         self.voice_model_path = voice_model_path
         self._voice = None
@@ -57,9 +56,7 @@ class PiperTTS:
 
         if voice_model_path:
             if not os.path.isfile(voice_model_path):
-                raise FileNotFoundError(
-                    f"Piper voice model not found: {voice_model_path}"
-                )
+                raise FileNotFoundError(f"Piper voice model not found: {voice_model_path}")
             self._load_voice(voice_model_path)
 
     def _load_voice(self, voice_model_path: str) -> None:
@@ -85,9 +82,7 @@ class PiperTTS:
             {audio_path: str, duration: float, sample_rate: int}
         """
         if not self._voice:
-            raise RuntimeError(
-                "No voice model loaded. Provide voice_model_path to __init__."
-            )
+            raise RuntimeError("No voice model loaded. Provide voice_model_path to __init__.")
         if not text or not text.strip():
             raise ValueError("Text must not be empty")
 
@@ -121,9 +116,7 @@ class PiperTTS:
             The output_path (same as input).
         """
         if not self._voice:
-            raise RuntimeError(
-                "No voice model loaded. Provide voice_model_path to __init__."
-            )
+            raise RuntimeError("No voice model loaded. Provide voice_model_path to __init__.")
         if not text or not text.strip():
             raise ValueError("Text must not be empty")
 

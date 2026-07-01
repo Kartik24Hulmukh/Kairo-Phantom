@@ -1,6 +1,8 @@
 """Y‑Sweet Bridge: S3‑persisted Yjs document store for Kairo Enterprise."""
+
 import os
-from typing import Dict, Optional
+from typing import Optional
+
 
 class YSweetBridge:
     """Provides y‑sweet document persistence for Kairo Enterprise."""

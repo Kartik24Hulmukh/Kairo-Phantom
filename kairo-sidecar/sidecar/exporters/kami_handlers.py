@@ -6,14 +6,13 @@ social/email platform layout engines, audio dialogue systems, or subtitle genera
 
 import json
 import logging
-import os
 import re
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
 
 logger = logging.getLogger("kairo.sidecar.kami_handlers")
+
 
 class KamiCommandHandler:
     """Core router for the Kairo Universal Document Compiler (Kami Pipeline)."""
@@ -23,7 +22,9 @@ class KamiCommandHandler:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self._quarkdown = None  # Lazy load
 
-    def handle(self, command: str, document_text: str, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def handle(
+        self, command: str, document_text: str, metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Parse and execute any // kami command.
         """
@@ -61,12 +62,14 @@ class KamiCommandHandler:
             return {
                 "ok": False,
                 "error": str(e),
-                "notification": f"❌ Kami {cmd_name} export failed: {e}"
+                "notification": f"❌ Kami {cmd_name} export failed: {e}",
             }
 
     # ─── Formats Implementation ───
 
-    def _export_pdf(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_pdf(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami pdf — Typeset paged PDF via KamiPdfExporter or Quarkdown."""
         theme = args.get("theme", "github-light")
         ts = self._timestamp()
@@ -74,8 +77,9 @@ class KamiCommandHandler:
 
         # Try high-fidelity reportlab exporter first
         from sidecar.exporters.kami_pdf_exporter import KamiPdfExporter
+
         exporter = KamiPdfExporter()
-        
+
         title = metadata.get("title") or self._extract_h1(text) or "Kairo Document Overview"
         author = metadata.get("author") or "Kairo Phantom"
         subtitle = metadata.get("subtitle") or ""
@@ -93,10 +97,12 @@ class KamiCommandHandler:
             "ok": True,
             "format": "pdf",
             "output_path": written_path,
-            "notification": f"✅ PDF successfully exported: {written_path}"
+            "notification": f"✅ PDF successfully exported: {written_path}",
         }
 
-    def _export_epub(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_epub(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami epub — EPUB 3.2 e-book compiling."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-export-{ts}.epub"
@@ -106,16 +112,20 @@ class KamiCommandHandler:
         if not success:
             # Fallback EPUB stub (valid ZIP container mimicking EPUB)
             with open(out_path, "wb") as f:
-                f.write(b"PK\x03\x04\n\x00\x00\x00\x00\x00" + b"\x00" * 100) # simple valid EPUB file stub header
+                f.write(
+                    b"PK\x03\x04\n\x00\x00\x00\x00\x00" + b"\x00" * 100
+                )  # simple valid EPUB file stub header
 
         return {
             "ok": True,
             "format": "epub",
             "output_path": str(out_path),
-            "notification": f"✅ EPUB e-book exported to {out_path}"
+            "notification": f"✅ EPUB e-book exported to {out_path}",
         }
 
-    def _export_slides(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_slides(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami slides — Interactive Reveal.js presentation."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-slides-{ts}.html"
@@ -127,10 +137,12 @@ class KamiCommandHandler:
             "ok": success,
             "format": "slides",
             "output_path": str(out_path),
-            "notification": f"✅ Interactive slides exported: {out_path}"
+            "notification": f"✅ Interactive slides exported: {out_path}",
         }
 
-    def _export_book(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_book(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami book — Continuous-flow HTML book layout."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-book-{ts}.html"
@@ -142,10 +154,12 @@ class KamiCommandHandler:
             "ok": success,
             "format": "book",
             "output_path": str(out_path),
-            "notification": f"✅ Continuous HTML book exported to {out_path}"
+            "notification": f"✅ Continuous HTML book exported to {out_path}",
         }
 
-    def _export_html(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_html(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami html — Standalone static HTML file."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-export-{ts}.html"
@@ -156,14 +170,16 @@ class KamiCommandHandler:
             "ok": success,
             "format": "html",
             "output_path": str(out_path),
-            "notification": f"✅ Standalone HTML exported: {out_path}"
+            "notification": f"✅ Standalone HTML exported: {out_path}",
         }
 
-    def _format_email(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _format_email(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami email — Formats text as professional email to system clipboard."""
         subject = metadata.get("title") or self._extract_h1(text) or "Important Document Update"
-        clean_body = re.sub(r'[#*`\-–—]', '', text).strip()
-        
+        clean_body = re.sub(r"[#*`\-–—]", "", text).strip()
+
         email_content = f"Subject: {subject}\n\nDear recipient,\n\nI am pleased to share the following summary with you:\n\n{clean_body}\n\nBest regards,\nKairo Colleague"
         self._copy_to_clipboard(email_content)
 
@@ -171,12 +187,14 @@ class KamiCommandHandler:
             "ok": True,
             "format": "email",
             "clipboard_content": email_content,
-            "notification": "📧 Email formatted and copied to clipboard!"
+            "notification": "📧 Email formatted and copied to clipboard!",
         }
 
-    def _format_linkedin(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _format_linkedin(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami linkedin — LinkedIn post formatted to system clipboard."""
-        clean_text = re.sub(r'[#*`\-–—]', '', text).strip()
+        clean_text = re.sub(r"[#*`\-–—]", "", text).strip()
         if len(clean_text) > 1200:
             clean_text = clean_text[:1200] + "..."
 
@@ -187,19 +205,21 @@ class KamiCommandHandler:
             "ok": True,
             "format": "linkedin",
             "clipboard_content": linkedin_post,
-            "notification": "💼 LinkedIn post copied to clipboard!"
+            "notification": "💼 LinkedIn post copied to clipboard!",
         }
 
-    def _format_tweet_thread(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _format_tweet_thread(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami tweet — Tweet thread format to clipboard."""
-        clean_text = re.sub(r'[#*`\-–—]', '', text).strip()
-        
+        clean_text = re.sub(r"[#*`\-–—]", "", text).strip()
+
         # Split text into chunks ~ 240 chars to leave space for numbering and margins
         words = clean_text.split()
         chunks = []
         current_chunk = []
         current_len = 0
-        
+
         for w in words:
             if current_len + len(w) + 1 > 240:
                 chunks.append(" ".join(current_chunk))
@@ -223,10 +243,12 @@ class KamiCommandHandler:
             "ok": True,
             "format": "tweet_thread",
             "clipboard_content": thread_str,
-            "notification": "🐦 Tweet thread formatted and copied to clipboard!"
+            "notification": "🐦 Tweet thread formatted and copied to clipboard!",
         }
 
-    def _export_podcast(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_podcast(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami podcast — Dialogue MP3 podcast summaries."""
         use_local = args.get("local", False) or args.get("local") == "true"
         ts = self._timestamp()
@@ -234,10 +256,12 @@ class KamiCommandHandler:
 
         if use_local:
             from sidecar.exporters.synthesizer_bridge import SynthesizerBridge
+
             synth = SynthesizerBridge()
             written = synth.generate_audio(text, str(out_path))
         else:
             from sidecar.exporters.notebooklm_bridge import NotebookLMBridge
+
             nlm = NotebookLMBridge()
             written = nlm.convert_to_podcast(text, str(out_path))
 
@@ -245,15 +269,18 @@ class KamiCommandHandler:
             "ok": True,
             "format": "podcast",
             "output_path": written,
-            "notification": f"🎙️ Podcast dialogue overview exported: {written}"
+            "notification": f"🎙️ Podcast dialogue overview exported: {written}",
         }
 
-    def _export_subtitles(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_subtitles(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami subtitles — Timed SRT/VTT subtitle files."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-subtitles-{ts}.srt"
 
         from sidecar.exporters.subtxt_bridge import SubtxtBridge
+
         subtxt = SubtxtBridge()
         written = subtxt.generate_subtitles(text, str(out_path))
 
@@ -261,15 +288,18 @@ class KamiCommandHandler:
             "ok": True,
             "format": "subtitles",
             "output_path": written,
-            "notification": f"📝 Subtitles successfully exported to {written}"
+            "notification": f"📝 Subtitles successfully exported to {written}",
         }
 
-    def _generate_quiz(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_quiz(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami quiz — JSON quiz format."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-quiz-{ts}.json"
 
         from sidecar.exporters.notebooklm_bridge import NotebookLMBridge
+
         nlm = NotebookLMBridge()
         quiz_data = nlm.generate_quiz(text)
 
@@ -280,15 +310,18 @@ class KamiCommandHandler:
             "ok": True,
             "format": "quiz",
             "output_path": str(out_path),
-            "notification": f"🧠 Quiz successfully generated at {out_path}"
+            "notification": f"🧠 Quiz successfully generated at {out_path}",
         }
 
-    def _generate_flashcards(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_flashcards(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami flashcards — Interactive study flashcard JSON deck."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-flashcards-{ts}.json"
 
         from sidecar.exporters.notebooklm_bridge import NotebookLMBridge
+
         nlm = NotebookLMBridge()
         cards_data = nlm.generate_flashcards(text)
 
@@ -299,10 +332,12 @@ class KamiCommandHandler:
             "ok": True,
             "format": "flashcards",
             "output_path": str(out_path),
-            "notification": f"🗂️ Flashcard deck exported: {out_path}"
+            "notification": f"🗂️ Flashcard deck exported: {out_path}",
         }
 
-    def _generate_mindmap(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_mindmap(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami mindmap — Visual markdown mindmap."""
         ts = self._timestamp()
         out_path = self.output_dir / f"kairo-mindmap-{ts}.md"
@@ -310,8 +345,8 @@ class KamiCommandHandler:
         # Simple hierarchical extractor
         lines = [line.strip() for line in text.splitlines() if line.strip()]
         mindmap_lines = ["# Mind Map: " + (metadata.get("title") or "Document Analysis"), ""]
-        
-        for line in lines[:20]: # cap at 20 headings/items
+
+        for line in lines[:20]:  # cap at 20 headings/items
             if line.startswith("# "):
                 mindmap_lines.append(f"- {line[2:]}")
             elif line.startswith("## "):
@@ -328,10 +363,12 @@ class KamiCommandHandler:
             "ok": True,
             "format": "mindmap",
             "output_path": str(out_path),
-            "notification": f"🌿 Visual Mind Map saved to {out_path}"
+            "notification": f"🌿 Visual Mind Map saved to {out_path}",
         }
 
-    def _export_all(self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_all(
+        self, text: str, args: Dict[str, Any], metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """// kami all — Batch export to pdf, epub, slides, book, and html formats simultaneously."""
         formats = ["pdf", "epub", "slides", "book", "html"]
         results = {}
@@ -352,7 +389,7 @@ class KamiCommandHandler:
             "ok": True,
             "format": "all",
             "results": results,
-            "notification": f"📦 All formats successfully compiled in: {self.output_dir}"
+            "notification": f"📦 All formats successfully compiled in: {self.output_dir}",
         }
 
     # ─── Helpers ───
@@ -363,7 +400,7 @@ class KamiCommandHandler:
         # Python 3.9+ removeprefix, with fallback for older interpreters
         prefix = "// kami "
         if cleaned.startswith(prefix):
-            cleaned = cleaned[len(prefix):]
+            cleaned = cleaned[len(prefix) :]
         cleaned = cleaned.strip()
 
         if not cleaned:
@@ -377,8 +414,8 @@ class KamiCommandHandler:
             part = parts[i]
             if part.startswith("--"):
                 key = part[2:]
-                if i + 1 < len(parts) and not parts[i+1].startswith("--"):
-                    args[key] = parts[i+1]
+                if i + 1 < len(parts) and not parts[i + 1].startswith("--"):
+                    args[key] = parts[i + 1]
                     i += 2
                 else:
                     args[key] = "true"
@@ -397,14 +434,21 @@ class KamiCommandHandler:
     def _copy_to_clipboard(self, text: str) -> None:
         """Copy a string to the clipboard safely using PowerShell on Windows."""
         from sidecar.clipboard_mutex import CLIPBOARD_LOCK
+
         with CLIPBOARD_LOCK:
             import platform
             import subprocess
+
             if platform.system() == "Windows":
                 # Sanitize single quotes and execute PowerShell command
                 escaped = text.replace("'", "''").replace("\r", "").replace("\n", "`n")
                 cmd = f"Set-Clipboard -Value '{escaped}'"
-                subprocess.run(["powershell", "-Command", cmd], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(
+                    ["powershell", "-Command", cmd],
+                    shell=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             else:
                 # Fallback simple print for non-windows
                 logger.info(f"Clipboard mock payload: {text[:60]}...")
@@ -413,6 +457,7 @@ class KamiCommandHandler:
         """Lazy load the Quarkdown compiler wrapper."""
         if self._quarkdown is None:
             import sidecar.exporters.quarkdown_compiler as qc
+
             self._quarkdown = qc
         return self._quarkdown
 

@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Literal, Union, List, Optional
+
 
 class SlideParagraph(BaseModel):
     text: str
@@ -15,7 +16,10 @@ class SlideParagraph(BaseModel):
         if self.bullet and self.text:
             word_count = len(self.text.strip().split())
             if word_count > 7:
-                raise ValueError(f"Bullet paragraph text exceeds 7 words limit ({word_count} words): '{self.text}'")
+                raise ValueError(
+                    f"Bullet paragraph text exceeds 7 words limit ({word_count} words): '{self.text}'"
+                )
+
 
 class UpdateShapeTextOp(BaseModel):
     type: Literal["update_shape_text"] = "update_shape_text"
@@ -35,6 +39,7 @@ class UpdateShapeTextOp(BaseModel):
             raise ValueError(f"Maximum of 5 bullets per slide allowed, got {len(bullets)}")
         return v
 
+
 class UpdateTitleOp(BaseModel):
     type: Literal["update_title"] = "update_title"
     slide_index: int
@@ -48,6 +53,7 @@ class UpdateTitleOp(BaseModel):
             raise ValueError(f"Title exceeds 7 words limit ({word_count} words): '{v}'")
         return v
 
+
 class AddSlideOp(BaseModel):
     type: Literal["add_slide"] = "add_slide"
     after_index: int
@@ -55,12 +61,15 @@ class AddSlideOp(BaseModel):
     title: Optional[str] = None
     bullets: Optional[List[str]] = None
 
+
 class UpdateNotesOp(BaseModel):
     type: Literal["update_notes"] = "update_notes"
     slide_index: int
     text: str
 
+
 SlideOperation = Union[UpdateShapeTextOp, UpdateTitleOp, AddSlideOp, UpdateNotesOp]
+
 
 class SlideResponse(BaseModel):
     operations: List[SlideOperation]
@@ -68,4 +77,3 @@ class SlideResponse(BaseModel):
     reasoning: Optional[str] = Field(default="", max_length=200)
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
-

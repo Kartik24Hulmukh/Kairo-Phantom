@@ -1,19 +1,25 @@
 import os
 import re
-import json
 import logging
-import traceback
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Any
 
 # Import schemas
 from sidecar.schemas.domain_schemas import (
-    CodeResponse, PDFResponse, BrowserResponse, TerminalResponse,
-    EmailResponse, NotesResponse, DesignResponse, MediaResponse, DataResponse
+    CodeResponse,
+    PDFResponse,
+    BrowserResponse,
+    TerminalResponse,
+    EmailResponse,
+    NotesResponse,
+    DesignResponse,
+    MediaResponse,
+    DataResponse,
 )
 from sidecar.schemas.pptx_schema import SlideResponse
 from sidecar.observability.opik_tracer import track
 
 log = logging.getLogger("kairo-sidecar.other_masters")
+
 
 # Helper result class
 class ValidationResult:
@@ -21,6 +27,7 @@ class ValidationResult:
         self.valid = valid
         self.error = error
         self.op = op
+
 
 # ==========================================
 # 1. PowerPoint Master
@@ -30,20 +37,28 @@ class PowerPointMaster:
         try:
             from sidecar.parsers.pptx_context import PptxContextCapture
             import json
+
             capture = PptxContextCapture()
-            slide_idx = int(cursor_info) if isinstance(cursor_info, (int, str)) and str(cursor_info).isdigit() else 0
-            
+            slide_idx = (
+                int(cursor_info)
+                if isinstance(cursor_info, (int, str)) and str(cursor_info).isdigit()
+                else 0
+            )
+
             ctx = capture.capture(file_path, slide_idx)
             ctx["slide_index"] = slide_idx
             ctx["total_slides"] = ctx.get("slide_count", 0)
-            ctx["layout_name"] = ctx.get("current_slide", {}).get("layout_name", "Title and Content")
+            ctx["layout_name"] = ctx.get("current_slide", {}).get(
+                "layout_name", "Title and Content"
+            )
             ctx["major_font"] = "Segoe UI Light"
             ctx["minor_font"] = "Segoe UI"
             ctx["deck_purpose"] = "sales_deck"
             ctx["shapes_json"] = "[]"
-            
+
             try:
                 from pptx import Presentation
+
                 prs = Presentation(file_path)
                 slide_count = len(prs.slides)
                 ctx["total_slides"] = slide_count
@@ -51,13 +66,17 @@ class PowerPointMaster:
                     slide_idx = max(0, min(slide_idx, slide_count - 1))
                     slide = prs.slides[slide_idx]
                     ctx["layout_name"] = slide.slide_layout.name
-                    
+
                     shapes_list = []
                     for shape in slide.shapes:
                         shape_info = {
-                            "shape_id": str(shape.shape_id) if hasattr(shape, "shape_id") else str(shape.id),
+                            "shape_id": str(shape.shape_id)
+                            if hasattr(shape, "shape_id")
+                            else str(shape.id),
                             "name": shape.name,
-                            "type": str(shape.shape_type) if hasattr(shape, "shape_type") else "Unknown",
+                            "type": str(shape.shape_type)
+                            if hasattr(shape, "shape_type")
+                            else "Unknown",
                         }
                         if shape.has_text_frame:
                             shape_info["text"] = shape.text_frame.text
@@ -65,7 +84,7 @@ class PowerPointMaster:
                     ctx["shapes_json"] = json.dumps(shapes_list, indent=2)
             except Exception as e:
                 log.warning(f"PowerPointMaster python-pptx extraction failed: {e}")
-                
+
             return ctx
         except Exception as e:
             log.warning(f"PowerPointMaster context extraction failed: {e}")
@@ -82,12 +101,15 @@ class PowerPointMaster:
                 "major_font": "Segoe UI Light",
                 "minor_font": "Segoe UI",
                 "deck_purpose": "sales_deck",
-                "shapes_json": "[]"
+                "shapes_json": "[]",
             }
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         # Build prompt using PPTX prompt fragment from Capture
         from sidecar.parsers.pptx_context import PptxContextCapture
+
         capture = PptxContextCapture()
         fragment = capture.to_system_prompt_fragment(context)
 
@@ -113,7 +135,7 @@ Deck purpose: {context.get('deck_purpose', 'sales_deck')}
 User Writing Preferences:
 {mem_context or "No writing preferences learned yet. Use professional defaults."}"""
 
-        intent_part = f"""=== INTENT CLASSIFICATION ===
+        intent_part = """=== INTENT CLASSIFICATION ===
 Intent: PowerPoint Presentation / Slide Design Action"""
 
         system_rules = """SYSTEM:
@@ -201,22 +223,22 @@ OUTPUT (JSON only):
         for op in response.operations:
             op_dict = op.model_dump()
             op_type = op_dict.get("type")
-            
+
             # Slide index bounds check
             slide_count = context.get("slide_count", 0)
             if op_type in ("update_shape_text", "update_title", "update_notes"):
                 idx = op_dict.get("slide_index", 0)
                 if slide_count > 0:
                     op_dict["slide_index"] = max(0, min(idx, slide_count - 1))
-            
+
             # Bullet word count check
             if op_type == "update_shape_text":
                 for p in op_dict.get("paragraphs", []):
                     text = p.get("text", "")
                     words = text.split()
                     if p.get("bullet") and len(words) > 7:
-                        p["text"] = " ".join(words[:7]) # Clamping
-            
+                        p["text"] = " ".join(words[:7])  # Clamping
+
             # Title word count check
             if op_type == "update_title":
                 text = op_dict.get("text", "")
@@ -240,6 +262,7 @@ OUTPUT (JSON only):
         """
         try:
             from sidecar.writers.pptx_writer import write_pptx
+
             result = write_pptx(file_path, operations)
             log.info(
                 f"PowerPointMaster.apply_operations: applied={result.get('applied_count', 0)} "
@@ -270,7 +293,7 @@ class CodeMaster:
             "enclosing_function_signature": "None",
             "enclosing_class_name": "None",
             "existing_imports": [],
-            "surrounding_code": ""
+            "surrounding_code": "",
         }
         if not file_path or not os.path.exists(file_path):
             return context
@@ -279,19 +302,30 @@ class CodeMaster:
             # Simple line/context extractor
             ext = os.path.splitext(file_path)[1].lower()
             lang_map = {
-                ".py": "python", ".rs": "rust", ".ts": "typescript", ".js": "javascript",
-                ".go": "go", ".java": "java", ".cpp": "cpp", ".c": "c", ".sh": "bash"
+                ".py": "python",
+                ".rs": "rust",
+                ".ts": "typescript",
+                ".js": "javascript",
+                ".go": "go",
+                ".java": "java",
+                ".cpp": "cpp",
+                ".c": "c",
+                ".sh": "bash",
             }
             context["language"] = lang_map.get(ext, "python")
-            
-            cursor_line = int(cursor_info) if isinstance(cursor_info, (int, str)) and str(cursor_info).isdigit() else 1
+
+            cursor_line = (
+                int(cursor_info)
+                if isinstance(cursor_info, (int, str)) and str(cursor_info).isdigit()
+                else 1
+            )
             context["cursor_line"] = cursor_line
 
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
-            
+
             context["line_endings"] = "CRLF" if any("\r\n" in l for l in lines[:10]) else "LF"
-            
+
             # Capture surrounding code
             start = max(0, cursor_line - 15)
             end = min(len(lines), cursor_line + 15)
@@ -324,12 +358,16 @@ class CodeMaster:
                 line = lines[idx]
                 stripped = line.strip()
                 indent = len(line) - len(line.lstrip())
-                
+
                 if stripped.startswith(("class ", "class\t")):
                     if class_indent == -1 or indent < class_indent:
                         enclosing_class = stripped.split("{")[0].split(":")[0].strip()
                         class_indent = indent
-                elif stripped.startswith(("def ", "function ", "func ", "fn ")) or "public " in stripped or "private " in stripped:
+                elif (
+                    stripped.startswith(("def ", "function ", "func ", "fn "))
+                    or "public " in stripped
+                    or "private " in stripped
+                ):
                     if func_indent == -1 or indent < func_indent:
                         enclosing_func = stripped.split("{")[0].split(":")[0].strip()
                         func_indent = indent
@@ -341,7 +379,9 @@ class CodeMaster:
             log.warning(f"CodeMaster context extraction failed: {e}")
         return context
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         app_ctx = f"""=== APP CONTEXT ===
 Application Name: VS Code / Code Editor
 Application Type: Integrated Development Environment
@@ -367,7 +407,7 @@ Surrounding code (30 lines):
 User Coding Preferences:
 {mem_context or "No coding preferences learned yet. Use professional defaults."}"""
 
-        intent_part = f"""=== INTENT CLASSIFICATION ===
+        intent_part = """=== INTENT CLASSIFICATION ===
 Intent: Code Generation / Modification Action"""
 
         system_rules = """SYSTEM:
@@ -460,18 +500,20 @@ OUTPUT (JSON only):
     def get_schema_class(self):
         return CodeResponse
 
+
 class WeKnoraPipeline:
     """
     RAG pipeline framework for document Q&A without hallucination,
     exposing citation-backed answers. Uses SQLite FTS5.
     """
+
     def __init__(self, db_path: str = ":memory:"):
-        import sqlite3
         self.db_path = db_path
         self._init_db()
 
     def _init_db(self):
         import sqlite3
+
         conn = sqlite3.connect(self.db_path)
         # Create virtual FTS5 table for chunks if it doesn't exist
         try:
@@ -499,9 +541,10 @@ class WeKnoraPipeline:
     def ingest(self, pdf_path: str):
         if not pdf_path or not os.path.exists(pdf_path):
             return
-        
+
         # Check if already ingested
         import sqlite3
+
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM pdf_chunks WHERE pdf_path = ?", (pdf_path,))
@@ -516,11 +559,13 @@ class WeKnoraPipeline:
         try:
             # Try pdfminer.six
             from pdfminer.high_level import extract_text
+
             text = extract_text(pdf_path)
         except Exception as e:
             log.debug(f"WeKnora: pdfminer.six extraction failed: {e}. Trying parser fallback...")
             try:
                 from sidecar.parsers.pdf_parser import parse_pdf
+
                 parsed = parse_pdf(pdf_path)
                 paragraphs = parsed.get("paragraphs", [])
                 text = "\n".join(p.get("text", "") for p in paragraphs)
@@ -536,7 +581,7 @@ class WeKnoraPipeline:
         chunk_size = 300
         chunks = []
         for i in range(0, len(words), chunk_size):
-            chunk = " ".join(words[i:i+chunk_size])
+            chunk = " ".join(words[i : i + chunk_size])
             if chunk.strip():
                 chunks.append(chunk)
 
@@ -545,7 +590,7 @@ class WeKnoraPipeline:
             for idx, content in enumerate(chunks):
                 cur.execute(
                     "INSERT INTO pdf_chunks (pdf_path, chunk_index, content) VALUES (?, ?, ?)",
-                    (pdf_path, idx, content)
+                    (pdf_path, idx, content),
                 )
             conn.commit()
             log.info(f"WeKnora: Ingested {len(chunks)} chunks of 300 words from {pdf_path}")
@@ -556,32 +601,38 @@ class WeKnoraPipeline:
 
     def query(self, pdf_path: str, question: str, k: int = 5) -> dict:
         import sqlite3
+
         if not os.path.exists(pdf_path):
             return {"answer": "No content available in the PDF.", "citations": []}
-            
+
         self.ingest(pdf_path)
 
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        
+
         # Clean question for FTS5 (remove punctuation, only alphanumeric/spaces)
         clean_q = " ".join(re.findall(r"\w+", question))
-        
+
         results = []
         try:
             # Query virtual FTS5 table
-            cur.execute("""
+            cur.execute(
+                """
                 SELECT chunk_index, content 
                 FROM pdf_chunks 
                 WHERE pdf_path = ? AND content MATCH ? 
                 LIMIT ?
-            """, (pdf_path, clean_q, k))
+            """,
+                (pdf_path, clean_q, k),
+            )
             results = cur.fetchall()
         except sqlite3.OperationalError:
             # Fallback if MATCH fails or FTS5 not available
-            cur.execute("SELECT chunk_index, content FROM pdf_chunks WHERE pdf_path = ?", (pdf_path,))
+            cur.execute(
+                "SELECT chunk_index, content FROM pdf_chunks WHERE pdf_path = ?", (pdf_path,)
+            )
             all_chunks = cur.fetchall()
-            
+
             # Simple keyword match
             q_words = set(clean_q.lower().split())
             scored = []
@@ -626,34 +677,43 @@ class PDFMaster:
             "extracted_content": "Empty PDF",
             "language": "en",
             "confidence": 1.0,
-            "file_path": file_path
+            "file_path": file_path,
         }
         if not file_path or not os.path.exists(file_path):
             return context
 
         try:
             from sidecar.parsers.pdf_extraction_engine import PdfExtractionEngine
+
             engine = PdfExtractionEngine(offline_mode=True)
             result = engine.extract(file_path)
             context["extraction_tier"] = result.tier_used.name if result.tier_used else "PyMuPDF"
             context["page_count"] = result.metadata.get("pages", 1)
-            context["extracted_content"] = result.text[:4000] # Truncate for prompt
+            context["extracted_content"] = result.text[:4000]  # Truncate for prompt
             context["language"] = result.language or "en"
             context["confidence"] = result.confidence
-            
+
             # Ingest to WeKnora
             self._weknora.ingest(file_path)
         except Exception as e:
             log.warning(f"PDFMaster context extraction failed: {e}")
         return context
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         # Query WeKnora if user is asking a question about the PDF
         weknora_ctx = ""
         pdf_path = context.get("file_path", "")
-        if pdf_path and ("?" in user_instruction or "what" in user_instruction.lower() or "explain" in user_instruction.lower() or "say about" in user_instruction.lower()):
+        if pdf_path and (
+            "?" in user_instruction
+            or "what" in user_instruction.lower()
+            or "explain" in user_instruction.lower()
+            or "say about" in user_instruction.lower()
+        ):
             try:
                 import json
+
                 qa_res = self._weknora.query(pdf_path, user_instruction)
                 weknora_ctx = f"\n=== WEKNORA CITATION-BACKED Q&A CONTEXT ===\nAnswer: {qa_res['answer']}\nCitations: {json.dumps(qa_res['citations'])}\n"
             except Exception as e:
@@ -677,7 +737,7 @@ Extracted content:
 User Document Preferences:
 {mem_context or "No preferences learned yet."}"""
 
-        intent_part = f"""=== INTENT CLASSIFICATION ===
+        intent_part = """=== INTENT CLASSIFICATION ===
 Intent: PDF Extraction / Content Transformation Action"""
 
         system_rules = """SYSTEM:
@@ -747,10 +807,9 @@ OUTPUT (JSON only):
         """
         try:
             from sidecar.writers.pdf_output_writer import write_pdf_output
+
             output_path = write_pdf_output(pdf_content, output_type, file_path)
-            log.info(
-                f"PDFMaster.apply_output: wrote {output_type.upper()} → {output_path}"
-            )
+            log.info(f"PDFMaster.apply_output: wrote {output_type.upper()} → {output_path}")
             return output_path
         except Exception as e:
             log.error(f"PDFMaster.apply_output failed: {e}")
@@ -774,18 +833,30 @@ class BrowserMaster:
             "active_element_type": "body",
             "platform": "Chrome",
             "page_content_truncated": "No content loaded",
-            "is_collaborative_editor": is_collab
+            "is_collaborative_editor": is_collab,
         }
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         intent_classification = "Browser Interaction"
         if classification is not None:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Browser Interaction"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Browser Interaction"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Browser Interaction"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Browser Interaction"
+                )
 
         app_ctx = f"""=== APP CONTEXT ===
 Application Name: {context.get('platform', 'Chrome')}
@@ -860,10 +931,14 @@ OUTPUT (JSON only):
         op = response.model_dump()
 
         # 1. Safety check verification
-        if (response.safety_check.is_password_field or 
-            response.safety_check.is_payment_field or 
-            response.safety_check.is_auto_submit):
-            log.warning("Safety block: password, payment, or auto-submit field injection requested.")
+        if (
+            response.safety_check.is_password_field
+            or response.safety_check.is_payment_field
+            or response.safety_check.is_auto_submit
+        ):
+            log.warning(
+                "Safety block: password, payment, or auto-submit field injection requested."
+            )
             return []
 
         # Runtime input guardrails on context: active_element_type, page_url, page_title
@@ -872,14 +947,27 @@ OUTPUT (JSON only):
         title_lower = context.get("page_title", "").lower()
 
         # Reject password, 2fa, otp, security, credit card inputs
-        unsafe_keywords = ["password", "passwd", "creditcard", "cardnumber", "cvv", "cvc", "2fa", "otp", "passcode", "pin_number"]
+        unsafe_keywords = [
+            "password",
+            "passwd",
+            "creditcard",
+            "cardnumber",
+            "cvv",
+            "cvc",
+            "2fa",
+            "otp",
+            "passcode",
+            "pin_number",
+        ]
         is_unsafe = False
         for kw in unsafe_keywords:
-            if (kw in element_lower or 
-                kw in url_lower or 
-                kw in title_lower or
-                "2fa" in url_lower or 
-                "otp" in url_lower):
+            if (
+                kw in element_lower
+                or kw in url_lower
+                or kw in title_lower
+                or "2fa" in url_lower
+                or "otp" in url_lower
+            ):
                 is_unsafe = True
                 break
 
@@ -906,9 +994,10 @@ class TerminalMaster:
     @track("terminal", "extract_context")
     def extract_context(self, file_path: str, cursor_info: Any) -> dict:
         import platform
+
         os_type = platform.system()
         cwd = file_path if file_path and os.path.isdir(file_path) else os.getcwd()
-        
+
         git_info = "No git repository found"
         try:
             if os.path.exists(os.path.join(cwd, ".git")):
@@ -921,18 +1010,30 @@ class TerminalMaster:
             "os_type": os_type,
             "current_directory": cwd,
             "terminal_content": "",
-            "git_info": git_info
+            "git_info": git_info,
         }
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         intent_classification = "Terminal command generation"
         if classification is not None:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Terminal command generation"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Terminal command generation"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Terminal command generation"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Terminal command generation"
+                )
 
         app_ctx = f"""=== APP CONTEXT ===
 Application Name: {context.get('shell_type', 'powershell')}
@@ -1003,10 +1104,10 @@ OUTPUT (JSON only):
     def validate_operations(self, response: TerminalResponse, context: dict) -> List[dict]:
         op_dict = response.model_dump()
         op_dict["injection_method"] = "show_only"
-        
+
         command = op_dict.get("command", "")
         cmd_lower = command.lower()
-        
+
         # 1. Programmatic Danger Level Guardrails
         is_dangerous = False
         dangerous_patterns = ["rm -rf", "drop table", "format", "del /s", "shutdown", "rmdir /s"]
@@ -1014,7 +1115,7 @@ OUTPUT (JSON only):
             if pattern in cmd_lower:
                 is_dangerous = True
                 break
-                
+
         is_caution = False
         caution_patterns = ["rm ", "git reset", "chmod", "chown", "del "]
         if not is_dangerous:
@@ -1026,19 +1127,25 @@ OUTPUT (JSON only):
         if is_dangerous:
             op_dict["danger_level"] = "dangerous"
             if not op_dict.get("warning") or "⚠️" not in op_dict.get("warning", ""):
-                op_dict["warning"] = "⚠️ WARNING: This command is highly destructive or system-critical. " + (op_dict.get("warning") or "")
+                op_dict["warning"] = (
+                    "⚠️ WARNING: This command is highly destructive or system-critical. "
+                    + (op_dict.get("warning") or "")
+                )
         elif is_caution:
             op_dict["danger_level"] = "caution"
             if not op_dict.get("warning") or "review" not in op_dict.get("warning", "").lower():
                 op_dict["warning"] = "Review before running. " + (op_dict.get("warning") or "")
-            
+
             # Ensure the command has a review comment if not present
-            if "# review before running" not in cmd_lower and "rem review before running" not in cmd_lower:
+            if (
+                "# review before running" not in cmd_lower
+                and "rem review before running" not in cmd_lower
+            ):
                 if context.get("shell_type") == "cmd":
                     op_dict["command"] = f"{command} & rem Review before running"
                 else:
                     op_dict["command"] = f"{command} # Review before running"
-        
+
         return [op_dict]
 
     def get_schema_class(self):
@@ -1056,20 +1163,33 @@ class EmailMaster:
             "compose_mode": "new",
             "thread_context": "",
             "preferred_signoff": "Best regards,",
-            "user_name": "User"
+            "user_name": "User",
         }
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
-        signoff = context.get('preferred_signoff', 'Best regards,')
-        name = context.get('user_name', 'User')
+
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
+        signoff = context.get("preferred_signoff", "Best regards,")
+        name = context.get("user_name", "User")
 
         intent_classification = "Email Drafting"
         if classification is not None:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Email Drafting"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Email Drafting"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Email Drafting"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Email Drafting"
+                )
 
         app_ctx = f"""=== APP CONTEXT ===
 Application Name: {context.get('email_client', 'Outlook')}
@@ -1149,7 +1269,7 @@ OUTPUT (JSON only):
 
     def validate_operations(self, response: EmailResponse, context: dict) -> List[dict]:
         op_dict = response.model_dump()
-        
+
         # 1. Subject line rules
         if op_dict.get("subject"):
             sub = op_dict["subject"]
@@ -1171,7 +1291,7 @@ OUTPUT (JSON only):
         emotional_words = ["frustrated", "unacceptable", "terrible", "angry"]
         user_prompt_lower = context.get("user_prompt", "").lower()
         body_lower = op_dict.get("body", "").lower()
-        
+
         has_emotion = any(w in user_prompt_lower or w in body_lower for w in emotional_words)
         if has_emotion:
             op_dict["emotional_flag"] = True
@@ -1188,13 +1308,13 @@ OUTPUT (JSON only):
         ssn_pattern = r"\b\d{3}-\d{2}-\d{4}\b"
         card_pattern = r"\b(?:\d[ -]*?){13,16}\b"
         medical_pattern = r"\bMED-\d{6,10}\b"
-        
+
         thread_has_pii = (
-            re.search(ssn_pattern, thread_ctx) or
-            re.search(card_pattern, thread_ctx) or
-            re.search(medical_pattern, thread_ctx)
+            re.search(ssn_pattern, thread_ctx)
+            or re.search(card_pattern, thread_ctx)
+            or re.search(medical_pattern, thread_ctx)
         )
-        
+
         if thread_has_pii:
             op_dict["pii_redacted"] = True
             for key in ["body", "subject", "suggested_revision"]:
@@ -1224,34 +1344,48 @@ class NotesMaster:
                 app = "Logseq"
             elif ext == ".txt":
                 app = "Plain .md"
-        
+
         return {
             "notes_app": app,
             "file_path": file_path or "scratchpad.md",
             "current_heading": "None",
-            "cursor_line": int(cursor_info) if isinstance(cursor_info, (int, str)) and str(cursor_info).isdigit() else 1,
+            "cursor_line": int(cursor_info)
+            if isinstance(cursor_info, (int, str)) and str(cursor_info).isdigit()
+            else 1,
             "surrounding_content": "",
             "existing_tags": [],
-            "backlinks": []
+            "backlinks": [],
         }
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
-        app = context.get('notes_app', 'Obsidian')
-        file = context.get('file_path', 'scratchpad.md')
-        heading = context.get('current_heading', 'None')
-        line = context.get('cursor_line', 1)
-        surrounding = context.get('surrounding_content', '')
-        tags = context.get('existing_tags', [])
-        links = context.get('backlinks', [])
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
+        app = context.get("notes_app", "Obsidian")
+        file = context.get("file_path", "scratchpad.md")
+        heading = context.get("current_heading", "None")
+        line = context.get("cursor_line", 1)
+        surrounding = context.get("surrounding_content", "")
+        tags = context.get("existing_tags", [])
+        links = context.get("backlinks", [])
 
         intent_classification = "Notes Management"
         if classification is not None:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Notes Management"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Notes Management"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Notes Management"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Notes Management"
+                )
 
         app_ctx = f"""=== APP CONTEXT ===
 App: {app}
@@ -1328,7 +1462,7 @@ class DesignMaster:
         tool = "Figma"
         if file_path and "canva" in file_path.lower():
             tool = "Canva"
-        
+
         return {
             "design_tool": tool,
             "active_frame_name": "Frame 1",
@@ -1336,25 +1470,37 @@ class DesignMaster:
             "color_tokens": {"primary": "#0055FF", "secondary": "#FF8800", "neutral": "#333333"},
             "type_tokens": {"heading": "Inter Bold 32px", "body": "Inter Regular 16px"},
             "layers_json": "[]",
-            "auto_layout_active": False
+            "auto_layout_active": False,
         }
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
-        tool = context.get('design_tool', 'Figma')
-        frame = context.get('active_frame_name', 'Frame 1')
-        dimensions = context.get('canvas_dimensions', [1920, 1080])
-        colors = context.get('color_tokens', {})
-        typography = context.get('type_tokens', {})
-        layers = context.get('layers_json', '[]')
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
+        tool = context.get("design_tool", "Figma")
+        frame = context.get("active_frame_name", "Frame 1")
+        dimensions = context.get("canvas_dimensions", [1920, 1080])
+        colors = context.get("color_tokens", {})
+        typography = context.get("type_tokens", {})
+        layers = context.get("layers_json", "[]")
 
         intent_classification = "Design Action"
         if classification is not None:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Design Action"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Design Action"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Design Action"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Design Action"
+                )
 
         app_ctx = f"""=== APP CONTEXT ===
 Design tool: {tool}
@@ -1454,7 +1600,7 @@ OUTPUT (JSON only):
     def validate_operations(self, response: DesignResponse, context: dict) -> List[dict]:
         op_dict = response.model_dump()
         tool = context.get("design_tool", "Figma").lower()
-        color_tokens = context.get("color_tokens", {})
+        context.get("color_tokens", {})
         auto_layout = context.get("auto_layout_active", False)
 
         if "canva" in tool:
@@ -1463,14 +1609,14 @@ OUTPUT (JSON only):
         validated_ops = []
         for op in response.operations:
             op_data = op.model_dump()
-            
+
             if op_data["type"] == "create_text":
                 if auto_layout:
                     op_data["x"] = 0
                     op_data["y"] = 0
-            
+
             validated_ops.append(op_data)
-            
+
         op_dict["operations"] = validated_ops
         return [op_dict]
 
@@ -1525,10 +1671,9 @@ class MediaMaster:
         if isinstance(cursor_info, dict) and "x" in cursor_info and "y" in cursor_info:
             try:
                 from sidecar.kairo_eye.farscry_service import FarscryService
+
                 service = FarscryService()
-                analysis = service.analyze_cursor_region(
-                    cursor_info["x"], cursor_info["y"]
-                )
+                analysis = service.analyze_cursor_region(cursor_info["x"], cursor_info["y"])
                 ctx["visual_element_type"] = analysis.get("element_type", "TEXT_BLOCK")
                 ctx["selected_element_text"] = analysis.get("element_text", "")
                 ctx["contextual_actions"] = analysis.get("contextual_actions", [])
@@ -1537,17 +1682,29 @@ class MediaMaster:
 
         return ctx
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         intent_classification = "Media Automation"
         if classification is not None:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Media Automation"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Media Automation"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Media Automation"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Media Automation"
+                )
 
-        app_ctx = f"""=== APP CONTEXT ===
+        app_ctx = """=== APP CONTEXT ===
 Application Name: Canva / Adobe Photoshop
 Application Type: Media Image / Video Editor"""
 
@@ -1622,6 +1779,7 @@ class DataMaster:
                 ctx["language"] = "python"
                 try:
                     import json as _json
+
                     if os.path.exists(file_path):
                         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                             nb = _json.load(f)
@@ -1674,9 +1832,24 @@ class DataMaster:
                                 ctx["imports"].append(lib)
 
             # Detect data libraries from imports
-            DATA_LIBS = {"pandas", "numpy", "sklearn", "scikit_learn", "matplotlib", "plotly",
-                         "seaborn", "dask", "pyspark", "tensorflow", "torch", "keras",
-                         "xgboost", "lightgbm", "statsmodels", "scipy"}
+            DATA_LIBS = {
+                "pandas",
+                "numpy",
+                "sklearn",
+                "scikit_learn",
+                "matplotlib",
+                "plotly",
+                "seaborn",
+                "dask",
+                "pyspark",
+                "tensorflow",
+                "torch",
+                "keras",
+                "xgboost",
+                "lightgbm",
+                "statsmodels",
+                "scipy",
+            }
             ctx["data_libraries"] = [lib for lib in ctx["imports"] if lib.lower() in DATA_LIBS]
 
             # Set cursor line from cursor_info
@@ -1691,7 +1864,9 @@ class DataMaster:
 
         return ctx
 
-    def build_prompt(self, user_instruction: str, context: dict, mem_context: str, classification: Any = None) -> str:
+    def build_prompt(
+        self, user_instruction: str, context: dict, mem_context: str, classification: Any = None
+    ) -> str:
         language = context.get("language", "python")
         sql_dialect = context.get("sql_dialect", "generic")
         data_libs = context.get("data_libraries", [])
@@ -1712,9 +1887,19 @@ class DataMaster:
             if isinstance(classification, str):
                 intent_classification = classification
             elif isinstance(classification, dict):
-                intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Data Analysis"
+                intent_classification = (
+                    classification.get("task_type")
+                    or classification.get("intent")
+                    or classification.get("classification")
+                    or "Data Analysis"
+                )
             else:
-                intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Data Analysis"
+                intent_classification = (
+                    getattr(classification, "task_type", None)
+                    or getattr(classification, "intent", None)
+                    or getattr(classification, "classification", None)
+                    or "Data Analysis"
+                )
 
         app_ctx = f"""=== APP CONTEXT ===
 Application Name: Jupyter Notebook / DBeaver / RStudio

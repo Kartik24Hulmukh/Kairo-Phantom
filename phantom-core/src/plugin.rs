@@ -1,11 +1,9 @@
 /// Plugin System for Kairo Phantom.
 /// Allows community to add specialized app fingerprinters and AI agents.
-
 use crate::context::AppEnvironment;
 use crate::document_context::DocumentContext;
-use std::sync::Arc;
 use serde::Deserialize;
-
+use std::sync::Arc;
 
 /// Trait for identifying the application environment.
 pub trait AppFingerprinter: Send + Sync {
@@ -23,13 +21,13 @@ pub enum DomainCapability {
 pub trait SwarmAgent: Send + Sync {
     /// The unique identifier for this agent.
     fn id(&self) -> &str;
-    
+
     /// The human-readable name of the agent.
     fn name(&self) -> &str;
-    
+
     /// Returns the system prompt for this agent based on document context.
     fn build_system_prompt(&self, doc_ctx: &DocumentContext) -> String;
-    
+
     /// Returns whether this agent is a good fit for the current context.
     /// Higher score = better fit.
     fn match_score(&self, doc_ctx: &DocumentContext) -> u8;
@@ -53,7 +51,9 @@ impl Default for FingerprinterRegistry {
 
 impl FingerprinterRegistry {
     pub fn new() -> Self {
-        Self { fingerprinters: Vec::new() }
+        Self {
+            fingerprinters: Vec::new(),
+        }
     }
 
     pub fn register(&mut self, fingerprinter: Box<dyn AppFingerprinter>) {
@@ -99,7 +99,8 @@ impl AgentRegistry {
     }
 
     pub fn select_best(&self, doc_ctx: &DocumentContext) -> Option<Arc<dyn SwarmAgent>> {
-        self.agents.iter()
+        self.agents
+            .iter()
             .max_by_key(|a| a.match_score(doc_ctx))
             .cloned()
     }
@@ -107,7 +108,8 @@ impl AgentRegistry {
     /// Returns only agents with `Real` (non-PromptOnly) capabilities.
     /// Use this for public-facing capability listings to avoid advertising thin expert domains.
     pub fn public_agents(&self) -> Vec<Arc<dyn SwarmAgent>> {
-        self.agents.iter()
+        self.agents
+            .iter()
             .filter(|a| a.capability() == DomainCapability::Real)
             .cloned()
             .collect()
@@ -116,7 +118,8 @@ impl AgentRegistry {
     /// Returns a map of agent id → capability for all registered agents.
     /// PromptOnly agents are included but clearly marked so callers can strip them.
     pub fn capability_map(&self) -> Vec<(String, DomainCapability)> {
-        self.agents.iter()
+        self.agents
+            .iter()
             .map(|a| (a.id().to_string(), a.capability()))
             .collect()
     }
@@ -139,12 +142,16 @@ impl AppFingerprinter for DynamicFingerprinter {
 
         let mut matches = true;
         if let Some(ref p) = self.process {
-            if !process_name.to_lowercase().contains(&p.to_lowercase()) { matches = false; }
+            if !process_name.to_lowercase().contains(&p.to_lowercase()) {
+                matches = false;
+            }
         }
         if let Some(ref t) = self.title_contains {
-            if !window_title.to_lowercase().contains(&t.to_lowercase()) { matches = false; }
+            if !window_title.to_lowercase().contains(&t.to_lowercase()) {
+                matches = false;
+            }
         }
-        
+
         if matches {
             Some(AppEnvironment::Unknown(self.env_label.clone()))
         } else {
@@ -152,7 +159,6 @@ impl AppFingerprinter for DynamicFingerprinter {
         }
     }
 }
-
 
 /// Dynamic agent loaded from TOML.
 #[derive(Deserialize, Clone)]
@@ -165,16 +171,27 @@ pub struct DynamicAgent {
 }
 
 impl SwarmAgent for DynamicAgent {
-    fn id(&self) -> &str { &self.id }
-    fn name(&self) -> &str { &self.name }
+    fn id(&self) -> &str {
+        &self.id
+    }
+    fn name(&self) -> &str {
+        &self.name
+    }
     fn build_system_prompt(&self, doc_ctx: &DocumentContext) -> String {
         let base = crate::ai::KAIRO_SYSTEM_PROMPT;
         let doc_fragment = doc_ctx.to_system_prompt_fragment();
-        format!("{}\n\n[DOCUMENT INTELLIGENCE]\n{}\n\n*** ROLE: {} ***\n{}", base, doc_fragment, self.name, self.system_prompt)
+        format!(
+            "{}\n\n[DOCUMENT INTELLIGENCE]\n{}\n\n*** ROLE: {} ***\n{}",
+            base, doc_fragment, self.name, self.system_prompt
+        )
     }
     fn match_score(&self, doc_ctx: &DocumentContext) -> u8 {
         if let Some(ref pattern) = self.match_pattern {
-            if doc_ctx.prompt_text.to_lowercase().contains(&pattern.to_lowercase()) {
+            if doc_ctx
+                .prompt_text
+                .to_lowercase()
+                .contains(&pattern.to_lowercase())
+            {
                 return 90;
             }
         }
@@ -189,4 +206,3 @@ pub struct PluginConfig {
     pub fingerprinters: Option<Vec<DynamicFingerprinter>>,
     pub agents: Option<Vec<DynamicAgent>>,
 }
-

@@ -23,8 +23,8 @@ use std::thread;
 use std::time::Duration;
 use tracing::{debug, error, info, warn};
 
-use std::sync::atomic::AtomicBool;
 use once_cell::sync::Lazy;
+use std::sync::atomic::AtomicBool;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RecordedAction {
@@ -37,9 +37,12 @@ pub struct RecordedAction {
 }
 
 pub static IS_RECORDING: AtomicBool = AtomicBool::new(false);
-pub static RECORDING_NAME: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("recorded_workflow".to_string()));
-pub static RECORDED_ACTIONS: Lazy<Mutex<Vec<RecordedAction>>> = Lazy::new(|| Mutex::new(Vec::new()));
-pub static LAST_EVENT_TIME: Lazy<Mutex<std::time::Instant>> = Lazy::new(|| Mutex::new(std::time::Instant::now()));
+pub static RECORDING_NAME: Lazy<Mutex<String>> =
+    Lazy::new(|| Mutex::new("recorded_workflow".to_string()));
+pub static RECORDED_ACTIONS: Lazy<Mutex<Vec<RecordedAction>>> =
+    Lazy::new(|| Mutex::new(Vec::new()));
+pub static LAST_EVENT_TIME: Lazy<Mutex<std::time::Instant>> =
+    Lazy::new(|| Mutex::new(std::time::Instant::now()));
 
 /// Default polling interval for the foreground-window watcher.
 const POLL_INTERVAL_MS: u64 = 250;
@@ -63,21 +66,21 @@ impl AppChangedEvent {
     /// Maps known process names to friendly labels.
     pub fn label_for_process(process_name: &str) -> &'static str {
         match process_name.to_ascii_lowercase().as_str() {
-            s if s.starts_with("winword")      => "Microsoft Word",
-            s if s.starts_with("excel")        => "Microsoft Excel",
-            s if s.starts_with("powerpnt")     => "Microsoft PowerPoint",
-            s if s.starts_with("outlook")      => "Microsoft Outlook",
-            s if s.starts_with("code")         => "Visual Studio Code",
-            s if s.starts_with("notepad++")    => "Notepad++",
-            s if s.starts_with("notepad")      => "Notepad",
-            s if s.starts_with("chrome")       => "Google Chrome",
-            s if s.starts_with("msedge")       => "Microsoft Edge",
-            s if s.starts_with("firefox")      => "Mozilla Firefox",
-            s if s.starts_with("acrobat")      => "Adobe Acrobat",
-            s if s.starts_with("powershell")   => "PowerShell",
+            s if s.starts_with("winword") => "Microsoft Word",
+            s if s.starts_with("excel") => "Microsoft Excel",
+            s if s.starts_with("powerpnt") => "Microsoft PowerPoint",
+            s if s.starts_with("outlook") => "Microsoft Outlook",
+            s if s.starts_with("code") => "Visual Studio Code",
+            s if s.starts_with("notepad++") => "Notepad++",
+            s if s.starts_with("notepad") => "Notepad",
+            s if s.starts_with("chrome") => "Google Chrome",
+            s if s.starts_with("msedge") => "Microsoft Edge",
+            s if s.starts_with("firefox") => "Mozilla Firefox",
+            s if s.starts_with("acrobat") => "Adobe Acrobat",
+            s if s.starts_with("powershell") => "PowerShell",
             s if s.starts_with("windowsterminal") => "Windows Terminal",
-            s if s.starts_with("cmd")          => "Command Prompt",
-            _                                  => "Unknown",
+            s if s.starts_with("cmd") => "Command Prompt",
+            _ => "Unknown",
         }
     }
 }
@@ -139,10 +142,10 @@ impl AppWatcher {
 
     #[cfg(target_os = "windows")]
     fn monitor_uia_events(stop_flag: Arc<Mutex<bool>>) {
+        use std::sync::atomic::Ordering;
+        use std::time::Instant;
         use uiautomation::core::UIAutomation;
         use uiautomation::types::UIProperty;
-        use std::time::Instant;
-        use std::sync::atomic::Ordering;
 
         let uia = match UIAutomation::new() {
             Ok(u) => u,
@@ -156,16 +159,24 @@ impl AppWatcher {
                 // 1. Update World Model Cache and compute diff/delta
                 #[cfg(feature = "cua")]
                 {
-                    let hwnd = unsafe { windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow().0 as isize };
+                    let hwnd = unsafe {
+                        windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow().0 as isize
+                    };
                     if let Ok(id) = focused.get_runtime_id() {
                         if let Ok(new_tree) = crate::cua::world_model::build_tree(&focused, 0) {
-                            let mut model_map = crate::cua::world_model::GLOBAL_WORLD_MODEL.lock().unwrap();
+                            let mut model_map =
+                                crate::cua::world_model::GLOBAL_WORLD_MODEL.lock().unwrap();
                             let app_model = model_map.entry(hwnd).or_default();
-                            
+
                             if let Some(ref old_tree) = app_model.root {
                                 let mut delta = crate::cua::world_model::UiDelta::default();
-                                crate::cua::world_model::diff_trees(old_tree, &new_tree, &mut delta);
-                                if !delta.added.is_empty() || !delta.removed.is_empty() || !delta.value_changed.is_empty() {
+                                crate::cua::world_model::diff_trees(
+                                    old_tree, &new_tree, &mut delta,
+                                );
+                                if !delta.added.is_empty()
+                                    || !delta.removed.is_empty()
+                                    || !delta.value_changed.is_empty()
+                                {
                                     info!(
                                         "[World Model] UiDelta detected for hwnd {}: {} added, {} removed, {} value changed",
                                         hwnd, delta.added.len(), delta.removed.len(), delta.value_changed.len()
@@ -230,7 +241,7 @@ impl AppWatcher {
                     if let Some(home) = dirs::home_dir() {
                         let dir = home.join(".kairo-phantom").join("workflows");
                         let _ = std::fs::create_dir_all(&dir);
-                        let path = dir.join(format!("{}.toml", name));
+                        let path = dir.join(format!("{name}.toml"));
 
                         #[derive(serde::Serialize)]
                         struct TomlWorkflow {
@@ -245,7 +256,12 @@ impl AppWatcher {
                         app_shortcuts.insert(name.clone(), actions.clone());
 
                         let mut apps = std::collections::HashMap::new();
-                        apps.insert("generic".to_string(), TomlApp { shortcuts: app_shortcuts });
+                        apps.insert(
+                            "generic".to_string(),
+                            TomlApp {
+                                shortcuts: app_shortcuts,
+                            },
+                        );
 
                         let workflow = TomlWorkflow { apps };
                         if let Ok(toml_str) = toml::to_string(&workflow) {
@@ -266,7 +282,10 @@ impl AppWatcher {
     fn run_loop(&self, stop_flag: Arc<Mutex<bool>>) {
         let mut last_pid: u32 = 0;
 
-        info!("[AppWatcher] Polling foreground window every {}ms", self.poll_interval.as_millis());
+        info!(
+            "[AppWatcher] Polling foreground window every {}ms",
+            self.poll_interval.as_millis()
+        );
 
         loop {
             // Honour stop signal
@@ -280,7 +299,10 @@ impl AppWatcher {
             if let Some(event) = Self::poll_foreground() {
                 if event.pid != last_pid {
                     last_pid = event.pid;
-                    debug!("[AppWatcher] App changed → {} ({})", event.app_label, event.process_name);
+                    debug!(
+                        "[AppWatcher] App changed → {} ({})",
+                        event.app_label, event.process_name
+                    );
                     if let Err(e) = self.tx.send(event) {
                         warn!("[AppWatcher] Receiver dropped — stopping: {e}");
                         break;
@@ -311,8 +333,7 @@ impl AppWatcher {
         use windows::Win32::Foundation::{CloseHandle, HWND};
         use windows::Win32::System::ProcessStatus::K32GetModuleBaseNameW;
         use windows::Win32::System::Threading::{
-            OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
-            PROCESS_VM_READ,
+            OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_VM_READ,
         };
         use windows::Win32::UI::WindowsAndMessaging::{
             GetForegroundWindow, GetWindowTextW, GetWindowThreadProcessId,
@@ -408,17 +429,35 @@ mod tests {
 
     #[test]
     fn test_label_for_known_process() {
-        assert_eq!(AppChangedEvent::label_for_process("WINWORD.EXE"), "Microsoft Word");
-        assert_eq!(AppChangedEvent::label_for_process("EXCEL.EXE"), "Microsoft Excel");
-        assert_eq!(AppChangedEvent::label_for_process("Code.exe"), "Visual Studio Code");
-        assert_eq!(AppChangedEvent::label_for_process("POWERPNT.EXE"), "Microsoft PowerPoint");
-        assert_eq!(AppChangedEvent::label_for_process("chrome.exe"), "Google Chrome");
+        assert_eq!(
+            AppChangedEvent::label_for_process("WINWORD.EXE"),
+            "Microsoft Word"
+        );
+        assert_eq!(
+            AppChangedEvent::label_for_process("EXCEL.EXE"),
+            "Microsoft Excel"
+        );
+        assert_eq!(
+            AppChangedEvent::label_for_process("Code.exe"),
+            "Visual Studio Code"
+        );
+        assert_eq!(
+            AppChangedEvent::label_for_process("POWERPNT.EXE"),
+            "Microsoft PowerPoint"
+        );
+        assert_eq!(
+            AppChangedEvent::label_for_process("chrome.exe"),
+            "Google Chrome"
+        );
         assert_eq!(AppChangedEvent::label_for_process("notepad.exe"), "Notepad");
     }
 
     #[test]
     fn test_label_for_unknown_process() {
-        assert_eq!(AppChangedEvent::label_for_process("random_app.exe"), "Unknown");
+        assert_eq!(
+            AppChangedEvent::label_for_process("random_app.exe"),
+            "Unknown"
+        );
         assert_eq!(AppChangedEvent::label_for_process(""), "Unknown");
     }
 

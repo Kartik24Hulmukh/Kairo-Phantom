@@ -121,7 +121,7 @@ class MemoryExportImport:
 
         # Verify and strip magic header
         if raw.startswith(b"KAIRO_MEM\x00"):
-            raw = raw[len(b"KAIRO_MEM\x00"):]
+            raw = raw[len(b"KAIRO_MEM\x00") :]
         else:
             # Try loading as plain JSON (backward compat)
             try:
@@ -191,7 +191,5 @@ class MemoryExportImport:
             f.write(b"KAIRO_MEM\x00")
             f.write(encrypted)
 
-        log.info(
-            f"Exported {len(memories)} memories to .kairo-memory format at {output_path}"
-        )
+        log.info(f"Exported {len(memories)} memories to .kairo-memory format at {output_path}")
         return output_path

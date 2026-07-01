@@ -18,4 +18,3 @@ GENERATOR_MODEL = "ollama/llama3.2:latest"
 TESTED_MODEL = "ollama/qwen2.5:7b"
 JUDGE_MODEL_A = "ollama/qwen2.5:7b"
 JUDGE_MODEL_B = "ollama/llama3.2:latest"
-

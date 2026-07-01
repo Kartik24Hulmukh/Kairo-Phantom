@@ -15,8 +15,8 @@ from __future__ import annotations
 import re
 import time
 import logging
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List
 
 log = logging.getLogger("kairo-sidecar.word.context_extractor")
 
@@ -25,6 +25,7 @@ log = logging.getLogger("kairo-sidecar.word.context_extractor")
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ParagraphInfo:
     """Rich per-paragraph metadata extracted from a .docx paragraph."""
@@ -32,9 +33,9 @@ class ParagraphInfo:
     index: int
     text: str
     style_name: str
-    level: int                          # heading level (0 = body text)
+    level: int  # heading level (0 = body text)
     is_list: bool
-    runs: List[dict]                    # [{"text": str, "bold": bool, "italic": bool, "font_size": float}]
+    runs: List[dict]  # [{"text": str, "bold": bool, "italic": bool, "font_size": float}]
     word_count: int
 
 
@@ -43,7 +44,7 @@ class WordDocumentContext:
     """Full document snapshot for prompt assembly."""
 
     paragraphs: List[ParagraphInfo]
-    purpose: str                        # legal / academic / business_memo / technical / report / creative
+    purpose: str  # legal / academic / business_memo / technical / report / creative
     styles_used: List[str]
     section_count: int
     total_words: int
@@ -53,6 +54,7 @@ class WordDocumentContext:
 # ---------------------------------------------------------------------------
 # Extractor implementation
 # ---------------------------------------------------------------------------
+
 
 class WordContextExtractor:
     """
@@ -65,16 +67,50 @@ class WordContextExtractor:
     """
 
     # ── Purpose-detection keyword sets ────────────────────────────────────────
-    _LEGAL_KEYWORDS     = {"whereas", "herein", "hereinafter", "party", "parties", "agreement",
-                           "non-disclosure", "nda", "indemnify", "covenant", "governing law"}
-    _ACADEMIC_KEYWORDS  = {"abstract", "references", "bibliography", "hypothesis", "methodology",
-                           "literature review", "conclusion", "appendix"}
-    _MEMO_KEYWORDS      = {"to:", "from:", "re:", "date:", "subject:", "cc:"}
-    _TECHNICAL_KEYWORDS = {"installation", "configuration", "api", "endpoint", "deployment",
-                           "docker", "bash", "shell", "repository"}
-    _REPORT_KEYWORDS    = {"executive summary", "findings", "recommendations",
-                           "key performance", "kpi", "dashboard"}
-    _CREATIVE_KEYWORDS  = {"she said", "he said", "\"", "\u201c", "\u201d"}  # dialogue indicators
+    _LEGAL_KEYWORDS = {
+        "whereas",
+        "herein",
+        "hereinafter",
+        "party",
+        "parties",
+        "agreement",
+        "non-disclosure",
+        "nda",
+        "indemnify",
+        "covenant",
+        "governing law",
+    }
+    _ACADEMIC_KEYWORDS = {
+        "abstract",
+        "references",
+        "bibliography",
+        "hypothesis",
+        "methodology",
+        "literature review",
+        "conclusion",
+        "appendix",
+    }
+    _MEMO_KEYWORDS = {"to:", "from:", "re:", "date:", "subject:", "cc:"}
+    _TECHNICAL_KEYWORDS = {
+        "installation",
+        "configuration",
+        "api",
+        "endpoint",
+        "deployment",
+        "docker",
+        "bash",
+        "shell",
+        "repository",
+    }
+    _REPORT_KEYWORDS = {
+        "executive summary",
+        "findings",
+        "recommendations",
+        "key performance",
+        "kpi",
+        "dashboard",
+    }
+    _CREATIVE_KEYWORDS = {"she said", "he said", '"', "\u201c", "\u201d"}  # dialogue indicators
 
     def extract(self, doc) -> WordDocumentContext:
         """
@@ -147,22 +183,26 @@ class WordContextExtractor:
                     except Exception:
                         pass
 
-                runs.append({
-                    "text": run.text,
-                    "bold": bold,
-                    "italic": italic,
-                    "font_size": font_size,
-                })
+                runs.append(
+                    {
+                        "text": run.text,
+                        "bold": bold,
+                        "italic": italic,
+                        "font_size": font_size,
+                    }
+                )
 
-            paragraphs.append(ParagraphInfo(
-                index=i,
-                text=text[:500],        # cap per-paragraph for memory safety
-                style_name=style_name,
-                level=level,
-                is_list=is_list,
-                runs=runs,
-                word_count=word_count,
-            ))
+            paragraphs.append(
+                ParagraphInfo(
+                    index=i,
+                    text=text[:500],  # cap per-paragraph for memory safety
+                    style_name=style_name,
+                    level=level,
+                    is_list=is_list,
+                    runs=runs,
+                    word_count=word_count,
+                )
+            )
 
         section_count = max(1, len(list(doc.sections)))
         purpose = self._detect_purpose(paragraphs)
@@ -227,7 +267,7 @@ class WordContextExtractor:
         if any(kw in sample_text for kw in self._CREATIVE_KEYWORDS):
             return "creative"
 
-        return "business_memo"     # safe default
+        return "business_memo"  # safe default
 
     # ── Style extraction ──────────────────────────────────────────────────────
 

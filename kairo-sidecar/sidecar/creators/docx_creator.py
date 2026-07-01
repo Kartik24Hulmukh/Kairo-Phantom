@@ -32,7 +32,7 @@ Usage
 import os
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 log = logging.getLogger("kairo-sidecar.docx_creator")
 
@@ -105,7 +105,7 @@ class DocxCreator:
             # Bullet list items
             for bullet in section.get("bullets", []):
                 if bullet:
-                    para = doc.add_paragraph(str(bullet), style="List Bullet")
+                    doc.add_paragraph(str(bullet), style="List Bullet")
 
             # Table
             table_data = section.get("table")
@@ -133,9 +133,10 @@ class DocxCreator:
         # Resolve output path
         if not output_path:
             KAIRO_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-            safe_title = "".join(
-                c if c.isalnum() or c in " _-" else "_" for c in title
-            ).strip()[:50] or "Document"
+            safe_title = (
+                "".join(c if c.isalnum() or c in " _-" else "_" for c in title).strip()[:50]
+                or "Document"
+            )
             output_path = str(KAIRO_DOCS_DIR / f"{safe_title}.docx")
 
         doc.save(output_path)

@@ -1,11 +1,10 @@
 """Tests for PassivePreloader."""
+
 import sys
 import os
 import time
-import tempfile
-import threading
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from sidecar.kairo_eye.passive_preloader import PassivePreloader, get_preloader
 
@@ -98,15 +97,14 @@ def test_get_preloader_singleton():
 def test_model_preloader_warmup():
     from unittest.mock import patch
     import asyncio
-    
+
     # Mock call_with_schema so it doesn't try to make network calls to LiteLLM
     with patch("sidecar.llm_caller.call_with_schema") as mock_call:
         from sidecar.main import _preload_models
-        
+
         # We also need to mock asyncio.sleep so we don't wait 2 seconds
         with patch("asyncio.sleep", return_value=None):
             asyncio.run(_preload_models())
-            
+
         # Verify call_with_schema was called
         assert mock_call.call_count >= 2
-

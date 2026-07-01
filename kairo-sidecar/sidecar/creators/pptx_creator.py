@@ -46,7 +46,7 @@ Usage
 import os
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 log = logging.getLogger("kairo-sidecar.pptx_creator")
 
@@ -88,8 +88,6 @@ class PptxCreator:
         """
         from pptx import Presentation
         from pptx.util import Inches, Pt
-        from pptx.dml.color import RGBColor
-        from pptx.enum.text import PP_ALIGN
 
         prs = Presentation()
 
@@ -217,9 +215,10 @@ class PptxCreator:
         # Resolve output path
         if not output_path:
             KAIRO_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-            safe_title = "".join(
-                c if c.isalnum() or c in " _-" else "_" for c in title
-            ).strip()[:50] or "Presentation"
+            safe_title = (
+                "".join(c if c.isalnum() or c in " _-" else "_" for c in title).strip()[:50]
+                or "Presentation"
+            )
             output_path = str(KAIRO_DOCS_DIR / f"{safe_title}.pptx")
 
         prs.save(output_path)

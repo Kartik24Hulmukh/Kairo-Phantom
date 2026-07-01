@@ -1,6 +1,5 @@
 /// Config — loads ~/.kairo-phantom/config.toml
 /// Falls back to sensible defaults (Ollama local).
-
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -104,7 +103,9 @@ pub struct SsoConfigSection {
     pub idle_timeout_secs: u64,
 }
 
-fn default_idle_timeout() -> u64 { 3600 }
+fn default_idle_timeout() -> u64 {
+    3600
+}
 
 /// SPIFFE configuration section (mirrors enterprise::spiffe_identity::SpiffeConfig)
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -130,9 +131,15 @@ impl Default for SpiffeConfigSection {
     }
 }
 
-fn spiffe_enabled_default() -> bool { true }
-fn default_trust_domain() -> String { "kairo-phantom.io".to_string() }
-fn default_agent_name() -> String { "ghost-writer".to_string() }
+fn spiffe_enabled_default() -> bool {
+    true
+}
+fn default_trust_domain() -> String {
+    "kairo-phantom.io".to_string()
+}
+fn default_agent_name() -> String {
+    "ghost-writer".to_string()
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct AuditConfig {
@@ -154,25 +161,28 @@ pub struct ComplianceConfig {
     pub block_on_error: bool,
 }
 
-fn compliance_enabled_default() -> bool { true }
-fn block_on_error_default() -> bool { true }
-
+fn compliance_enabled_default() -> bool {
+    true
+}
+fn block_on_error_default() -> bool {
+    true
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SwarmConfig {
     /// Enables the multi-agent LLM routing pipeline.
     #[serde(default)]
     pub enabled: bool,
-    
+
     /// The Brain: analyzes the context and delegates.
     pub brain: Option<ModelConfig>,
-    
+
     /// Content & Prose Specialist
     pub content_agent: Option<ModelConfig>,
-    
+
     /// Reasoning & Code Specialist
     pub reasoning_agent: Option<ModelConfig>,
-    
+
     /// Design & Layout Specialist
     pub design_agent: Option<ModelConfig>,
 }
@@ -204,9 +214,15 @@ impl Default for ModelConfig {
     }
 }
 
-fn default_hotkey() -> String { "ctrl+space".into() }
-fn default_typing_delay() -> u64 { 15 }
-fn default_provider() -> String { "ollama".into() }
+fn default_hotkey() -> String {
+    "ctrl+space".into()
+}
+fn default_typing_delay() -> u64 {
+    15
+}
+fn default_provider() -> String {
+    "ollama".into()
+}
 
 // ── Domain 8: Multimodal Input Configuration ─────────────────────────────────
 
@@ -229,7 +245,6 @@ pub struct VoiceConfig {
     pub max_recording_seconds: u64,
 
     // ── Moonshine Voice (primary ASR engine) ──────────────────────────────
-
     /// Use Moonshine Voice as primary ASR engine (MIT license, 107ms inference)
     #[serde(default = "default_true")]
     pub moonshine_enabled: bool,
@@ -277,7 +292,6 @@ pub struct TtsConfig {
     pub speak_responses: bool,
 
     // ── sherpa-onnx TTS ───────────────────────────────────────────────────
-
     /// Use sherpa-onnx-offline-tts as primary TTS (Apache 2.0, requires model download)
     #[serde(default = "default_true")]
     pub sherpa_enabled: bool,
@@ -340,32 +354,58 @@ impl Default for ScreenContextConfig {
     }
 }
 
-fn default_true() -> bool { true }
-fn default_whisper_model() -> String { "base.en".into() }
-fn default_voice_lang() -> String { "en".into() }
-fn default_silence_threshold() -> u64 { 1500 }
-fn default_max_recording() -> u64 { 120 }
-fn default_tts_voice() -> String { "Microsoft David".into() }
-fn default_wake_phrase() -> String { "hey kairo".into() }
-fn default_sensitivity() -> f32 { 0.5 }
-fn default_moonshine_port() -> u16 { 7439 }
-fn default_moonshine_model() -> String { "moonshine/moonshine-base".into() }
-fn default_confidence_threshold() -> f32 { 0.6 }
-fn default_sherpa_model() -> String { "en_US-amy-medium".into() }
-
-fn default_document_graph_folders() -> Vec<String> {
-    vec![
-        dirs::home_dir()
-            .unwrap_or_default()
-            .join("Documents")
-            .join("Kairo")
-            .to_string_lossy()
-            .to_string()
-    ]
+fn default_true() -> bool {
+    true
+}
+fn default_whisper_model() -> String {
+    "base.en".into()
+}
+fn default_voice_lang() -> String {
+    "en".into()
+}
+fn default_silence_threshold() -> u64 {
+    1500
+}
+fn default_max_recording() -> u64 {
+    120
+}
+fn default_tts_voice() -> String {
+    "Microsoft David".into()
+}
+fn default_wake_phrase() -> String {
+    "hey kairo".into()
+}
+fn default_sensitivity() -> f32 {
+    0.5
+}
+fn default_moonshine_port() -> u16 {
+    7439
+}
+fn default_moonshine_model() -> String {
+    "moonshine/moonshine-base".into()
+}
+fn default_confidence_threshold() -> f32 {
+    0.6
+}
+fn default_sherpa_model() -> String {
+    "en_US-amy-medium".into()
 }
 
-fn default_relevance_floor() -> f32 { 0.05 }
-fn default_clarity_threshold() -> f32 { 0.4 }
+fn default_document_graph_folders() -> Vec<String> {
+    vec![dirs::home_dir()
+        .unwrap_or_default()
+        .join("Documents")
+        .join("Kairo")
+        .to_string_lossy()
+        .to_string()]
+}
+
+fn default_relevance_floor() -> f32 {
+    0.05
+}
+fn default_clarity_threshold() -> f32 {
+    0.4
+}
 
 impl Default for PhantomConfig {
     fn default() -> Self {
@@ -387,7 +427,6 @@ impl Default for PhantomConfig {
         }
     }
 }
-
 
 impl PhantomConfig {
     /// Load config from ~/.kairo-phantom/config.toml or return defaults
@@ -425,9 +464,9 @@ pub fn get_client_builder() -> reqwest::ClientBuilder {
     let mut builder = reqwest::Client::builder();
     if std::env::var("KAIRO_OFFLINE").unwrap_or_default() == "1" {
         if let Ok(proxy) = reqwest::Proxy::all("http://127.0.0.1:9999") {
-            builder = builder.proxy(proxy.no_proxy(reqwest::NoProxy::from_string("localhost,127.0.0.1,::1")));
+            builder = builder
+                .proxy(proxy.no_proxy(reqwest::NoProxy::from_string("localhost,127.0.0.1,::1")));
         }
     }
     builder
 }
-

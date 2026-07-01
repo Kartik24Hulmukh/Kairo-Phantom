@@ -13,13 +13,10 @@ passes through PromptShield before reaching the agent.
 from __future__ import annotations
 
 import logging
-import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, Callable
 
 from sidecar.connectors.telegram_connector import (
-    screen_inbound_message,
-    screen_outbound_message,
     is_airgap_mode,
 )
 
@@ -29,6 +26,7 @@ log = logging.getLogger("kairo-sidecar.connectors.email")
 @dataclass
 class EmailInboundMessage:
     """An email message received via IMAP."""
+
     from_address: str
     subject: str
     body: str

@@ -12,6 +12,7 @@ Changes vs Phase 4 baseline:
     directory under <base_dir>/sandboxes/. After the run it is deleted, so
     no cross-contamination between concurrent sandboxes is possible.
 """
+
 from __future__ import annotations
 
 import os
@@ -129,7 +130,9 @@ class SandboxRunner:
         try:
             result = execute_fn(sandbox_path, scenario)
             elapsed = time.perf_counter() - t0
-            verdict = result.get("oracle_verdict", "PASS" if result.get("success", True) else "FAIL")
+            verdict = result.get(
+                "oracle_verdict", "PASS" if result.get("success", True) else "FAIL"
+            )
             return {
                 "id": scenario_id,
                 "status": verdict,
@@ -167,7 +170,8 @@ class SandboxRunner:
         """Run all scenarios in parallel using a ThreadPoolExecutor."""
         log.info(
             "[SandboxRunner] Running %d scenarios with %d workers",
-            len(scenarios), self.max_workers,
+            len(scenarios),
+            self.max_workers,
         )
         results: List[Dict[str, Any]] = []
         worker_counter = [0]
@@ -179,23 +183,24 @@ class SandboxRunner:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = {
-                executor.submit(_with_worker_id, scenario): scenario
-                for scenario in scenarios
+                executor.submit(_with_worker_id, scenario): scenario for scenario in scenarios
             }
             for future in concurrent.futures.as_completed(futures):
                 scenario = futures[future]
                 try:
                     results.append(future.result())
                 except Exception as exc:
-                    results.append({
-                        "id": scenario.get("id", "unknown"),
-                        "status": "FAIL",
-                        "oracle_verdict": "FAIL",
-                        "reason": f"Executor error: {exc}",
-                        "output": "",
-                        "error": str(exc),
-                        "sandbox_path": None,
-                        "worker_id": "unknown",
-                        "elapsed_s": 0.0,
-                    })
+                    results.append(
+                        {
+                            "id": scenario.get("id", "unknown"),
+                            "status": "FAIL",
+                            "oracle_verdict": "FAIL",
+                            "reason": f"Executor error: {exc}",
+                            "output": "",
+                            "error": str(exc),
+                            "sandbox_path": None,
+                            "worker_id": "unknown",
+                            "elapsed_s": 0.0,
+                        }
+                    )
         return results

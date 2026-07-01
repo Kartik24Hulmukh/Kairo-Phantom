@@ -43,6 +43,7 @@ def pytest_runtest_setup(item):
     if item.get_closest_marker("xfail"):
         pytest.fail("Xfailed tests are strictly forbidden!", pytrace=False)
 
+
 def pytest_runtest_logreport(report):
     # Enforce no dynamic runtime skips or xfails
     if report.outcome == "skipped":
@@ -50,6 +51,7 @@ def pytest_runtest_logreport(report):
     if hasattr(report, "wasxfail"):
         raise pytest.UsageError(f"Xfailed tests are strictly forbidden at runtime: {report.nodeid}")
 
+
 @pytest.fixture
 def anyio_backend():
-    return 'asyncio'
+    return "asyncio"

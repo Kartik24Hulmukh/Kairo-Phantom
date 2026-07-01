@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Literal, List, Dict, Any, Optional, Union
 
+
 # --- 1. Code Master ---
 class InsertAtLineOp(BaseModel):
     type: Literal["insert_at_line"] = "insert_at_line"
@@ -8,22 +9,27 @@ class InsertAtLineOp(BaseModel):
     code: str
     language: str
 
+
 class ReplaceLinesOp(BaseModel):
     type: Literal["replace_lines"] = "replace_lines"
     start_line: int
     end_line: int
     code: str
 
+
 class AddImportOp(BaseModel):
     type: Literal["add_import"] = "add_import"
     import_statement: str
     insert_at_line: int
 
+
 class ShowOnlyOp(BaseModel):
     type: Literal["show_only"] = "show_only"
     content: str
 
+
 CodeOperation = Union[InsertAtLineOp, ReplaceLinesOp, AddImportOp, ShowOnlyOp]
+
 
 class CodeResponse(BaseModel):
     operations: List[CodeOperation]
@@ -32,6 +38,7 @@ class CodeResponse(BaseModel):
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
 
+
 # --- 2. PDF Master ---
 class CreateDocxSection(BaseModel):
     heading: Optional[str] = None
@@ -39,20 +46,25 @@ class CreateDocxSection(BaseModel):
     body: Optional[str] = None
     table: Optional[Dict[str, Any]] = None
 
+
 class CreateDocxOp(BaseModel):
     type: Literal["create_docx"] = "create_docx"
     sections: List[CreateDocxSection]
 
+
 class ClipboardTextOp(BaseModel):
     type: Literal["clipboard_text"] = "clipboard_text"
     content: str
+
 
 class ExcelTableOp(BaseModel):
     type: Literal["excel_table"] = "excel_table"
     headers: List[str]
     rows: List[List[Any]]
 
+
 PDFOperation = Union[CreateDocxOp, ClipboardTextOp, ExcelTableOp]
+
 
 class PDFResponse(BaseModel):
     output_type: Literal["docx", "text", "clipboard", "excel_table"]
@@ -64,11 +76,13 @@ class PDFResponse(BaseModel):
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
 
+
 # --- 3. Browser Master ---
 class BrowserSafetyCheck(BaseModel):
     is_password_field: bool = False
     is_payment_field: bool = False
     is_auto_submit: bool = False
+
 
 class BrowserResponse(BaseModel):
     injection_method: Literal["uia_field", "clipboard", "crdt_yjs", "show_only"]
@@ -80,6 +94,7 @@ class BrowserResponse(BaseModel):
     reasoning: Optional[str] = Field(default="", max_length=200)
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
+
 
 # --- 4. Terminal Master ---
 class TerminalResponse(BaseModel):
@@ -93,6 +108,7 @@ class TerminalResponse(BaseModel):
     reasoning: Optional[str] = Field(default="", max_length=200)
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
+
 
 # --- 5. Email Master ---
 class EmailResponse(BaseModel):
@@ -109,6 +125,7 @@ class EmailResponse(BaseModel):
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
 
+
 # --- 6. Notes Master ---
 class NotesResponse(BaseModel):
     injection_method: Literal["file_write", "uia_field", "clipboard"]
@@ -121,6 +138,7 @@ class NotesResponse(BaseModel):
     reasoning: Optional[str] = Field(default="", max_length=200)
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
+
 
 # --- 7. Design Master ---
 class CreateTextOp(BaseModel):
@@ -135,10 +153,12 @@ class CreateTextOp(BaseModel):
     color_token: Optional[str] = None
     alignment: Literal["left", "center", "right"] = "left"
 
+
 class SetTextOp(BaseModel):
     type: Literal["set_text"] = "set_text"
     node_id: str
     text: str
+
 
 class SetFillsOp(BaseModel):
     type: Literal["set_fills"] = "set_fills"
@@ -146,11 +166,14 @@ class SetFillsOp(BaseModel):
     color_hex: str
     opacity: float = 1.0
 
+
 class DesignShowOnlyOp(BaseModel):
     type: Literal["show_only"] = "show_only"
     design_suggestion: str
 
+
 DesignOperation = Union[CreateTextOp, SetTextOp, SetFillsOp, DesignShowOnlyOp]
+
 
 class DesignResponse(BaseModel):
     injection_method: Literal["figma_mcp", "penpot_mcp", "clipboard"]
@@ -162,12 +185,14 @@ class DesignResponse(BaseModel):
     needs_clarification: bool = False
     clarification_question: Optional[str] = None
 
+
 # --- 8. Media Master ---
 class MediaResponse(BaseModel):
     injection_method: Literal["clipboard", "uia_field", "script_write", "show_only"]
     content: str
     confidence: float = Field(ge=0.0, le=1.0)
     reasoning: str = Field(default="")
+
 
 # --- 9. Data Master ---
 class DataResponse(BaseModel):
@@ -181,29 +206,52 @@ class DataResponse(BaseModel):
 # --- 10. Master Orchestrator ---
 class OrchestratorResponse(BaseModel):
     domain: Literal[
-        "word", "excel", "powerpoint", "code", "pdf", "browser",
-        "terminal", "email", "notes", "design", "media", "data", "unknown"
+        "word",
+        "excel",
+        "powerpoint",
+        "code",
+        "pdf",
+        "browser",
+        "terminal",
+        "email",
+        "notes",
+        "design",
+        "media",
+        "data",
+        "unknown",
     ] = "unknown"
     task_type: Literal[
-        "insert", "replace", "analyze", "explain", "export",
-        "generate", "rewrite", "fix", "unknown"
+        "insert", "replace", "analyze", "explain", "export", "generate", "rewrite", "fix", "unknown"
     ] = "unknown"
     target: Literal[
-        "paragraph", "heading", "table", "cell", "formula", "shape",
-        "slide", "selection", "document", "file", "unknown"
+        "paragraph",
+        "heading",
+        "table",
+        "cell",
+        "formula",
+        "shape",
+        "slide",
+        "selection",
+        "document",
+        "file",
+        "unknown",
     ] = "unknown"
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     is_ambiguous: bool = False
     ambiguity_reason: Optional[str] = None
     clarifying_question: Optional[str] = None
     waza_agent: Literal[
-        "corporate_strategist", "developer", "legal_reviewer",
-        "medical_scribe", "academic_editor", "creative_writer",
-        "data_analyst", "general"
+        "corporate_strategist",
+        "developer",
+        "legal_reviewer",
+        "medical_scribe",
+        "academic_editor",
+        "creative_writer",
+        "data_analyst",
+        "general",
     ] = "general"
     complexity: Literal["simple", "medium", "complex"] = "medium"
     estimated_tokens: int = 500
     requires_web_search: bool = False
     safety_flags: List[str] = []
     reasoning: Optional[str] = None
-

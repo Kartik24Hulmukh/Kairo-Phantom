@@ -8,8 +8,9 @@ from typing import List, Dict, Any
 from sidecar.constants import KAIRO_BACKUP_SUFFIX
 
 try:
-    import win32com.client
-    import pythoncom
+    import win32com.client  # noqa: F401
+    import pythoncom  # noqa: F401
+
     HAS_WIN32COM = True
 except ImportError:
     HAS_WIN32COM = False
@@ -54,7 +55,9 @@ def write_docx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
         com_result = _try_com_write(str(path), operations)
         if "error" not in com_result:
             return com_result
-        log.warning(f"COM write attempt failed: {com_result.get('error')} — falling back to file write")
+        log.warning(
+            f"COM write attempt failed: {com_result.get('error')} — falling back to file write"
+        )
 
     # Fallback: python-docx file write
     backup_path = path.with_suffix(path.suffix + KAIRO_BACKUP_SUFFIX)
@@ -297,7 +300,7 @@ def _get_com_style(doc, style_name: str):
         mapped = "List Bullet"
     elif style_name == "ListNumber":
         mapped = "List Number"
-    
+
     try:
         return doc.Styles(mapped)
     except Exception:
@@ -312,19 +315,22 @@ def _try_com_write(file_path: str, operations: List[Dict[str, Any]]) -> dict:
     import win32com.client
     import pythoncom
     import subprocess
+
     pythoncom.CoInitialize()
-    
+
     word = None
     target_doc = None
     path = Path(file_path).resolve()
-    
+
     word_running = False
     try:
-        out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True)
+        out = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True
+        )
         word_running = "winword.exe" in out.stdout.lower()
     except Exception:
         pass
-        
+
     if word_running:
         try:
             target_doc = win32com.client.GetObject(str(path))
@@ -405,6 +411,7 @@ def _try_com_write(file_path: str, operations: List[Dict[str, Any]]) -> dict:
         "path": str(path),
     }
 
+
 def _com_set_paragraph_content(doc, p, text, style, runs_data):
     """Sets the text and style of a paragraph without overwriting its paragraph mark."""
     start = p.Range.Start
@@ -447,7 +454,7 @@ def _com_insert_paragraph(doc, op, current_indices):
             new_p = p
         else:
             rng = p.Range
-            rng.Collapse(0) # Collapse to end
+            rng.Collapse(0)  # Collapse to end
             rng.InsertParagraphAfter()
             new_p = doc.Paragraphs(doc.Paragraphs.Count)
     else:
@@ -495,10 +502,10 @@ def _com_delete_paragraph(doc, op, current_indices):
             p.Range.Delete()
             count_after = doc.Paragraphs.Count
             diff = count_after - count_before
-            
+
             # Mark deleted paragraph
             current_indices[idx] = -1
-            
+
             # Shift subsequent paragraphs
             if diff != 0:
                 for i in range(len(current_indices)):
@@ -583,4 +590,3 @@ def _com_apply_runs(rng, runs_data):
         if r.get("italic"):
             run_rng.Italic = True
         start += length
-

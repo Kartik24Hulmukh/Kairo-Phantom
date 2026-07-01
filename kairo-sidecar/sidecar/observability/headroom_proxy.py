@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 log = logging.getLogger("kairo-sidecar.headroom_proxy")
 
@@ -24,6 +24,7 @@ _headroom_client = None
 
 try:
     import headroom
+
     _headroom_available = True
     log.debug("headroom-ai is available")
 except ImportError:
@@ -32,10 +33,7 @@ except ImportError:
 
 def is_compression_enabled() -> bool:
     """Check if Headroom compression is enabled (env flag + package available)."""
-    return (
-        _headroom_available
-        and os.environ.get("KAIRO_HEADROOM", "1") == "1"
-    )
+    return _headroom_available and os.environ.get("KAIRO_HEADROOM", "1") == "1"
 
 
 def get_headroom_client():
@@ -83,7 +81,7 @@ def compress_context(text: str) -> Tuple[str, Dict[str, Any]]:
     try:
         # Use headroom's compress function
         result = headroom.compress(text)
-        compressed = result.compressed_text if hasattr(result, 'compressed_text') else str(result)
+        compressed = result.compressed_text if hasattr(result, "compressed_text") else str(result)
 
         # Estimate tokens (rough: 1 token ≈ 4 chars)
         tokens_before = len(text) // 4
@@ -126,7 +124,7 @@ def compress_spreadsheet_context(text: str) -> Tuple[str, Dict[str, Any]]:
 
     try:
         result = headroom.compress_spreadsheet(text)
-        compressed = result.compressed_text if hasattr(result, 'compressed_text') else str(result)
+        compressed = result.compressed_text if hasattr(result, "compressed_text") else str(result)
 
         tokens_before = len(text) // 4
         tokens_after = len(compressed) // 4

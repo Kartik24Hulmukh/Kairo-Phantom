@@ -4,6 +4,7 @@ from typing import Optional
 
 log = logging.getLogger("kairo-sidecar.xlsx_parser")
 
+
 def parse_xlsx(file_path: str, active_cell: Optional[str] = None) -> dict:
     """
     Read Excel file and return surrounding context grid and named ranges.
@@ -23,15 +24,18 @@ def parse_xlsx(file_path: str, active_cell: Optional[str] = None) -> dict:
         import win32com.client
         import pythoncom
         import subprocess
+
         pythoncom.CoInitialize()
-        
+
         excel_running = False
         try:
-            out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True)
+            out = subprocess.run(
+                ["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True
+            )
             excel_running = "excel.exe" in out.stdout.lower()
         except Exception:
             pass
-            
+
         if excel_running:
             target_path = str(path.resolve())
             try:
@@ -39,7 +43,9 @@ def parse_xlsx(file_path: str, active_cell: Optional[str] = None) -> dict:
                 xl = wb_com.Application
                 active_sheet = wb_com.ActiveSheet.Name
                 active_cell = xl.ActiveCell.Address.replace("$", "")
-                log.info(f"parse_xlsx COM detected active sheet via moniker: {active_sheet}, cell: {active_cell}")
+                log.info(
+                    f"parse_xlsx COM detected active sheet via moniker: {active_sheet}, cell: {active_cell}"
+                )
             except Exception:
                 try:
                     xl = win32com.client.GetActiveObject("Excel.Application")
@@ -47,7 +53,9 @@ def parse_xlsx(file_path: str, active_cell: Optional[str] = None) -> dict:
                         if str(Path(wb.FullName).resolve()) == target_path:
                             active_sheet = wb.ActiveSheet.Name
                             active_cell = xl.ActiveCell.Address.replace("$", "")
-                            log.info(f"parse_xlsx COM detected active sheet via fallback: {active_sheet}, cell: {active_cell}")
+                            log.info(
+                                f"parse_xlsx COM detected active sheet via fallback: {active_sheet}, cell: {active_cell}"
+                            )
                             break
                 except Exception:
                     pass
@@ -63,8 +71,8 @@ def parse_xlsx(file_path: str, active_cell: Optional[str] = None) -> dict:
 
         # Parse active cell (e.g. "G5")
         if active_cell:
-            col_str = ''.join(c for c in active_cell if c.isalpha())
-            row_digits = ''.join(c for c in active_cell if c.isdigit())
+            col_str = "".join(c for c in active_cell if c.isalpha())
+            row_digits = "".join(c for c in active_cell if c.isdigit())
             row = int(row_digits) if row_digits else 1
             col = column_index_from_string(col_str) if col_str else 1
         else:
@@ -81,12 +89,14 @@ def parse_xlsx(file_path: str, active_cell: Optional[str] = None) -> dict:
             row_data = []
             for c in range(c_start, c_end + 1):
                 cell = ws.cell(row=r, column=c)
-                row_data.append({
-                    "ref": f"{get_column_letter(c)}{r}",
-                    "value": str(cell.value) if cell.value is not None else "",
-                    "formula": str(cell.value) if str(cell.value).startswith("=") else "",
-                    "is_active": (r == row and c == col),
-                })
+                row_data.append(
+                    {
+                        "ref": f"{get_column_letter(c)}{r}",
+                        "value": str(cell.value) if cell.value is not None else "",
+                        "formula": str(cell.value) if str(cell.value).startswith("=") else "",
+                        "is_active": (r == row and c == col),
+                    }
+                )
             grid.append(row_data)
 
         # Column headers (row 1)
@@ -124,6 +134,7 @@ def get_workbook_blueprint(file_path: str) -> dict:
     Get structural overview of an Excel workbook.
     """
     from sidecar.parsers.excelmcp_bridge import get_workbook_blueprint as get_bp
+
     res = get_bp(file_path)
     if res.get("ok"):
         return res["data"]
@@ -137,10 +148,12 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
     conditional_formatting: {type: "cell_is"|"data_bar"|"color_scale", operator?, threshold?, fill_color?}
     """
     from sidecar.parsers.excelmcp_bridge import excel_com_lease, save_workbook_safely
+
     log.info(f"write_xlsx_with_formatting: file_path={file_path}, operations={operations}")
     try:
         import openpyxl
         from openpyxl.styles import Font, PatternFill
+
         path = Path(file_path)
         if not path.exists():
             return {"error": f"File not found: {file_path}"}
@@ -150,28 +163,35 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
             import win32com.client
             import pythoncom
             import subprocess
+
             pythoncom.CoInitialize()
-            
+
             excel_running = False
             try:
-                out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True)
+                out = subprocess.run(
+                    ["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True
+                )
                 excel_running = "excel.exe" in out.stdout.lower()
             except Exception:
                 pass
-                
+
             if excel_running:
                 target_path = str(path.resolve())
                 try:
                     wb_com = win32com.client.GetObject(target_path)
                     active_sheet = wb_com.ActiveSheet.Name
-                    log.info(f"write_xlsx_with_formatting COM detected active sheet: {active_sheet}")
+                    log.info(
+                        f"write_xlsx_with_formatting COM detected active sheet: {active_sheet}"
+                    )
                 except Exception:
                     try:
                         xl = win32com.client.GetActiveObject("Excel.Application")
                         for wb_check in xl.Workbooks:
                             if str(Path(wb_check.FullName).resolve()) == target_path:
                                 active_sheet = wb_check.ActiveSheet.Name
-                                log.info(f"write_xlsx_with_formatting fallback COM active sheet: {active_sheet}")
+                                log.info(
+                                    f"write_xlsx_with_formatting fallback COM active sheet: {active_sheet}"
+                                )
                                 break
                     except Exception:
                         pass
@@ -203,17 +223,15 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
                     try:
                         if cf_type == "cell_is":
                             from openpyxl.formatting.rule import CellIsRule
+
                             operator = cf_config.get("operator", "greaterThan")
                             threshold = cf_config.get("threshold", 0)
                             fill_color = cf_config.get("fill_color", "C6EFCE")
                             fill = PatternFill(
-                                start_color=fill_color, end_color=fill_color,
-                                fill_type="solid"
+                                start_color=fill_color, end_color=fill_color, fill_type="solid"
                             )
                             rule = CellIsRule(
-                                operator=operator,
-                                formula=[str(threshold)],
-                                fill=fill
+                                operator=operator, formula=[str(threshold)], fill=fill
                             )
                             ws.conditional_formatting.add(cell_ref, rule)
                             written += 1
@@ -222,17 +240,23 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
                         elif cf_type == "data_bar":
                             try:
                                 from openpyxl.formatting.rule import DataBarRule
+
                                 rule = DataBarRule(
-                                    start_type="min", start_value=0,
-                                    end_type="max", end_value=100,
-                                    color="638EC6"
+                                    start_type="min",
+                                    start_value=0,
+                                    end_type="max",
+                                    end_value=100,
+                                    color="638EC6",
                                 )
                             except (ImportError, TypeError):
                                 # Older openpyxl — use ColorScaleRule as fallback
                                 from openpyxl.formatting.rule import ColorScaleRule
+
                                 rule = ColorScaleRule(
-                                    start_type="min", start_color="FFFFFF",
-                                    end_type="max", end_color="638EC6"
+                                    start_type="min",
+                                    start_color="FFFFFF",
+                                    end_type="max",
+                                    end_color="638EC6",
                                 )
                             ws.conditional_formatting.add(cell_ref, rule)
                             written += 1
@@ -240,10 +264,15 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
 
                         elif cf_type == "color_scale":
                             from openpyxl.formatting.rule import ColorScaleRule
+
                             rule = ColorScaleRule(
-                                start_type="min", start_color="F8696B",
-                                mid_type="percentile", mid_value=50, mid_color="FFEB84",
-                                end_type="max", end_color="63BE7B"
+                                start_type="min",
+                                start_color="F8696B",
+                                mid_type="percentile",
+                                mid_value=50,
+                                mid_color="FFEB84",
+                                end_type="max",
+                                end_color="63BE7B",
                             )
                             ws.conditional_formatting.add(cell_ref, rule)
                             written += 1
@@ -257,16 +286,20 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
                     if formula and any(ch in formula for ch in [">", "<"]):
                         try:
                             from openpyxl.formatting.rule import CellIsRule
+
                             fill_color = "FFC7CE"  # default red
                             if ">" in formula:
                                 fill_color = "C6EFCE"  # green for greater-than
                             fill = PatternFill(
-                                start_color=fill_color, end_color=fill_color,
-                                fill_type="solid"
+                                start_color=fill_color, end_color=fill_color, fill_type="solid"
                             )
                             operator = "greaterThan" if ">" in formula else "lessThan"
-                            formula_val = formula.split(">")[-1] if ">" in formula else formula.split("<")[-1]
-                            rule = CellIsRule(operator=operator, formula=[formula_val.strip()], fill=fill)
+                            formula_val = (
+                                formula.split(">")[-1] if ">" in formula else formula.split("<")[-1]
+                            )
+                            rule = CellIsRule(
+                                operator=operator, formula=[formula_val.strip()], fill=fill
+                            )
                             ws.conditional_formatting.add(cell_ref, rule)
                             written += 1
                             continue
@@ -278,6 +311,7 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
                     # or a tuple of row-tuples. Normalise to 2-D rows×cols.
                     raw = ws[cell_ref]
                     from openpyxl.cell.cell import Cell as _Cell
+
                     if raw and isinstance(raw[0], _Cell):
                         rows_iter = (raw,)  # single-row flat tuple → wrap
                     else:
@@ -324,4 +358,3 @@ def write_xlsx_with_formatting(file_path: str, operations: list[dict]) -> dict:
     except Exception as e:
         log.error(f"Failed write_xlsx_with_formatting: {e}")
         return {"error": str(e)}
-

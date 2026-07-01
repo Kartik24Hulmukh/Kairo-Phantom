@@ -19,7 +19,6 @@ from __future__ import annotations
 import logging
 import re
 import traceback
-from typing import Any
 
 from sidecar.observability.opik_tracer import track
 
@@ -30,95 +29,195 @@ log = logging.getLogger("kairo-sidecar.legal_redline")
 # ---------------------------------------------------------------------------
 
 CUAD_HIGH_RISK_CLAUSES: list[dict] = [
-    {"id": "termination_for_convenience", "label": "Termination for Convenience",
-     "keywords": ["terminate", "termination", "convenience", "without cause", "at any time"],
-     "risk_level": "HIGH",
-     "description": "Party can end contract without reason"},
-    {"id": "auto_renewal", "label": "Auto-Renewal",
-     "keywords": ["automatically renew", "auto-renew", "renewed automatically", "unless notice"],
-     "risk_level": "MEDIUM",
-     "description": "Contract auto-renews unless notice given"},
-    {"id": "non_compete", "label": "Non-Compete / Non-Solicitation",
-     "keywords": ["non-compete", "non compete", "non-solicitation", "not solicit", "competitive activities", "not to solicit", "solicit"],
-     "risk_level": "HIGH",
-     "description": "Restricts competitive activities after termination"},
-    {"id": "liability_cap", "label": "Limitation of Liability",
-     "keywords": ["liability shall not exceed", "cap on liability", "limitation of liability",
-                  "aggregate liability", "limited to fees paid", "maximum liability", "liability is limited", "limited to the contract value"],
-     "risk_level": "HIGH",
-     "description": "Caps total liability exposure"},
-    {"id": "indemnification", "label": "Indemnification",
-     "keywords": ["indemnify", "indemnification", "hold harmless", "defend"],
-     "risk_level": "HIGH",
-     "description": "One party must compensate other for losses"},
-    {"id": "ip_ownership", "label": "Intellectual Property Ownership",
-     "keywords": ["intellectual property", "work for hire", "assigns all", "solely owned",
-                  "all right title and interest", "all right, title, and interest", "vest exclusively"],
-     "risk_level": "HIGH",
-     "description": "Who owns IP created under the contract"},
-    {"id": "liquidated_damages", "label": "Liquidated Damages",
-     "keywords": ["liquidated damages", "penalty", "agreed damages"],
-     "risk_level": "HIGH",
-     "description": "Pre-agreed penalty amounts for breach"},
-    {"id": "governing_law", "label": "Governing Law & Jurisdiction",
-     "keywords": ["governed by", "laws of", "jurisdiction", "venue", "courts of"],
-     "risk_level": "MEDIUM",
-     "description": "Which state/country law applies"},
-    {"id": "force_majeure", "label": "Force Majeure",
-     "keywords": ["force majeure", "act of god", "circumstances beyond", "unforeseeable"],
-     "risk_level": "MEDIUM",
-     "description": "Excuses non-performance for extraordinary events"},
-    {"id": "audit_rights", "label": "Audit Rights",
-     "keywords": ["audit", "right to audit", "inspect records", "accounting records"],
-     "risk_level": "MEDIUM",
-     "description": "Party's right to audit books/records"},
-    {"id": "exclusivity", "label": "Exclusivity",
-     "keywords": ["exclusive", "exclusivity", "sole and exclusive", "only provider"],
-     "risk_level": "HIGH",
-     "description": "Contract grants exclusive rights"},
-    {"id": "assignment", "label": "Assignment",
-     "keywords": ["assign", "assignment", "transfer this agreement", "successor"],
-     "risk_level": "MEDIUM",
-     "description": "Can either party assign contract rights"},
-    {"id": "warranty", "label": "Warranty / Representations",
-     "keywords": ["warrant", "warranty", "represent", "representations", "as-is"],
-     "risk_level": "HIGH",
-     "description": "Contractual guarantees made by parties"},
-    {"id": "confidentiality", "label": "Confidentiality / NDA",
-     "keywords": ["confidential", "confidentiality", "non-disclosure", "proprietary information"],
-     "risk_level": "MEDIUM",
-     "description": "Restrictions on sharing information"},
-    {"id": "change_of_control", "label": "Change of Control",
-     "keywords": ["change of control", "acquisition", "merger", "acquired by"],
-     "risk_level": "HIGH",
-     "description": "What happens if ownership changes"},
-    {"id": "minimum_commitment", "label": "Minimum Commitment / Purchase",
-     "keywords": ["minimum purchase", "minimum commitment", "take-or-pay", "minimum order"],
-     "risk_level": "HIGH",
-     "description": "Required minimum volume/spend"},
-    {"id": "arbitration", "label": "Arbitration",
-     "keywords": ["arbitration", "arbitrate", "binding arbitration", "american arbitration"],
-     "risk_level": "MEDIUM",
-     "description": "Disputes resolved by arbitrator, not courts"},
-    {"id": "insurance", "label": "Insurance Requirements",
-     "keywords": ["insurance", "maintain insurance", "certificate of insurance",
-                  "general liability insurance"],
-     "risk_level": "MEDIUM",
-     "description": "Required insurance coverage types"},
-    {"id": "payment_terms", "label": "Payment Terms",
-     "keywords": ["net 30", "net 60", "payment due", "invoice", "late payment", "interest on late"],
-     "risk_level": "MEDIUM",
-     "description": "When and how payment is made"},
-    {"id": "renewal_notice", "label": "Renewal Notice Period",
-     "keywords": ["days prior", "written notice", "notice period", "days before expiration"],
-     "risk_level": "MEDIUM",
-     "description": "Required advance notice to prevent auto-renewal"},
+    {
+        "id": "termination_for_convenience",
+        "label": "Termination for Convenience",
+        "keywords": ["terminate", "termination", "convenience", "without cause", "at any time"],
+        "risk_level": "HIGH",
+        "description": "Party can end contract without reason",
+    },
+    {
+        "id": "auto_renewal",
+        "label": "Auto-Renewal",
+        "keywords": ["automatically renew", "auto-renew", "renewed automatically", "unless notice"],
+        "risk_level": "MEDIUM",
+        "description": "Contract auto-renews unless notice given",
+    },
+    {
+        "id": "non_compete",
+        "label": "Non-Compete / Non-Solicitation",
+        "keywords": [
+            "non-compete",
+            "non compete",
+            "non-solicitation",
+            "not solicit",
+            "competitive activities",
+            "not to solicit",
+            "solicit",
+        ],
+        "risk_level": "HIGH",
+        "description": "Restricts competitive activities after termination",
+    },
+    {
+        "id": "liability_cap",
+        "label": "Limitation of Liability",
+        "keywords": [
+            "liability shall not exceed",
+            "cap on liability",
+            "limitation of liability",
+            "aggregate liability",
+            "limited to fees paid",
+            "maximum liability",
+            "liability is limited",
+            "limited to the contract value",
+        ],
+        "risk_level": "HIGH",
+        "description": "Caps total liability exposure",
+    },
+    {
+        "id": "indemnification",
+        "label": "Indemnification",
+        "keywords": ["indemnify", "indemnification", "hold harmless", "defend"],
+        "risk_level": "HIGH",
+        "description": "One party must compensate other for losses",
+    },
+    {
+        "id": "ip_ownership",
+        "label": "Intellectual Property Ownership",
+        "keywords": [
+            "intellectual property",
+            "work for hire",
+            "assigns all",
+            "solely owned",
+            "all right title and interest",
+            "all right, title, and interest",
+            "vest exclusively",
+        ],
+        "risk_level": "HIGH",
+        "description": "Who owns IP created under the contract",
+    },
+    {
+        "id": "liquidated_damages",
+        "label": "Liquidated Damages",
+        "keywords": ["liquidated damages", "penalty", "agreed damages"],
+        "risk_level": "HIGH",
+        "description": "Pre-agreed penalty amounts for breach",
+    },
+    {
+        "id": "governing_law",
+        "label": "Governing Law & Jurisdiction",
+        "keywords": ["governed by", "laws of", "jurisdiction", "venue", "courts of"],
+        "risk_level": "MEDIUM",
+        "description": "Which state/country law applies",
+    },
+    {
+        "id": "force_majeure",
+        "label": "Force Majeure",
+        "keywords": ["force majeure", "act of god", "circumstances beyond", "unforeseeable"],
+        "risk_level": "MEDIUM",
+        "description": "Excuses non-performance for extraordinary events",
+    },
+    {
+        "id": "audit_rights",
+        "label": "Audit Rights",
+        "keywords": ["audit", "right to audit", "inspect records", "accounting records"],
+        "risk_level": "MEDIUM",
+        "description": "Party's right to audit books/records",
+    },
+    {
+        "id": "exclusivity",
+        "label": "Exclusivity",
+        "keywords": ["exclusive", "exclusivity", "sole and exclusive", "only provider"],
+        "risk_level": "HIGH",
+        "description": "Contract grants exclusive rights",
+    },
+    {
+        "id": "assignment",
+        "label": "Assignment",
+        "keywords": ["assign", "assignment", "transfer this agreement", "successor"],
+        "risk_level": "MEDIUM",
+        "description": "Can either party assign contract rights",
+    },
+    {
+        "id": "warranty",
+        "label": "Warranty / Representations",
+        "keywords": ["warrant", "warranty", "represent", "representations", "as-is"],
+        "risk_level": "HIGH",
+        "description": "Contractual guarantees made by parties",
+    },
+    {
+        "id": "confidentiality",
+        "label": "Confidentiality / NDA",
+        "keywords": [
+            "confidential",
+            "confidentiality",
+            "non-disclosure",
+            "proprietary information",
+        ],
+        "risk_level": "MEDIUM",
+        "description": "Restrictions on sharing information",
+    },
+    {
+        "id": "change_of_control",
+        "label": "Change of Control",
+        "keywords": ["change of control", "acquisition", "merger", "acquired by"],
+        "risk_level": "HIGH",
+        "description": "What happens if ownership changes",
+    },
+    {
+        "id": "minimum_commitment",
+        "label": "Minimum Commitment / Purchase",
+        "keywords": ["minimum purchase", "minimum commitment", "take-or-pay", "minimum order"],
+        "risk_level": "HIGH",
+        "description": "Required minimum volume/spend",
+    },
+    {
+        "id": "arbitration",
+        "label": "Arbitration",
+        "keywords": ["arbitration", "arbitrate", "binding arbitration", "american arbitration"],
+        "risk_level": "MEDIUM",
+        "description": "Disputes resolved by arbitrator, not courts",
+    },
+    {
+        "id": "insurance",
+        "label": "Insurance Requirements",
+        "keywords": [
+            "insurance",
+            "maintain insurance",
+            "certificate of insurance",
+            "general liability insurance",
+        ],
+        "risk_level": "MEDIUM",
+        "description": "Required insurance coverage types",
+    },
+    {
+        "id": "payment_terms",
+        "label": "Payment Terms",
+        "keywords": [
+            "net 30",
+            "net 60",
+            "payment due",
+            "invoice",
+            "late payment",
+            "interest on late",
+        ],
+        "risk_level": "MEDIUM",
+        "description": "When and how payment is made",
+    },
+    {
+        "id": "renewal_notice",
+        "label": "Renewal Notice Period",
+        "keywords": ["days prior", "written notice", "notice period", "days before expiration"],
+        "risk_level": "MEDIUM",
+        "description": "Required advance notice to prevent auto-renewal",
+    },
 ]
 
 
 # ---------------------------------------------------------------------------
 # Core: CUAD Clause Detection
 # ---------------------------------------------------------------------------
+
 
 def detect_cuad_clauses(
     document_text: str,
@@ -166,7 +265,7 @@ def detect_cuad_clauses(
             # Find excerpt around first match
             first_kw = matched_keywords[0]
             idx = text_lower.find(first_kw.lower())
-            excerpt = document_text[max(0, idx - 80): idx + 120].strip()
+            excerpt = document_text[max(0, idx - 80) : idx + 120].strip()
 
             # Find paragraph index if paragraphs provided
             para_idx = None
@@ -179,16 +278,18 @@ def detect_cuad_clauses(
             # Confidence based on number of matching keywords
             confidence = min(0.99, 0.60 + 0.08 * len(matched_keywords))
 
-            detected.append({
-                "id": clause["id"],
-                "label": clause["label"],
-                "risk_level": clause["risk_level"],
-                "description": clause["description"],
-                "matched_text": excerpt,
-                "paragraph_index": para_idx,
-                "matched_keywords": matched_keywords,
-                "confidence": round(confidence, 2),
-            })
+            detected.append(
+                {
+                    "id": clause["id"],
+                    "label": clause["label"],
+                    "risk_level": clause["risk_level"],
+                    "description": clause["description"],
+                    "matched_text": excerpt,
+                    "paragraph_index": para_idx,
+                    "matched_keywords": matched_keywords,
+                    "confidence": round(confidence, 2),
+                }
+            )
             detected_ids.add(clause["id"])
 
     # --- Risk summary
@@ -199,14 +300,19 @@ def detect_cuad_clauses(
 
     # --- Missing standard clauses (should be present in most contracts)
     standard_required = {
-        "governing_law", "confidentiality", "termination_for_convenience",
-        "liability_cap", "indemnification",
+        "governing_law",
+        "confidentiality",
+        "termination_for_convenience",
+        "liability_cap",
+        "indemnification",
     }
     missing = list(standard_required - detected_ids)
 
     log.info(
         "detect_cuad_clauses: %d clauses detected (HIGH=%d, MEDIUM=%d)",
-        len(detected), risk_counts["HIGH"], risk_counts["MEDIUM"],
+        len(detected),
+        risk_counts["HIGH"],
+        risk_counts["MEDIUM"],
     )
 
     return {
@@ -228,6 +334,7 @@ def detect_cuad_clauses(
 # ---------------------------------------------------------------------------
 # Core: Generate AI Redlines
 # ---------------------------------------------------------------------------
+
 
 def generate_redlines_for_clause(
     clause_text: str,
@@ -262,8 +369,8 @@ def generate_redlines_for_clause(
             f"interests. Minimize {party}'s obligations, maximize protections."
         ),
         "balanced": (
-            f"You are a neutral contract lawyer. Propose a BALANCED revision that protects "
-            f"both parties fairly and is commercially reasonable."
+            "You are a neutral contract lawyer. Propose a BALANCED revision that protects "
+            "both parties fairly and is commercially reasonable."
         ),
         "conservative": (
             f"You are a {party}-side contract lawyer. Propose a CONSERVATIVE, market-standard "
@@ -271,7 +378,7 @@ def generate_redlines_for_clause(
         ),
     }
 
-    stance_text = stance_instructions.get(negotiation_stance, stance_instructions["balanced"])
+    stance_instructions.get(negotiation_stance, stance_instructions["balanced"])
 
     # Redline instruction templates per clause type
     clause_instructions: dict[str, str] = {
@@ -316,7 +423,8 @@ def generate_redlines_for_clause(
         "data": {
             "original_text": clause_text,
             "suggested_text": suggested_text,
-            "rationale": clause_specific or f"Standard {negotiation_stance} revision for {clause_id}",
+            "rationale": clause_specific
+            or f"Standard {negotiation_stance} revision for {clause_id}",
             "stance": negotiation_stance,
             "party": party,
             "clause_id": clause_id,
@@ -385,12 +493,14 @@ def generate_contract_summary(
     # Build per-clause action items
     action_items: list[dict] = []
     for clause in high_risk:
-        action_items.append({
-            "priority": "URGENT",
-            "clause": clause["label"],
-            "action": f"Negotiate or remove {clause['label']} — {clause['description']}",
-            "paragraph_index": clause.get("paragraph_index"),
-        })
+        action_items.append(
+            {
+                "priority": "URGENT",
+                "clause": clause["label"],
+                "action": f"Negotiate or remove {clause['label']} — {clause['description']}",
+                "paragraph_index": clause.get("paragraph_index"),
+            }
+        )
 
     return {
         "ok": True,
@@ -445,15 +555,18 @@ def analyze_contract(file_text: str, paragraphs: list[dict] | None = None) -> di
                     negotiation_stance="balanced",
                 )
                 if redline_result["ok"]:
-                    redlines.append({
-                        "clause_id": clause["id"],
-                        "clause_label": clause["label"],
-                        **redline_result["data"],
-                    })
+                    redlines.append(
+                        {
+                            "clause_id": clause["id"],
+                            "clause_label": clause["label"],
+                            **redline_result["data"],
+                        }
+                    )
 
         log.info(
             "analyze_contract: %d clauses, %d redlines generated",
-            len(detected), len(redlines),
+            len(detected),
+            len(redlines),
         )
 
         return {
@@ -477,6 +590,7 @@ def analyze_contract(file_text: str, paragraphs: list[dict] | None = None) -> di
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _apply_rule_based_redline(clause_text: str, clause_id: str) -> str:
     """
     Apply deterministic rule-based text transformations as a baseline redline.
@@ -486,7 +600,10 @@ def _apply_rule_based_redline(clause_text: str, clause_id: str) -> str:
 
     rules: dict[str, list[tuple[str, str]]] = {
         "auto_renewal": [
-            (r"\b(\d+)\s*days?\s*(?:prior|advance|written)?\s*notice", "60 days prior written notice"),
+            (
+                r"\b(\d+)\s*days?\s*(?:prior|advance|written)?\s*notice",
+                "60 days prior written notice",
+            ),
             (r"\bnotice\b", "written notice"),
         ],
         "termination_for_convenience": [
@@ -494,7 +611,10 @@ def _apply_rule_based_redline(clause_text: str, clause_id: str) -> str:
             (r"\bimmediate(?:ly)?\b", "after thirty (30) days"),
         ],
         "liability_cap": [
-            (r"\bshall not exceed\b", "shall not exceed (excluding gross negligence, willful misconduct, and IP infringement)"),
+            (
+                r"\bshall not exceed\b",
+                "shall not exceed (excluding gross negligence, willful misconduct, and IP infringement)",
+            ),
         ],
         "non_compete": [
             (r"\bany\s+(?:competitive|business)\b", "directly competitive"),
@@ -535,6 +655,7 @@ def _estimate_risk_reduction(clause_id: str, stance: str) -> str:
 # ---------------------------------------------------------------------------
 # Clause-by-Clause Redline Comparison (Domain 5 enhancement)
 # ---------------------------------------------------------------------------
+
 
 def compare_contracts(
     original_text: str,
@@ -590,29 +711,34 @@ def compare_contracts(
         if not orig_list and rev_list:
             # Clauses added in revised version
             for c in rev_list:
-                added.append({
-                    "clause_type": c.type,
-                    "text": c.text,
-                    "paragraph_ref": c.paragraph_ref,
-                    "confidence": c.confidence,
-                    "version": "revised",
-                })
+                added.append(
+                    {
+                        "clause_type": c.type,
+                        "text": c.text,
+                        "paragraph_ref": c.paragraph_ref,
+                        "confidence": c.confidence,
+                        "version": "revised",
+                    }
+                )
 
         elif orig_list and not rev_list:
             # Clauses removed in revised version
             for c in orig_list:
-                removed.append({
-                    "clause_type": c.type,
-                    "text": c.text,
-                    "paragraph_ref": c.paragraph_ref,
-                    "confidence": c.confidence,
-                    "version": "original",
-                })
+                removed.append(
+                    {
+                        "clause_type": c.type,
+                        "text": c.text,
+                        "paragraph_ref": c.paragraph_ref,
+                        "confidence": c.confidence,
+                        "version": "original",
+                    }
+                )
 
         else:
             # Both have clauses of this type — compare text
             # Match by best text similarity
             import difflib
+
             used_rev: set[int] = set()
             for oc in orig_list:
                 best_ratio = 0.0
@@ -629,34 +755,40 @@ def compare_contracts(
                     used_rev.add(best_idx)
                     rc = rev_list[best_idx]
                     if best_ratio < 0.95:
-                        modified.append({
-                            "clause_type": clause_type,
-                            "original_text": oc.text,
-                            "original_paragraph_ref": oc.paragraph_ref,
-                            "revised_text": rc.text,
-                            "revised_paragraph_ref": rc.paragraph_ref,
-                            "confidence": min(oc.confidence, rc.confidence),
-                            "similarity": round(best_ratio, 3),
-                        })
+                        modified.append(
+                            {
+                                "clause_type": clause_type,
+                                "original_text": oc.text,
+                                "original_paragraph_ref": oc.paragraph_ref,
+                                "revised_text": rc.text,
+                                "revised_paragraph_ref": rc.paragraph_ref,
+                                "confidence": min(oc.confidence, rc.confidence),
+                                "similarity": round(best_ratio, 3),
+                            }
+                        )
                     else:
-                        unchanged.append({
-                            "clause_type": clause_type,
-                            "text": oc.text,
-                            "paragraph_ref": oc.paragraph_ref,
-                            "confidence": oc.confidence,
-                            "similarity": round(best_ratio, 3),
-                        })
+                        unchanged.append(
+                            {
+                                "clause_type": clause_type,
+                                "text": oc.text,
+                                "paragraph_ref": oc.paragraph_ref,
+                                "confidence": oc.confidence,
+                                "similarity": round(best_ratio, 3),
+                            }
+                        )
 
             # Any unmatched revised clauses are additions
             for i, rc in enumerate(rev_list):
                 if i not in used_rev:
-                    added.append({
-                        "clause_type": rc.type,
-                        "text": rc.text,
-                        "paragraph_ref": rc.paragraph_ref,
-                        "confidence": rc.confidence,
-                        "version": "revised",
-                    })
+                    added.append(
+                        {
+                            "clause_type": rc.type,
+                            "text": rc.text,
+                            "paragraph_ref": rc.paragraph_ref,
+                            "confidence": rc.confidence,
+                            "version": "revised",
+                        }
+                    )
 
     summary = {
         "added": len(added),
@@ -667,7 +799,10 @@ def compare_contracts(
 
     log.info(
         "compare_contracts: added=%d, removed=%d, modified=%d, unchanged=%d",
-        summary["added"], summary["removed"], summary["modified"], summary["unchanged"],
+        summary["added"],
+        summary["removed"],
+        summary["modified"],
+        summary["unchanged"],
     )
 
     return {

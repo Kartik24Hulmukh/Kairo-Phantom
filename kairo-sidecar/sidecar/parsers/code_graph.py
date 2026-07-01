@@ -53,9 +53,7 @@ _TS_FUNC = re.compile(
     re.MULTILINE,
 )
 _TS_CLASS = re.compile(r"(?:export\s+)?class\s+(\w+)", re.MULTILINE)
-_TS_IMPORT = re.compile(
-    r'import\s+.*?from\s+["\']([^"\']+)["\']', re.MULTILINE
-)
+_TS_IMPORT = re.compile(r'import\s+.*?from\s+["\']([^"\']+)["\']', re.MULTILINE)
 
 
 # ── Node / edge type constants ─────────────────────────────────────────
@@ -106,7 +104,12 @@ class CodeGraph:
         for root, _dirs, files in os.walk(project_dir):
             # Skip hidden dirs and common vendored/build dirs
             parts = os.path.relpath(root, project_dir).split(os.sep)
-            if any(p.startswith(".") and p != "." or p in ("node_modules", "target", "dist", "build", "__pycache__") for p in parts):
+            if any(
+                p.startswith(".")
+                and p != "."
+                or p in ("node_modules", "target", "dist", "build", "__pycache__")
+                for p in parts
+            ):
                 continue
             for fname in files:
                 ext = os.path.splitext(fname)[1]
@@ -162,11 +165,13 @@ class CodeGraph:
                 if target == function_name or target_last == function_name:
                     caller_node = u
                     caller_data = self.graph.nodes[caller_node]
-                    results.append({
-                        "file": caller_data.get("file", caller_data.get("path", "")),
-                        "line": data.get("line", 0),
-                        "caller_function": caller_data.get("name", "<module>"),
-                    })
+                    results.append(
+                        {
+                            "file": caller_data.get("file", caller_data.get("path", "")),
+                            "line": data.get("line", 0),
+                            "caller_function": caller_data.get("name", "<module>"),
+                        }
+                    )
         return results
 
     def find_dependencies(self, file_path: str) -> List[str]:
@@ -204,13 +209,15 @@ class CodeGraph:
         for node_id, data in self.graph.nodes(data=True):
             ntype = data.get("type")
             if ntype in (NODE_CLASS, NODE_FUNCTION):
-                symbols.append({
-                    "name": data.get("name", ""),
-                    "file": data.get("file", data.get("path", "")),
-                    "line_start": data.get("line_start", 0),
-                    "line_end": data.get("line_end", 0),
-                    "type": ntype,
-                })
+                symbols.append(
+                    {
+                        "name": data.get("name", ""),
+                        "file": data.get("file", data.get("path", "")),
+                        "line_start": data.get("line_start", 0),
+                        "line_end": data.get("line_end", 0),
+                        "type": ntype,
+                    }
+                )
         # Sort by file then line for deterministic output
         symbols.sort(key=lambda s: (s["file"], s["line_start"]))
         return symbols
@@ -246,7 +253,7 @@ class CodeGraph:
         with open(fpath, "r", encoding="utf-8", errors="replace") as fh:
             source = fh.read()
         tree = ast.parse(source, filename=fpath)
-        lines = source.splitlines()
+        source.splitlines()
 
         file_node = f"file:{rel}"
 
@@ -255,26 +262,34 @@ class CodeGraph:
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 self._add_function_node(rel, node.name, node.lineno, node.end_lineno or node.lineno)
                 # Containment edge: file → function
-                self.graph.add_edge(file_node, f"func:{rel}:{node.name}:{node.lineno}", type=EDGE_CONTAINS)
+                self.graph.add_edge(
+                    file_node, f"func:{rel}:{node.name}:{node.lineno}", type=EDGE_CONTAINS
+                )
                 # Index for caller lookup
                 self._symbol_index.setdefault(node.name, []).append((rel, node.lineno))
 
             elif isinstance(node, ast.ClassDef):
                 self._add_class_node(rel, node.name, node.lineno, node.end_lineno or node.lineno)
-                self.graph.add_edge(file_node, f"class:{rel}:{node.name}:{node.lineno}", type=EDGE_CONTAINS)
+                self.graph.add_edge(
+                    file_node, f"class:{rel}:{node.name}:{node.lineno}", type=EDGE_CONTAINS
+                )
                 self._symbol_index.setdefault(node.name, []).append((rel, node.lineno))
 
                 # Methods inside class
                 for item in node.body:
                     if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                         method_qualname = f"{node.name}.{item.name}"
-                        self._add_function_node(rel, method_qualname, item.lineno, item.end_lineno or item.lineno)
+                        self._add_function_node(
+                            rel, method_qualname, item.lineno, item.end_lineno or item.lineno
+                        )
                         self.graph.add_edge(
                             f"class:{rel}:{node.name}:{node.lineno}",
                             f"func:{rel}:{method_qualname}:{item.lineno}",
                             type=EDGE_CONTAINS,
                         )
-                        self._symbol_index.setdefault(method_qualname, []).append((rel, item.lineno))
+                        self._symbol_index.setdefault(method_qualname, []).append(
+                            (rel, item.lineno)
+                        )
                         self._symbol_index.setdefault(item.name, []).append((rel, item.lineno))
 
         # Walk for calls and imports
@@ -391,7 +406,11 @@ class CodeGraph:
 
     def _find_class_node(self, rel: str, name: str) -> str:
         for nid, data in self.graph.nodes(data=True):
-            if data.get("type") == NODE_CLASS and data.get("file") == rel and data.get("name") == name:
+            if (
+                data.get("type") == NODE_CLASS
+                and data.get("file") == rel
+                and data.get("name") == name
+            ):
                 return nid
         return f"file:{rel}"
 

@@ -45,7 +45,12 @@ class CuaDriverService:
 
     # Candidate paths where cua-driver might be installed
     CANDIDATE_PATHS = [
-        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Cua" / "cua-driver" / "bin" / "cua-driver.exe",
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "Programs"
+        / "Cua"
+        / "cua-driver"
+        / "bin"
+        / "cua-driver.exe",
         Path.home() / ".cua" / "bin" / "cua-driver.exe",
         Path("C:/Program Files/cua-driver/cua-driver.exe"),
         Path("C:/ProgramData/cua-driver/cua-driver.exe"),
@@ -94,7 +99,9 @@ class CuaDriverService:
             if result.returncode == 0:
                 return result.stdout  # PNG bytes
             else:
-                log.warning(f"[CuaDriver] screenshot failed: {result.stderr.decode('utf-8', errors='replace')}")
+                log.warning(
+                    f"[CuaDriver] screenshot failed: {result.stderr.decode('utf-8', errors='replace')}"
+                )
                 return None
         except subprocess.TimeoutExpired:
             log.error("[CuaDriver] screenshot timed out")
@@ -103,7 +110,9 @@ class CuaDriverService:
             log.error(f"[CuaDriver] screenshot error: {e}")
             return None
 
-    def screenshot_to_file(self, output_path: str, region: Optional[Tuple[int, int, int, int]] = None) -> bool:
+    def screenshot_to_file(
+        self, output_path: str, region: Optional[Tuple[int, int, int, int]] = None
+    ) -> bool:
         """
         Capture screenshot to a file.
 

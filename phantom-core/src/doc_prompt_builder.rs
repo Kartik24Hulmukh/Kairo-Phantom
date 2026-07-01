@@ -229,7 +229,9 @@ pub fn format_docx_context(ctx: &DocxContext, command: &str) -> String {
 
     // Format text as a list of paragraphs with indices and styles
     if !ctx.paragraphs.is_empty() {
-        parts.push("\n## Document Paragraphs (preview with indices for editing/deleting)".to_string());
+        parts.push(
+            "\n## Document Paragraphs (preview with indices for editing/deleting)".to_string(),
+        );
         let mut current_chars = 0;
         for p in &ctx.paragraphs {
             let formatted = format!("[Index {}] [{}] {}\n", p.index, p.style, p.text);
@@ -243,7 +245,7 @@ pub fn format_docx_context(ctx: &DocxContext, command: &str) -> String {
     } else {
         let text_preview = if ctx.full_text.chars().count() > 2000 {
             let cut: String = ctx.full_text.chars().take(2000).collect();
-            format!("{}...[truncated]", cut)
+            format!("{cut}...[truncated]")
         } else {
             ctx.full_text.clone()
         };
@@ -251,7 +253,7 @@ pub fn format_docx_context(ctx: &DocxContext, command: &str) -> String {
         parts.push(text_preview);
     }
 
-    parts.push(format!("\n## User Command\n{}", command));
+    parts.push(format!("\n## User Command\n{command}"));
     parts.join("\n")
 }
 
@@ -265,12 +267,13 @@ pub fn format_xlsx_context(ctx: &ExcelContext, command: &str) -> String {
 
     // Headers
     if !ctx.headers.is_empty() {
-        let header_str = ctx.headers
+        let header_str = ctx
+            .headers
             .iter()
-            .map(|(col, name)| format!("{}={}", col, name))
+            .map(|(col, name)| format!("{col}={name}"))
             .collect::<Vec<_>>()
             .join(", ");
-        parts.push(format!("## Column Headers: {}", header_str));
+        parts.push(format!("## Column Headers: {header_str}"));
     }
 
     // Grid (show surrounding cells)
@@ -294,7 +297,7 @@ pub fn format_xlsx_context(ctx: &ExcelContext, command: &str) -> String {
         parts.push(row_str);
     }
 
-    parts.push(format!("\n## User Command\n{}", command));
+    parts.push(format!("\n## User Command\n{command}"));
     parts.join("\n")
 }
 
@@ -305,15 +308,12 @@ pub fn format_generic_context(data: &Value, command: &str) -> String {
     // UTF-8 safe truncation
     let preview = if full_text.chars().count() > 3000 {
         let cut: String = full_text.chars().take(3000).collect();
-        format!("{}...[truncated]", cut)
+        format!("{cut}...[truncated]")
     } else {
         full_text.to_string()
     };
 
-    format!(
-        "## Document Content\n{}\n\n## User Command\n{}",
-        preview, command
-    )
+    format!("## Document Content\n{preview}\n\n## User Command\n{command}")
 }
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
@@ -326,10 +326,14 @@ pub struct DocumentPrompt {
 
 impl DocumentPrompt {
     /// Build a structured prompt for DOCX manipulation.
-    pub fn for_docx(ctx: &DocxContext, command: &str, file_path: &str, distilled_memories: &str) -> Self {
+    pub fn for_docx(
+        ctx: &DocxContext,
+        command: &str,
+        file_path: &str,
+        distilled_memories: &str,
+    ) -> Self {
         let app_context = format!(
-            "=== APP CONTEXT ===\nApplication Name: Microsoft Word\nApplication Type: Word Processor\nFile Path: {}",
-            file_path
+            "=== APP CONTEXT ===\nApplication Name: Microsoft Word\nApplication Type: Word Processor\nFile Path: {file_path}"
         );
 
         let mut doc_parts = vec![];
@@ -342,7 +346,9 @@ impl DocumentPrompt {
         }
 
         if !ctx.paragraphs.is_empty() {
-            doc_parts.push("\n## Document Paragraphs (preview with indices for editing/deleting)".to_string());
+            doc_parts.push(
+                "\n## Document Paragraphs (preview with indices for editing/deleting)".to_string(),
+            );
             let mut current_chars = 0;
             for p in &ctx.paragraphs {
                 let formatted = format!("[Index {}] [{}] {}\n", p.index, p.style, p.text);
@@ -356,7 +362,7 @@ impl DocumentPrompt {
         } else {
             let text_preview = if ctx.full_text.chars().count() > 2000 {
                 let cut: String = ctx.full_text.chars().take(2000).collect();
-                format!("{}...[truncated]", cut)
+                format!("{cut}...[truncated]")
             } else {
                 ctx.full_text.clone()
             };
@@ -370,22 +376,18 @@ impl DocumentPrompt {
         } else {
             distilled_memories
         };
-        let memory_context = format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{}", mem_str);
+        let memory_context =
+            format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{mem_str}");
 
-        let classification = "=== INTENT CLASSIFICATION ===\nIntent Classification: Document Operation Generation";
+        let classification =
+            "=== INTENT CLASSIFICATION ===\nIntent Classification: Document Operation Generation";
 
         let json_reminder = "REMINDER: Your entire response must be a single JSON array. First character must be [. Last character must be ].";
 
         let user_command = format!("User Instruction: {}\nGenerate the JSON response conforming to the DocxResponse schema. Remember: ONLY the raw JSON output is allowed. No markdown fences.", strip_prompt_prefix(command));
 
         let user_prompt = format!(
-            "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
-            app_context,
-            doc_context,
-            memory_context,
-            classification,
-            json_reminder,
-            user_command
+            "{app_context}\n\n{doc_context}\n\n{memory_context}\n\n{classification}\n\n{json_reminder}\n\n{user_command}"
         );
 
         DocumentPrompt {
@@ -396,10 +398,14 @@ impl DocumentPrompt {
     }
 
     /// Build a structured prompt for Excel manipulation.
-    pub fn for_xlsx(ctx: &ExcelContext, command: &str, file_path: &str, distilled_memories: &str) -> Self {
+    pub fn for_xlsx(
+        ctx: &ExcelContext,
+        command: &str,
+        file_path: &str,
+        distilled_memories: &str,
+    ) -> Self {
         let app_context = format!(
-            "=== APP CONTEXT ===\nApplication Name: Microsoft Excel\nApplication Type: Spreadsheet\nFile Path: {}",
-            file_path
+            "=== APP CONTEXT ===\nApplication Name: Microsoft Excel\nApplication Type: Spreadsheet\nFile Path: {file_path}"
         );
 
         let mut doc_parts = vec![];
@@ -411,10 +417,16 @@ impl DocumentPrompt {
             h_keys.sort();
             let header_str = h_keys
                 .iter()
-                .map(|col| format!("{}={}", col, ctx.headers.get(*col).unwrap_or(&String::new())))
+                .map(|col| {
+                    format!(
+                        "{}={}",
+                        col,
+                        ctx.headers.get(*col).unwrap_or(&String::new())
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(", ");
-            doc_parts.push(format!("Column Headers: {}", header_str));
+            doc_parts.push(format!("Column Headers: {header_str}"));
         }
 
         doc_parts.push("Surrounding Data (10x10 grid)".to_string());
@@ -443,7 +455,8 @@ impl DocumentPrompt {
         } else {
             distilled_memories
         };
-        let memory_context = format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{}", mem_str);
+        let memory_context =
+            format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{mem_str}");
 
         let classification = "=== INTENT CLASSIFICATION ===\nIntent Classification: Spreadsheet Formula / Data Operation Generation";
 
@@ -452,13 +465,7 @@ impl DocumentPrompt {
         let user_command = format!("User Instruction: {}\nGenerate the JSON response conforming to the ExcelResponse schema. Remember: ONLY the raw JSON output is allowed. No markdown fences.", strip_prompt_prefix(command));
 
         let user_prompt = format!(
-            "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
-            app_context,
-            doc_context,
-            memory_context,
-            classification,
-            json_reminder,
-            user_command
+            "{app_context}\n\n{doc_context}\n\n{memory_context}\n\n{classification}\n\n{json_reminder}\n\n{user_command}"
         );
 
         DocumentPrompt {
@@ -469,21 +476,26 @@ impl DocumentPrompt {
     }
 
     /// Build a structured prompt for PowerPoint manipulation.
-    pub fn for_pptx(data: &Value, command: &str, file_path: &str, distilled_memories: &str) -> Self {
+    pub fn for_pptx(
+        data: &Value,
+        command: &str,
+        file_path: &str,
+        distilled_memories: &str,
+    ) -> Self {
         let app_context = format!(
-            "=== APP CONTEXT ===\nApplication Name: Microsoft PowerPoint\nApplication Type: Presentation\nFile Path: {}",
-            file_path
+            "=== APP CONTEXT ===\nApplication Name: Microsoft PowerPoint\nApplication Type: Presentation\nFile Path: {file_path}"
         );
 
         let slide_info = serde_json::to_string_pretty(data).unwrap_or_default();
-        let doc_context = format!("=== DOCUMENT CONTEXT ===\nSlide Inventory\n{}", slide_info);
+        let doc_context = format!("=== DOCUMENT CONTEXT ===\nSlide Inventory\n{slide_info}");
 
         let mem_str = if distilled_memories.is_empty() {
             "No writing preferences learned yet. Use professional defaults."
         } else {
             distilled_memories
         };
-        let memory_context = format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{}", mem_str);
+        let memory_context =
+            format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{mem_str}");
 
         let classification = "=== INTENT CLASSIFICATION ===\nIntent Classification: Presentation Slide Operation Generation";
 
@@ -492,13 +504,7 @@ impl DocumentPrompt {
         let user_command = format!("User Instruction: {}\nGenerate the JSON response conforming to the SlideOperation schema. Remember: ONLY the raw JSON output is allowed. No markdown fences.", strip_prompt_prefix(command));
 
         let user_prompt = format!(
-            "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
-            app_context,
-            doc_context,
-            memory_context,
-            classification,
-            json_reminder,
-            user_command
+            "{app_context}\n\n{doc_context}\n\n{memory_context}\n\n{classification}\n\n{json_reminder}\n\n{user_command}"
         );
 
         DocumentPrompt {
@@ -510,15 +516,19 @@ impl DocumentPrompt {
 
     /// Build a Track Changes prompt for surgical DOCX editing.
     /// Used with CommandMode::TrackChanges — LLM outputs TrackChangeEdit JSON.
-    pub fn for_docx_track_changes(ctx: &crate::sidecar_client::DocxContext, command: &str, file_path: &str, distilled_memories: &str) -> Self {
+    pub fn for_docx_track_changes(
+        ctx: &crate::sidecar_client::DocxContext,
+        command: &str,
+        file_path: &str,
+        distilled_memories: &str,
+    ) -> Self {
         let app_context = format!(
-            "=== APP CONTEXT ===\nApplication Name: Microsoft Word\nApplication Type: Word Processor (Track Changes Mode)\nFile Path: {}",
-            file_path
+            "=== APP CONTEXT ===\nApplication Name: Microsoft Word\nApplication Type: Word Processor (Track Changes Mode)\nFile Path: {file_path}"
         );
 
         let full_text = if ctx.full_text.chars().count() > 4000 {
             let cut: String = ctx.full_text.chars().take(4000).collect();
-            format!("{}...[truncated — use target_text from visible text only]", cut)
+            format!("{cut}...[truncated — use target_text from visible text only]")
         } else {
             ctx.full_text.clone()
         };
@@ -531,7 +541,8 @@ impl DocumentPrompt {
                 doc_parts.push(format!("{}→ H{}: {}", indent, h.level, h.text));
             }
         }
-        doc_parts.push("\n## Full Document Text (find exact substrings for target_text)".to_string());
+        doc_parts
+            .push("\n## Full Document Text (find exact substrings for target_text)".to_string());
         doc_parts.push(full_text);
         let doc_context = format!("=== DOCUMENT CONTEXT ===\n{}", doc_parts.join("\n"));
 
@@ -540,7 +551,8 @@ impl DocumentPrompt {
         } else {
             distilled_memories
         };
-        let memory_context = format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{}", mem_str);
+        let memory_context =
+            format!("=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{mem_str}");
 
         let classification = "=== INTENT CLASSIFICATION ===\nIntent Classification: Surgical Document Editing (Track Changes)";
 
@@ -549,13 +561,7 @@ impl DocumentPrompt {
         let user_command = format!("User Instruction: {}\nGenerate the JSON response conforming to the TrackChangeEdit schema. Remember: ONLY the raw JSON output is allowed. No markdown fences.", strip_prompt_prefix(command));
 
         let user_prompt = format!(
-            "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
-            app_context,
-            doc_context,
-            memory_context,
-            classification,
-            json_reminder,
-            user_command
+            "{app_context}\n\n{doc_context}\n\n{memory_context}\n\n{classification}\n\n{json_reminder}\n\n{user_command}"
         );
 
         DocumentPrompt {
@@ -569,15 +575,18 @@ impl DocumentPrompt {
     pub fn for_prose(data: &Value, command: &str, format: &DocFormat) -> Self {
         let format_hint = match format {
             DocFormat::Pdf => "The document is a PDF. Write a well-structured analysis or summary.",
-            DocFormat::Md => "The document is Markdown. Respond in valid Markdown with proper heading hierarchy.",
-            DocFormat::Txt => "The document is plain text. Respond in clean plain text, no formatting.",
+            DocFormat::Md => {
+                "The document is Markdown. Respond in valid Markdown with proper heading hierarchy."
+            }
+            DocFormat::Txt => {
+                "The document is plain text. Respond in clean plain text, no formatting."
+            }
             _ => "Respond clearly and accurately based on the document context.",
         };
 
         DocumentPrompt {
             system: format!(
-                "You are Kairo Document Engine. {}\n\nRULES:\n- NEVER invent facts not in the document\n- NEVER fabricate statistics or quotes\n- Use hedging language for uncertain specifics",
-                format_hint
+                "You are Kairo Document Engine. {format_hint}\n\nRULES:\n- NEVER invent facts not in the document\n- NEVER fabricate statistics or quotes\n- Use hedging language for uncertain specifics"
             ),
             user: format_generic_context(data, command),
             is_structured: false,
@@ -682,27 +691,29 @@ pub fn parse_excel_write_ops(response: &str) -> Vec<crate::sidecar_client::Excel
     }
 }
 
-
 /// Robustly parse simple arrays, nested arrays, and strings into Vec<String>.
 pub fn parse_robust_json_array(val: &serde_json::Value) -> Vec<String> {
     if let Some(arr) = val.as_array() {
-        arr.iter().flat_map(|v| {
-            if let Some(s) = v.as_str() {
-                vec![s.to_string()]
-            } else if let Some(inner_arr) = v.as_array() {
-                inner_arr.iter().filter_map(|iv| iv.as_str().map(|s| s.to_string())).collect()
-            } else {
-                vec![]
-            }
-        }).collect()
+        arr.iter()
+            .flat_map(|v| {
+                if let Some(s) = v.as_str() {
+                    vec![s.to_string()]
+                } else if let Some(inner_arr) = v.as_array() {
+                    inner_arr
+                        .iter()
+                        .filter_map(|iv| iv.as_str().map(|s| s.to_string()))
+                        .collect()
+                } else {
+                    vec![]
+                }
+            })
+            .collect()
     } else if let Some(s) = val.as_str() {
         vec![s.to_string()]
     } else {
         vec![]
     }
 }
-
-
 
 /// Parse SlideOperation array from LLM response.
 pub fn parse_slide_operations(response: &str) -> Vec<crate::sidecar_client::SlideOperation> {
@@ -738,19 +749,22 @@ pub fn parse_track_change_edits(response: &str) -> Vec<crate::sidecar_client::Do
             let mut edits = Vec::new();
             if let Some(items) = arr.as_array() {
                 for item in items {
-                    let target = item.get("target_text")
+                    let target = item
+                        .get("target_text")
                         .or_else(|| item.get("find"))
                         .or_else(|| item.get("original"))
                         .and_then(|v| v.as_str())
                         .unwrap_or_default()
                         .to_string();
-                    let replacement = item.get("new_text")
+                    let replacement = item
+                        .get("new_text")
                         .or_else(|| item.get("replace"))
                         .or_else(|| item.get("replacement"))
                         .and_then(|v| v.as_str())
                         .unwrap_or_default()
                         .to_string();
-                    let comment = item.get("comment")
+                    let comment = item
+                        .get("comment")
                         .or_else(|| item.get("rationale"))
                         .or_else(|| item.get("reason"))
                         .and_then(|v| v.as_str())

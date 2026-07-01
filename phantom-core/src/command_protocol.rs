@@ -79,73 +79,232 @@ impl CommandMode {
     pub fn from_prompt(prompt: &str) -> (Self, String) {
         let p = prompt.trim();
         if p.starts_with("//!") {
-            (Self::Urgent,      p.strip_prefix("//!").unwrap_or("").trim().to_string())
+            (
+                Self::Urgent,
+                p.strip_prefix("//!").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("//?") {
-            (Self::Query,       p.strip_prefix("//?").unwrap_or("").trim().to_string())
+            (
+                Self::Query,
+                p.strip_prefix("//?").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// think") {
-            (Self::Think,       p.strip_prefix("// think").unwrap_or("").trim().to_string())
+            (
+                Self::Think,
+                p.strip_prefix("// think").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// design") {
-            (Self::Design,      p.strip_prefix("// design").unwrap_or("").trim().to_string())
+            (
+                Self::Design,
+                p.strip_prefix("// design").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// check") {
-            (Self::Check,       p.strip_prefix("// check").unwrap_or("").trim().to_string())
+            (
+                Self::Check,
+                p.strip_prefix("// check").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// write") {
-            (Self::Write,       p.strip_prefix("// write").unwrap_or("").trim().to_string())
+            (
+                Self::Write,
+                p.strip_prefix("// write").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// learn") {
-            (Self::Learn,       p.strip_prefix("// learn").unwrap_or("").trim().to_string())
+            (
+                Self::Learn,
+                p.strip_prefix("// learn").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// read") {
-            (Self::Read,        p.strip_prefix("// read").unwrap_or("").trim().to_string())
+            (
+                Self::Read,
+                p.strip_prefix("// read").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// explain") {
-            (Self::Explain,     p.strip_prefix("// explain").unwrap_or("").trim().to_string())
+            (
+                Self::Explain,
+                p.strip_prefix("// explain")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// health") {
-            (Self::Health,      p.strip_prefix("// health").unwrap_or("").trim().to_string())
+            (
+                Self::Health,
+                p.strip_prefix("// health").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// kami pdf") {
-            (Self::KamiPdf,     p.strip_prefix("// kami pdf").unwrap_or("").trim().to_string())
+            (
+                Self::KamiPdf,
+                p.strip_prefix("// kami pdf")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami revealjs") {
-            (Self::KamiRevealJs, p.strip_prefix("// kami revealjs").unwrap_or("").trim().to_string())
+            (
+                Self::KamiRevealJs,
+                p.strip_prefix("// kami revealjs")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami email") {
-            (Self::KamiEmail,   p.strip_prefix("// kami email").unwrap_or("").trim().to_string())
+            (
+                Self::KamiEmail,
+                p.strip_prefix("// kami email")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami linkedin") {
-            (Self::KamiLinkedin, p.strip_prefix("// kami linkedin").unwrap_or("").trim().to_string())
+            (
+                Self::KamiLinkedin,
+                p.strip_prefix("// kami linkedin")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami press-release") {
-            (Self::KamiPressRelease, p.strip_prefix("// kami press-release").unwrap_or("").trim().to_string())
+            (
+                Self::KamiPressRelease,
+                p.strip_prefix("// kami press-release")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami epub") {
-            (Self::KamiEpub,    p.strip_prefix("// kami epub").unwrap_or("").trim().to_string())
+            (
+                Self::KamiEpub,
+                p.strip_prefix("// kami epub")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami slides") {
-            (Self::KamiSlides,  p.strip_prefix("// kami slides").unwrap_or("").trim().to_string())
+            (
+                Self::KamiSlides,
+                p.strip_prefix("// kami slides")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami book") {
-            (Self::KamiBook,    p.strip_prefix("// kami book").unwrap_or("").trim().to_string())
+            (
+                Self::KamiBook,
+                p.strip_prefix("// kami book")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami podcast --local") {
-            (Self::KamiPodcastLocal, p.strip_prefix("// kami podcast --local").unwrap_or("").trim().to_string())
+            (
+                Self::KamiPodcastLocal,
+                p.strip_prefix("// kami podcast --local")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami podcast") {
-            (Self::KamiPodcast, p.strip_prefix("// kami podcast").unwrap_or("").trim().to_string())
+            (
+                Self::KamiPodcast,
+                p.strip_prefix("// kami podcast")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami subtitles") {
-            (Self::KamiSubtitles, p.strip_prefix("// kami subtitles").unwrap_or("").trim().to_string())
+            (
+                Self::KamiSubtitles,
+                p.strip_prefix("// kami subtitles")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami quiz") {
-            (Self::KamiQuiz,    p.strip_prefix("// kami quiz").unwrap_or("").trim().to_string())
+            (
+                Self::KamiQuiz,
+                p.strip_prefix("// kami quiz")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami flashcards") {
-            (Self::KamiFlashcards, p.strip_prefix("// kami flashcards").unwrap_or("").trim().to_string())
+            (
+                Self::KamiFlashcards,
+                p.strip_prefix("// kami flashcards")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami mindmap") {
-            (Self::KamiMindmap, p.strip_prefix("// kami mindmap").unwrap_or("").trim().to_string())
+            (
+                Self::KamiMindmap,
+                p.strip_prefix("// kami mindmap")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami html") {
-            (Self::KamiHtml,    p.strip_prefix("// kami html").unwrap_or("").trim().to_string())
+            (
+                Self::KamiHtml,
+                p.strip_prefix("// kami html")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami tweet-thread") || p.starts_with("// kami tweet") {
-            (Self::KamiTweet,   p.strip_prefix("// kami tweet").unwrap_or("").trim().to_string())
+            (
+                Self::KamiTweet,
+                p.strip_prefix("// kami tweet")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami all") {
-            (Self::KamiAll,     p.strip_prefix("// kami all").unwrap_or("").trim().to_string())
+            (
+                Self::KamiAll,
+                p.strip_prefix("// kami all")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// kami") {
-            (Self::Kami,        p.strip_prefix("// kami").unwrap_or("").trim().to_string())
+            (
+                Self::Kami,
+                p.strip_prefix("// kami").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// redline") {
-            (Self::Redline,     p.strip_prefix("// redline").unwrap_or("").trim().to_string())
+            (
+                Self::Redline,
+                p.strip_prefix("// redline")
+                    .unwrap_or("")
+                    .trim()
+                    .to_string(),
+            )
         } else if p.starts_with("// track") {
-            (Self::TrackChanges, p.strip_prefix("// track").unwrap_or("").trim().to_string())
+            (
+                Self::TrackChanges,
+                p.strip_prefix("// track").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// voice") {
-            (Self::Voice,       p.strip_prefix("// voice").unwrap_or("").trim().to_string())
+            (
+                Self::Voice,
+                p.strip_prefix("// voice").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// screen") {
-            (Self::ScreenContext, p.strip_prefix("// screen").unwrap_or("").trim().to_string())
+            (
+                Self::ScreenContext,
+                p.strip_prefix("// screen").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("// speak") {
-            (Self::Speak,       p.strip_prefix("// speak").unwrap_or("").trim().to_string())
+            (
+                Self::Speak,
+                p.strip_prefix("// speak").unwrap_or("").trim().to_string(),
+            )
         } else if p.starts_with("//") {
-            (Self::GhostWrite,  p.strip_prefix("//").unwrap_or("").trim().to_string())
+            (
+                Self::GhostWrite,
+                p.strip_prefix("//").unwrap_or("").trim().to_string(),
+            )
         } else {
             (Self::None, p.to_string())
         }

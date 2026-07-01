@@ -9,13 +9,11 @@ are not updated to match.
 """
 
 import re
-import pytest
 
 from sidecar.safety.prompt_shield import (
     PromptShield,
     HARD_PATTERNS,
     SOFT_PATTERNS,
-    ADDITIONAL_PATTERNS,
     INJECTION_PATTERNS,
 )
 
@@ -107,7 +105,7 @@ class TestPatternParity:
 
     def test_every_rust_hard_pattern_covered_by_python(self):
         """Every Rust hard pattern must be matched by at least one Python pattern."""
-        shield = PromptShield()
+        PromptShield()
         all_py_patterns = INJECTION_PATTERNS
         missing = []
 
@@ -155,9 +153,7 @@ class TestPatternParity:
     def test_total_pattern_count(self):
         """Total pattern count should be at least 56 (Rust total)."""
         total = len(INJECTION_PATTERNS)
-        assert total >= 56, (
-            f"Python has {total} total patterns, Rust has 56 — Python is WEAKER"
-        )
+        assert total >= 56, f"Python has {total} total patterns, Rust has 56 — Python is WEAKER"
 
     def test_rust_hard_pattern_count(self):
         """Verify Rust hard pattern count hasn't changed (detect Rust updates)."""
@@ -177,17 +173,17 @@ class TestPatternParity:
         """PromptShield.scan() must return False for every Rust hard pattern."""
         shield = PromptShield()
         for pattern in RUST_HARD_PATTERNS:
-            assert not shield.scan(pattern), (
-                f"Rust hard pattern '{pattern}' was NOT blocked by Python PromptShield"
-            )
+            assert not shield.scan(
+                pattern
+            ), f"Rust hard pattern '{pattern}' was NOT blocked by Python PromptShield"
 
     def test_scan_blocks_all_rust_soft_patterns(self):
         """PromptShield.scan() must return False for every Rust soft pattern."""
         shield = PromptShield()
         for pattern in RUST_SOFT_PATTERNS:
-            assert not shield.scan(pattern), (
-                f"Rust soft pattern '{pattern}' was NOT blocked by Python PromptShield"
-            )
+            assert not shield.scan(
+                pattern
+            ), f"Rust soft pattern '{pattern}' was NOT blocked by Python PromptShield"
 
 
 class TestEndToEndConnectorInjection:

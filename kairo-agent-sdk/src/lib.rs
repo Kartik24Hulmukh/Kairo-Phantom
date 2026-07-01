@@ -1,7 +1,7 @@
 pub mod agent_registry;
 pub mod agent_router;
-pub mod sandbox;
 pub mod cli;
+pub mod sandbox;
 
 use serde::{Deserialize, Serialize};
 

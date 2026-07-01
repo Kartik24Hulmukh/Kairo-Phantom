@@ -16,7 +16,6 @@ from __future__ import annotations
 import logging
 import traceback
 from pathlib import Path
-from typing import Any
 
 log = logging.getLogger("kairo-sidecar.excel_context")
 
@@ -24,6 +23,7 @@ log = logging.getLogger("kairo-sidecar.excel_context")
 # ──────────────────────────────────────────────────────────────────────────────
 # Core context capture class
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 class ExcelContextCapture:
     """
@@ -53,15 +53,18 @@ class ExcelContextCapture:
             import win32com.client
             import pythoncom
             import subprocess
+
             pythoncom.CoInitialize()
-            
+
             excel_running = False
             try:
-                out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True)
+                out = subprocess.run(
+                    ["tasklist", "/FI", "IMAGENAME eq excel.exe"], capture_output=True, text=True
+                )
                 excel_running = "excel.exe" in out.stdout.lower()
             except Exception:
                 pass
-                
+
             if excel_running:
                 target_path = str(Path(file_path).resolve())
                 wb_com = None
@@ -71,7 +74,9 @@ class ExcelContextCapture:
                     xl = wb_com.Application
                     active_sheet = wb_com.ActiveSheet.Name
                     active_cell = xl.ActiveCell.Address.replace("$", "")
-                    log.info(f"Excel COM detected active sheet via moniker: {active_sheet}, cell: {active_cell}")
+                    log.info(
+                        f"Excel COM detected active sheet via moniker: {active_sheet}, cell: {active_cell}"
+                    )
                 except Exception:
                     try:
                         xl = win32com.client.GetActiveObject("Excel.Application")
@@ -80,7 +85,9 @@ class ExcelContextCapture:
                                 wb_com = wb
                                 active_sheet = wb_com.ActiveSheet.Name
                                 active_cell = xl.ActiveCell.Address.replace("$", "")
-                                log.info(f"Excel COM detected active sheet via fallback: {active_sheet}, cell: {active_cell}")
+                                log.info(
+                                    f"Excel COM detected active sheet via fallback: {active_sheet}, cell: {active_cell}"
+                                )
                                 break
                     except Exception:
                         pass
@@ -125,13 +132,15 @@ class ExcelContextCapture:
                         formula = val
                     elif val is not None:
                         value_str = str(val)
-                    row_data.append({
-                        "ref": cell.coordinate,
-                        "value": value_str,
-                        "formula": formula,
-                        "is_active": (r == row_num and c == col_num),
-                        "number_format": cell.number_format or "General",
-                    })
+                    row_data.append(
+                        {
+                            "ref": cell.coordinate,
+                            "value": value_str,
+                            "formula": formula,
+                            "is_active": (r == row_num and c == col_num),
+                            "number_format": cell.number_format or "General",
+                        }
+                    )
                 grid.append(row_data)
 
             # Column headers (row 1 values)
@@ -153,8 +162,9 @@ class ExcelContextCapture:
                 for sname in wb.sheetnames:
                     ws2 = wb[sname]
                     for tname, tobj in (getattr(ws2, "tables", {}) or {}).items():
-                        tables.append({"name": tname, "sheet": sname,
-                                       "range": getattr(tobj, "ref", "")})
+                        tables.append(
+                            {"name": tname, "sheet": sname, "range": getattr(tobj, "ref", "")}
+                        )
             except Exception:
                 pass
 
@@ -206,8 +216,12 @@ class ExcelContextCapture:
         bp = context.get("blueprint", {})
         sheet_names = context.get("sheet_names") or [s["name"] for s in bp.get("sheets", [])]
         if sheet_names:
-            lines.append(f"Workbook has {len(sheet_names)} sheet(s): {', '.join(str(s) for s in sheet_names)}")
-        lines.append(f"Active sheet: {context.get('sheet_name', 'Sheet1')} | Active cell: {context.get('active_cell', 'A1')}")
+            lines.append(
+                f"Workbook has {len(sheet_names)} sheet(s): {', '.join(str(s) for s in sheet_names)}"
+            )
+        lines.append(
+            f"Active sheet: {context.get('sheet_name', 'Sheet1')} | Active cell: {context.get('active_cell', 'A1')}"
+        )
 
         # Headers
         headers = context.get("headers", {})
@@ -229,7 +243,9 @@ class ExcelContextCapture:
         # Surrounding data grid (compact representation)
         grid = context.get("grid", [])
         if grid:
-            lines.append(f"\n## Surrounding Data (±8 rows/cols from {context.get('active_cell', 'A1')})")
+            lines.append(
+                f"\n## Surrounding Data (±8 rows/cols from {context.get('active_cell', 'A1')})"
+            )
             for row in grid[:16]:  # cap at 16 rows
                 row_strs = []
                 for cell in row[:16]:  # cap at 16 cols
@@ -241,12 +257,18 @@ class ExcelContextCapture:
         # Instructions
         lines.append("\n## Instructions for Excel Mode")
         lines.append("- Output ONLY valid JSON: array of ExcelWriteOp objects")
-        lines.append("- ExcelWriteOp fields: {\"cell\": \"F2\", \"formula\": \"=C2-B2\", \"value\": \"\", \"number_format\": \"0.00%\"}")
+        lines.append(
+            '- ExcelWriteOp fields: {"cell": "F2", "formula": "=C2-B2", "value": "", "number_format": "0.00%"}'
+        )
         lines.append("- Use = prefix for ALL formulas (e.g. =SUM(A1:A10))")
-        lines.append("- Use commas as separators in formulas (=SUMIF(A:A,\"West\",B:B))")
+        lines.append('- Use commas as separators in formulas (=SUMIF(A:A,"West",B:B))')
         lines.append("- Use named ranges where available instead of raw cell references")
-        lines.append("- For charts: {\"chart_type\": \"line\", \"source_range\": \"A1:B100\", \"title\": \"Revenue\"}")
-        lines.append("- For pivots: {\"source_range\": \"A1:D100\", \"rows\": [\"Region\"], \"columns\": [], \"values\": [\"Revenue\"]}")
+        lines.append(
+            '- For charts: {"chart_type": "line", "source_range": "A1:B100", "title": "Revenue"}'
+        )
+        lines.append(
+            '- For pivots: {"source_range": "A1:D100", "rows": ["Region"], "columns": [], "values": ["Revenue"]}'
+        )
 
         return "\n".join(lines)
 
@@ -255,12 +277,14 @@ class ExcelContextCapture:
 # Standalone functions (used by sidecar dispatcher)
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def get_workbook_overview(file_path: str) -> dict:
     """
     Get structural overview: sheets, tables, charts, pivots, named ranges.
     Returns: {sheets, named_ranges, tables, total_sheets, total_named_ranges}
     """
     from sidecar.parsers.excelmcp_bridge import get_workbook_blueprint
+
     result = get_workbook_blueprint(file_path)
     if not result.get("ok"):
         return result
@@ -276,7 +300,7 @@ def get_active_cell_context(file_path: str, active_cell: str, radius: int = 8) -
     ctx = cap.capture(file_path, active_cell)
     # Trim grid to requested radius
     grid = ctx.get("grid", [])
-    trimmed = [row[:radius * 2 + 1] for row in grid[:radius * 2 + 1]]
+    trimmed = [row[: radius * 2 + 1] for row in grid[: radius * 2 + 1]]
     return {
         "ok": True,
         "data": {
@@ -309,6 +333,7 @@ def format_excel_context_for_prompt(file_path: str, active_cell: str, command: s
 # ──────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def _empty_context(active_cell: str | None) -> dict:
     return {

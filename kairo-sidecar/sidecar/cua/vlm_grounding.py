@@ -38,9 +38,11 @@ logger = logging.getLogger(__name__)
 
 # ─── Data Structures ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class GroundingResult:
     """Result of a VLM element grounding request."""
+
     found: bool
     x: int = 0
     y: int = 0
@@ -57,6 +59,7 @@ class GroundingResult:
 @dataclass
 class VerificationResult:
     """Result of a post-action semantic verification."""
+
     success: bool
     confidence: float
     explanation: str
@@ -66,7 +69,8 @@ class VerificationResult:
 @dataclass
 class ScreenDescription:
     """Structured description of what the VLM sees on screen."""
-    elements: list[dict]     # [{name, type, x, y, text}, ...]
+
+    elements: list[dict]  # [{name, type, x, y, text}, ...]
     app_name: str
     raw_description: str
     latency_ms: float = 0.0
@@ -124,6 +128,7 @@ Focus on clickable/interactive elements that would be relevant for automation.""
 
 # ─── VLM Grounding Engine ─────────────────────────────────────────────────────
 
+
 class VlmGroundingEngine:
     """
     Vision-Language Model grounding engine using Ollama.
@@ -160,7 +165,9 @@ class VlmGroundingEngine:
         if self._client is None or self._client.is_closed:
             self._client = httpx.AsyncClient(
                 base_url=self.config.ollama_url,
-                timeout=httpx.Timeout(10.0, read=300.0),  # 300s read: cold GGUF load + first inference can exceed 60s
+                timeout=httpx.Timeout(
+                    10.0, read=300.0
+                ),  # 300s read: cold GGUF load + first inference can exceed 60s
             )
         return self._client
 
@@ -178,11 +185,15 @@ class VlmGroundingEngine:
     ) -> tuple[str, float]:
         """
         Call Ollama chat API with image(s).
-        
+
         Returns:
             (response_text, latency_ms)
         """
-        model = model_name or self.config.selected_model.ollama_pull_tag or self.config.selected_model.ollama_name
+        model = (
+            model_name
+            or self.config.selected_model.ollama_pull_tag
+            or self.config.selected_model.ollama_name
+        )
         images = [self._encode_image(p) for p in image_paths]
 
         payload = {
@@ -194,7 +205,8 @@ class VlmGroundingEngine:
                     "images": images,
                 }
             ],
-            "options": self.config.to_ollama_options(), "keep_alive": self.config.keep_alive,
+            "options": self.config.to_ollama_options(),
+            "keep_alive": self.config.keep_alive,
             "stream": False,
         }
 
@@ -342,7 +354,7 @@ class VlmGroundingEngine:
             return VerificationResult(
                 success=False,
                 confidence=0.0,
-                explanation=f"Parse error — could not verify",
+                explanation="Parse error — could not verify",
             )
         except Exception as e:
             logger.error(f"VLM verify error: {e}", exc_info=True)

@@ -7,6 +7,7 @@ from pathlib import Path
 
 logger = logging.getLogger("kairo.quarkdown")
 
+
 def compile_quarkdown(content: str, output_format: str, output_path: str) -> bool:
     """
     Compiles Quarkdown/Markdown content to either 'pdf' or 'revealjs' presentation.
@@ -26,14 +27,17 @@ def compile_quarkdown(content: str, output_format: str, output_path: str) -> boo
         if jar_path.exists() and shutil.which("java"):
             logger.info("Found bundled quarkdown.jar and JVM, running compilation...")
             return run_jvm_quarkdown(qd_markup, jar_path, output_format, output_path)
-        
+
         # 3. Fallback: Programmatic, high-fidelity layout compilation (100% reliable)
-        logger.info("Quarkdown JVM compiler unavailable. Running high-fidelity local programmatic compiler...")
+        logger.info(
+            "Quarkdown JVM compiler unavailable. Running high-fidelity local programmatic compiler..."
+        )
         return run_fallback_compiler(qd_markup, content, output_format, output_path)
 
     except Exception as e:
         logger.error(f"Failed to compile Quarkdown document: {e}", exc_info=True)
         return False
+
 
 def generate_quarkdown_markup(content: str, output_format: str) -> str:
     """
@@ -52,7 +56,7 @@ def generate_quarkdown_markup(content: str, output_format: str) -> str:
                 current_section.append(line)
         if current_section:
             sections.append("\n".join(current_section))
-            
+
         qd_slides = []
         for section in sections:
             qd_slides.append(f".slide\n{section}\n")
@@ -61,16 +65,29 @@ def generate_quarkdown_markup(content: str, output_format: str) -> str:
         # Standard document
         return f".document\n{content}\n"
 
+
 def run_jvm_quarkdown(markup: str, jar_path: Path, output_format: str, output_path: str) -> bool:
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".qd", delete=False, encoding="utf-8") as temp_in:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".qd", delete=False, encoding="utf-8"
+    ) as temp_in:
         temp_in.write(markup)
         temp_in_name = temp_in.name
 
     try:
         fmt_arg = "revealjs" if output_format == "revealjs" else "pdf"
-        cmd = ["java", "-jar", str(jar_path), "--format", fmt_arg, "-i", temp_in_name, "-o", output_path]
+        cmd = [
+            "java",
+            "-jar",
+            str(jar_path),
+            "--format",
+            fmt_arg,
+            "-i",
+            temp_in_name,
+            "-o",
+            output_path,
+        ]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-        
+
         if result.returncode == 0:
             logger.info("JVM Quarkdown compile successful.")
             return True
@@ -86,7 +103,10 @@ def run_jvm_quarkdown(markup: str, jar_path: Path, output_format: str, output_pa
         except:
             pass
 
-def run_fallback_compiler(markup: str, original_content: str, output_format: str, output_path: str) -> bool:
+
+def run_fallback_compiler(
+    markup: str, original_content: str, output_format: str, output_path: str
+) -> bool:
     """
     Renders high-fidelity reveal.js slides, EPUB 3.2 e-books, book-style HTML, or standard printable documents.
     """
@@ -117,15 +137,17 @@ def _generate_epub_fallback(content: str, output_path: str) -> bool:
     for line in content.splitlines():
         stripped = line.strip()
         if stripped.startswith("# "):
-            body_lines.append(f'<h1>{escape(stripped[2:].strip())}</h1>')
+            body_lines.append(f"<h1>{escape(stripped[2:].strip())}</h1>")
         elif stripped.startswith("## "):
-            body_lines.append(f'<h2>{escape(stripped[3:].strip())}</h2>')
+            body_lines.append(f"<h2>{escape(stripped[3:].strip())}</h2>")
         elif stripped.startswith("### "):
-            body_lines.append(f'<h3>{escape(stripped[4:].strip())}</h3>')
+            body_lines.append(f"<h3>{escape(stripped[4:].strip())}</h3>")
         elif stripped.startswith("- ") or stripped.startswith("* "):
-            body_lines.append(f'<p style="margin-left:1.5em">&#x2022; {escape(stripped[2:].strip())}</p>')
+            body_lines.append(
+                f'<p style="margin-left:1.5em">&#x2022; {escape(stripped[2:].strip())}</p>'
+            )
         elif stripped:
-            body_lines.append(f'<p>{escape(stripped)}</p>')
+            body_lines.append(f"<p>{escape(stripped)}</p>")
 
     xhtml_body = "\n".join(body_lines)
 
@@ -203,6 +225,7 @@ def _generate_epub_fallback(content: str, output_path: str) -> bool:
 def _epub_utc_timestamp() -> str:
     """ISO 8601 UTC timestamp for EPUB metadata."""
     from datetime import datetime, timezone
+
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -218,10 +241,7 @@ def _generate_revealjs_fallback(original_content: str, output_path: str) -> bool
         if line.startswith("# ") or line.startswith("## "):
             if current_slide:
                 slides.append(current_slide)
-            current_slide = {
-                "title": line.lstrip("# ").lstrip("## ").strip(),
-                "elements": []
-            }
+            current_slide = {"title": line.lstrip("# ").lstrip("## ").strip(), "elements": []}
         elif current_slide is not None:
             if line.startswith("- ") or line.startswith("* "):
                 current_slide["elements"].append({"type": "bullet", "text": line[2:].strip()})
@@ -232,14 +252,16 @@ def _generate_revealjs_fallback(original_content: str, output_path: str) -> bool
                 while i < len(lines) and not lines[i].startswith("```"):
                     code_lines.append(lines[i])
                     i += 1
-                current_slide["elements"].append({"type": "code", "lang": lang, "text": "\n".join(code_lines)})
+                current_slide["elements"].append(
+                    {"type": "code", "lang": lang, "text": "\n".join(code_lines)}
+                )
             elif line.strip():
                 current_slide["elements"].append({"type": "p", "text": line.strip()})
         else:
             if line.strip():
                 current_slide = {
                     "title": "Introduction",
-                    "elements": [{"type": "p", "text": line.strip()}]
+                    "elements": [{"type": "p", "text": line.strip()}],
                 }
         i += 1
 
@@ -257,19 +279,25 @@ def _generate_revealjs_fallback(original_content: str, output_path: str) -> bool
                 if not in_list:
                     elements_html.append('<ul style="margin-top: 20px;">')
                     in_list = True
-                elements_html.append(f'<li class="fragment" style="margin-bottom: 10px;">{elem["text"]}</li>')
+                elements_html.append(
+                    f'<li class="fragment" style="margin-bottom: 10px;">{elem["text"]}</li>'
+                )
             else:
                 if in_list:
-                    elements_html.append('</ul>')
+                    elements_html.append("</ul>")
                     in_list = False
 
                 if elem["type"] == "code":
-                    elements_html.append(f'<pre><code class="language-{elem["lang"]}">{elem["text"]}</code></pre>')
+                    elements_html.append(
+                        f'<pre><code class="language-{elem["lang"]}">{elem["text"]}</code></pre>'
+                    )
                 elif elem["type"] == "p":
-                    elements_html.append(f'<p style="margin-top: 15px; font-size: 1.1em; line-height: 1.6;">{elem["text"]}</p>')
+                    elements_html.append(
+                        f'<p style="margin-top: 15px; font-size: 1.1em; line-height: 1.6;">{elem["text"]}</p>'
+                    )
 
         if in_list:
-            elements_html.append('</ul>')
+            elements_html.append("</ul>")
 
         body_content = "\n".join(elements_html)
         slides_html += f"""
@@ -382,16 +410,16 @@ def _generate_book_fallback(original_content: str, output_path: str) -> bool:
             toc_entries.append({"level": 3, "id": heading_id, "text": text})
             body_content += f'<h3 id="{heading_id}">{escape(text)}</h3>\n'
         elif stripped.startswith("- ") or stripped.startswith("* "):
-            body_content += f'<li>{escape(stripped[2:].strip())}</li>\n'
+            body_content += f"<li>{escape(stripped[2:].strip())}</li>\n"
         elif stripped:
-            body_content += f'<p>{escape(stripped)}</p>\n'
+            body_content += f"<p>{escape(stripped)}</p>\n"
 
     # Build TOC HTML
     toc_html = '<nav class="toc"><h2>Table of Contents</h2><ol>\n'
     for entry in toc_entries:
         indent = "  " * entry["level"]
         toc_html += f'{indent}<li style="margin-left: {(entry["level"]-1) * 20}px"><a href="#{entry["id"]}">{escape(entry["text"])}</a></li>\n'
-    toc_html += '</ol></nav>\n'
+    toc_html += "</ol></nav>\n"
 
     title = "Kairo Book Export"
     if toc_entries:
@@ -553,5 +581,3 @@ def _generate_html_fallback(original_content: str, output_path: str) -> bool:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
     return True
-
-

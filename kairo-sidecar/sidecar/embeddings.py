@@ -7,6 +7,7 @@ log = logging.getLogger("kairo-sidecar.embeddings")
 _model = None
 _lock = threading.Lock()
 
+
 def get_model():
     global _model
     if _model is None:
@@ -15,13 +16,17 @@ def get_model():
                 log.info("Loading Model2Vec 'minishlab/potion-base-8M'...")
                 try:
                     from model2vec import StaticModel
+
                     # Note: First load will download and cache the model from HuggingFace
                     _model = StaticModel.from_pretrained("minishlab/potion-base-8M")
-                    log.info("Model2Vec model 'minishlab/potion-base-8M' loaded successfully (256 dimensions)")
+                    log.info(
+                        "Model2Vec model 'minishlab/potion-base-8M' loaded successfully (256 dimensions)"
+                    )
                 except Exception as e:
                     log.error(f"Failed to load Model2Vec: {e}")
                     raise
     return _model
+
 
 def embed_texts(texts: List[str]) -> List[List[float]]:
     """
@@ -38,6 +43,7 @@ def embed_texts(texts: List[str]) -> List[List[float]]:
         log.error(f"Embedding generation failed: {e}")
         # Return fallback zero vectors (256-dim) so the system degrades gracefully
         return [[0.0] * 256 for _ in texts]
+
 
 def embed_text(text: str) -> List[float]:
     """

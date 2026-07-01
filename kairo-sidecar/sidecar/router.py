@@ -24,34 +24,55 @@ import json
 import logging
 import traceback
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional, Union, Callable
+from typing import Dict, Any, List, Optional, Callable
 from sidecar.streaming_injector import get_streaming_injector
 
 from sidecar.masters.word_master import (
-    WordMaster, WordContextExtractor, WordOperationValidator, WordWriter,
+    WordMaster,
+    WordContextExtractor,
+    WordOperationValidator,
+    WordWriter,
 )
 from sidecar.masters.word_prompt_builder import build_word_prompt
 from sidecar.masters.excel_master import (
-    ExcelMaster, ExcelContextExtractor, ExcelOperationValidator, ExcelWriter,
+    ExcelMaster,
+    ExcelContextExtractor,
+    ExcelOperationValidator,
+    ExcelWriter,
 )
 from sidecar.schemas.docx_schema import DocxResponse
 from sidecar.schemas.xlsx_schema import ExcelResponse
 from sidecar.schemas.domain_schemas import OrchestratorResponse
 from sidecar.llm_caller import call_with_schema
 from sidecar.masters.other_masters import (
-    PowerPointMaster, CodeMaster, PDFMaster, BrowserMaster, TerminalMaster,
-    EmailMaster, NotesMaster, DesignMaster, MediaMaster, DataMaster,
+    PowerPointMaster,
+    CodeMaster,
+    PDFMaster,
+    BrowserMaster,
+    TerminalMaster,
+    EmailMaster,
+    NotesMaster,
+    DesignMaster,
+    MediaMaster,
+    DataMaster,
 )
 from sidecar.mem_machine import MemorySeeder
 
 # 4-Tier Smart Model Router (non-blocking import)
 try:
-    from sidecar.model_router import select_model as _select_model, MODEL_STANDARD as _MODEL_STANDARD
+    from sidecar.model_router import (
+        select_model as _select_model,
+        MODEL_STANDARD as _MODEL_STANDARD,
+    )
+
     _HAS_MODEL_ROUTER = True
 except Exception as _mr_exc:
     _HAS_MODEL_ROUTER = False
     _MODEL_STANDARD = "ollama/qwen2.5:7b"
-    def _select_model(**_kwargs): return _MODEL_STANDARD  # type: ignore
+
+    def _select_model(**_kwargs):
+        return _MODEL_STANDARD  # type: ignore
+
 
 log = logging.getLogger("kairo-sidecar.router")
 
@@ -60,13 +81,17 @@ try:
     mem_seeder = MemorySeeder()
 except Exception as _mem_seeder_exc:
     import logging as _log_fallback
-    _log_fallback.getLogger("kairo-sidecar.router").warning(f"MemorySeeder init failed: {_mem_seeder_exc}")
+
+    _log_fallback.getLogger("kairo-sidecar.router").warning(
+        f"MemorySeeder init failed: {_mem_seeder_exc}"
+    )
     mem_seeder = None
 
 
 # ---------------------------------------------------------------------------
 # KairoRequest / KairoResponse — clean data transfer objects
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class KairoRequest:
@@ -83,6 +108,7 @@ class KairoRequest:
     user_id       : MemMachine user key (default "local").
     model_name    : LiteLLM model alias to use (default from config).
     """
+
     user_prompt: str
     domain: str
     file_path: str = ""
@@ -109,7 +135,8 @@ class KairoResponse:
     error             : Error message (only when type=="error").
     raw_data          : Full LLM response dict for debugging / GRP display.
     """
-    type: str = "operations"           # "operations" | "clarification" | "error"
+
+    type: str = "operations"  # "operations" | "clarification" | "error"
     domain: str = ""
     operations: List[Dict] = field(default_factory=list)
     context_summary: str = ""
@@ -123,13 +150,13 @@ class KairoResponse:
 def _get_doc_len(doc_context: Any) -> int:
     if doc_context is None:
         return 0
-        
+
     if isinstance(doc_context, dict):
         for key in ["full_text", "extracted_content", "slide_text", "page_content_truncated"]:
             val = doc_context.get(key)
             if val is not None:
                 return len(str(val))
-        
+
         # Word paragraphs checking in dict
         if "paragraphs" in doc_context:
             paras = doc_context["paragraphs"]
@@ -157,14 +184,14 @@ def _get_doc_len(doc_context: Any) -> int:
                     if val is not None:
                         total_len += len(str(val))
                 return total_len
-                
+
     else:
         # Check dataclass / object attributes
         for attr in ["full_text", "extracted_content", "slide_text", "page_content_truncated"]:
             val = getattr(doc_context, attr, None)
             if val is not None:
                 return len(str(val))
-                
+
         # Word paragraphs checking in object
         paras = getattr(doc_context, "paragraphs", None)
         if paras is not None and isinstance(paras, (list, tuple)):
@@ -190,14 +217,14 @@ def _get_doc_len(doc_context: Any) -> int:
                 if val is not None:
                     total_len += len(str(val))
             return total_len
-            
+
     return 0
 
 
 def _get_page_count(doc_context: Any) -> int:
     if doc_context is None:
         return 0
-        
+
     if isinstance(doc_context, dict):
         for key in ["page_count", "total_slides", "slide_count"]:
             val = doc_context.get(key)
@@ -214,7 +241,7 @@ def _get_page_count(doc_context: Any) -> int:
                     return int(val)
                 except (ValueError, TypeError):
                     pass
-                    
+
     return 0
 
 
@@ -222,11 +249,13 @@ def _get_page_count(doc_context: Any) -> int:
 # ReasoningStep — orchestrator / classifier
 # ---------------------------------------------------------------------------
 
+
 class ReasoningStep:
     """
     Master Orchestrator / Classification Router.
     Runs first to classify domain, task, complexity, and ambiguity.
     """
+
     def classify(
         self,
         user_prompt: str,
@@ -239,8 +268,19 @@ class ReasoningStep:
     ) -> OrchestratorResponse:
         # Map domain input to valid Orchestrator domain literals
         valid_domains = {
-            "word", "excel", "powerpoint", "code", "pdf", "browser",
-            "terminal", "email", "notes", "design", "media", "data", "unknown",
+            "word",
+            "excel",
+            "powerpoint",
+            "code",
+            "pdf",
+            "browser",
+            "terminal",
+            "email",
+            "notes",
+            "design",
+            "media",
+            "data",
+            "unknown",
         }
         mapped_domain = domain.lower() if domain else "unknown"
         if mapped_domain == "docx":
@@ -256,29 +296,41 @@ class ReasoningStep:
         app_name = "Unknown"
         app_type = "Unknown"
         if mapped_domain == "word":
-            app_name = "Microsoft Word"; app_type = "Word Processor"
+            app_name = "Microsoft Word"
+            app_type = "Word Processor"
         elif mapped_domain == "excel":
-            app_name = "Microsoft Excel"; app_type = "Spreadsheet"
+            app_name = "Microsoft Excel"
+            app_type = "Spreadsheet"
         elif mapped_domain == "powerpoint":
-            app_name = "Microsoft PowerPoint"; app_type = "Presentation"
+            app_name = "Microsoft PowerPoint"
+            app_type = "Presentation"
         elif mapped_domain == "code":
-            app_name = "VS Code"; app_type = "IDE"
+            app_name = "VS Code"
+            app_type = "IDE"
         elif mapped_domain == "pdf":
-            app_name = "Adobe Acrobat"; app_type = "PDF Viewer"
+            app_name = "Adobe Acrobat"
+            app_type = "PDF Viewer"
         elif mapped_domain == "browser":
-            app_name = "Google Chrome"; app_type = "Web Browser"
+            app_name = "Google Chrome"
+            app_type = "Web Browser"
         elif mapped_domain == "terminal":
-            app_name = "Windows Terminal"; app_type = "Command Line Shell"
+            app_name = "Windows Terminal"
+            app_type = "Command Line Shell"
         elif mapped_domain == "email":
-            app_name = "Microsoft Outlook"; app_type = "Email Client"
+            app_name = "Microsoft Outlook"
+            app_type = "Email Client"
         elif mapped_domain == "notes":
-            app_name = "Obsidian"; app_type = "Notes App"
+            app_name = "Obsidian"
+            app_type = "Notes App"
         elif mapped_domain == "design":
-            app_name = "Figma"; app_type = "Design Tool"
+            app_name = "Figma"
+            app_type = "Design Tool"
         elif mapped_domain == "media":
-            app_name = "Canva"; app_type = "Media Editor"
+            app_name = "Canva"
+            app_type = "Media Editor"
         elif mapped_domain == "data":
-            app_name = "Jupyter"; app_type = "Data Notebook"
+            app_name = "Jupyter"
+            app_type = "Data Notebook"
 
         prompt = f"""SYSTEM:
 You are the Kairo Phantom Orchestrator. You classify user requests and route them to the correct specialist.
@@ -385,13 +437,16 @@ OUTPUT (JSON only, no other text):
                 )
             return res
         except Exception as e:
-            log.warning(f"Orchestrator classification failed: {e}. Falling back to default routing.")
+            log.warning(
+                f"Orchestrator classification failed: {e}. Falling back to default routing."
+            )
             return OrchestratorResponse(domain=mapped_domain, confidence=1.0, is_ambiguous=False)
 
 
 # ---------------------------------------------------------------------------
 # QualityReport / OutputVerifier — quality gates
 # ---------------------------------------------------------------------------
+
 
 class QualityReport:
     def __init__(self, all_passed: bool, issues: List[str] = None, retry_recommended: bool = False):
@@ -422,8 +477,12 @@ class OutputVerifier:
 
         # 1. Prompt leakage check
         leaked_keywords = [
-            "waza", "memmachine", "ghost-writer", "waza_agent",
-            "system prompt", "classification output schema",
+            "waza",
+            "memmachine",
+            "ghost-writer",
+            "waza_agent",
+            "system prompt",
+            "classification output schema",
         ]
         for kw in leaked_keywords:
             if kw in output.lower():
@@ -473,6 +532,7 @@ class OutputVerifier:
 # DomainMasterRouter — the main router
 # ---------------------------------------------------------------------------
 
+
 class DomainMasterRouter:
     """
     Intelligence routing layer that directs every Alt+M request to the correct
@@ -493,18 +553,18 @@ class DomainMasterRouter:
     def __init__(self):
         # --- Unified façade masters (new API) ---
         self.masters: Dict[str, Any] = {
-            "word":        WordMaster(),
-            "excel":       ExcelMaster(),
-            "powerpoint":  PowerPointMaster(),
-            "code":        CodeMaster(),
-            "browser":     BrowserMaster(),
-            "terminal":    TerminalMaster(),
-            "email":       EmailMaster(),
-            "pdf":         PDFMaster(),
-            "notes":       NotesMaster(),
-            "design":      DesignMaster(),
-            "media":       MediaMaster(),
-            "data":        DataMaster(),
+            "word": WordMaster(),
+            "excel": ExcelMaster(),
+            "powerpoint": PowerPointMaster(),
+            "code": CodeMaster(),
+            "browser": BrowserMaster(),
+            "terminal": TerminalMaster(),
+            "email": EmailMaster(),
+            "pdf": PDFMaster(),
+            "notes": NotesMaster(),
+            "design": DesignMaster(),
+            "media": MediaMaster(),
+            "data": DataMaster(),
         }
 
         # --- Legacy low-level extractors (kept for route_llm_request) ---
@@ -521,6 +581,7 @@ class DomainMasterRouter:
         # MemMachineClient — non-critical; failures are swallowed
         try:
             from sidecar.mem_machine import MemMachineClient
+
             self.mem_machine = MemMachineClient()
         except Exception as e:
             log.warning(f"MemMachineClient init failed: {e}")
@@ -529,6 +590,7 @@ class DomainMasterRouter:
         # IntentGate — lazy singleton; instantiated once and reused across calls
         try:
             from sidecar.intent_gate import get_intent_gate
+
             self._intent_gate = get_intent_gate()
         except Exception as e:
             log.warning(f"IntentGate init failed (non-critical): {e}")
@@ -565,6 +627,7 @@ class DomainMasterRouter:
 
         # Check domain registry mode
         from sidecar.domain_registry import get_domain_mode
+
         if get_domain_mode(domain) == "PromptOnly":
             canonical_name = domain.capitalize()
             if domain == "powerpoint":
@@ -575,7 +638,7 @@ class DomainMasterRouter:
             return KairoResponse(
                 type="error",
                 domain=domain,
-                error=f"Domain {canonical_name} is unavailable. Operating in PromptOnly mode."
+                error=f"Domain {canonical_name} is unavailable. Operating in PromptOnly mode.",
             )
 
         # ── STEP 0: IntentGate — lightweight pre-classification (FIRST STEP) ──
@@ -621,7 +684,9 @@ class DomainMasterRouter:
 
             # 2b. 4-Tier Model Selection — pick optimal model tier for this request
             if _HAS_MODEL_ROUTER and request.model_name in (
-                "ollama/qwen2.5:7b", "kairo-standard", "",
+                "ollama/qwen2.5:7b",
+                "kairo-standard",
+                "",
             ):
                 selected_model = _select_model(
                     user_prompt=request.user_prompt,
@@ -637,7 +702,9 @@ class DomainMasterRouter:
 
             # Complex requests: generate plan and attach to response context
             plan_steps = []
-            if getattr(classification, "complexity", "") == "complex" and getattr(classification, "task_type", "") in ("generate", "rewrite", "analyze"):
+            if getattr(classification, "complexity", "") == "complex" and getattr(
+                classification, "task_type", ""
+            ) in ("generate", "rewrite", "analyze"):
                 plan_steps = self._dispatch_plan_engine(domain, request.user_prompt, classification)
                 log.info(f"Plan generated: {plan_steps}")
 
@@ -650,9 +717,7 @@ class DomainMasterRouter:
                         or "Could you please clarify your request?"
                     ),
                     confidence=classification.confidence,
-                    context_summary=(
-                        classification.ambiguity_reason or "Ambiguous request"
-                    ),
+                    context_summary=(classification.ambiguity_reason or "Ambiguous request"),
                 )
 
             # ── STEP 2c: Create-From-Scratch dispatch ──────────────────────
@@ -679,8 +744,9 @@ class DomainMasterRouter:
                             raw_data={"created_path": created_path},
                         )
                 except Exception as _cfs_err:
-                    log.warning(f"Create-from-scratch dispatch failed: {_cfs_err}. Continuing normal route.")
-
+                    log.warning(
+                        f"Create-from-scratch dispatch failed: {_cfs_err}. Continuing normal route."
+                    )
 
             # 3. Extract domain context
             doc_context = master.extract_context(
@@ -689,16 +755,14 @@ class DomainMasterRouter:
             )
 
             # 4. Build prompt
-            prompt = master.build_prompt(
-                request.user_prompt, doc_context, mem_ctx, classification
-            )
+            prompt = master.build_prompt(request.user_prompt, doc_context, mem_ctx, classification)
 
             # 5. Call LLM (using selected model tier and adaptive compute)
             schema_class = master.get_schema_class()
-            
+
             from sidecar.adaptive_compute import estimate_difficulty, get_compute_budget
             from sidecar.best_of_n import run_best_of_n
-            
+
             doc_len = _get_doc_len(doc_context)
             page_count = _get_page_count(doc_context)
             waza_agent_str = getattr(classification, "waza_agent", "general")
@@ -710,7 +774,7 @@ class DomainMasterRouter:
                 document_page_count=page_count,
             )
             budget = get_compute_budget(difficulty)
-            
+
             if budget.get("use_best_of_n", False) and request.file_path:
                 raw_response = run_best_of_n(
                     prompt=prompt,
@@ -720,7 +784,7 @@ class DomainMasterRouter:
                     file_path=request.file_path,
                     master=master,
                     doc_context=doc_context,
-                    N=budget.get("N", 3)
+                    N=budget.get("N", 3),
                 )
             else:
                 raw_response = call_with_schema(prompt, schema_class, model=selected_model)
@@ -732,7 +796,7 @@ class DomainMasterRouter:
                     model=selected_model,
                     prompt=prompt,
                     system="",
-                    on_token=getattr(request, "on_token", None)
+                    on_token=getattr(request, "on_token", None),
                 )
 
             # 6. Quality check + one retry
@@ -740,10 +804,7 @@ class DomainMasterRouter:
             quality = self.quality_checker.run_all_checks(raw_dump, domain=domain)
             if not quality.all_passed and quality.retry_recommended:
                 log.warning(f"Quality gate failed: {quality.issues}. Retrying once…")
-                retry_prompt = (
-                    prompt
-                    + f"\n\nQuality issues to fix: {', '.join(quality.issues)}"
-                )
+                retry_prompt = prompt + f"\n\nQuality issues to fix: {', '.join(quality.issues)}"
                 # Retry with standard tier to maximise quality
                 retry_model = selected_model if selected_model != "kairo-fast" else _MODEL_STANDARD
                 raw_response = call_with_schema(retry_prompt, schema_class, model=retry_model)
@@ -781,6 +842,7 @@ class DomainMasterRouter:
             try:
                 import datetime
                 from pathlib import Path
+
                 audit_path = Path.home() / ".kairo" / "audit.jsonl"
                 audit_path.parent.mkdir(parents=True, exist_ok=True)
                 audit_entry = {
@@ -817,42 +879,45 @@ class DomainMasterRouter:
         In the current architecture, generates a heuristic plan in Python
         (Rust PlanningEngine is called via main.rs IPC; this is the Python fallback).
         """
-        complexity = getattr(classification, 'complexity', 'medium')
-        task_type = getattr(classification, 'task_type', 'insert')
-        waza = getattr(classification, 'waza_agent', 'general')
-        
+        getattr(classification, "complexity", "medium")
+        task_type = getattr(classification, "task_type", "insert")
+        getattr(classification, "waza_agent", "general")
+
         # Heuristic plans by domain + task type
         plans = {
-            ('word', 'rewrite'): [
-                '1. Extract current paragraph style and document tone',
-                '2. Rewrite content to improve flow and readability',
-                '3. Align vocabulary and formatting with surrounding paragraphs',
+            ("word", "rewrite"): [
+                "1. Extract current paragraph style and document tone",
+                "2. Rewrite content to improve flow and readability",
+                "3. Align vocabulary and formatting with surrounding paragraphs",
             ],
-            ('word', 'generate'): [
-                '1. Analyze document structure and target section',
-                '2. Draft content matching document style and format',
-                '3. Apply correct paragraph styles (Heading/Body/List)',
-                '4. Verify content aligns with MemMachine style preferences',
+            ("word", "generate"): [
+                "1. Analyze document structure and target section",
+                "2. Draft content matching document style and format",
+                "3. Apply correct paragraph styles (Heading/Body/List)",
+                "4. Verify content aligns with MemMachine style preferences",
             ],
-            ('excel', 'generate'): [
-                '1. Identify target cell range and sheet context',
-                '2. Formulate Excel formula with correct syntax',
-                '3. Validate formula against openpyxl parser',
-                '4. Write to target cell without touching adjacent cells',
+            ("excel", "generate"): [
+                "1. Identify target cell range and sheet context",
+                "2. Formulate Excel formula with correct syntax",
+                "3. Validate formula against openpyxl parser",
+                "4. Write to target cell without touching adjacent cells",
             ],
-            ('powerpoint', 'generate'): [
-                '1. Analyze slide layout and presentation context',
-                '2. Draft concise slide title and bullet points (max 5 bullets, 7 words each)',
-                '3. Apply correct slide layout and style',
+            ("powerpoint", "generate"): [
+                "1. Analyze slide layout and presentation context",
+                "2. Draft concise slide title and bullet points (max 5 bullets, 7 words each)",
+                "3. Apply correct slide layout and style",
             ],
         }
         key = (domain, task_type)
-        steps = plans.get(key, [
-            '1. Parse prompt and analyze document context',
-            '2. Generate content matching document style',
-            '3. Validate and inject with correct formatting',
-        ])
-        log.info(f'PlanningEngine: {len(steps)}-step plan for {domain}/{task_type}')
+        steps = plans.get(
+            key,
+            [
+                "1. Parse prompt and analyze document context",
+                "2. Generate content matching document style",
+                "3. Validate and inject with correct formatting",
+            ],
+        )
+        log.info(f"PlanningEngine: {len(steps)}-step plan for {domain}/{task_type}")
         return steps
 
     # -----------------------------------------------------------------------
@@ -872,7 +937,9 @@ class DomainMasterRouter:
             schema = '{"title":"...","sections":[{"heading":"...","level":1,"paragraphs":["..."],"bullets":[]}]}'
             creator_obj = DocxCreator()
         elif domain == "powerpoint":
-            schema = '{"title":"...","slides":[{"layout":"content","title":"...","bullets":["..."]}]}'
+            schema = (
+                '{"title":"...","slides":[{"layout":"content","title":"...","bullets":["..."]}]}'
+            )
             creator_obj = PptxCreator()
         elif domain == "excel":
             schema = '{"title":"...","sheets":[{"name":"Sheet1","headers":["Col"],"rows":[["val"]],"totals":false}]}'
@@ -883,31 +950,71 @@ class DomainMasterRouter:
         try:
             import json as _j
             import urllib.request as _u
-            msg = 'Create a ' + domain + ' document for: "' + user_prompt + '". Use schema: ' + schema + '. Output ONLY JSON.'
-            p = {"model": model, "messages": [{"role": "user", "content": msg}],
-                 "response_format": {"type": "json_object"}, "temperature": 0.3}
-            req = _u.Request("http://localhost:4000/v1/chat/completions",
-                             data=_j.dumps(p).encode(), headers={"Content-Type": "application/json"}, method="POST")
+
+            msg = (
+                "Create a "
+                + domain
+                + ' document for: "'
+                + user_prompt
+                + '". Use schema: '
+                + schema
+                + ". Output ONLY JSON."
+            )
+            p = {
+                "model": model,
+                "messages": [{"role": "user", "content": msg}],
+                "response_format": {"type": "json_object"},
+                "temperature": 0.3,
+            }
+            req = _u.Request(
+                "http://localhost:4000/v1/chat/completions",
+                data=_j.dumps(p).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
             with _u.urlopen(req, timeout=15.0) as rsp:
                 raw = _j.loads(rsp.read())["choices"][0]["message"]["content"]
             fi, li = raw.find("{"), raw.rfind("}")
             if fi != -1 and li != -1:
-                return creator_obj.create_and_open(_j.loads(raw[fi:li+1]))
+                return creator_obj.create_and_open(_j.loads(raw[fi : li + 1]))
         except Exception as _e:
             log.warning("Create-from-scratch LLM call failed: %s", _e)
         title = " ".join(user_prompt.replace("//", "").strip().split()[:8])
         if domain == "powerpoint":
-            return creator_obj.create_and_open({"title": title, "slides": [
-                {"layout": "title", "title": title, "subtitle": "Created by Kairo Phantom"},
-                {"layout": "content", "title": "Overview", "bullets": ["Add your content here"]},
-            ]})
+            return creator_obj.create_and_open(
+                {
+                    "title": title,
+                    "slides": [
+                        {"layout": "title", "title": title, "subtitle": "Created by Kairo Phantom"},
+                        {
+                            "layout": "content",
+                            "title": "Overview",
+                            "bullets": ["Add your content here"],
+                        },
+                    ],
+                }
+            )
         elif domain == "excel":
-            return creator_obj.create_and_open({"title": title, "sheets": [
-                {"name": "Data", "headers": ["Item", "Value"], "rows": [["Example", 0]]}
-            ]})
-        return creator_obj.create_and_open({"title": title, "sections": [
-            {"heading": "Overview", "level": 1, "paragraphs": ["Created by Kairo Phantom.", "Edit to add your content."]}
-        ]})
+            return creator_obj.create_and_open(
+                {
+                    "title": title,
+                    "sheets": [
+                        {"name": "Data", "headers": ["Item", "Value"], "rows": [["Example", 0]]}
+                    ],
+                }
+            )
+        return creator_obj.create_and_open(
+            {
+                "title": title,
+                "sections": [
+                    {
+                        "heading": "Overview",
+                        "level": 1,
+                        "paragraphs": ["Created by Kairo Phantom.", "Edit to add your content."],
+                    }
+                ],
+            }
+        )
 
     # -----------------------------------------------------------------------
     # LEGACY ASYNC API: route_llm_request() — unchanged for backward compat
@@ -925,7 +1032,7 @@ class DomainMasterRouter:
             log.warning(f"Quality checks failed: {quality_report.issues}. Retrying once…")
             prompt_with_feedback = (
                 prompt
-                + f"\n\nQuality issues to fix from previous attempt: "
+                + "\n\nQuality issues to fix from previous attempt: "
                 + f"{', '.join(quality_report.issues)}"
             )
             validated_response = call_with_schema(
@@ -943,9 +1050,7 @@ class DomainMasterRouter:
         """Query MemMachine for style context (non-blocking)."""
         if self.mem_machine:
             try:
-                return self.mem_machine.query(
-                    user_id=user_id, domain=domain, task_type=task_type
-                )
+                return self.mem_machine.query(user_id=user_id, domain=domain, task_type=task_type)
             except Exception as e:
                 log.debug(f"MemMachine query failed (non-blocking): {e}")
         return ""
@@ -1007,9 +1112,7 @@ class DomainMasterRouter:
         Legacy async wrapper — routes Alt+M requests to the correct Domain
         Master pipeline. Returns a dict with {"ok": bool, "data": {...}}.
         """
-        log.info(
-            f"DomainMasterRouter.route_llm_request: domain={domain} path={file_path}"
-        )
+        log.info(f"DomainMasterRouter.route_llm_request: domain={domain} path={file_path}")
 
         try:
             # Classification step
@@ -1281,6 +1384,7 @@ class DomainMasterRouter:
         if not is_mock:
             try:
                 from sidecar.parsers.excel_context import ExcelContextCapture
+
                 capture = ExcelContextCapture()
                 context_dict = context.to_dict()
                 context_dict["sheet_name"] = context.active_sheet
@@ -1290,12 +1394,14 @@ class DomainMasterRouter:
                 for c in context.cells:
                     ref = c["address"]
                     row_num = int("".join(ch for ch in ref if ch.isdigit()) or "1")
-                    row_dict.setdefault(row_num, []).append({
-                        "ref": ref,
-                        "value": c["value"] or "",
-                        "formula": c["formula"] or "",
-                        "is_active": ref == context.active_cell,
-                    })
+                    row_dict.setdefault(row_num, []).append(
+                        {
+                            "ref": ref,
+                            "value": c["value"] or "",
+                            "formula": c["formula"] or "",
+                            "is_active": ref == context.active_cell,
+                        }
+                    )
                 for r_num in sorted(row_dict.keys()):
                     grid_rows.append(row_dict[r_num])
                 context_dict["grid"] = grid_rows
@@ -1305,9 +1411,7 @@ class DomainMasterRouter:
         else:
             fragment = "## Excel Context Details:\n(Mock context)"
 
-        memory_str = (
-            mem_context or "No writing preferences learned yet. Use professional defaults."
-        )
+        memory_str = mem_context or "No writing preferences learned yet. Use professional defaults."
 
         app_context_part = f"""=== APP CONTEXT ===
 Application Name: Microsoft Excel
@@ -1482,6 +1586,7 @@ OUTPUT (JSON only):
 # ---------------------------------------------------------------------------
 # SwarmOrchestrator — Public façade wrapping DomainMasterRouter + IntentGate
 # ---------------------------------------------------------------------------
+
 
 class SwarmOrchestrator:
     """

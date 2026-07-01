@@ -2,7 +2,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 use tokio::task::JoinSet;
-use tracing::{info, error};
+use tracing::{error, info};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TestManifest {
@@ -38,9 +38,7 @@ async fn main() -> Result<()> {
     for test in manifest.win {
         set.spawn(async move {
             info!("Running test: {}", test.id);
-            let output = Command::new("cmd")
-                .args(["/c", &test.cmd])
-                .output();
+            let output = Command::new("cmd").args(["/c", &test.cmd]).output();
 
             match output {
                 Ok(out) => {

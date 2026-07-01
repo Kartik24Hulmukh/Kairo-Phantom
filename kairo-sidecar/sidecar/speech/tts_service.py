@@ -10,11 +10,11 @@ Text-to-speech fallback chain:
 
 The user NEVER sees engine names — this is Kairo's voice feedback.
 """
+
 from __future__ import annotations
 
 import logging
 import os
-import platform
 import subprocess
 import sys
 import tempfile
@@ -43,7 +43,9 @@ class TtsService:
         import shutil
 
         kairo_bin = Path.home() / ".kairo-phantom" / "bin"
-        exe_name = "sherpa-onnx-offline-tts.exe" if sys.platform == "win32" else "sherpa-onnx-offline-tts"
+        exe_name = (
+            "sherpa-onnx-offline-tts.exe" if sys.platform == "win32" else "sherpa-onnx-offline-tts"
+        )
 
         # Check Kairo-managed bin first
         kairo_candidate = kairo_bin / exe_name
@@ -69,7 +71,8 @@ class TtsService:
 
     def _has_pyttsx3(self) -> bool:
         try:
-            import pyttsx3  # type: ignore
+            import pyttsx3  # type: ignore  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -119,6 +122,7 @@ class TtsService:
         try:
             if sys.platform == "win32":
                 import winsound
+
                 winsound.PlaySound(wav_path, winsound.SND_FILENAME)
                 return True
             elif sys.platform == "darwin":
@@ -127,9 +131,7 @@ class TtsService:
             else:
                 # Linux: try aplay, then paplay, then sox
                 for player in ["aplay", "paplay", "play"]:
-                    if subprocess.run(
-                        ["which", player], capture_output=True
-                    ).returncode == 0:
+                    if subprocess.run(["which", player], capture_output=True).returncode == 0:
                         subprocess.run([player, wav_path], capture_output=True, timeout=30)
                         return True
             return False
@@ -140,6 +142,7 @@ class TtsService:
         """Speak using pyttsx3 (cross-platform, works offline)."""
         try:
             import pyttsx3  # type: ignore
+
             if self._pyttsx3_engine is None:
                 self._pyttsx3_engine = pyttsx3.init()
                 self._pyttsx3_engine.setProperty("rate", 175)
@@ -185,6 +188,7 @@ class TtsService:
     def _speak_via_espeak(self, text: str) -> bool:
         """Speak using espeak-ng (Linux fallback)."""
         import shutil
+
         for bin_name in ["espeak-ng", "espeak"]:
             if shutil.which(bin_name):
                 try:

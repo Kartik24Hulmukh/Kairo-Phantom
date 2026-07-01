@@ -1,16 +1,15 @@
+use serde::{Deserialize, Serialize};
 /// Kairo Phantom V6 — Yjs CRDT Peer (Production-Scale)
 /// E1: Sub-document segmentation for large docs (>5MB)
 /// E2: Awareness throttling — only broadcast on state TRANSITIONS
 /// E3: Snapshot-based state vectors for efficient sync
 /// Built on lessons from Plane FOSDEM 2026
-
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use yrs::{Doc, GetString, Options, Text, Transact, WriteTxn, ReadTxn};
-use yrs::updates::decoder::Decode;
-use serde::{Deserialize, Serialize};
-use tracing::{debug, info};
 use std::time::{Duration, Instant};
+use tokio::sync::Mutex;
+use tracing::{debug, info};
+use yrs::updates::decoder::Decode;
+use yrs::{Doc, GetString, Options, ReadTxn, Text, Transact, WriteTxn};
 
 // ─── Awareness State ──────────────────────────────────────────────────────────
 
@@ -57,7 +56,13 @@ impl ThrottledAwareness {
     }
 
     /// E2: Update state and broadcast only if it changed AND debounce passed.
-    pub async fn update_if_changed(&self, new_status: &str, progress: f32, section: Option<&str>, agent: &str) -> bool {
+    pub async fn update_if_changed(
+        &self,
+        new_status: &str,
+        progress: f32,
+        section: Option<&str>,
+        agent: &str,
+    ) -> bool {
         let new_state = AwarenessState {
             name: "Kairo AI".into(),
             color: "#8b5cf6".into(),
@@ -84,11 +89,17 @@ impl ThrottledAwareness {
         // State changed AND debounce passed — broadcast
         *current = new_state;
         *last = Some(now);
-        debug!("[Awareness] Transition: {} {:.0}%", new_status, progress * 100.0);
+        debug!(
+            "[Awareness] Transition: {} {:.0}%",
+            new_status,
+            progress * 100.0
+        );
         true
     }
 
-    pub async fn get(&self) -> AwarenessState { self.state.lock().await.clone() }
+    pub async fn get(&self) -> AwarenessState {
+        self.state.lock().await.clone()
+    }
 }
 
 // ─── E1: Sub-Document Segment ─────────────────────────────────────────────────
@@ -105,8 +116,14 @@ pub struct DocSegment {
 
 impl DocSegment {
     pub fn new(name: &str, client_id: u64) -> Self {
-        let doc = Doc::with_options(Options { client_id, ..Default::default() });
-        info!("[DocSegment] Created segment '{}' (cid={})", name, client_id);
+        let doc = Doc::with_options(Options {
+            client_id,
+            ..Default::default()
+        });
+        info!(
+            "[DocSegment] Created segment '{}' (cid={})",
+            name, client_id
+        );
         Self {
             name: name.to_string(),
             doc,
@@ -155,10 +172,10 @@ impl DocSegment {
     }
 
     pub fn apply_update(&self, update: &[u8]) -> Result<(), String> {
-        let u = yrs::Update::decode_v1(update)
-            .map_err(|e| format!("Decode error: {:?}", e))?;
+        let u = yrs::Update::decode_v1(update).map_err(|e| format!("Decode error: {e:?}"))?;
         let mut txn = self.doc.transact_mut();
-        txn.apply_update(u).map_err(|e| format!("Apply error: {:?}", e))?;
+        txn.apply_update(u)
+            .map_err(|e| format!("Apply error: {e:?}"))?;
         Ok(())
     }
 }
@@ -176,25 +193,45 @@ pub enum SyncTransport {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YjsPeerConfig {
-    #[serde(default)] pub enabled: bool,
-    #[serde(default = "default_true")] pub auto_detect: bool,
-    #[serde(default)] pub endpoints: std::collections::HashMap<String, String>,
-    #[serde(default = "default_prefix")] pub client_id_prefix: String,
-    #[serde(default = "default_review")] pub review_mode: String,
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default = "default_true")]
+    pub auto_detect: bool,
+    #[serde(default)]
+    pub endpoints: std::collections::HashMap<String, String>,
+    #[serde(default = "default_prefix")]
+    pub client_id_prefix: String,
+    #[serde(default = "default_review")]
+    pub review_mode: String,
     /// E1: Segment large docs beyond this size in bytes
-    #[serde(default = "default_segment_threshold")] pub segment_threshold_bytes: usize,
+    #[serde(default = "default_segment_threshold")]
+    pub segment_threshold_bytes: usize,
     /// E2: Awareness debounce in milliseconds
-    #[serde(default = "default_debounce")] pub awareness_debounce_ms: u64,
+    #[serde(default = "default_debounce")]
+    pub awareness_debounce_ms: u64,
     /// E3: Snapshot interval in seconds
-    #[serde(default = "default_snapshot_interval")] pub snapshot_interval_secs: u64,
+    #[serde(default = "default_snapshot_interval")]
+    pub snapshot_interval_secs: u64,
 }
 
-fn default_true() -> bool { true }
-fn default_prefix() -> String { "kairo-ai-".into() }
-fn default_review() -> String { "ghost".into() }
-fn default_segment_threshold() -> usize { 5 * 1024 * 1024 } // 5MB
-fn default_debounce() -> u64 { 200 }
-fn default_snapshot_interval() -> u64 { 30 }
+fn default_true() -> bool {
+    true
+}
+fn default_prefix() -> String {
+    "kairo-ai-".into()
+}
+fn default_review() -> String {
+    "ghost".into()
+}
+fn default_segment_threshold() -> usize {
+    5 * 1024 * 1024
+} // 5MB
+fn default_debounce() -> u64 {
+    200
+}
+fn default_snapshot_interval() -> u64 {
+    30
+}
 
 impl Default for YjsPeerConfig {
     fn default() -> Self {
@@ -252,14 +289,16 @@ impl YjsPeer {
     pub fn new(config: YjsPeerConfig) -> Self {
         let client_id = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default().as_nanos() as u64 & 0x0000_0000_FFFF_FFFF;
+            .unwrap_or_default()
+            .as_nanos() as u64
+            & 0x0000_0000_FFFF_FFFF;
         Self::with_client_id(config, client_id)
     }
 
     pub fn with_client_id(config: YjsPeerConfig, client_id: u64) -> Self {
         info!("[YjsPeer] Created clientID: {}", client_id);
         let debounce = config.awareness_debounce_ms;
-        
+
         Self {
             config,
             client_id,
@@ -276,24 +315,38 @@ impl YjsPeer {
         let t = title.to_lowercase();
         let u = url.unwrap_or("").to_lowercase();
         for (name, patterns) in YJS_URL_PATTERNS {
-            if patterns.iter().any(|p| u.contains(p)) { return Some(name.to_string()); }
+            if patterns.iter().any(|p| u.contains(p)) {
+                return Some(name.to_string());
+            }
         }
         for (name, patterns) in YJS_TITLE_PATTERNS {
-            if patterns.iter().any(|p| t.contains(p)) { return Some(name.to_string()); }
+            if patterns.iter().any(|p| t.contains(p)) {
+                return Some(name.to_string());
+            }
         }
         None
     }
 
     pub async fn connect(&self, app_name: &str) -> Result<(), String> {
-        let ws = self.config.endpoints.get(app_name).cloned().unwrap_or("auto".into());
+        let ws = self
+            .config
+            .endpoints
+            .get(app_name)
+            .cloned()
+            .unwrap_or("auto".into());
         *self.transport.lock().await = if ws == "auto" {
             SyncTransport::InProcess
         } else {
-            SyncTransport::WebSocket { url: ws, room: app_name.into() }
+            SyncTransport::WebSocket {
+                url: ws,
+                room: app_name.into(),
+            }
         };
         *self.connected.lock().await = true;
-        self.awareness.update_if_changed("connected", 0.0, None, "auto").await;
-        
+        self.awareness
+            .update_if_changed("connected", 0.0, None, "auto")
+            .await;
+
         // E3: Start periodic snapshot task
         let seg = self.primary_segment.clone();
         let interval = self.config.snapshot_interval_secs;
@@ -304,7 +357,7 @@ impl YjsPeer {
             }
         });
         *self.snapshot_task.lock().await = Some(handle);
-        
+
         info!("[YjsPeer] Connected to '{}'", app_name);
         Ok(())
     }
@@ -312,14 +365,18 @@ impl YjsPeer {
     pub async fn disconnect(&self) {
         *self.connected.lock().await = false;
         *self.transport.lock().await = SyncTransport::Disconnected;
-        self.awareness.update_if_changed("idle", 0.0, None, "auto").await;
+        self.awareness
+            .update_if_changed("idle", 0.0, None, "auto")
+            .await;
         // Stop snapshot task
         if let Some(handle) = self.snapshot_task.lock().await.take() {
             handle.abort();
         }
     }
 
-    pub async fn is_connected(&self) -> bool { *self.connected.lock().await }
+    pub async fn is_connected(&self) -> bool {
+        *self.connected.lock().await
+    }
 
     /// E1: Read document text — handles sub-document segmentation.
     pub async fn read_document_text(&self) -> String {
@@ -356,7 +413,9 @@ impl YjsPeer {
     pub fn replace_text(&self, start: u32, del: u32, new: &str) -> Result<(), String> {
         let mut txn = self.primary_segment.doc.transact_mut();
         let c = txn.get_or_insert_text("content");
-        if del > 0 { c.remove_range(&mut txn, start, del); }
+        if del > 0 {
+            c.remove_range(&mut txn, start, del);
+        }
         c.insert(&mut txn, start, new);
         Ok(())
     }
@@ -367,18 +426,29 @@ impl YjsPeer {
     }
 
     /// E2: Set awareness with throttling — only broadcasts on transitions.
-    pub async fn set_awareness(&self, status: &str, progress: f32, section: Option<&str>, agent: &str) -> bool {
-        self.awareness.update_if_changed(status, progress, section, agent).await
+    pub async fn set_awareness(
+        &self,
+        status: &str,
+        progress: f32,
+        section: Option<&str>,
+        agent: &str,
+    ) -> bool {
+        self.awareness
+            .update_if_changed(status, progress, section, agent)
+            .await
     }
 
-    pub async fn get_awareness(&self) -> AwarenessState { self.awareness.get().await }
+    pub async fn get_awareness(&self) -> AwarenessState {
+        self.awareness.get().await
+    }
 
     /// E2: Throttled convenience methods
     pub async fn broadcast_thinking(&self, p: f32) {
         self.set_awareness("thinking...", p, None, "auto").await;
     }
     pub async fn broadcast_writing(&self, sec: &str, p: f32) {
-        self.set_awareness(&format!("writing {}...", sec), p, Some(sec), "auto").await;
+        self.set_awareness(&format!("writing {sec}..."), p, Some(sec), "auto")
+            .await;
     }
     pub async fn broadcast_done(&self) {
         self.set_awareness("done", 1.0, None, "auto").await;
@@ -412,13 +482,16 @@ impl Drop for YjsPeer {
     }
 }
 
-
 // ─── Ghost Bridge ─────────────────────────────────────────────────────────────
 
-pub struct YjsGhostBridge { peer: Arc<YjsPeer> }
+pub struct YjsGhostBridge {
+    peer: Arc<YjsPeer>,
+}
 
 impl YjsGhostBridge {
-    pub fn new(peer: Arc<YjsPeer>) -> Self { Self { peer } }
+    pub fn new(peer: Arc<YjsPeer>) -> Self {
+        Self { peer }
+    }
 
     pub async fn inject_accepted(&self, text: &str, pos: u32) -> Result<(), String> {
         self.peer.broadcast_writing("injecting", 0.9).await;

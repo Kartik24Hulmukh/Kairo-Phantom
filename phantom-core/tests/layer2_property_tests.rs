@@ -1,12 +1,12 @@
+use phantom_core::config::PhantomConfig;
+use phantom_core::document_context::DocumentContext;
+use phantom_core::ghost_session::ConfidenceBand;
+use phantom_core::swarm::SwarmOrchestrator;
 /// ============================================================
 /// LAYER 2: Property-Based Tests — Swarm Brain + GhostSession
 /// proptest: random inputs, universally-held invariants
 /// ============================================================
 use proptest::prelude::*;
-use phantom_core::swarm::SwarmOrchestrator;
-use phantom_core::ghost_session::ConfidenceBand;
-use phantom_core::config::PhantomConfig;
-use phantom_core::document_context::DocumentContext;
 
 // ──────────────────────────────────────────────────────────────
 // Property 1: Swarm routing is DETERMINISTIC

@@ -10,17 +10,13 @@ Verifies:
 6. ingest() errors loudly on missing files
 """
 
-import os
-import tempfile
 import pytest
 from pathlib import Path
 
 from sidecar.parsers.markitdown_bridge import (
     ingest,
     _detect_format,
-    _try_pdf_oxide,
     _try_pymupdf,
-    _try_markitdown,
     is_agpl_guarded,
     IngestionResult,
 )
@@ -30,6 +26,7 @@ from sidecar.parsers.markitdown_bridge import (
 def sample_docx(tmp_path):
     """Create a real .docx file."""
     from docx import Document
+
     path = tmp_path / "test.docx"
     doc = Document()
     doc.add_heading("Test Document", level=1)
@@ -43,6 +40,7 @@ def sample_docx(tmp_path):
 def sample_xlsx(tmp_path):
     """Create a real .xlsx file."""
     from openpyxl import Workbook
+
     path = tmp_path / "test.xlsx"
     wb = Workbook()
     ws = wb.active
@@ -60,6 +58,7 @@ def sample_xlsx(tmp_path):
 def sample_pptx(tmp_path):
     """Create a real .pptx file."""
     from pptx import Presentation
+
     path = tmp_path / "test.pptx"
     prs = Presentation()
     slide = prs.slides.add_slide(prs.slide_layouts[0])
@@ -105,22 +104,25 @@ def sample_pdf():
 class TestFormatDetection:
     """Test file format detection."""
 
-    @pytest.mark.parametrize("filename,expected", [
-        ("doc.pdf", "pdf"),
-        ("doc.docx", "docx"),
-        ("doc.xlsx", "xlsx"),
-        ("doc.pptx", "pptx"),
-        ("doc.html", "html"),
-        ("doc.htm", "html"),
-        ("doc.txt", "text"),
-        ("doc.md", "markdown"),
-        ("doc.csv", "csv"),
-        ("doc.json", "json"),
-        ("doc.png", "image"),
-        ("doc.jpg", "image"),
-        ("doc.wav", "audio"),
-        ("doc.unknown", "unknown"),
-    ])
+    @pytest.mark.parametrize(
+        "filename,expected",
+        [
+            ("doc.pdf", "pdf"),
+            ("doc.docx", "docx"),
+            ("doc.xlsx", "xlsx"),
+            ("doc.pptx", "pptx"),
+            ("doc.html", "html"),
+            ("doc.htm", "html"),
+            ("doc.txt", "text"),
+            ("doc.md", "markdown"),
+            ("doc.csv", "csv"),
+            ("doc.json", "json"),
+            ("doc.png", "image"),
+            ("doc.jpg", "image"),
+            ("doc.wav", "audio"),
+            ("doc.unknown", "unknown"),
+        ],
+    )
     def test_format_detection(self, filename, expected):
         assert _detect_format(filename) == expected
 
@@ -181,7 +183,8 @@ class TestPDFIngestion:
         """pdf_oxide should be installed and importable."""
         try:
             import pdf_oxide
-            assert hasattr(pdf_oxide, '__version__')
+
+            assert hasattr(pdf_oxide, "__version__")
         except ImportError:
             pytest.skip("pdf_oxide not installed in this Python environment")
 
@@ -219,8 +222,7 @@ class TestAGPLLicenseGuard:
     def test_pymupdf_not_imported_at_module_level(self):
         """PyMuPDF (fitz) should not be imported at module level."""
         # The markitdown_bridge module should not import fitz at the top level
-        import sidecar.parsers.markitdown_bridge as bridge
-        import sys
+
         # fitz may or may not be in sys.modules depending on whether
         # _try_pymupdf has been called, but it should NOT be imported
         # just by importing the bridge module

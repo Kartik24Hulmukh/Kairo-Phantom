@@ -27,7 +27,6 @@ from sidecar.connectors.paperless_bridge import (
     PaperlessAuthError,
     PaperlessDocument,
     is_paperless_enabled,
-    create_bridge as create_paperless_bridge,
 )
 from sidecar.connectors.karakeep_bridge import (
     KarakeepBridge,
@@ -35,17 +34,19 @@ from sidecar.connectors.karakeep_bridge import (
     KarakeepAuthError,
     KarakeepBookmark,
     is_karakeep_enabled,
-    create_bridge as create_karakeep_bridge,
 )
 
 
 # ── MOCK HTTP SERVER (clearly labeled as NON-PRODUCTION) ──────────────────────
 
+
 class MockPaperlessHandler(BaseHTTPRequestHandler):
     """MOCK paperless-ngx API server — NON-PRODUCTION test fixture only."""
 
     def do_GET(self):
-        if "Authorization" not in self.headers or "invalid" in self.headers.get("Authorization", ""):
+        if "Authorization" not in self.headers or "invalid" in self.headers.get(
+            "Authorization", ""
+        ):
             self.send_response(401)
             self.end_headers()
             return
@@ -56,8 +57,18 @@ class MockPaperlessHandler(BaseHTTPRequestHandler):
             self.end_headers()
             response = {
                 "results": [
-                    {"id": 1, "title": "Invoice 2024", "content": "Invoice for $5,000", "correspondent": "ACME Corp"},
-                    {"id": 2, "title": "Contract NDA", "content": "Non-disclosure agreement", "correspondent": "Legal Dept"},
+                    {
+                        "id": 1,
+                        "title": "Invoice 2024",
+                        "content": "Invoice for $5,000",
+                        "correspondent": "ACME Corp",
+                    },
+                    {
+                        "id": 2,
+                        "title": "Contract NDA",
+                        "content": "Non-disclosure agreement",
+                        "correspondent": "Legal Dept",
+                    },
                 ]
             }
             self.wfile.write(json.dumps(response).encode())
@@ -91,8 +102,18 @@ class MockKarakeepHandler(BaseHTTPRequestHandler):
             self.end_headers()
             response = {
                 "results": [
-                    {"id": "bm1", "title": "AI Research", "url": "https://example.com/ai", "tags": ["ai", "research"]},
-                    {"id": "bm2", "title": "Rust Tutorial", "url": "https://example.com/rust", "tags": ["rust", "programming"]},
+                    {
+                        "id": "bm1",
+                        "title": "AI Research",
+                        "url": "https://example.com/ai",
+                        "tags": ["ai", "research"],
+                    },
+                    {
+                        "id": "bm2",
+                        "title": "Rust Tutorial",
+                        "url": "https://example.com/rust",
+                        "tags": ["rust", "programming"],
+                    },
                 ]
             }
             self.wfile.write(json.dumps(response).encode())
@@ -240,6 +261,7 @@ class TestBridgeSecurity:
     def test_paperless_content_treated_as_untrusted(self, mock_paperless_server):
         """Document content from paperless-ngx must be treated as untrusted."""
         from sidecar.safety.prompt_shield import PromptShield
+
         shield = PromptShield()
 
         bridge = PaperlessBridge(mock_paperless_server, "valid-token")
@@ -257,6 +279,7 @@ class TestBridgeSecurity:
     def test_karakeep_content_treated_as_untrusted(self, mock_karakeep_server):
         """Bookmark content from Karakeep must be treated as untrusted."""
         from sidecar.safety.prompt_shield import PromptShield
+
         shield = PromptShield()
 
         bridge = KarakeepBridge(mock_karakeep_server, "valid-token")

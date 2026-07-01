@@ -12,18 +12,16 @@ Tests:
 7. CPU fallback test: verify image processing works without GPU
 8. Air-gap test: verify no network calls in image_processor
 """
+
 from __future__ import annotations
 
 import os
 import sys
-import tempfile
 import shutil
 import inspect
-import textwrap
-from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 import pytest
 
@@ -44,21 +42,22 @@ from sidecar.safety.prompt_shield import PromptShield
 
 # ── Test image generation helpers ───────────────────────────────────
 
+
 def _make_screenshot_image(path: str, size=(400, 300)) -> None:
     """Generate a screenshot-like image: sharp edges, text, limited palette, high contrast."""
     img = Image.new("RGB", size, color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
     # Sharp rectangular blocks with limited colors
-    draw.rectangle([10, 10, 200, 50], fill=(0, 100, 200))       # blue bar
-    draw.rectangle([10, 60, 200, 100], fill=(200, 200, 200))    # gray bar
-    draw.rectangle([220, 10, 390, 150], fill=(240, 240, 240))   # light panel
-    draw.rectangle([10, 110, 200, 150], fill=(0, 0, 0))         # black bar
+    draw.rectangle([10, 10, 200, 50], fill=(0, 100, 200))  # blue bar
+    draw.rectangle([10, 60, 200, 100], fill=(200, 200, 200))  # gray bar
+    draw.rectangle([220, 10, 390, 150], fill=(240, 240, 240))  # light panel
+    draw.rectangle([10, 110, 200, 150], fill=(0, 0, 0))  # black bar
     draw.rectangle([220, 160, 390, 200], fill=(255, 255, 255), outline=(0, 0, 0))
     # Text-like lines (sharp, high contrast)
     for i, y in enumerate(range(170, 290, 15)):
         draw.line([(15, y), (380, y)], fill=(60, 60, 60), width=2)
     # Sharp border
-    draw.rectangle([0, 0, size[0]-1, size[1]-1], outline=(0, 0, 0), width=2)
+    draw.rectangle([0, 0, size[0] - 1, size[1] - 1], outline=(0, 0, 0), width=2)
     img.save(path)
 
 
@@ -77,7 +76,7 @@ def _make_photo_image(path: str, size=(400, 300)) -> None:
     draw = ImageDraw.Draw(img)
     cx, cy = size[0] // 2, size[1] // 2
     for r in range(100, 0, -1):
-        alpha = int(50 * (1 - r / 100))
+        int(50 * (1 - r / 100))
         color = (255, 200, 100)
         draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
     img.save(path)
@@ -129,8 +128,8 @@ def tmp_images(tmp_path):
 
 # ── 1. Media Embeddings Tests ──────────────────────────────────────
 
-class TestMediaEmbeddings:
 
+class TestMediaEmbeddings:
     def test_has_embed_anything_flag(self):
         """HAS_EMBED_ANYTHING must be a boolean (True or False)."""
         assert isinstance(HAS_EMBED_ANYTHING, bool)
@@ -139,7 +138,7 @@ class TestMediaEmbeddings:
         """If embed-anything is not installed, MediaEmbeddings must raise RuntimeError."""
         if HAS_EMBED_ANYTHING:
             # If it IS installed, test actual embedding
-            emb = MediaEmbeddings()
+            MediaEmbeddings()
             # We can't test actual embedding without a real model + GPU,
             # but we can test cosine_similarity and find_similar (static methods)
             vec1 = [1.0, 0.0, 0.0]
@@ -183,9 +182,9 @@ class TestMediaEmbeddings:
         """find_similar returns indices ranked by cosine similarity (descending)."""
         query = [1.0, 0.0]
         vectors = [
-            [0.0, 1.0],   # sim=0.0
-            [1.0, 0.0],   # sim=1.0 (best match)
-            [0.7, 0.7],   # sim≈0.707
+            [0.0, 1.0],  # sim=0.0
+            [1.0, 0.0],  # sim=1.0 (best match)
+            [0.7, 0.7],  # sim≈0.707
         ]
         result = MediaEmbeddings.find_similar(query, vectors, top_k=2)
         assert result == [1, 2]  # index 1 first (sim=1.0), then index 2 (sim≈0.707)
@@ -213,8 +212,8 @@ class TestMediaEmbeddings:
 
 # ── 2. Media Transcription Tests ───────────────────────────────────
 
-class TestMediaTranscribe:
 
+class TestMediaTranscribe:
     def test_has_faster_whisper_flag(self):
         """HAS_FASTER_WHISPER must be a boolean."""
         assert isinstance(HAS_FASTER_WHISPER, bool)
@@ -248,6 +247,7 @@ class TestMediaTranscribe:
             else:
                 # Can't even init transcriber — test the module-level check
                 from sidecar.parsers.media_transcribe import _check_ffmpeg
+
                 with pytest.raises(RuntimeError, match="ffmpeg not found"):
                     _check_ffmpeg()
 
@@ -275,8 +275,8 @@ class TestMediaTranscribe:
 
 # ── 3. Image Processor Tests ───────────────────────────────────────
 
-class TestImageProcessor:
 
+class TestImageProcessor:
     def test_resize(self, tmp_images):
         """resize returns a PIL Image with the correct dimensions."""
         proc = ImageProcessor()
@@ -344,8 +344,8 @@ class TestImageProcessor:
 
 # ── 4. Batch Process Tests ─────────────────────────────────────────
 
-class TestBatchProcess:
 
+class TestBatchProcess:
     def test_batch_process_normalize_5_images(self, tmp_images):
         """batch_process with 'normalize' on 5 images → all processed."""
         proc = ImageProcessor()
@@ -425,15 +425,14 @@ class TestBatchProcess:
 
 # ── 5. Histogram Classification Tests ──────────────────────────────
 
-class TestHistogramClassification:
 
+class TestHistogramClassification:
     def test_screenshot_classification(self, tmp_images):
         """Screenshot-like image (sharp edges, limited palette) → is_screenshot=True."""
         proc = ImageProcessor()
         result = proc.histogram_quality_score(tmp_images["screenshot"])
         assert result["is_screenshot"] is True, (
-            f"Expected is_screenshot=True for screenshot-like image, "
-            f"got: {result}"
+            f"Expected is_screenshot=True for screenshot-like image, " f"got: {result}"
         )
 
     def test_photo_classification(self, tmp_images):
@@ -441,8 +440,7 @@ class TestHistogramClassification:
         proc = ImageProcessor()
         result = proc.histogram_quality_score(tmp_images["photo"])
         assert result["is_photo"] is True, (
-            f"Expected is_photo=True for photo-like image, "
-            f"got: {result}"
+            f"Expected is_photo=True for photo-like image, " f"got: {result}"
         )
 
     def test_diagram_classification(self, tmp_images):
@@ -461,12 +459,12 @@ class TestHistogramClassification:
         proc = ImageProcessor()
         result = proc.histogram_quality_score(tmp_images["photo"])
         assert result["is_screenshot"] is False, (
-            f"Photo-like image should not be classified as screenshot, "
-            f"got: {result}"
+            f"Photo-like image should not be classified as screenshot, " f"got: {result}"
         )
 
 
 # ── 6. PromptShield Injection Tests ────────────────────────────────
+
 
 class TestPromptShieldInjection:
     """
@@ -504,15 +502,15 @@ class TestPromptShieldInjection:
         ]
         payload = payloads[payload_id]
         is_safe = shield.scan(payload)
-        assert is_safe is False, (
-            f"Injection payload {payload_id + 1} was NOT blocked by PromptShield: {payload}"
-        )
+        assert (
+            is_safe is False
+        ), f"Injection payload {payload_id + 1} was NOT blocked by PromptShield: {payload}"
 
 
 # ── 7. CPU Fallback Test ────────────────────────────────────────────
 
-class TestCPUFallback:
 
+class TestCPUFallback:
     def test_image_processing_works_without_gpu(self, tmp_images):
         """Verify image processing works on CPU (no GPU required)."""
         proc = ImageProcessor()
@@ -544,15 +542,13 @@ class TestCPUFallback:
         forbidden_imports = ["torch", "cuda", "cupy", "numba.cuda", "cudnn", "tensorrt"]
         for line in import_lines:
             for term in forbidden_imports:
-                assert term not in line.lower(), (
-                    f"ImageProcessor has forbidden GPU import: {line}"
-                )
+                assert term not in line.lower(), f"ImageProcessor has forbidden GPU import: {line}"
 
 
 # ── 8. Air-Gap Test ────────────────────────────────────────────────
 
-class TestAirGap:
 
+class TestAirGap:
     def test_no_network_calls_in_image_processor(self):
         """Verify ImageProcessor source has no network calls."""
         source = inspect.getsource(ImageProcessor)
@@ -569,9 +565,7 @@ class TestAirGap:
             "fetch(",
         ]
         for term in forbidden:
-            assert term not in source, (
-                f"ImageProcessor source contains network call: {term}"
-            )
+            assert term not in source, f"ImageProcessor source contains network call: {term}"
 
     def test_no_network_calls_in_media_embeddings(self):
         """Verify MediaEmbeddings source has no direct network calls (except via embed_anything lib)."""
@@ -589,9 +583,7 @@ class TestAirGap:
             "httpx",
         ]
         for term in forbidden:
-            assert term not in source, (
-                f"MediaEmbeddings source contains network call: {term}"
-            )
+            assert term not in source, f"MediaEmbeddings source contains network call: {term}"
 
     def test_image_processor_offline(self, tmp_images):
         """Verify image processing works with no network (all local PIL ops)."""

@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
@@ -37,8 +37,10 @@ logger = logging.getLogger(__name__)
 
 # ─── Enumerations ─────────────────────────────────────────────────────────────
 
+
 class AppTarget(str, Enum):
     """Known application targets for cross-app workflows."""
+
     EXCEL = "microsoft excel"
     WORD = "microsoft word"
     POWERPOINT = "microsoft powerpoint"
@@ -53,14 +55,15 @@ class AppTarget(str, Enum):
 
 class StepActionType(str, Enum):
     """Types of actions a step can perform."""
-    COPY = "copy"               # Select + copy content
-    PASTE = "paste"             # Paste content at cursor
-    TYPE = "type"               # Type text
-    CLICK = "click"             # Click element by description
-    SHORTCUT = "shortcut"       # Run keyboard shortcut
-    FOCUS_APP = "focus_app"     # Bring app window to foreground
-    SCREENSHOT = "screenshot"   # Take screenshot for context
-    VERIFY = "verify"           # Verify expected state
+
+    COPY = "copy"  # Select + copy content
+    PASTE = "paste"  # Paste content at cursor
+    TYPE = "type"  # Type text
+    CLICK = "click"  # Click element by description
+    SHORTCUT = "shortcut"  # Run keyboard shortcut
+    FOCUS_APP = "focus_app"  # Bring app window to foreground
+    SCREENSHOT = "screenshot"  # Take screenshot for context
+    VERIFY = "verify"  # Verify expected state
 
 
 class StepStatus(str, Enum):
@@ -73,18 +76,20 @@ class StepStatus(str, Enum):
 
 # ─── Data Structures ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class WorkflowStep:
     """A single step in a cross-app workflow."""
+
     step_id: int
     app_target: AppTarget
     action: StepActionType
-    description: str             # Human-readable description for GRP
+    description: str  # Human-readable description for GRP
     # Action-specific params
     element_description: str = ""  # For CLICK — what to click
-    text_to_type: str = ""          # For TYPE
-    shortcut: str = ""              # For SHORTCUT (e.g., "ctrl+c")
-    expected_result: str = ""       # For VERIFY — what should change
+    text_to_type: str = ""  # For TYPE
+    shortcut: str = ""  # For SHORTCUT (e.g., "ctrl+c")
+    expected_result: str = ""  # For VERIFY — what should change
     rollback_shortcut: str = "ctrl+z"  # Undo action if next step fails
     # Runtime state
     status: StepStatus = StepStatus.PENDING
@@ -99,13 +104,14 @@ class WorkflowStep:
 class AppWorkflowPlan:
     """
     An ordered list of steps forming a complete cross-app workflow.
-    
+
     Example: Excel → PowerPoint → Outlook email workflow
     """
+
     plan_id: str
-    description: str               # e.g., "Q3 Report: Excel → PowerPoint → Email"
+    description: str  # e.g., "Q3 Report: Excel → PowerPoint → Email"
     steps: list[WorkflowStep]
-    user_intent: str               # Original user request
+    user_intent: str  # Original user request
     requires_approval: bool = True
 
     @property
@@ -134,6 +140,7 @@ class AppWorkflowPlan:
 @dataclass
 class OrchestrationResult:
     """Final result of a cross-app workflow execution."""
+
     success: bool
     plan: AppWorkflowPlan
     total_latency_ms: float
@@ -144,10 +151,11 @@ class OrchestrationResult:
 
 # ─── Common Workflow Builders ──────────────────────────────────────────────────
 
+
 class WorkflowBuilder:
     """
     Factory for common cross-app workflow plans.
-    
+
     These pre-built workflows cover the most common enterprise use cases
     described in the briefing.
     """
@@ -161,7 +169,7 @@ class WorkflowBuilder:
     ) -> AppWorkflowPlan:
         """
         'Take the Q3 report from Excel, put it into PowerPoint, and email it'
-        
+
         The example from the briefing: a $10B+ productivity workflow currently
         relying on fragile RPA tools.
         """
@@ -171,7 +179,7 @@ class WorkflowBuilder:
                 step_id=1,
                 app_target=AppTarget.EXCEL,
                 action=StepActionType.FOCUS_APP,
-                description=f"Bring Microsoft Excel to foreground",
+                description="Bring Microsoft Excel to foreground",
                 expected_result="Excel window is active and visible",
             ),
             # Step 2: Take screenshot for context
@@ -246,55 +254,57 @@ class WorkflowBuilder:
 
         # Add email steps if recipient provided
         if recipient_email:
-            steps.extend([
-                WorkflowStep(
-                    step_id=10,
-                    app_target=AppTarget.OUTLOOK,
-                    action=StepActionType.FOCUS_APP,
-                    description="Open Microsoft Outlook",
-                    expected_result="Outlook window is active",
-                ),
-                WorkflowStep(
-                    step_id=11,
-                    app_target=AppTarget.OUTLOOK,
-                    action=StepActionType.SHORTCUT,
-                    description="New email (Ctrl+N)",
-                    shortcut="ctrl+n",
-                    expected_result="New email compose window appears",
-                ),
-                WorkflowStep(
-                    step_id=12,
-                    app_target=AppTarget.OUTLOOK,
-                    action=StepActionType.CLICK,
-                    description="Click on To: field",
-                    element_description="To: recipient email input field",
-                    expected_result="To field is focused",
-                ),
-                WorkflowStep(
-                    step_id=13,
-                    app_target=AppTarget.OUTLOOK,
-                    action=StepActionType.TYPE,
-                    description=f"Type recipient email: {recipient_email}",
-                    text_to_type=recipient_email,
-                    expected_result=f"To field contains {recipient_email}",
-                ),
-                WorkflowStep(
-                    step_id=14,
-                    app_target=AppTarget.OUTLOOK,
-                    action=StepActionType.CLICK,
-                    description="Click Subject field",
-                    element_description="Subject: email subject input field",
-                    expected_result="Subject field is focused",
-                ),
-                WorkflowStep(
-                    step_id=15,
-                    app_target=AppTarget.OUTLOOK,
-                    action=StepActionType.TYPE,
-                    description=f"Type subject: {email_subject}",
-                    text_to_type=email_subject,
-                    expected_result=f"Subject contains '{email_subject}'",
-                ),
-            ])
+            steps.extend(
+                [
+                    WorkflowStep(
+                        step_id=10,
+                        app_target=AppTarget.OUTLOOK,
+                        action=StepActionType.FOCUS_APP,
+                        description="Open Microsoft Outlook",
+                        expected_result="Outlook window is active",
+                    ),
+                    WorkflowStep(
+                        step_id=11,
+                        app_target=AppTarget.OUTLOOK,
+                        action=StepActionType.SHORTCUT,
+                        description="New email (Ctrl+N)",
+                        shortcut="ctrl+n",
+                        expected_result="New email compose window appears",
+                    ),
+                    WorkflowStep(
+                        step_id=12,
+                        app_target=AppTarget.OUTLOOK,
+                        action=StepActionType.CLICK,
+                        description="Click on To: field",
+                        element_description="To: recipient email input field",
+                        expected_result="To field is focused",
+                    ),
+                    WorkflowStep(
+                        step_id=13,
+                        app_target=AppTarget.OUTLOOK,
+                        action=StepActionType.TYPE,
+                        description=f"Type recipient email: {recipient_email}",
+                        text_to_type=recipient_email,
+                        expected_result=f"To field contains {recipient_email}",
+                    ),
+                    WorkflowStep(
+                        step_id=14,
+                        app_target=AppTarget.OUTLOOK,
+                        action=StepActionType.CLICK,
+                        description="Click Subject field",
+                        element_description="Subject: email subject input field",
+                        expected_result="Subject field is focused",
+                    ),
+                    WorkflowStep(
+                        step_id=15,
+                        app_target=AppTarget.OUTLOOK,
+                        action=StepActionType.TYPE,
+                        description=f"Type subject: {email_subject}",
+                        text_to_type=email_subject,
+                        expected_result=f"Subject contains '{email_subject}'",
+                    ),
+                ]
+            )
 
         return AppWorkflowPlan(
             plan_id="excel-to-pptx-email",
@@ -343,13 +353,14 @@ class WorkflowBuilder:
 
         return AppWorkflowPlan(
             plan_id="word-to-pdf",
-            description=f"Word → PDF Export",
+            description="Word → PDF Export",
             steps=steps,
             user_intent="Save Word document as PDF",
         )
 
 
 # ─── Cross-App Orchestrator ───────────────────────────────────────────────────
+
 
 class CrossAppOrchestrator:
     """
@@ -409,19 +420,16 @@ class CrossAppOrchestrator:
                 step.status = StepStatus.SUCCESS if success else StepStatus.FAILED
 
                 if not success:
-                    logger.error(
-                        f"Step {step.step_id} failed: {step.description} — {step.error}"
-                    )
+                    logger.error(f"Step {step.step_id} failed: {step.description} — {step.error}")
                     # Attempt rollback of this step
                     await self._rollback_step(step)
                     # Mark remaining steps as skipped
-                    for remaining in plan.steps[step.step_id:]:
+                    for remaining in plan.steps[step.step_id :]:
                         remaining.status = StepStatus.SKIPPED
                     break
 
                 logger.info(
-                    f"  ✓ Step {step.step_id}: {step.description} "
-                    f"({step.latency_ms:.0f}ms)"
+                    f"  ✓ Step {step.step_id}: {step.description} " f"({step.latency_ms:.0f}ms)"
                 )
 
             except Exception as e:
@@ -511,6 +519,7 @@ class CrossAppOrchestrator:
     async def _take_screenshot_step(self, step: WorkflowStep) -> bool:
         """Take a screenshot and store the path."""
         from ..kairo_eye.farscry_service import take_screenshot
+
         try:
             path = await take_screenshot()
             step.after_screenshot = str(path)
@@ -537,6 +546,7 @@ class CrossAppOrchestrator:
         # Execute click via enigo
         try:
             import enigo  # type: ignore
+
             e = enigo.Enigo()
             e.mouse_move(ground.x, ground.y)
             await asyncio.sleep(0.1)
@@ -642,7 +652,8 @@ class CrossAppOrchestrator:
         try:
             import win32api  # type: ignore
             import win32con  # type: ignore
-            import win32gui  # type: ignore
+            import win32gui  # type: ignore  # noqa: F401
+
             # Simple implementation — production would use SendInput
             keys_map = {
                 "ctrl": win32con.VK_CONTROL,
@@ -671,11 +682,13 @@ class CrossAppOrchestrator:
     async def _send_text(self, text: str) -> None:
         """Type text via SendInput or clipboard paste."""
         from sidecar.clipboard_mutex import CLIPBOARD_LOCK
+
         with CLIPBOARD_LOCK:
             try:
                 import win32clipboard  # type: ignore
                 import win32con  # type: ignore
                 import win32api  # type: ignore
+
                 # Use clipboard for reliable Unicode support
                 win32clipboard.OpenClipboard()
                 win32clipboard.EmptyClipboard()
@@ -687,16 +700,18 @@ class CrossAppOrchestrator:
                 win32api.keybd_event(ord("V"), 0, win32con.KEYEVENTF_KEYUP, 0)
                 win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
             except ImportError:
-                logger.warning(f"win32clipboard not available — text type skipped")
+                logger.warning("win32clipboard not available — text type skipped")
 
     async def _send_click_ctypes(self, x: int, y: int) -> None:
         """Send mouse click via ctypes (no dependency required)."""
         import sys
+
         if sys.platform != "win32":
             logger.warning("ctypes click only supported on Windows")
             return
 
         import ctypes
+
         MOUSEEVENTF_LEFTDOWN = 0x0002
         MOUSEEVENTF_LEFTUP = 0x0004
         MOUSEEVENTF_MOVE = 0x0001

@@ -1,0 +1,183 @@
+# =============================================================================
+# Kairo-Phantom — Release Workflow (blocks on Tier 2 GPU gate)
+# =============================================================================
+# Triggered by a v* tag. Calls gpu-verify.yml as a reusable workflow gate
+# before producing release artifacts. If Tier 2 (GPU live inference) fails,
+# no release artifacts are built or published.
+#
+# Tier 1 (verify.yml) is enforced by branch protection on master — a tag
+# can only be pushed from a commit that already passed Tier 1. This workflow
+# does NOT re-run Tier 1. It only runs Tier 2 as the release-specific gate,
+# then builds artifacts.
+#
+# PROVEN FACTS:
+#   verify subcommand (phantom-core/src/main.rs:423):
+#     if args.len() >= 2 && args[1] == "verify" {
+#   Tauri crate name (phantom-overlay/src-tauri/Cargo.toml:2):
+#     name = "phantom-overlay"
+#   → Tauri build requires system deps on each platform (installed below).
+# =============================================================================
+
+name: Release (Tier 2 GPU Gated)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Gate: Tier 2 GPU live inference — BLOCKS release ──
+  tier2-gpu-gate:
+    name: Tier 2 Gate (GPU live inference)
+    uses: ./.github/workflows/gpu-verify.yml
+    with:
+      release_tag: ${{ github.ref_name }}
+    secrets: inherit
+
+  # ── Release: build artifacts only after Tier 2 passes ──
+  release-artifacts:
+    name: Build & Publish Release Artifacts
+    needs:
+      - tier2-gpu-gate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: kairo-phantom-windows
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: kairo-phantom-macos
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: kairo-phantom-linux
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: "1.88.0"
+          targets: ${{ matrix.target }}
+          components: rustfmt,clippy
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+        with:
+          workspaces: |
+            .
+            phantom-core
+
+      # ── Install Tauri 2 system deps on Linux (FIX 1) ──
+      - name: Install Tauri system deps (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev \
+            build-essential \
+            libssl-dev \
+            pkg-config
+
+      - name: Set up Node.js (for Tauri frontend)
+        if: matrix.os != 'ubuntu-latest'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: phantom-overlay/package-lock.json
+
+      - name: Build Tauri frontend
+        if: matrix.os != 'ubuntu-latest'
+        working-directory: phantom-overlay
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build release binary (phantom-core + non-Tauri workspace)
+        run: cargo build --release --workspace --exclude phantom-overlay --target ${{ matrix.target }}
+
+      - name: Build Tauri app (with signing, Linux needs system deps installed above)
+        working-directory: phantom-overlay
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        run: npx tauri build --target ${{ matrix.target }}
+
+      # ── Regenerate SBOM in-run (deterministic, no cross-run artifact dependency) ──
+      - name: Generate CycloneDX SBOM (in-run)
+        uses: anchore/sbom-action@d94f46e13c6c62f59525ac9a1e147a99dc0b9bf5 # v0.17.0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+
+      - name: Verify Ed25519 audit chain integrity
+        # verify subcommand confirmed: phantom-core/src/main.rs:423
+        run: cargo run -p phantom-core --bin kairo-phantom -- verify
+
+      - name: Create release archive
+        run: |
+          mkdir -p release
+          cp -r target/${{ matrix.target }}/release/kairo-phantom release/ || true
+          cp sbom.cyclonedx.json release/ || true
+          cp CHANGELOG.md release/ || true
+          tar -czf ${{ matrix.artifact_name }}.tar.gz release/
+        shell: bash
+
+      - name: Generate SHA-256 checksum
+        run: |
+          sha256sum ${{ matrix.artifact_name }}.tar.gz > ${{ matrix.artifact_name }}.sha256
+          cat ${{ matrix.artifact_name }}.sha256
+        shell: bash
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.artifact_name }}.tar.gz
+            ${{ matrix.artifact_name }}.sha256
+          retention-days: 90
+
+  # ── Publish: create GitHub Release with all artifacts + checksums ──
+  publish-release:
+    name: Publish GitHub Release
+    needs: release-artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download all release artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+
+      - name: Verify CHANGELOG has entry for this tag
+        run: |
+          TAG="${{ github.ref_name }}"
+          if ! grep -q "$TAG" CHANGELOG.md; then
+            echo "❌ CHANGELOG.md has no entry for $TAG"
+            exit 1
+          fi
+          echo "✅ CHANGELOG entry found for $TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@72e2aa257a956c42a15f4887e07f01b9a9f9b1cf # v2.0.9
+        with:
+          body_path: CHANGELOG.md
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.sha256
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

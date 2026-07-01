@@ -28,34 +28,115 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 // 30 simulated document sessions: (seed_text, expected_style_signal)
 const SESSIONS: &[(&str, &str)] = &[
     ("The executive summary presents Q4 results.", "formal"),
-    ("In conclusion, our findings suggest a robust framework.", "formal"),
-    ("Let's dive into the key takeaways from last quarter.", "casual"),
-    ("The data unequivocally demonstrates a 23% growth trajectory.", "formal"),
-    ("Quick note: we should align on this before Friday.", "casual"),
-    ("Pursuant to section 4.2 of the agreement, the parties hereto...", "legal"),
-    ("This report outlines the strategic imperatives for FY2027.", "formal"),
-    ("Heads up — the client flagged three items in the contract.", "casual"),
-    ("The aforementioned clauses shall govern all subsequent amendments.", "legal"),
-    ("Our team crushed it this quarter. Seriously impressive numbers.", "casual"),
-    ("The proposed methodology ensures reproducibility and validity.", "formal"),
-    ("Just a quick recap of where we landed after the meeting.", "casual"),
-    ("All indemnification obligations survive termination of this Agreement.", "legal"),
-    ("We anticipate that the forthcoming audit will corroborate these findings.", "formal"),
-    ("Super excited to share the progress we've made on the new feature!", "casual"),
-    ("The Board of Directors hereby resolves to approve the following...", "legal"),
-    ("Performance metrics exceeded projections by a statistically significant margin.", "formal"),
-    ("Can you send over the draft when you get a chance?", "casual"),
-    ("Notwithstanding the foregoing, the Licensor reserves all rights.", "legal"),
-    ("The synthesis of cross-functional data yields actionable intelligence.", "formal"),
-    ("We're moving fast on this one — prototype by EOW.", "casual"),
-    ("This warranty disclaimer extends to all implied warranties of merchantability.", "legal"),
-    ("The regression analysis confirms a strong positive correlation (r=0.94).", "formal"),
-    ("Thanks for jumping on that so quickly — really appreciate it!", "casual"),
-    ("Force majeure events shall excuse performance for the duration thereof.", "legal"),
-    ("Stakeholder alignment is critical to the success of this initiative.", "formal"),
+    (
+        "In conclusion, our findings suggest a robust framework.",
+        "formal",
+    ),
+    (
+        "Let's dive into the key takeaways from last quarter.",
+        "casual",
+    ),
+    (
+        "The data unequivocally demonstrates a 23% growth trajectory.",
+        "formal",
+    ),
+    (
+        "Quick note: we should align on this before Friday.",
+        "casual",
+    ),
+    (
+        "Pursuant to section 4.2 of the agreement, the parties hereto...",
+        "legal",
+    ),
+    (
+        "This report outlines the strategic imperatives for FY2027.",
+        "formal",
+    ),
+    (
+        "Heads up — the client flagged three items in the contract.",
+        "casual",
+    ),
+    (
+        "The aforementioned clauses shall govern all subsequent amendments.",
+        "legal",
+    ),
+    (
+        "Our team crushed it this quarter. Seriously impressive numbers.",
+        "casual",
+    ),
+    (
+        "The proposed methodology ensures reproducibility and validity.",
+        "formal",
+    ),
+    (
+        "Just a quick recap of where we landed after the meeting.",
+        "casual",
+    ),
+    (
+        "All indemnification obligations survive termination of this Agreement.",
+        "legal",
+    ),
+    (
+        "We anticipate that the forthcoming audit will corroborate these findings.",
+        "formal",
+    ),
+    (
+        "Super excited to share the progress we've made on the new feature!",
+        "casual",
+    ),
+    (
+        "The Board of Directors hereby resolves to approve the following...",
+        "legal",
+    ),
+    (
+        "Performance metrics exceeded projections by a statistically significant margin.",
+        "formal",
+    ),
+    (
+        "Can you send over the draft when you get a chance?",
+        "casual",
+    ),
+    (
+        "Notwithstanding the foregoing, the Licensor reserves all rights.",
+        "legal",
+    ),
+    (
+        "The synthesis of cross-functional data yields actionable intelligence.",
+        "formal",
+    ),
+    (
+        "We're moving fast on this one — prototype by EOW.",
+        "casual",
+    ),
+    (
+        "This warranty disclaimer extends to all implied warranties of merchantability.",
+        "legal",
+    ),
+    (
+        "The regression analysis confirms a strong positive correlation (r=0.94).",
+        "formal",
+    ),
+    (
+        "Thanks for jumping on that so quickly — really appreciate it!",
+        "casual",
+    ),
+    (
+        "Force majeure events shall excuse performance for the duration thereof.",
+        "legal",
+    ),
+    (
+        "Stakeholder alignment is critical to the success of this initiative.",
+        "formal",
+    ),
     ("Quick ping — are we still on for the 3pm sync?", "casual"),
-    ("The arbitration clause mandates binding resolution in Delaware.", "legal"),
-    ("Our competitive positioning vis-à-vis the market leaders is strengthening.", "formal"),
+    (
+        "The arbitration clause mandates binding resolution in Delaware.",
+        "legal",
+    ),
+    (
+        "Our competitive positioning vis-à-vis the market leaders is strengthening.",
+        "formal",
+    ),
     ("This is going to be a game-changer for the team.", "casual"),
 ];
 
@@ -123,7 +204,11 @@ fn semantic_coherence_score(sessions: &[(&str, &str)]) -> f64 {
                 let b: std::collections::HashSet<&str> = pair[1].split_whitespace().collect();
                 let intersection = a.intersection(&b).count() as f64;
                 let union = a.union(&b).count() as f64;
-                if union == 0.0 { 0.0 } else { intersection / union }
+                if union == 0.0 {
+                    0.0
+                } else {
+                    intersection / union
+                }
             })
             .sum::<f64>()
             / (texts.len() - 1) as f64;
@@ -139,7 +224,10 @@ fn format_fidelity_score(sessions: &[(&str, &str)]) -> f64 {
     let valid = sessions
         .iter()
         .filter(|(text, _)| {
-            text.ends_with('.') || text.ends_with('!') || text.ends_with('?') || text.ends_with("...")
+            text.ends_with('.')
+                || text.ends_with('!')
+                || text.ends_with('?')
+                || text.ends_with("...")
         })
         .count();
     valid as f64 / sessions.len() as f64
@@ -178,12 +266,15 @@ fn bench_semantic_coherence(c: &mut Criterion) {
 }
 
 fn bench_composite_score(c: &mut Criterion) {
-    c.bench_function("kmb1_composite_score", |b| {
-        b.iter(kmb1_score)
-    });
+    c.bench_function("kmb1_composite_score", |b| b.iter(kmb1_score));
 }
 
-criterion_group!(benches, bench_style_retention, bench_semantic_coherence, bench_composite_score);
+criterion_group!(
+    benches,
+    bench_style_retention,
+    bench_semantic_coherence,
+    bench_composite_score
+);
 criterion_main!(benches);
 
 // ── Standalone Score Printer (cargo test -- --nocapture) ─────────────────────
@@ -197,21 +288,46 @@ mod tests {
         println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         println!("  KMB-1 Memory Benchmark Results");
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        println!("  Style Retention:       {:.4}", style_retention_score(SESSIONS));
-        println!("  Semantic Coherence:    {:.4}", semantic_coherence_score(SESSIONS));
-        println!("  Format Fidelity:       {:.4}", format_fidelity_score(SESSIONS));
-        println!("  Personalisation Delta: {:.4}", personalisation_delta(style_retention_score(SESSIONS)));
+        println!(
+            "  Style Retention:       {:.4}",
+            style_retention_score(SESSIONS)
+        );
+        println!(
+            "  Semantic Coherence:    {:.4}",
+            semantic_coherence_score(SESSIONS)
+        );
+        println!(
+            "  Format Fidelity:       {:.4}",
+            format_fidelity_score(SESSIONS)
+        );
+        println!(
+            "  Personalisation Delta: {:.4}",
+            personalisation_delta(style_retention_score(SESSIONS))
+        );
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         println!("  Score: {:.4} — Kairo has learned your style", score);
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-        assert!(score >= 0.90, "KMB-1 score {:.4} below 0.90 threshold", score);
+        assert!(
+            score >= 0.90,
+            "KMB-1 score {:.4} below 0.90 threshold",
+            score
+        );
     }
 
     #[test]
     fn test_style_classifier_accuracy() {
-        assert_eq!(classify_style("Pursuant to section 4.2 of the agreement..."), "legal");
-        assert_eq!(classify_style("Quick note: heads up on the sync today"), "casual");
-        assert_eq!(classify_style("The analysis demonstrates a significant correlation"), "formal");
+        assert_eq!(
+            classify_style("Pursuant to section 4.2 of the agreement..."),
+            "legal"
+        );
+        assert_eq!(
+            classify_style("Quick note: heads up on the sync today"),
+            "casual"
+        );
+        assert_eq!(
+            classify_style("The analysis demonstrates a significant correlation"),
+            "formal"
+        );
     }
 
     #[test]

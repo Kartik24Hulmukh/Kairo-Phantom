@@ -108,24 +108,20 @@ ADDITIONAL_PATTERNS: List[str] = [
     # Direct instruction overrides (broader regex)
     r"forget\s+(?:all\s+|your\s+)?(?:previous\s+|prior\s+)?(?:instructions?|rules|guidelines)",
     r"override\s+(?:all\s+|your\s+)?(?:system\s+|safety\s+)?(?:rules|guidelines|instructions)",
-
     # Role hijacking (broader regex)
     r"you\s+are\s+now\s+(?:DAN|an?\s+unrestricted|an?\s+unfiltered|an?\s+unlimited)",
     r"act\s+as\s+(?:an?\s+unrestricted|DAN|jailbreak|unfiltered)",
     r"enter\s+(?:developer\s+mode|admin\s+mode|jailbreak\s+mode|unrestricted\s+mode)",
     r"you\s+are\s+(?:no\s+longer|not\s+)\s*(?:bound\s+by|limited\s+by|restricted\s+by)",
-
     # Tool/command injection
     r"execute\s+(?:the\s+following\s+)?(?:command|script|code):\s*",
     r"run\s+(?:system\s+)?(?:command|shell|bash|cmd)\s*",
     r"(?:rm\s+-rf|del\s+/[fqs]|format\s+[a-z]:)",
     r"(?:import\s+os|subprocess|eval\s*\(|exec\s*\()",
-
     # Data exfiltration (broader regex)
     r"(?:reveal|show|print|display|output)\s+(?:the\s+)?(?:system\s+)?(?:prompt|instructions?|rules|guidelines)",
     r"(?:print|show|reveal|exfiltrate)\s+(?:all\s+)?(?:secrets?|api\s+keys?|tokens?|passwords?|credentials?)",
     r"(?:send|transmit|exfiltrate)\s+(?:data|secrets?|info)\s+to\s+",
-
     # Hidden instructions in formatting
     r"\[SYSTEM(?:\s+OVERRIDE)?\]",
     r"<\|system\|>",
@@ -133,16 +129,13 @@ ADDITIONAL_PATTERNS: List[str] = [
     r"\[INST\]",
     r"###\s*SYSTEM:",
     r"---\s*SYSTEM\s*---",
-
     # Encoding tricks
     r"(?:base64|btoa|atob)\s*\(",
     r"\\x[0-9a-f]{2}\\x[0-9a-f]{2}",
     r"\\u[0-9a-f]{4}\\u[0-9a-f]{4}",
-
     # Prompt leaking
     r"(?:what\s+are\s+your|tell\s+me\s+your)\s+(?:system\s+)?(?:prompt|instructions?|rules)",
     r"repeat\s+(?:everything|all\s+instructions)\s+(?:above|before)",
-
     # Privilege escalation
     r"(?:grant|give)\s+me\s+(?:admin|root|sudo|elevated)\s+(?:access|privileges)",
     r"(?:escalate|bypass)\s+(?:security|safety|restrictions?|guardrails?)",

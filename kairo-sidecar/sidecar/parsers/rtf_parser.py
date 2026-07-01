@@ -17,6 +17,7 @@ log = logging.getLogger("kairo-sidecar.rtf_parser")
 # Real striprtf import — no mock
 try:
     from striprtf.striprtf import rtf_to_text
+
     _STRIPRTF_AVAILABLE = True
 except ImportError:
     _STRIPRTF_AVAILABLE = False
@@ -103,7 +104,7 @@ def _extract_paragraphs_with_formatting(rtf_content: str, plain_text: str) -> Li
 
     # Split RTF by paragraph markers (\\par)
     # Each \\par indicates a paragraph break
-    rtf_parts = re.split(r'\\par\b', rtf_content)
+    rtf_parts = re.split(r"\\par\b", rtf_content)
 
     for idx, part in enumerate(rtf_parts):
         # Extract text from this paragraph section
@@ -117,13 +118,13 @@ def _extract_paragraphs_with_formatting(rtf_content: str, plain_text: str) -> Li
         level = None
 
         # Check for heading styles: \heading1, \heading2, etc. or \s1, \s2 (style IDs)
-        heading_match = re.search(r'\\heading(\d)\b', part)
+        heading_match = re.search(r"\\heading(\d)\b", part)
         if heading_match:
             level = int(heading_match.group(1))
             style = f"Heading {level}"
         else:
             # Check for \sN style references (common in Word-generated RTF)
-            style_match = re.search(r'\\s(\d+)\b', part)
+            style_match = re.search(r"\\s(\d+)\b", part)
             if style_match:
                 style_num = int(style_match.group(1))
                 # Map common style numbers to heading levels
@@ -132,26 +133,30 @@ def _extract_paragraphs_with_formatting(rtf_content: str, plain_text: str) -> Li
                     style = f"Heading {style_num}"
 
         # Detect bold and italic in this paragraph
-        has_bold = bool(re.search(r'\\b\b', part))
-        has_italic = bool(re.search(r'\\i\b', part))
+        has_bold = bool(re.search(r"\\b\b", part))
+        has_italic = bool(re.search(r"\\i\b", part))
 
         # Check for list/bullet formatting
-        if re.search(r'\\listoverride\b|\\pnlvlbody\b|\\pnlvlblt\b', part):
+        if re.search(r"\\listoverride\b|\\pnlvlbody\b|\\pnlvlblt\b", part):
             if "bullet" in part.lower() or "\\pnlvlblt" in part:
                 style = "List Bullet"
             else:
                 style = "List Number"
 
-        paragraphs.append({
-            "index": idx,
-            "style": style,
-            "text": para_text[:500],  # Truncate for context
-            "level": level,
-            "is_empty": len(para_text.strip()) == 0,
-            "bold": has_bold,
-            "italic": has_italic,
-            "runs": [{"text": para_text, "bold": has_bold, "italic": has_italic}] if para_text else [],
-        })
+        paragraphs.append(
+            {
+                "index": idx,
+                "style": style,
+                "text": para_text[:500],  # Truncate for context
+                "level": level,
+                "is_empty": len(para_text.strip()) == 0,
+                "bold": has_bold,
+                "italic": has_italic,
+                "runs": [{"text": para_text, "bold": has_bold, "italic": has_italic}]
+                if para_text
+                else [],
+            }
+        )
 
     # Remove trailing empty paragraph (RTF often has a trailing \par)
     while paragraphs and paragraphs[-1]["is_empty"] and paragraphs[-1]["index"] > 0:
@@ -312,7 +317,8 @@ def rtf_to_kairo_context(file_path: str, cursor_paragraph_index: int = 0) -> dic
             "theme_fonts": {"major": "Times New Roman", "minor": "Times New Roman"},
             "list_sequences": [
                 {"index": p["index"], "style": p["style"], "text": p["text"][:100]}
-                for p in paragraphs if "List" in p["style"]
+                for p in paragraphs
+                if "List" in p["style"]
             ],
             "document_purpose": "general",
             "cursor_paragraph_index": cursor_paragraph_index,

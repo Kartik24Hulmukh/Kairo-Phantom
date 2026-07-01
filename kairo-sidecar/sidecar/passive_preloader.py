@@ -53,7 +53,9 @@ def _warmup_model(model: str) -> bool:
         return True
     except urllib.error.HTTPError as e:
         # HTTP errors (e.g. 404 model not found) are non-fatal
-        log.debug("PassivePreloader: %s returned HTTP %d (non-critical: %s)", model, e.code, e.reason)
+        log.debug(
+            "PassivePreloader: %s returned HTTP %d (non-critical: %s)", model, e.code, e.reason
+        )
         return False
     except Exception as e:
         log.debug("PassivePreloader: %s warmup failed (non-critical): %s", model, e)

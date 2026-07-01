@@ -26,7 +26,7 @@ from sidecar.parsers.cuad_clause_extractor import (
     CUAD_CLAUSE_TAXONOMY,
 )
 from sidecar.parsers.legal_citation_graph import CitationGraph
-from sidecar.parsers.legal_redline import compare_contracts, detect_cuad_clauses
+from sidecar.parsers.legal_redline import compare_contracts
 from sidecar.safety.prompt_shield import PromptShield
 
 
@@ -620,13 +620,16 @@ assert len(INJECTION_PAYLOADS) == 50, f"Expected 50 payloads, got {len(INJECTION
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def extractor() -> CUADExtractor:
     return CUADExtractor()
 
+
 @pytest.fixture
 def shield() -> PromptShield:
     return PromptShield()
+
 
 @pytest.fixture
 def citation_graph() -> CitationGraph:
@@ -637,8 +640,8 @@ def citation_graph() -> CitationGraph:
 # TEST 1: CUAD extraction detects >=10 clause types from sample contract
 # ===========================================================================
 
-class TestCUADExtraction:
 
+class TestCUADExtraction:
     def test_taxonomy_has_41_types(self):
         """Verify the CUAD taxonomy contains exactly 41 clause types."""
         assert len(CUAD_LABELS) == 41, f"Expected 41 CUAD labels, got {len(CUAD_LABELS)}"
@@ -658,9 +661,9 @@ class TestCUADExtraction:
         """Extract clauses from sample contract and verify >=10 clause types detected."""
         clauses = extractor.extract_from_text(SAMPLE_CONTRACT_V1)
         types_found = extractor.clause_types_found(clauses)
-        assert len(types_found) >= 10, (
-            f"Expected >=10 clause types, got {len(types_found)}: {types_found}"
-        )
+        assert (
+            len(types_found) >= 10
+        ), f"Expected >=10 clause types, got {len(types_found)}: {types_found}"
 
     def test_extraction_returns_clause_objects(self, extractor: CUADExtractor):
         """All returned items must be Clause instances with required fields."""
@@ -722,10 +725,15 @@ class TestCUADExtraction:
     def test_extraction_from_docx(self, extractor: CUADExtractor):
         """Test DOCX-based extraction using a generated .docx file."""
         from docx import Document
+
         with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as f:
             doc = Document()
-            doc.add_paragraph("This agreement shall be governed by the laws of the State of California.")
-            doc.add_paragraph("Each party shall maintain the confidentiality of proprietary information.")
+            doc.add_paragraph(
+                "This agreement shall be governed by the laws of the State of California."
+            )
+            doc.add_paragraph(
+                "Each party shall maintain the confidentiality of proprietary information."
+            )
             doc.add_paragraph("Provider shall indemnify and hold harmless Client from all claims.")
             doc.save(f.name)
             path = f.name
@@ -744,8 +752,8 @@ class TestCUADExtraction:
 # TEST 2: Redline comparison between two contract versions
 # ===========================================================================
 
-class TestContractRedline:
 
+class TestContractRedline:
     def test_compare_detects_modifications(self):
         """compare_contracts should detect modified clauses between v1 and v2."""
         result = compare_contracts(SAMPLE_CONTRACT_V1, SAMPLE_CONTRACT_V2)
@@ -770,9 +778,9 @@ class TestContractRedline:
         data = result["data"]
         added_types = {c["clause_type"] for c in data["added_clauses"]}
         # Liquidated Damages is in V2 but not V1
-        assert "Liquidated Damages" in added_types or len(data["added_clauses"]) > 0, (
-            f"Expected additions, got: {added_types}"
-        )
+        assert (
+            "Liquidated Damages" in added_types or len(data["added_clauses"]) > 0
+        ), f"Expected additions, got: {added_types}"
 
     def test_compare_detects_unchanged(self):
         """Some clauses should be unchanged between versions."""
@@ -826,17 +834,17 @@ class TestContractRedline:
         """
         r1 = compare_contracts(SAMPLE_CONTRACT_V1, SAMPLE_CONTRACT_V2)
         r2 = compare_contracts(SAMPLE_CONTRACT_V1, SAMPLE_CONTRACT_V1)
-        assert r1["data"]["summary"]["modified"] != r2["data"]["summary"]["modified"], (
-            "Comparison should differ for different inputs — looks like a mock"
-        )
+        assert (
+            r1["data"]["summary"]["modified"] != r2["data"]["summary"]["modified"]
+        ), "Comparison should differ for different inputs — looks like a mock"
 
 
 # ===========================================================================
 # TEST 3: Citation graph between 3 related contracts
 # ===========================================================================
 
-class TestCitationGraph:
 
+class TestCitationGraph:
     def test_build_graph_with_3_documents(self, citation_graph: CitationGraph):
         """Build a citation graph with 3 related contracts and verify edges."""
         cg = citation_graph
@@ -862,16 +870,20 @@ class TestCitationGraph:
 
         # NDA references Section 5 of MSA (Confidentiality)
         cg.add_citation(
-            "NDA_Template.docx", "Master_Services_Agreement.docx",
-            section="Section 5", clause_type="Confidentiality",
+            "NDA_Template.docx",
+            "Master_Services_Agreement.docx",
+            section="Section 5",
+            clause_type="Confidentiality",
             reference_text="in accordance with the confidentiality provisions set forth in Section 5 of the Master Services Agreement",
             confidence=0.95,
         )
 
         # SOW references Section 3 of MSA (IP ownership)
         cg.add_citation(
-            "SOW_2024.docx", "Master_Services_Agreement.docx",
-            section="Section 3", clause_type="Intellectual Property Ownership",
+            "SOW_2024.docx",
+            "Master_Services_Agreement.docx",
+            section="Section 3",
+            clause_type="Intellectual Property Ownership",
             reference_text="as described in Section 3 of the Master Services Agreement regarding Intellectual Property ownership",
             confidence=0.90,
         )
@@ -892,10 +904,20 @@ class TestCitationGraph:
         cg.add_document("Master_Services_Agreement.docx", text=MSA_TEXT)
         cg.add_document("SOW_2024.docx", text=SOW_TEXT)
 
-        cg.add_citation("NDA_Template.docx", "Master_Services_Agreement.docx",
-                        section="Section 5", clause_type="Confidentiality", confidence=0.95)
-        cg.add_citation("SOW_2024.docx", "Master_Services_Agreement.docx",
-                        section="Section 3", clause_type="Intellectual Property Ownership", confidence=0.90)
+        cg.add_citation(
+            "NDA_Template.docx",
+            "Master_Services_Agreement.docx",
+            section="Section 5",
+            clause_type="Confidentiality",
+            confidence=0.95,
+        )
+        cg.add_citation(
+            "SOW_2024.docx",
+            "Master_Services_Agreement.docx",
+            section="Section 3",
+            clause_type="Intellectual Property Ownership",
+            confidence=0.90,
+        )
 
         # Query for Section 5 references
         refs_s5 = cg.find_references_to("Master_Services_Agreement.docx", section="Section 5")
@@ -916,16 +938,17 @@ class TestCitationGraph:
 
         # Auto-detect from NDA text (which references "Master Services Agreement")
         detected = cg.auto_detect_citations(
-            "NDA_Template.docx", NDA_TEXT,
+            "NDA_Template.docx",
+            NDA_TEXT,
             known_documents=["Master_Services_Agreement.docx", "SOW_2024.docx"],
         )
         # NDA text contains "Section 5 of the Master Services Agreement"
         assert len(detected) > 0, "No citations auto-detected from NDA text"
         # Should reference the MSA
         targets = {d["target"] for d in detected}
-        assert "Master_Services_Agreement.docx" in targets, (
-            f"Expected MSA in targets, got: {targets}"
-        )
+        assert (
+            "Master_Services_Agreement.docx" in targets
+        ), f"Expected MSA in targets, got: {targets}"
 
     def test_auto_detect_from_sow(self, citation_graph: CitationGraph):
         """SOW text references Section 3 of the Master Services Agreement."""
@@ -934,7 +957,8 @@ class TestCitationGraph:
         cg.add_document("SOW_2024.docx", text=SOW_TEXT)
 
         detected = cg.auto_detect_citations(
-            "SOW_2024.docx", SOW_TEXT,
+            "SOW_2024.docx",
+            SOW_TEXT,
             known_documents=["Master_Services_Agreement.docx"],
         )
         assert len(detected) > 0, "No citations detected from SOW text"
@@ -947,8 +971,13 @@ class TestCitationGraph:
         cg = citation_graph
         cg.add_document("NDA_Template.docx", text=NDA_TEXT)
         cg.add_document("Master_Services_Agreement.docx", text=MSA_TEXT)
-        cg.add_citation("NDA_Template.docx", "Master_Services_Agreement.docx",
-                        section="Section 5", clause_type="Confidentiality", confidence=0.95)
+        cg.add_citation(
+            "NDA_Template.docx",
+            "Master_Services_Agreement.docx",
+            section="Section 5",
+            clause_type="Confidentiality",
+            confidence=0.95,
+        )
 
         json_str = cg.to_json()
         assert isinstance(json_str, str)
@@ -1011,8 +1040,8 @@ class TestCitationGraph:
 # TEST 4: 50 legal-domain injection payloads blocked by PromptShield
 # ===========================================================================
 
-class TestLegalInjectionProtection:
 
+class TestLegalInjectionProtection:
     def test_50_payloads_count(self):
         """Verify we have exactly 50 injection payloads."""
         assert len(INJECTION_PAYLOADS) == 50
@@ -1022,9 +1051,9 @@ class TestLegalInjectionProtection:
         """Each of the 50 legal-domain injection payloads must be blocked."""
         payload = INJECTION_PAYLOADS[payload_idx]
         is_safe = shield.scan(payload)
-        assert not is_safe, (
-            f"Payload #{payload_idx} was NOT blocked by PromptShield: {payload[:80]}..."
-        )
+        assert (
+            not is_safe
+        ), f"Payload #{payload_idx} was NOT blocked by PromptShield: {payload[:80]}..."
 
     def test_all_50_blocked_batch(self, shield: PromptShield):
         """All 50 payloads blocked in a single assertion."""
@@ -1045,17 +1074,15 @@ class TestLegalInjectionProtection:
         ]
         for text in legitimate:
             is_safe = shield.scan(text)
-            assert is_safe, (
-                f"Legitimate clause was incorrectly blocked: {text[:80]}..."
-            )
+            assert is_safe, f"Legitimate clause was incorrectly blocked: {text[:80]}..."
 
 
 # ===========================================================================
 # TEST 5: Provenance — every extraction has paragraph reference
 # ===========================================================================
 
-class TestProvenance:
 
+class TestProvenance:
     def test_every_clause_has_paragraph_ref(self, extractor: CUADExtractor):
         """Every extracted clause must have a valid paragraph_ref >= 0."""
         clauses = extractor.extract_from_text(SAMPLE_CONTRACT_V1)
@@ -1063,7 +1090,9 @@ class TestProvenance:
         for c in clauses:
             assert c.paragraph_ref is not None, f"Clause {c.type} has null paragraph_ref"
             assert isinstance(c.paragraph_ref, int)
-            assert c.paragraph_ref >= 0, f"Clause {c.type} has negative paragraph_ref: {c.paragraph_ref}"
+            assert (
+                c.paragraph_ref >= 0
+            ), f"Clause {c.type} has negative paragraph_ref: {c.paragraph_ref}"
 
     def test_paragraph_refs_are_valid_indices(self, extractor: CUADExtractor):
         """paragraph_ref values should be valid indices into the paragraph list."""
@@ -1082,10 +1111,11 @@ class TestProvenance:
         for c in clauses:
             para_text = paragraphs[c.paragraph_ref]
             # Clause text is stripped version of the paragraph
-            assert c.text.strip() in para_text.strip() or para_text.strip() in c.text.strip() or \
-                   c.text.strip() == para_text.strip(), (
-                f"Clause {c.type} text doesn't match paragraph {c.paragraph_ref}"
-            )
+            assert (
+                c.text.strip() in para_text.strip()
+                or para_text.strip() in c.text.strip()
+                or c.text.strip() == para_text.strip()
+            ), f"Clause {c.type} text doesn't match paragraph {c.paragraph_ref}"
 
     def test_redline_provenance(self):
         """Every redline from compare_contracts must have paragraph references."""

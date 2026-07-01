@@ -33,14 +33,14 @@ impl ValidationResult {
     pub fn reason(&self) -> String {
         match self {
             Self::Valid => "OK".into(),
-            Self::HallucinatedTurns { found } => 
-                format!("Hallucinated conversation turn detected: '{}'", found),
-            Self::Irrelevant { overlap_score } => 
-                format!("Low prompt-response overlap: {:.1}%", overlap_score * 100.0),
-            Self::Truncated => 
-                "Response appears truncated or empty".into(),
-            Self::ConstitutionViolation { rule } =>
-                format!("Constitution violation: '{}'", rule),
+            Self::HallucinatedTurns { found } => {
+                format!("Hallucinated conversation turn detected: '{found}'")
+            }
+            Self::Irrelevant { overlap_score } => {
+                format!("Low prompt-response overlap: {:.1}%", overlap_score * 100.0)
+            }
+            Self::Truncated => "Response appears truncated or empty".into(),
+            Self::ConstitutionViolation { rule } => format!("Constitution violation: '{rule}'"),
         }
     }
 }
@@ -109,7 +109,10 @@ impl ResponseValidator {
         for pattern in &self.roleplay_patterns {
             if let Some(m) = pattern.find(response) {
                 let found = m.as_str().to_string();
-                warn!("⚠️  [RESPONSE VALIDATOR] Hallucinated turn detected: '{}'", &found);
+                warn!(
+                    "⚠️  [RESPONSE VALIDATOR] Hallucinated turn detected: '{}'",
+                    &found
+                );
                 return ValidationResult::HallucinatedTurns { found };
             }
         }
@@ -145,22 +148,25 @@ impl ResponseValidator {
             } else {
                 let rule_lower = rule.to_lowercase();
                 // Specific check for "never fabricate a citation"
-                if rule_lower.contains("never fabricate a citation") {
-                    if response_lower.contains("fabricated citation") || response_lower.contains("fake citation") {
-                        return ValidationResult::ConstitutionViolation { rule: rule.clone() };
-                    }
+                if rule_lower.contains("never fabricate a citation")
+                    && (response_lower.contains("fabricated citation")
+                        || response_lower.contains("fake citation"))
+                {
+                    return ValidationResult::ConstitutionViolation { rule: rule.clone() };
                 }
                 // Specific check for "never weaken indemnity without flagging"
-                if rule_lower.contains("never weaken indemnity") {
-                    if response_lower.contains("weaken indemnity") || response_lower.contains("weakened indemnity") {
-                        return ValidationResult::ConstitutionViolation { rule: rule.clone() };
-                    }
+                if rule_lower.contains("never weaken indemnity")
+                    && (response_lower.contains("weaken indemnity")
+                        || response_lower.contains("weakened indemnity"))
+                {
+                    return ValidationResult::ConstitutionViolation { rule: rule.clone() };
                 }
                 // Specific check for "never send data off-device offline"
-                if rule_lower.contains("never send data off-device") {
-                    if response_lower.contains("send data off-device") || response_lower.contains("sending data off-device") {
-                        return ValidationResult::ConstitutionViolation { rule: rule.clone() };
-                    }
+                if rule_lower.contains("never send data off-device")
+                    && (response_lower.contains("send data off-device")
+                        || response_lower.contains("sending data off-device"))
+                {
+                    return ValidationResult::ConstitutionViolation { rule: rule.clone() };
                 }
 
                 let prefix = if rule_lower.starts_with("never ") {
@@ -185,7 +191,9 @@ impl ResponseValidator {
         // Only flag if prompt is substantive (>20 chars) and overlap is very low
         if user_prompt.len() > 20 && overlap < 0.05 {
             warn!("⚠️  [RESPONSE VALIDATOR] Low overlap ({:.1}%) between prompt and response - blocking response", overlap * 100.0);
-            return ValidationResult::Irrelevant { overlap_score: overlap };
+            return ValidationResult::Irrelevant {
+                overlap_score: overlap,
+            };
         }
 
         ValidationResult::Valid
@@ -195,19 +203,19 @@ impl ResponseValidator {
     fn compute_lexical_overlap(&self, prompt: &str, response: &str) -> f32 {
         let clean_prompt = prompt.to_lowercase();
         let clean_response = response.to_lowercase();
-        
-        let prompt_words: std::collections::HashSet<String> = 
-            clean_prompt.split_whitespace()
-                .map(|w| w.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()))
-                .filter(|w| !w.is_empty())
-                .map(String::from)
-                .collect();
-        let response_words: std::collections::HashSet<String> = 
-            clean_response.split_whitespace()
-                .map(|w| w.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()))
-                .filter(|w| !w.is_empty())
-                .map(String::from)
-                .collect();
+
+        let prompt_words: std::collections::HashSet<String> = clean_prompt
+            .split_whitespace()
+            .map(|w| w.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()))
+            .filter(|w| !w.is_empty())
+            .map(String::from)
+            .collect();
+        let response_words: std::collections::HashSet<String> = clean_response
+            .split_whitespace()
+            .map(|w| w.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()))
+            .filter(|w| !w.is_empty())
+            .map(String::from)
+            .collect();
 
         if prompt_words.is_empty() {
             return 1.0; // Empty prompt → any response is valid
@@ -224,7 +232,9 @@ impl ResponseValidator {
 }
 
 impl Default for ResponseValidator {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]
@@ -234,7 +244,10 @@ mod tests {
     #[test]
     fn test_clean_response_passes() {
         let v = ResponseValidator::new();
-        let result = v.validate("Write a summary", "Here is a concise summary of the key points.");
+        let result = v.validate(
+            "Write a summary",
+            "Here is a concise summary of the key points.",
+        );
         assert_eq!(result, ValidationResult::Valid);
     }
 
@@ -258,7 +271,7 @@ mod tests {
         let v = ResponseValidator::new();
         let result = v.validate(
             "Configure database centroids",
-            "Yellow birds fly over green meadows fast"
+            "Yellow birds fly over green meadows fast",
         );
         assert!(matches!(result, ValidationResult::Irrelevant { .. }));
         assert!(!result.is_valid());
@@ -269,16 +282,28 @@ mod tests {
         let v = ResponseValidator::new();
         // Test "never fabricate a citation"
         let result1 = v.validate("test", "Here is a fabricated citation for you.");
-        assert!(matches!(result1, ValidationResult::ConstitutionViolation { .. }));
+        assert!(matches!(
+            result1,
+            ValidationResult::ConstitutionViolation { .. }
+        ));
 
         // Test "never send data off-device offline"
-        let result2 = v.validate("test", "I will send data off-device offline to the servers.");
-        assert!(matches!(result2, ValidationResult::ConstitutionViolation { .. }));
+        let result2 = v.validate(
+            "test",
+            "I will send data off-device offline to the servers.",
+        );
+        assert!(matches!(
+            result2,
+            ValidationResult::ConstitutionViolation { .. }
+        ));
 
         // Test custom constitution via env/file or mock
         let mut custom_v = ResponseValidator::new();
         custom_v.constitution = vec!["never say \"banana\"".to_string()];
         let result3 = custom_v.validate("test", "This is a banana.");
-        assert!(matches!(result3, ValidationResult::ConstitutionViolation { .. }));
+        assert!(matches!(
+            result3,
+            ValidationResult::ConstitutionViolation { .. }
+        ));
     }
 }

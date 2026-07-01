@@ -35,14 +35,13 @@ import asyncio
 import hashlib
 import json
 import logging
-import os
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 try:
     from sidecar.cua.vlm_grounding import get_vlm_engine
@@ -180,12 +179,18 @@ class CanvaCUAAgent:
                     vlm_engine = get_vlm_engine()
                     if vlm_engine.is_available:
                         # VLM Grounding
-                        ground_res = asyncio.run(vlm_engine.ground_element(before_path, "Canva text design element or text box"))
+                        ground_res = asyncio.run(
+                            vlm_engine.ground_element(
+                                before_path, "Canva text design element or text box"
+                            )
+                        )
                         if ground_res.found:
-                            log.info(f"[CanvaCUA] VLM grounded element at ({ground_res.x}, {ground_res.y})")
+                            log.info(
+                                f"[CanvaCUA] VLM grounded element at ({ground_res.x}, {ground_res.y})"
+                            )
                             result = self._farscry_text_replace(
                                 {"x": ground_res.x, "y": ground_res.y, "width": 0, "height": 0},
-                                new_text
+                                new_text,
                             )
                         else:
                             log.warning("[CanvaCUA] VLM grounding could not locate the element")
@@ -226,7 +231,9 @@ class CanvaCUAAgent:
         return ExecutionResult(
             success=verified,
             fallback_type=None if verified else "clipboard",
-            message="Text replaced successfully" if verified else "Replacement unverified — check manually",
+            message="Text replaced successfully"
+            if verified
+            else "Replacement unverified — check manually",
             before_screenshot=before_path,
             after_screenshot=after_path,
             before_hash=before_hash,
@@ -419,7 +426,7 @@ class CanvaCUAAgent:
         expected: str,
     ) -> bool:
         """
-        Use VLM semantic verification first (if available), then fall back to 
+        Use VLM semantic verification first (if available), then fall back to
         farscry OCR, and finally fall back to hash comparison.
         """
         # Step 1: VLM semantic verification
@@ -427,11 +434,11 @@ class CanvaCUAAgent:
             try:
                 vlm_engine = get_vlm_engine()
                 if vlm_engine.is_available:
-                    verify_res = asyncio.run(vlm_engine.verify_action(
-                        before_path,
-                        after_path,
-                        f"text element changed to '{expected}'"
-                    ))
+                    verify_res = asyncio.run(
+                        vlm_engine.verify_action(
+                            before_path, after_path, f"text element changed to '{expected}'"
+                        )
+                    )
                     log.info(
                         f"[CanvaCUA] VLM verification: success={verify_res.success}, "
                         f"confidence={verify_res.confidence:.2f}, explanation='{verify_res.explanation}'"
@@ -479,10 +486,7 @@ class CanvaCUAAgent:
     def _verify_canva_context(self) -> bool:
         """Verify that a Canva tab is active in the foreground browser."""
         title = self._get_active_window_title().lower()
-        return (
-            "canva" in title
-            or any(p in title for p in ["chrome", "edge", "firefox", "browser"])
-        )
+        return "canva" in title or any(p in title for p in ["chrome", "edge", "firefox", "browser"])
 
     def _get_active_window_title(self) -> str:
         """Get the title of the currently active window."""
@@ -534,8 +538,6 @@ class CanvaCUAAgent:
 
     def _capture_screenshot_win32(self, output_path: str) -> None:
         """Capture full screen using Windows GDI API."""
-        import ctypes
-        import ctypes.wintypes as wintypes
 
         # This is a simplified screenshot using PowerShell as a subprocess
         ps_cmd = (
@@ -609,11 +611,9 @@ class CanvaCUAAgent:
     def _type_text(self, text: str) -> None:
         """Type text using Windows SendInput API."""
         from sidecar.clipboard_mutex import CLIPBOARD_LOCK
+
         with CLIPBOARD_LOCK:
             try:
-                import ctypes
-                import ctypes.wintypes
-
                 # Use clipboard paste for reliability with Unicode text
                 self._copy_to_clipboard(text)
                 time.sleep(0.05)
@@ -624,8 +624,12 @@ class CanvaCUAAgent:
     def _copy_to_clipboard(self, text: str) -> None:
         """Copy text to Windows clipboard."""
         try:
-            result = subprocess.run(
-                ["powershell", "-Command", f"Set-Clipboard -Value '{text.replace(chr(39), chr(39)*2)}'"],
+            subprocess.run(
+                [
+                    "powershell",
+                    "-Command",
+                    f"Set-Clipboard -Value '{text.replace(chr(39), chr(39)*2)}'",
+                ],
                 capture_output=True,
                 timeout=3.0,
             )
@@ -664,13 +668,13 @@ class CanvaCUAAgent:
 
         line = (
             f"[{entry.timestamp}] CUA action={entry.action} "
-            f"window=\"{entry.window_title}\" "
+            f'window="{entry.window_title}" '
             f"success={entry.success} "
             f"before_hash={entry.before_hash} "
             f"after_hash={entry.after_hash}"
         )
         if entry.error:
-            line += f" error=\"{entry.error}\""
+            line += f' error="{entry.error}"'
         line += "\n"
 
         try:
@@ -757,8 +761,9 @@ def run_self_test() -> int:
     result = agent.execute_text_replacement("Test replacement text")
     agent._get_active_window_title = original_method
 
-    assert not result.success or result.fallback_type is not None or result.message, \
-        "Non-Canva context should trigger fallback"
+    assert (
+        not result.success or result.fallback_type is not None or result.message
+    ), "Non-Canva context should trigger fallback"
     print(f"[CanvaCUA] Test 5 PASS: Non-Canva context handled (fallback={result.fallback_type})")
     tests_passed += 1
 
@@ -802,12 +807,17 @@ if __name__ == "__main__":
     elif args.text:
         agent = CanvaCUAAgent()
         result = agent.execute_text_replacement(args.text)
-        print(json.dumps({
-            "success": result.success,
-            "fallback_type": result.fallback_type,
-            "message": result.message,
-            "time_taken_ms": result.time_taken_ms,
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "success": result.success,
+                    "fallback_type": result.fallback_type,
+                    "message": result.message,
+                    "time_taken_ms": result.time_taken_ms,
+                },
+                indent=2,
+            )
+        )
         sys.exit(0 if result.success else 1)
     else:
         parser.print_help()

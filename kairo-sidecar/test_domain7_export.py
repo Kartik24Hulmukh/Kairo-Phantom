@@ -3,13 +3,11 @@ Domain 7: Export & Publishing — Kairo Phantom
 Comprehensive test suite for all 14 kami export formats.
 Runs fully offline without any external service dependencies.
 """
+
 import json
-import os
 import sys
-import tempfile
-import shutil
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -43,6 +41,7 @@ def temp_output_dir(tmp_path):
 def handler(temp_output_dir):
     """Create a KamiCommandHandler with isolated output directory."""
     from sidecar.exporters.kami_handlers import KamiCommandHandler
+
     h = KamiCommandHandler()
     h.output_dir = temp_output_dir
     h.output_dir.mkdir(parents=True, exist_ok=True)
@@ -55,6 +54,7 @@ def sample_metadata():
 
 
 # ─── PDF Export ───────────────────────────────────────────────────────────────
+
 
 class TestPdfExport:
     def test_pdf_creates_file(self, handler, sample_metadata):
@@ -77,6 +77,7 @@ class TestPdfExport:
 
 # ─── EPUB Export ──────────────────────────────────────────────────────────────
 
+
 class TestEpubExport:
     def test_epub_creates_file(self, handler, sample_metadata):
         result = handler.handle("// kami epub", SAMPLE_DOC, sample_metadata)
@@ -92,6 +93,7 @@ class TestEpubExport:
 
 
 # ─── Slides Export ────────────────────────────────────────────────────────────
+
 
 class TestSlidesExport:
     def test_slides_creates_html_file(self, handler, sample_metadata):
@@ -110,6 +112,7 @@ class TestSlidesExport:
 
 # ─── Book Export ──────────────────────────────────────────────────────────────
 
+
 class TestBookExport:
     def test_book_creates_html_file(self, handler, sample_metadata):
         result = handler.handle("// kami book", SAMPLE_DOC, sample_metadata)
@@ -121,6 +124,7 @@ class TestBookExport:
 
 
 # ─── HTML Export ──────────────────────────────────────────────────────────────
+
 
 class TestHtmlExport:
     def test_html_creates_file(self, handler, sample_metadata):
@@ -134,6 +138,7 @@ class TestHtmlExport:
 
 
 # ─── Email Format ─────────────────────────────────────────────────────────────
+
 
 class TestEmailFormat:
     def test_email_returns_clipboard_content(self, handler, sample_metadata):
@@ -155,6 +160,7 @@ class TestEmailFormat:
 
 # ─── LinkedIn Format ──────────────────────────────────────────────────────────
 
+
 class TestLinkedInFormat:
     def test_linkedin_returns_clipboard_content(self, handler, sample_metadata):
         with patch.object(handler, "_copy_to_clipboard") as mock_clip:
@@ -172,6 +178,7 @@ class TestLinkedInFormat:
 
 
 # ─── Tweet Thread Format ──────────────────────────────────────────────────────
+
 
 class TestTweetThreadFormat:
     def test_tweet_returns_clipboard_content(self, handler, sample_metadata):
@@ -201,6 +208,7 @@ class TestTweetThreadFormat:
 
 # ─── Podcast Export ───────────────────────────────────────────────────────────
 
+
 class TestPodcastExport:
     def test_podcast_creates_file(self, handler, sample_metadata):
         result = handler.handle("// kami podcast", SAMPLE_DOC, sample_metadata)
@@ -218,6 +226,7 @@ class TestPodcastExport:
 
 # ─── Subtitles Export ─────────────────────────────────────────────────────────
 
+
 class TestSubtitlesExport:
     def test_subtitles_creates_srt_file(self, handler, sample_metadata):
         result = handler.handle("// kami subtitles", SAMPLE_DOC, sample_metadata)
@@ -231,6 +240,7 @@ class TestSubtitlesExport:
 
 
 # ─── Quiz Export ──────────────────────────────────────────────────────────────
+
 
 class TestQuizExport:
     def test_quiz_creates_json_file(self, handler, sample_metadata):
@@ -250,6 +260,7 @@ class TestQuizExport:
 
 # ─── Flashcards Export ────────────────────────────────────────────────────────
 
+
 class TestFlashcardsExport:
     def test_flashcards_creates_json_file(self, handler, sample_metadata):
         result = handler.handle("// kami flashcards", SAMPLE_DOC, sample_metadata)
@@ -267,6 +278,7 @@ class TestFlashcardsExport:
 
 
 # ─── Mindmap Export ───────────────────────────────────────────────────────────
+
 
 class TestMindmapExport:
     def test_mindmap_creates_md_file(self, handler, sample_metadata):
@@ -287,6 +299,7 @@ class TestMindmapExport:
 
 # ─── Batch Export (all) ───────────────────────────────────────────────────────
 
+
 class TestBatchExport:
     def test_all_export_succeeds(self, handler, sample_metadata):
         result = handler.handle("// kami all", SAMPLE_DOC, sample_metadata)
@@ -305,6 +318,7 @@ class TestBatchExport:
 
 
 # ─── Command Parser ───────────────────────────────────────────────────────────
+
 
 class TestCommandParser:
     def test_parse_pdf_command(self, handler):
@@ -329,6 +343,7 @@ class TestCommandParser:
 
 
 # ─── Error Resilience ─────────────────────────────────────────────────────────
+
 
 class TestErrorResilience:
     def test_empty_content_doesnt_crash(self, handler, sample_metadata):
@@ -355,9 +370,11 @@ class TestErrorResilience:
 
 # ─── Output Directory ─────────────────────────────────────────────────────────
 
+
 class TestOutputDirectory:
     def test_output_dir_created_automatically(self, tmp_path):
         from sidecar.exporters.kami_handlers import KamiCommandHandler
+
         non_existent = tmp_path / "new" / "nested" / "dir"
         h = KamiCommandHandler()
         h.output_dir = non_existent

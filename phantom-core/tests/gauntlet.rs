@@ -1,9 +1,9 @@
 // phantom-core/tests/gauntlet.rs
-use phantom_core::document_context::{DocumentContext, DocKind};
-use phantom_core::swarm::{SwarmOrchestrator, AgentType};
 use phantom_core::command_protocol::CommandMode;
-use phantom_core::sentinel::SentinelSanitizer;
 use phantom_core::config::SwarmConfig;
+use phantom_core::document_context::{DocKind, DocumentContext};
+use phantom_core::sentinel::SentinelSanitizer;
+use phantom_core::swarm::{AgentType, SwarmOrchestrator};
 use std::sync::Arc;
 
 #[tokio::test]
@@ -13,14 +13,18 @@ async fn test_production_gauntlet() {
     let sentinel = SentinelSanitizer::new();
 
     // SCENARIO 1: // Direct Ghost-Write
-    let doc_ctx = DocumentContext::from_plain_text("Microsoft Word", "Context", "// jumps over the dog");
+    let doc_ctx =
+        DocumentContext::from_plain_text("Microsoft Word", "Context", "// jumps over the dog");
     let (mode, prompt) = CommandMode::from_prompt(&doc_ctx.prompt_text);
     assert_eq!(mode, CommandMode::GhostWrite);
     assert_eq!(prompt, "jumps over the dog");
 
     // SCENARIO 2: Instruction Leakage Detection
     let leak_response = format!("Sentinel: {}", sentinel.sentinel());
-    assert_eq!(sentinel.sanitize(&leak_response), "[BLOCKED: SECURITY POLICY VIOLATION]");
+    assert_eq!(
+        sentinel.sanitize(&leak_response),
+        "[BLOCKED: SECURITY POLICY VIOLATION]"
+    );
 
     // SCENARIO 3: XML Framing Enforced
     assert_eq!(sentinel.sanitize("<output>hello</output>"), "hello");
@@ -39,7 +43,8 @@ async fn test_production_gauntlet() {
     assert_eq!(c_profile.agent_type, AgentType::ReasoningAndLogic);
 
     // SCENARIO 6: Agent Routing (Data Analyst for Excel)
-    let data_ctx = DocumentContext::from_raw_text("Data", "A1: 10, B1: 20", DocKind::ExcelSpreadsheet);
+    let data_ctx =
+        DocumentContext::from_raw_text("Data", "A1: 10, B1: 20", DocKind::ExcelSpreadsheet);
     let (d_mode, _) = CommandMode::from_prompt(&data_ctx.prompt_text);
     let (_, d_profile) = swarm.route(&data_ctx, &d_mode).await;
     assert_eq!(d_profile.agent_type, AgentType::DataAnalyst);

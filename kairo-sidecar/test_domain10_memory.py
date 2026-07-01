@@ -18,8 +18,6 @@ Uses if/else branching for hardware/service-dependent tests (NO skipif).
 
 import os
 import sys
-import json
-import math
 import tempfile
 import pytest
 
@@ -43,6 +41,7 @@ from sidecar.embeddings import embed_text
 # ════════════════════════════════════════════════════════════════════════════
 # 1. Mem0Bridge — availability-gated tests
 # ════════════════════════════════════════════════════════════════════════════
+
 
 class TestMem0Bridge:
     """Tests for Mem0Bridge — if/else branching, NO skipif."""
@@ -187,7 +186,7 @@ class TestSQLInjectionBlocked:
     def test_10_sql_injection_payloads_blocked(self):
         """SQL injection payloads must be blocked by PromptShield or sanitization."""
         shield = PromptShield()
-        pii = PiiGuard()
+        PiiGuard()
         blocked = 0
         for payload in SQL_INJECTION_PAYLOADS_10:
             # Check if PromptShield catches it
@@ -238,6 +237,7 @@ class TestSQLInjectionBlocked:
 # 4. PII scrubbing before storing
 # ════════════════════════════════════════════════════════════════════════════
 
+
 class TestPIIScrubbing:
     """PII in memory text must be scrubbed before storing."""
 
@@ -248,7 +248,7 @@ class TestPIIScrubbing:
             "User called from 555-123-4567 about billing issue. "
             "Email: john.doe@example.com. SSN: 123-45-6789."
         )
-        mem_id = store.add(text_with_pii, user_id="pii_test")
+        store.add(text_with_pii, user_id="pii_test")
 
         # Retrieve the stored memory
         all_mems = store.get_all(user_id="pii_test")
@@ -284,6 +284,7 @@ class TestPIIScrubbing:
 # 5. Memory export/import round-trip
 # ════════════════════════════════════════════════════════════════════════════
 
+
 class TestMemoryExportImport:
     """Export → import → verify round-trip."""
 
@@ -313,7 +314,11 @@ class TestMemoryExportImport:
         """Export with include_pii=False must redact PII from the export."""
         exporter = MemoryExportImport()
         memories = [
-            {"id": 1, "text": "User email is secret@example.com and phone is 555-111-2222", "user_id": "local"},
+            {
+                "id": 1,
+                "text": "User email is secret@example.com and phone is 555-111-2222",
+                "user_id": "local",
+            },
             {"id": 2, "text": "SSN on file: 987-65-4321", "user_id": "local"},
         ]
 
@@ -343,7 +348,9 @@ class TestMemoryExportImport:
         with tempfile.NamedTemporaryFile(suffix=".kairo-memory", delete=False) as f:
             tmp_path = f.name
         try:
-            exporter.export_to_kairo_memory(memories, tmp_path, user_id="test_user", include_pii=True)
+            exporter.export_to_kairo_memory(
+                memories, tmp_path, user_id="test_user", include_pii=True
+            )
             imported = exporter.import_from_file(tmp_path)
 
             assert len(imported) == 1
@@ -368,6 +375,7 @@ class TestMemoryExportImport:
 # 6. Langfuse eval — availability-gated
 # ════════════════════════════════════════════════════════════════════════════
 
+
 class TestLangfuseEval:
     """Tests for LangfuseEval — if/else branching, NO skipif."""
 
@@ -387,6 +395,7 @@ class TestLangfuseEval:
 # ════════════════════════════════════════════════════════════════════════════
 # 7. CRITICAL: Semantic recall paraphrase test — REAL embeddings, not hash
 # ════════════════════════════════════════════════════════════════════════════
+
 
 class TestSemanticRecall:
     """
@@ -414,12 +423,12 @@ class TestSemanticRecall:
 
         assert len(results) > 0, "No results returned for paraphrase query"
         top_result = results[0]
-        assert "cancel subscription" in top_result["text"], (
-            f"Expected 'cancel subscription' in top result, got: {top_result['text']!r}"
-        )
-        assert top_result["score"] > 0.0, (
-            f"Similarity score must be > 0 for semantic match, got: {top_result['score']}"
-        )
+        assert (
+            "cancel subscription" in top_result["text"]
+        ), f"Expected 'cancel subscription' in top result, got: {top_result['text']!r}"
+        assert (
+            top_result["score"] > 0.0
+        ), f"Similarity score must be > 0 for semantic match, got: {top_result['score']}"
 
     def test_semantic_recall_membership_termination(self):
         """
@@ -472,9 +481,9 @@ class TestSemanticRecall:
         results = store.search("terminate membership", user_id="multi_test", top_k=3)
         assert len(results) > 0
         # The top result should be about subscription cancellation
-        assert "cancel subscription" in results[0]["text"], (
-            f"Expected 'cancel subscription' as top result, got: {results[0]['text']!r}"
-        )
+        assert (
+            "cancel subscription" in results[0]["text"]
+        ), f"Expected 'cancel subscription' as top result, got: {results[0]['text']!r}"
 
     def test_semantic_recall_user_isolation(self):
         """Memories from one user should not appear in another user's search."""
@@ -497,6 +506,7 @@ class TestSemanticRecall:
 # ════════════════════════════════════════════════════════════════════════════
 # 8. Sanitization tests
 # ════════════════════════════════════════════════════════════════════════════
+
 
 class TestSanitization:
     """Tests for the _sanitize function."""
@@ -529,6 +539,7 @@ class TestSanitization:
 # ════════════════════════════════════════════════════════════════════════════
 # 9. Cosine similarity helper tests
 # ════════════════════════════════════════════════════════════════════════════
+
 
 class TestCosineSimilarity:
     """Tests for the _cosine_similarity helper."""

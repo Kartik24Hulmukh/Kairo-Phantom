@@ -26,10 +26,17 @@ pub enum PlannerError {
 impl std::fmt::Display for PlannerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PlannerError::CannotPlan { goal, reason, manual_instruction } => {
-                write!(f, "Cannot plan for '{}': {} — Manual: {}", goal, reason, manual_instruction)
+            PlannerError::CannotPlan {
+                goal,
+                reason,
+                manual_instruction,
+            } => {
+                write!(
+                    f,
+                    "Cannot plan for '{goal}': {reason} — Manual: {manual_instruction}",
+                )
             }
-            PlannerError::UiaUnavailable(e) => write!(f, "UIA unavailable: {}", e),
+            PlannerError::UiaUnavailable(e) => write!(f, "UIA unavailable: {e}"),
         }
     }
 }
@@ -59,11 +66,7 @@ impl CuaPlanner {
     /// - Step descriptions for GRP mini-plan display
     /// - Source (Template/UIA/Visual)
     /// - Risk level
-    pub async fn plan(
-        &self,
-        goal: &str,
-        ctx: &CuaContext,
-    ) -> Result<CuaPlan, PlannerError> {
+    pub async fn plan(&self, goal: &str, ctx: &CuaContext) -> Result<CuaPlan, PlannerError> {
         super::world_model::TOTAL_ACTIONS.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let goal_lower = goal.to_lowercase();
 
@@ -73,10 +76,13 @@ impl CuaPlanner {
                 actions: template.actions.clone(),
                 source: PlanSource::Template,
                 estimated_risk: template.risk.clone(),
-                description: format!("Using keyboard shortcut sequence for: {}", goal),
+                description: format!("Using keyboard shortcut sequence for: {goal}"),
                 step_descriptions: template.step_descriptions.clone(),
                 step_confidences: vec![1.0; template.step_descriptions.len()],
-                step_sources: vec![super::TargetingSource::Keyboard; template.step_descriptions.len()],
+                step_sources: vec![
+                    super::TargetingSource::Keyboard;
+                    template.step_descriptions.len()
+                ],
             });
         }
 
@@ -87,7 +93,7 @@ impl CuaPlanner {
                     actions,
                     source: PlanSource::UIA,
                     estimated_risk: Risk::Low,
-                    description: format!("Located UI element by accessibility name for: {}", goal),
+                    description: format!("Located UI element by accessibility name for: {goal}"),
                     step_descriptions: descs.clone(),
                     step_confidences: vec![0.99; descs.len()],
                     step_sources: vec![super::TargetingSource::UIA; descs.len()],
@@ -105,7 +111,7 @@ impl CuaPlanner {
                 actions,
                 source: PlanSource::Visual,
                 estimated_risk: Risk::Medium,
-                description: format!("Located UI element via VLM visual grounding for: {}", goal),
+                description: format!("Located UI element via VLM visual grounding for: {goal}"),
                 step_descriptions: descs.clone(),
                 step_confidences: vec![confidence; descs.len()],
                 step_sources: vec![super::TargetingSource::VLM; descs.len()],
@@ -118,7 +124,7 @@ impl CuaPlanner {
                 actions,
                 source: PlanSource::Visual,
                 estimated_risk: Risk::Medium,
-                description: format!("Using visual element detection for: {}", goal),
+                description: format!("Using visual element detection for: {goal}"),
                 step_descriptions: descs.clone(),
                 step_confidences: vec![0.70; descs.len()],
                 step_sources: vec![super::TargetingSource::OCR; descs.len()],
@@ -186,7 +192,9 @@ impl CuaPlanner {
             if let Ok(model_map) = super::world_model::GLOBAL_WORLD_MODEL.lock() {
                 if let Some(model) = model_map.get(&(ctx.hwnd as isize)) {
                     if let Some(ref root_node) = model.root {
-                        if let Some(node) = super::world_model::find_element_in_tree(root_node, &target_name) {
+                        if let Some(node) =
+                            super::world_model::find_element_in_tree(root_node, &target_name)
+                        {
                             if let Some(ref bbox) = node.bbox {
                                 let x = bbox.left + (bbox.right - bbox.left) / 2;
                                 let y = bbox.top + (bbox.bottom - bbox.top) / 2;
@@ -200,12 +208,10 @@ impl CuaPlanner {
 
             let coords = match found_coords {
                 Some((x, y)) => Some((x, y)),
-                None => {
-                    match self.find_element_by_name_windows(&target_name, ctx) {
-                        Ok(Some((x, y))) => Some((x, y)),
-                        _ => None,
-                    }
-                }
+                None => match self.find_element_by_name_windows(&target_name, ctx) {
+                    Ok(Some((x, y))) => Some((x, y)),
+                    _ => None,
+                },
             };
 
             if let Some((x, y)) = coords {
@@ -220,7 +226,10 @@ impl CuaPlanner {
                     },
                 ];
                 let descs = vec![
-                    format!("Move to '{}' element (found via accessibility tree)", target_name),
+                    format!(
+                        "Move to '{}' element (found via accessibility tree)",
+                        target_name
+                    ),
                     format!("Click '{}' element", target_name),
                 ];
                 return Ok(Some((actions, descs)));
@@ -308,7 +317,7 @@ impl CuaPlanner {
             .output();
 
         let target_name = self.extract_element_name_from_goal(goal);
-        
+
         // Call ground_element on VlmBridge
         match bridge.ground_element(&screenshot_path, &target_name).await {
             Ok(resp) if resp.found => {
@@ -326,7 +335,10 @@ impl CuaPlanner {
                     },
                 ];
                 let descs = vec![
-                    format!("Move to '{}' element (found via VLM visual grounding)", target_name),
+                    format!(
+                        "Move to '{}' element (found via VLM visual grounding)",
+                        target_name
+                    ),
                     format!("Click '{}' element", target_name),
                 ];
                 Some((actions, descs, confidence))
@@ -377,17 +389,16 @@ impl CuaPlanner {
                     // Look for an element matching the target name
                     if let Some(elements_arr) = elements["elements"].as_array() {
                         for elem in elements_arr {
-                            let elem_text = elem["text"]
-                                .as_str()
-                                .unwrap_or("")
-                                .to_lowercase();
+                            let elem_text = elem["text"].as_str().unwrap_or("").to_lowercase();
                             if elem_text.contains(&target_name.to_lowercase()) {
-                                if let (Some(x), Some(y)) = (
-                                    elem["bbox"]["x"].as_i64(),
-                                    elem["bbox"]["y"].as_i64(),
-                                ) {
+                                if let (Some(x), Some(y)) =
+                                    (elem["bbox"]["x"].as_i64(), elem["bbox"]["y"].as_i64())
+                                {
                                     let actions = vec![
-                                        CuaAction::MouseMove { x: x as i32, y: y as i32 },
+                                        CuaAction::MouseMove {
+                                            x: x as i32,
+                                            y: y as i32,
+                                        },
                                         CuaAction::MouseClick {
                                             x: x as i32,
                                             y: y as i32,
@@ -397,8 +408,14 @@ impl CuaPlanner {
                                         },
                                     ];
                                     let descs = vec![
-                                        format!("Move to visually detected '{}' element", target_name),
-                                        format!("Click '{}' element (visual detection)", target_name),
+                                        format!(
+                                            "Move to visually detected '{}' element",
+                                            target_name
+                                        ),
+                                        format!(
+                                            "Click '{}' element (visual detection)",
+                                            target_name
+                                        ),
                                     ];
                                     return Some((actions, descs));
                                 }
@@ -438,7 +455,11 @@ impl CuaPlanner {
                     let name = words
                         .iter()
                         .take(2)
-                        .map(|w| w.trim_end_matches("button").trim_end_matches("option").trim_end_matches("tab"))
+                        .map(|w| {
+                            w.trim_end_matches("button")
+                                .trim_end_matches("option")
+                                .trim_end_matches("tab")
+                        })
                         .collect::<Vec<_>>()
                         .join(" ")
                         .trim()
@@ -473,11 +494,11 @@ impl CuaPlanner {
         word.insert(
             "save as pdf".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::SaveAsPdf },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::SaveAsPdf,
+                }],
                 step_descriptions: vec![
-                    "Press Ctrl+Shift+P to export Word document as PDF".to_string(),
+                    "Press Ctrl+Shift+P to export Word document as PDF".to_string()
                 ],
                 risk: Risk::Low,
             },
@@ -485,11 +506,11 @@ impl CuaPlanner {
         word.insert(
             "export pdf".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::SaveAsPdf },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::SaveAsPdf,
+                }],
                 step_descriptions: vec![
-                    "Press Ctrl+Shift+P to export Word document as PDF".to_string(),
+                    "Press Ctrl+Shift+P to export Word document as PDF".to_string()
                 ],
                 risk: Risk::Low,
             },
@@ -503,11 +524,17 @@ impl CuaPlanner {
             TemplateEntry {
                 // Multi-step keyboard shortcut sequence for Excel using Delay
                 actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["Alt".to_string(), "F".to_string()] },
+                    CuaAction::KeyboardCombo {
+                        keys: vec!["Alt".to_string(), "F".to_string()],
+                    },
                     CuaAction::Delay { ms: 100 },
-                    CuaAction::KeyboardType { text: "A".to_string() },
+                    CuaAction::KeyboardType {
+                        text: "A".to_string(),
+                    },
                     CuaAction::Delay { ms: 100 },
-                    CuaAction::KeyboardType { text: "O".to_string() },
+                    CuaAction::KeyboardType {
+                        text: "O".to_string(),
+                    },
                 ],
                 step_descriptions: vec![
                     "Press Alt+F to open File menu".to_string(),
@@ -522,12 +549,10 @@ impl CuaPlanner {
         excel.insert(
             "new sheet".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["shift".to_string(), "f11".to_string()] },
-                ],
-                step_descriptions: vec![
-                    "Press Shift+F11 to insert a new worksheet".to_string(),
-                ],
+                actions: vec![CuaAction::KeyboardCombo {
+                    keys: vec!["shift".to_string(), "f11".to_string()],
+                }],
+                step_descriptions: vec!["Press Shift+F11 to insert a new worksheet".to_string()],
                 risk: Risk::Low,
             },
         );
@@ -540,11 +565,17 @@ impl CuaPlanner {
             TemplateEntry {
                 // Multi-step keyboard shortcut sequence for PowerPoint using Delay
                 actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["alt".to_string(), "f".to_string()] },
+                    CuaAction::KeyboardCombo {
+                        keys: vec!["alt".to_string(), "f".to_string()],
+                    },
                     CuaAction::Delay { ms: 100 },
-                    CuaAction::KeyboardType { text: "e".to_string() },
+                    CuaAction::KeyboardType {
+                        text: "e".to_string(),
+                    },
                     CuaAction::Delay { ms: 100 },
-                    CuaAction::KeyboardType { text: "a".to_string() },
+                    CuaAction::KeyboardType {
+                        text: "a".to_string(),
+                    },
                 ],
                 step_descriptions: vec![
                     "Press Alt+F to open File menu".to_string(),
@@ -559,12 +590,10 @@ impl CuaPlanner {
         powerpoint.insert(
             "new slide".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["ctrl".to_string(), "m".to_string()] },
-                ],
-                step_descriptions: vec![
-                    "Press Ctrl+M to insert a new slide".to_string(),
-                ],
+                actions: vec![CuaAction::KeyboardCombo {
+                    keys: vec!["ctrl".to_string(), "m".to_string()],
+                }],
+                step_descriptions: vec!["Press Ctrl+M to insert a new slide".to_string()],
                 risk: Risk::Low,
             },
         );
@@ -575,24 +604,20 @@ impl CuaPlanner {
         chrome.insert(
             "new tab".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["ctrl".to_string(), "t".to_string()] },
-                ],
-                step_descriptions: vec![
-                    "Press Ctrl+T to open a new tab".to_string(),
-                ],
+                actions: vec![CuaAction::KeyboardCombo {
+                    keys: vec!["ctrl".to_string(), "t".to_string()],
+                }],
+                step_descriptions: vec!["Press Ctrl+T to open a new tab".to_string()],
                 risk: Risk::Low,
             },
         );
         chrome.insert(
             "bookmark".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["ctrl".to_string(), "d".to_string()] },
-                ],
-                step_descriptions: vec![
-                    "Press Ctrl+D to bookmark this page".to_string(),
-                ],
+                actions: vec![CuaAction::KeyboardCombo {
+                    keys: vec!["ctrl".to_string(), "d".to_string()],
+                }],
+                step_descriptions: vec!["Press Ctrl+D to bookmark this page".to_string()],
                 risk: Risk::Low,
             },
         );
@@ -603,12 +628,10 @@ impl CuaPlanner {
         firefox.insert(
             "new tab".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["ctrl".to_string(), "t".to_string()] },
-                ],
-                step_descriptions: vec![
-                    "Press Ctrl+T to open a new tab".to_string(),
-                ],
+                actions: vec![CuaAction::KeyboardCombo {
+                    keys: vec!["ctrl".to_string(), "t".to_string()],
+                }],
+                step_descriptions: vec!["Press Ctrl+T to open a new tab".to_string()],
                 risk: Risk::Low,
             },
         );
@@ -619,9 +642,9 @@ impl CuaPlanner {
         generic.insert(
             "save as pdf".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::SaveAs },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::SaveAs,
+                }],
                 step_descriptions: vec![
                     "Press Ctrl+Shift+S to open Save As dialog".to_string(),
                     "Select PDF format from dropdown".to_string(),
@@ -633,21 +656,19 @@ impl CuaPlanner {
         generic.insert(
             "export pdf".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::SaveAsPdf },
-                ],
-                step_descriptions: vec![
-                    "Press Ctrl+Shift+P to export as PDF".to_string(),
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::SaveAsPdf,
+                }],
+                step_descriptions: vec!["Press Ctrl+Shift+P to export as PDF".to_string()],
                 risk: Risk::Low,
             },
         );
         generic.insert(
             "select all".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::SelectAll },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::SelectAll,
+                }],
                 step_descriptions: vec!["Press Ctrl+A to select all content".to_string()],
                 risk: Risk::Low,
             },
@@ -655,9 +676,9 @@ impl CuaPlanner {
         generic.insert(
             "undo".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::Undo },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::Undo,
+                }],
                 step_descriptions: vec!["Press Ctrl+Z to undo last action".to_string()],
                 risk: Risk::Low,
             },
@@ -665,9 +686,9 @@ impl CuaPlanner {
         generic.insert(
             "redo".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::Redo },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::Redo,
+                }],
                 step_descriptions: vec!["Press Ctrl+Y to redo last action".to_string()],
                 risk: Risk::Low,
             },
@@ -675,9 +696,9 @@ impl CuaPlanner {
         generic.insert(
             "save file".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardCombo { keys: vec!["ctrl".to_string(), "s".to_string()] },
-                ],
+                actions: vec![CuaAction::KeyboardCombo {
+                    keys: vec!["ctrl".to_string(), "s".to_string()],
+                }],
                 step_descriptions: vec!["Press Ctrl+S to save the file".to_string()],
                 risk: Risk::Low,
             },
@@ -685,9 +706,9 @@ impl CuaPlanner {
         generic.insert(
             "close dialog".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::CloseDialog },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::CloseDialog,
+                }],
                 step_descriptions: vec!["Press Escape to close the dialog".to_string()],
                 risk: Risk::Low,
             },
@@ -695,9 +716,9 @@ impl CuaPlanner {
         generic.insert(
             "confirm".to_string(),
             TemplateEntry {
-                actions: vec![
-                    CuaAction::KeyboardShortcut { shortcut: WellKnownShortcut::ConfirmDialog },
-                ],
+                actions: vec![CuaAction::KeyboardShortcut {
+                    shortcut: WellKnownShortcut::ConfirmDialog,
+                }],
                 step_descriptions: vec!["Press Enter to confirm".to_string()],
                 risk: Risk::Low,
             },
@@ -752,14 +773,19 @@ impl CuaPlanner {
                                     match action_toml.action_type.as_str() {
                                         "keyboard_combo" => {
                                             if let Some(keys) = action_toml.keys {
-                                                actions.push(CuaAction::KeyboardCombo { keys: keys.clone() });
-                                                step_descriptions.push(format!("Press {}", keys.join("+")));
+                                                actions.push(CuaAction::KeyboardCombo {
+                                                    keys: keys.clone(),
+                                                });
+                                                step_descriptions
+                                                    .push(format!("Press {}", keys.join("+")));
                                             }
                                         }
                                         "keyboard_type" => {
                                             if let Some(text) = action_toml.text {
-                                                actions.push(CuaAction::KeyboardType { text: text.clone() });
-                                                step_descriptions.push(format!("Type: {}", text));
+                                                actions.push(CuaAction::KeyboardType {
+                                                    text: text.clone(),
+                                                });
+                                                step_descriptions.push(format!("Type: {text}"));
                                             }
                                         }
                                         "keyboard_shortcut" => {
@@ -770,19 +796,26 @@ impl CuaPlanner {
                                                     "select_all" => WellKnownShortcut::SelectAll,
                                                     "undo" => WellKnownShortcut::Undo,
                                                     "redo" => WellKnownShortcut::Redo,
-                                                    "close_dialog" => WellKnownShortcut::CloseDialog,
-                                                    "confirm_dialog" => WellKnownShortcut::ConfirmDialog,
+                                                    "close_dialog" => {
+                                                        WellKnownShortcut::CloseDialog
+                                                    }
+                                                    "confirm_dialog" => {
+                                                        WellKnownShortcut::ConfirmDialog
+                                                    }
                                                     "next_field" => WellKnownShortcut::NextField,
                                                     _ => continue,
                                                 };
-                                                actions.push(CuaAction::KeyboardShortcut { shortcut: shortcut.clone() });
-                                                step_descriptions.push(format!("Trigger {:?}", shortcut));
+                                                actions.push(CuaAction::KeyboardShortcut {
+                                                    shortcut: shortcut.clone(),
+                                                });
+                                                step_descriptions
+                                                    .push(format!("Trigger {shortcut:?}"));
                                             }
                                         }
                                         "delay_ms" => {
                                             if let Some(ms) = action_toml.ms {
                                                 actions.push(CuaAction::Delay { ms });
-                                                step_descriptions.push(format!("Wait {}ms", ms));
+                                                step_descriptions.push(format!("Wait {ms}ms"));
                                             }
                                         }
                                         _ => {}

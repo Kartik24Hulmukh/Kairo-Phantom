@@ -1,17 +1,17 @@
-pub mod mem_machine;
 pub mod document_graph;
-pub mod mem_gas;
 pub mod feedback;
+pub mod mem_gas;
+pub mod mem_machine;
 pub mod optimizer;
 pub mod types;
-pub use types::*;
 pub use mem_machine::MemMachine;
+pub use types::*;
 
 use rusqlite::{params, Connection, Result};
 
-use std::path::PathBuf;
 use chrono::Utc;
 use std::fs;
+use std::path::PathBuf;
 use std::process::Command;
 
 pub struct VaultV2 {
@@ -86,7 +86,7 @@ impl VaultV2 {
         let mut stmt = self.conn.prepare(
             "SELECT format_detected, outcome FROM interactions 
              WHERE app_name = ?1 
-             ORDER BY timestamp DESC LIMIT 10"
+             ORDER BY timestamp DESC LIMIT 10",
         )?;
 
         let rows = stmt.query_map(params![app_name], |row| {
@@ -107,11 +107,13 @@ impl VaultV2 {
             }
         }
 
-        if total == 0 { return Ok(()); }
+        if total == 0 {
+            return Ok(());
+        }
 
         let acceptance_rate = accepted as f64 / total as f64;
         let mut preferred_format = "prose".to_string(); // Default
-        
+
         // If a specific format has high acceptance, learn it
         for (format, count) in format_counts {
             if (count as f64 / total as f64) > 0.7 {
@@ -136,7 +138,7 @@ impl VaultV2 {
     pub fn get_preferences(&self, app_name: &str) -> Result<String> {
         let mut stmt = self.conn.prepare(
             "SELECT preferred_tone, preferred_format, preferred_length, acceptance_rate 
-             FROM app_preferences WHERE app_name = ?1"
+             FROM app_preferences WHERE app_name = ?1",
         )?;
 
         let mut rows = stmt.query(params![app_name])?;
@@ -159,9 +161,9 @@ impl VaultV2 {
         fs::create_dir_all(&daily_dir).unwrap();
 
         let date_str = Utc::now().format("%Y-%m-%d").to_string();
-        let log_file = daily_dir.join(format!("{}.md", date_str));
-        
-        fs::write(&log_file, format!("# Memory compilation for {}\n", date_str)).unwrap();
+        let log_file = daily_dir.join(format!("{date_str}.md"));
+
+        fs::write(&log_file, format!("# Memory compilation for {date_str}\n")).unwrap();
 
         // Git commit
         Command::new("git")
@@ -172,7 +174,7 @@ impl VaultV2 {
 
         Command::new("git")
             .current_dir(&self.vault_dir)
-            .args(["commit", "-m", &format!("Memory update {}", date_str)])
+            .args(["commit", "-m", &format!("Memory update {date_str}")])
             .output()
             .ok();
 

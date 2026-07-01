@@ -1,10 +1,9 @@
-import os
 import logging
 import datetime
 from pathlib import Path
-from typing import Dict, Any, List
 
 log = logging.getLogger("kairo-sidecar.pdf_parser")
+
 
 def parse_pdf(file_path: str) -> dict:
     """
@@ -28,6 +27,7 @@ def parse_pdf(file_path: str) -> dict:
 
     try:
         import fitz
+
         pymupdf_available = True
         doc = fitz.open(file_path_abs)
         page_count = len(doc)
@@ -35,7 +35,9 @@ def parse_pdf(file_path: str) -> dict:
             total_chars += len(page.get_text())
         doc.close()
         avg_density = total_chars / page_count if page_count > 0 else 0.0
-        log.info(f"PDF Character density scan: {page_count} pages, {total_chars} total chars. Avg density: {avg_density:.2f} chars/page")
+        log.info(
+            f"PDF Character density scan: {page_count} pages, {total_chars} total chars. Avg density: {avg_density:.2f} chars/page"
+        )
     except ImportError:
         log.warning("PyMuPDF (fitz) is not installed. Unable to calculate density directly.")
     except Exception as e:
@@ -103,6 +105,7 @@ def parse_pdf(file_path: str) -> dict:
 
     return result
 
+
 def _parse_pdf_pymupdf(file_path: str) -> dict:
     try:
         import fitz  # PyMuPDF — AGPL, lazy import inside try/except
@@ -111,32 +114,38 @@ def _parse_pdf_pymupdf(file_path: str) -> dict:
     doc = fitz.open(file_path)
     paragraphs = []
     tables = []
-    
+
     p_idx = 0
     for page_num, page in enumerate(doc):
-        text = page.get_text("blocks") # gets list of (x0, y0, x1, y1, "text", block_no, block_type)
+        text = page.get_text(
+            "blocks"
+        )  # gets list of (x0, y0, x1, y1, "text", block_no, block_type)
         for block in text:
             block_text = block[4].strip()
             if block_text:
-                paragraphs.append({
-                    "index": p_idx,
-                    "text": block_text,
-                    "style": "Normal",
-                    "level": 0,
-                    "page": page_num + 1,
-                    "runs": [{"text": block_text, "bold": False, "italic": False}]
-                })
+                paragraphs.append(
+                    {
+                        "index": p_idx,
+                        "text": block_text,
+                        "style": "Normal",
+                        "level": 0,
+                        "page": page_num + 1,
+                        "runs": [{"text": block_text, "bold": False, "italic": False}],
+                    }
+                )
                 p_idx += 1
-                
+
         # Simple table extraction if fitz has it
         try:
             tabs = page.find_tables()
             for tab in tabs:
-                tables.append({
-                    "after_paragraph_index": p_idx - 1,
-                    "rows": tab.extract(),
-                    "page": page_num + 1
-                })
+                tables.append(
+                    {
+                        "after_paragraph_index": p_idx - 1,
+                        "rows": tab.extract(),
+                        "page": page_num + 1,
+                    }
+                )
         except Exception:
             pass
 
@@ -144,22 +153,21 @@ def _parse_pdf_pymupdf(file_path: str) -> dict:
     return {
         "paragraphs": paragraphs,
         "tables": tables,
-        "metadata": {
-            "total_paragraphs": len(paragraphs),
-            "table_count": len(tables)
-        }
+        "metadata": {"total_paragraphs": len(paragraphs), "table_count": len(tables)},
     }
+
 
 def _parse_pdf_docling(file_path: str) -> dict:
     from docling.document_converter import DocumentConverter
+
     converter = DocumentConverter()
     res = converter.convert(file_path)
     markdown_text = res.document.export_to_markdown()
-    
+
     paragraphs = []
     tables = []
     p_idx = 0
-    
+
     lines = markdown_text.split("\n")
     for line in lines:
         line_clean = line.strip()
@@ -171,48 +179,50 @@ def _parse_pdf_docling(file_path: str) -> dict:
                 level = len(line_clean) - len(line_clean.lstrip("#"))
                 style = f"Heading{level}"
                 line_clean = line_clean.lstrip("#").strip()
-            
-            paragraphs.append({
-                "index": p_idx,
-                "text": line_clean,
-                "style": style,
-                "level": level,
-                "page": 1,
-                "runs": [{"text": line_clean, "bold": style.startswith("Heading"), "italic": False}]
-            })
+
+            paragraphs.append(
+                {
+                    "index": p_idx,
+                    "text": line_clean,
+                    "style": style,
+                    "level": level,
+                    "page": 1,
+                    "runs": [
+                        {"text": line_clean, "bold": style.startswith("Heading"), "italic": False}
+                    ],
+                }
+            )
             p_idx += 1
-            
+
     return {
         "paragraphs": paragraphs,
         "tables": tables,
-        "metadata": {
-            "total_paragraphs": len(paragraphs),
-            "table_count": len(tables)
-        }
+        "metadata": {"total_paragraphs": len(paragraphs), "table_count": len(tables)},
     }
+
 
 def _parse_pdf_mineru(file_path: str) -> dict:
     try:
         from sidecar.parsers.mineru_parser import parse_with_mineru
+
         return parse_with_mineru(file_path)
     except Exception as e:
         log.warning(f"parse_with_mineru failed, trying magic-pdf import fallback: {e}")
         # Keep old import fallback logic
-        from magic_pdf.data.data_reader_writer import FileBasedReaderWriter
         from magic_pdf.pipe.UNIPipe import UNIPipe
-        
+
         with open(file_path, "rb") as f:
             pdf_bytes = f.read()
-            
+
         pipe = UNIPipe(pdf_bytes, "pdf", {})
         pipe.pipe_classify()
         pipe.pipe_analyze()
         model_json = pipe.pipe_to_json()
-        
+
         paragraphs = []
         tables = []
         p_idx = 0
-        
+
         for block in model_json:
             block_type = block.get("type", "")
             if block_type in ("text", "title", "heading"):
@@ -225,30 +235,32 @@ def _parse_pdf_mineru(file_path: str) -> dict:
                 elif block_type == "heading":
                     level = block.get("level", 1)
                     style = f"Heading{level}"
-                    
-                paragraphs.append({
-                    "index": p_idx,
-                    "text": text,
-                    "style": style,
-                    "level": level,
-                    "page": block.get("page_idx", 0) + 1,
-                    "runs": [{"text": text, "bold": style.startswith("Heading"), "italic": False}]
-                })
+
+                paragraphs.append(
+                    {
+                        "index": p_idx,
+                        "text": text,
+                        "style": style,
+                        "level": level,
+                        "page": block.get("page_idx", 0) + 1,
+                        "runs": [
+                            {"text": text, "bold": style.startswith("Heading"), "italic": False}
+                        ],
+                    }
+                )
                 p_idx += 1
             elif block_type == "table":
                 rows = block.get("table_cells", [])
-                tables.append({
-                    "after_paragraph_index": p_idx - 1,
-                    "rows": rows,
-                    "page": block.get("page_idx", 0) + 1
-                })
-                
+                tables.append(
+                    {
+                        "after_paragraph_index": p_idx - 1,
+                        "rows": rows,
+                        "page": block.get("page_idx", 0) + 1,
+                    }
+                )
+
         return {
             "paragraphs": paragraphs,
             "tables": tables,
-            "metadata": {
-                "total_paragraphs": len(paragraphs),
-                "table_count": len(tables)
-            }
+            "metadata": {"total_paragraphs": len(paragraphs), "table_count": len(tables)},
         }
-

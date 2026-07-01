@@ -12,11 +12,12 @@ Usage:
     quality = proc.histogram_quality_score('/path/to/image.png')
     # → {brightness, contrast, is_screenshot, is_photo, is_diagram}
 """
+
 from __future__ import annotations
 
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Dict, List
 
 import numpy as np
 from PIL import Image
@@ -110,9 +111,8 @@ class ImageProcessor:
 
         # Convert to grayscale for histogram
         gray = np.array(img.convert("L"))
-        hist, _ = np.histogram(gray, bins=256, range=(0, 256))
+        hist: np.ndarray = np.histogram(gray, bins=256, range=(0, 256))[0]
         hist = hist.astype(np.float32)
-        hist_norm = hist / (hist.sum() + 1e-8)
 
         # Number of unique colors (downsampled for speed)
         small = img.resize((64, 64), Image.LANCZOS)
@@ -124,9 +124,7 @@ class ImageProcessor:
         if gray_small.shape[0] > 1 and gray_small.shape[1] > 1:
             grad_x = np.abs(np.diff(gray_small, axis=1))
             grad_y = np.abs(np.diff(gray_small, axis=0))
-            edge_density = float(
-                (np.mean(grad_x) + np.mean(grad_y)) / 2.0
-            )
+            edge_density = float((np.mean(grad_x) + np.mean(grad_y)) / 2.0)
         else:
             edge_density = 0.0
 
@@ -139,24 +137,13 @@ class ImageProcessor:
 
         # Classification heuristics (based on real histogram/edge analysis):
         # Screenshot: high edge density, limited color palette, high contrast
-        is_screenshot = (
-            edge_density > 10.0
-            and color_ratio < 0.15
-            and contrast > 50.0
-        )
+        is_screenshot = edge_density > 10.0 and color_ratio < 0.15 and contrast > 50.0
 
         # Photo: smooth gradients, wide color range, moderate-to-high unique colors
-        is_photo = (
-            edge_density < 10.0
-            and color_ratio > 0.20
-        )
+        is_photo = edge_density < 10.0 and color_ratio > 0.20
 
         # Diagram: very limited palette, moderate edges, geometric
-        is_diagram = (
-            color_ratio < 0.08
-            and edge_density > 5.0
-            and not is_screenshot
-        )
+        is_diagram = color_ratio < 0.08 and edge_density > 5.0 and not is_screenshot
 
         return {
             "brightness": brightness,
@@ -188,22 +175,26 @@ class ImageProcessor:
             try:
                 if operation == "resize":
                     img = self.resize(path, 256, 256)
-                    results.append({
-                        "path": path,
-                        "operation": "resize",
-                        "size": img.size,
-                        "status": "ok",
-                    })
+                    results.append(
+                        {
+                            "path": path,
+                            "operation": "resize",
+                            "size": img.size,
+                            "status": "ok",
+                        }
+                    )
                 elif operation == "normalize":
                     arr = self.normalize(path)
-                    results.append({
-                        "path": path,
-                        "operation": "normalize",
-                        "shape": arr.shape,
-                        "min": float(np.min(arr)),
-                        "max": float(np.max(arr)),
-                        "status": "ok",
-                    })
+                    results.append(
+                        {
+                            "path": path,
+                            "operation": "normalize",
+                            "shape": arr.shape,
+                            "min": float(np.min(arr)),
+                            "max": float(np.max(arr)),
+                            "status": "ok",
+                        }
+                    )
                 elif operation == "histogram":
                     score = self.histogram_quality_score(path)
                     score["path"] = path
@@ -212,24 +203,30 @@ class ImageProcessor:
                     results.append(score)
                 elif operation == "center_crop":
                     img = self.center_crop(path, 224)
-                    results.append({
-                        "path": path,
-                        "operation": "center_crop",
-                        "size": img.size,
-                        "status": "ok",
-                    })
+                    results.append(
+                        {
+                            "path": path,
+                            "operation": "center_crop",
+                            "size": img.size,
+                            "status": "ok",
+                        }
+                    )
                 else:
-                    results.append({
+                    results.append(
+                        {
+                            "path": path,
+                            "operation": operation,
+                            "status": "error",
+                            "error": f"Unknown operation: {operation}",
+                        }
+                    )
+            except Exception as exc:
+                results.append(
+                    {
                         "path": path,
                         "operation": operation,
                         "status": "error",
-                        "error": f"Unknown operation: {operation}",
-                    })
-            except Exception as exc:
-                results.append({
-                    "path": path,
-                    "operation": operation,
-                    "status": "error",
-                    "error": str(exc),
-                })
+                        "error": str(exc),
+                    }
+                )
         return results

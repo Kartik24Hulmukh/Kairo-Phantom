@@ -50,7 +50,7 @@ pub struct PdfHeading {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct PdfImage {
     pub page: usize,
-    pub bbox: Vec<f64>,   // [x0, y0, x1, y1]
+    pub bbox: Vec<f64>, // [x0, y0, x1, y1]
     #[serde(default)]
     pub caption: Option<String>,
 }
@@ -91,10 +91,10 @@ pub struct PdfDocumentContext {
 impl PdfDocumentContext {
     /// Extract PDF content via the multi-tier Python sidecar engine.
     pub async fn extract(file_path: &str) -> Result<Self> {
-        let data = crate::sidecar_client::pdf_extract(file_path).await
+        let data = crate::sidecar_client::pdf_extract(file_path)
+            .await
             .context("Failed to extract PDF via sidecar")?;
-        serde_json::from_value(data)
-            .context("Failed to parse PDF extraction result")
+        serde_json::from_value(data).context("Failed to parse PDF extraction result")
     }
 
     /// Build a system prompt fragment for the LLM from extracted PDF context.
@@ -140,7 +140,7 @@ impl PdfDocumentContext {
 
         if !self.text.is_empty() {
             let preview: String = self.text.chars().take(500).collect();
-            frag.push_str(&format!("\nContent preview:\n{}\n", preview));
+            frag.push_str(&format!("\nContent preview:\n{preview}\n"));
         }
 
         frag

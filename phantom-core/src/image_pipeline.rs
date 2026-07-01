@@ -1,14 +1,13 @@
 /// Image Pipeline v1.0 — Phase 1 of Kairo Phantom v3.0
 /// Implements: gpt-image-1 (OpenAI), Ollama Diffuser (local SD/FLUX), ImageRouter
 /// The ImageRouter selects the best backend based on document context and offline preferences.
-
 use anyhow::{Context, Result};
-use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info, warn};
 
-use crate::document_context::{DocumentContext, DocKind};
+use crate::document_context::{DocKind, DocumentContext};
 
 // ─── ImageResult ─────────────────────────────────────────────────────────────
 
@@ -27,7 +26,9 @@ pub struct ImageResult {
 impl ImageResult {
     /// Returns the raw bytes of the image
     pub fn decode_bytes(&self) -> Result<Vec<u8>> {
-        BASE64.decode(&self.base64_data).context("Failed to decode image base64")
+        BASE64
+            .decode(&self.base64_data)
+            .context("Failed to decode image base64")
     }
 
     /// Returns a data URI suitable for HTML/CSS embedding
@@ -111,7 +112,11 @@ impl OpenAiImageBackend {
     }
 
     pub async fn generate(&self, prompt: &str) -> Result<ImageResult> {
-        info!("🎨 OpenAI Image ({}) generating: {}...", self.model, &prompt[..prompt.len().min(60)]);
+        info!(
+            "🎨 OpenAI Image ({}) generating: {}...",
+            self.model,
+            &prompt[..prompt.len().min(60)]
+        );
 
         let req = OpenAiImageRequest {
             model: &self.model,
@@ -122,7 +127,8 @@ impl OpenAiImageBackend {
             response_format: "b64_json",
         };
 
-        let resp = self.client
+        let resp = self
+            .client
             .post("https://api.openai.com/v1/images/generations")
             .bearer_auth(&self.api_key)
             .json(&req)
@@ -133,12 +139,17 @@ impl OpenAiImageBackend {
         let status = resp.status();
         if !status.is_success() {
             let body = resp.text().await.unwrap_or_default();
-            anyhow::bail!("OpenAI Image API error {}: {}", status, body);
+            anyhow::bail!("OpenAI Image API error {status}: {body}");
         }
 
-        let data: OpenAiImageResponse = resp.json().await.context("Failed to parse OpenAI image response")?;
-        
-        let b64 = data.data.into_iter()
+        let data: OpenAiImageResponse = resp
+            .json()
+            .await
+            .context("Failed to parse OpenAI image response")?;
+
+        let b64 = data
+            .data
+            .into_iter()
             .next()
             .and_then(|d| d.b64_json)
             .context("No image data in OpenAI response")?;
@@ -190,7 +201,11 @@ impl OllamaDiffuserBackend {
     }
 
     pub async fn generate(&self, prompt: &str) -> Result<ImageResult> {
-        info!("🖼️  Ollama Diffuser ({}) generating locally: {}...", self.model, &prompt[..prompt.len().min(60)]);
+        info!(
+            "🖼️  Ollama Diffuser ({}) generating locally: {}...",
+            self.model,
+            &prompt[..prompt.len().min(60)]
+        );
 
         let req = OllamaGenerateRequest {
             model: &self.model,
@@ -199,7 +214,8 @@ impl OllamaDiffuserBackend {
         };
 
         let url = format!("{}/api/generate", self.base_url);
-        let resp = self.client
+        let resp = self
+            .client
             .post(&url)
             .json(&req)
             .send()
@@ -209,13 +225,18 @@ impl OllamaDiffuserBackend {
         let status = resp.status();
         if !status.is_success() {
             let body = resp.text().await.unwrap_or_default();
-            anyhow::bail!("Ollama Diffuser error {}: {}", status, body);
+            anyhow::bail!("Ollama Diffuser error {status}: {body}");
         }
 
-        let data: OllamaGenerateResponse = resp.json().await.context("Failed to parse Ollama response")?;
-        
+        let data: OllamaGenerateResponse = resp
+            .json()
+            .await
+            .context("Failed to parse Ollama response")?;
+
         // Ollama image models return images in the `images` array
-        let b64 = data.images.into_iter()
+        let b64 = data
+            .images
+            .into_iter()
             .next()
             .context("No image in Ollama response (is this a vision-capable model?)")?;
 
@@ -231,9 +252,11 @@ impl OllamaDiffuserBackend {
 
     pub async fn health_check(&self) -> bool {
         let url = format!("{}/api/tags", self.base_url);
-        self.client.get(&url)
+        self.client
+            .get(&url)
             .timeout(std::time::Duration::from_secs(3))
-            .send().await
+            .send()
+            .await
             .map(|r| r.status().is_success())
             .unwrap_or(false)
     }
@@ -242,39 +265,53 @@ impl OllamaDiffuserBackend {
 // ─── ImageRouter — Context-Aware Routing ─────────────────────────────────────
 
 pub struct ImageRouter {
-    cloud_hq: Option<OpenAiImageBackend>,       // gpt-image-1 (high quality)
-    cloud_mini: Option<OpenAiImageBackend>,     // gpt-image-1-mini (fast/cheap)
-    local: Option<OllamaDiffuserBackend>,       // Ollama SD/FLUX
+    cloud_hq: Option<OpenAiImageBackend>, // gpt-image-1 (high quality)
+    cloud_mini: Option<OpenAiImageBackend>, // gpt-image-1-mini (fast/cheap)
+    local: Option<OllamaDiffuserBackend>, // Ollama SD/FLUX
     config: ImageGenerationConfig,
 }
 
 impl ImageRouter {
     pub fn new(config: ImageGenerationConfig) -> Self {
-        let cloud_hq = config.openai_api_key.as_deref()
+        let cloud_hq = config
+            .openai_api_key
+            .as_deref()
             .filter(|k| !k.is_empty())
-            .map(|key| OpenAiImageBackend::new(
-                key.to_string(),
-                "gpt-image-1".into(),
-                config.image_size.clone(),
-                config.image_quality.clone(),
-            ));
+            .map(|key| {
+                OpenAiImageBackend::new(
+                    key.to_string(),
+                    "gpt-image-1".into(),
+                    config.image_size.clone(),
+                    config.image_quality.clone(),
+                )
+            });
 
-        let cloud_mini = config.openai_api_key.as_deref()
+        let cloud_mini = config
+            .openai_api_key
+            .as_deref()
             .filter(|k| !k.is_empty())
-            .map(|key| OpenAiImageBackend::new(
-                key.to_string(),
-                "gpt-image-1-mini".into(),
-                "512x512".into(),
-                "standard".into(),
-            ));
+            .map(|key| {
+                OpenAiImageBackend::new(
+                    key.to_string(),
+                    "gpt-image-1-mini".into(),
+                    "512x512".into(),
+                    "standard".into(),
+                )
+            });
 
-        let local = config.ollama_base_url.as_deref()
-            .map(|url| OllamaDiffuserBackend::new(
+        let local = config.ollama_base_url.as_deref().map(|url| {
+            OllamaDiffuserBackend::new(
                 url.to_string(),
                 "stable-diffusion".into(), // or "flux", configurable
-            ));
+            )
+        });
 
-        Self { cloud_hq, cloud_mini, local, config }
+        Self {
+            cloud_hq,
+            cloud_mini,
+            local,
+            config,
+        }
     }
 
     /// Build a context-enriched prompt from the document context.
@@ -293,16 +330,19 @@ impl ImageRouter {
             DocKind::FigmaDesign | DocKind::CanvaDesign => {
                 "Modern UI/UX illustration. Clean design. Flat or minimal style. "
             }
-            _ => ""
+            _ => "",
         };
 
-        format!("{}{}", context_hint, prompt)
+        format!("{context_hint}{prompt}")
     }
 
     /// Generate an image, routing to the best available backend.
     pub async fn generate(&self, prompt: &str, ctx: &DocumentContext) -> Result<ImageResult> {
         let enhanced = self.enhance_prompt(prompt, ctx);
-        debug!("ImageRouter: enhanced prompt = {}", &enhanced[..enhanced.len().min(100)]);
+        debug!(
+            "ImageRouter: enhanced prompt = {}",
+            &enhanced[..enhanced.len().min(100)]
+        );
 
         // RULE: Offline-only → always use local
         if self.config.offline_only {
@@ -310,8 +350,10 @@ impl ImageRouter {
         }
 
         // RULE: Title slide (slide 0) → use best cloud model
-        if matches!(ctx.doc_kind, DocKind::PowerPoint | DocKind::OpenDocumentPresentation)
-            && ctx.active_slide == Some(0)
+        if matches!(
+            ctx.doc_kind,
+            DocKind::PowerPoint | DocKind::OpenDocumentPresentation
+        ) && ctx.active_slide == Some(0)
         {
             if let Some(cloud) = &self.cloud_hq {
                 match cloud.generate(&enhanced).await {
@@ -322,7 +364,8 @@ impl ImageRouter {
         }
 
         // RULE: Quick icon/thumbnail → use mini
-        let is_icon = prompt.contains("icon") || prompt.contains("logo") || prompt.contains("thumbnail");
+        let is_icon =
+            prompt.contains("icon") || prompt.contains("logo") || prompt.contains("thumbnail");
         if is_icon {
             if let Some(mini) = &self.cloud_mini {
                 match mini.generate(&enhanced).await {
@@ -336,13 +379,17 @@ impl ImageRouter {
         match self.local_generate(&enhanced).await {
             Ok(r) => Ok(r),
             Err(local_err) => {
-                warn!("Local generation failed: {} — trying cloud fallback", local_err);
+                warn!(
+                    "Local generation failed: {} — trying cloud fallback",
+                    local_err
+                );
                 if let Some(cloud) = &self.cloud_hq {
                     cloud.generate(&enhanced).await
                 } else if let Some(mini) = &self.cloud_mini {
                     mini.generate(&enhanced).await
                 } else {
-                    Err(local_err).context("All image backends failed and no cloud fallback configured")
+                    Err(local_err)
+                        .context("All image backends failed and no cloud fallback configured")
                 }
             }
         }
@@ -393,7 +440,11 @@ impl GeminiImagenBackend {
     }
 
     pub async fn generate(&self, prompt: &str) -> Result<ImageResult> {
-        info!("🎨 Gemini Imagen ({}) generating: {}...", self.model, &prompt[..prompt.len().min(60)]);
+        info!(
+            "🎨 Gemini Imagen ({}) generating: {}...",
+            self.model,
+            &prompt[..prompt.len().min(60)]
+        );
         let url = format!(
             "https://generativelanguage.googleapis.com/v1beta/models/{}:predict?key={}",
             self.model, self.api_key
@@ -415,7 +466,7 @@ impl GeminiImagenBackend {
         if !resp.status().is_success() {
             let status = resp.status();
             let body = resp.text().await.unwrap_or_default();
-            anyhow::bail!("Gemini Imagen error {}: {}", status, body);
+            anyhow::bail!("Gemini Imagen error {status}: {body}");
         }
 
         let json: serde_json::Value = resp.json().await.context("Gemini Imagen parse failed")?;
@@ -445,8 +496,12 @@ impl ClipboardImageInjector {
     /// Write raw bytes to a deterministic temp file path. Returns the path.
     pub fn write_to_temp_file(image_result: &ImageResult) -> Result<std::path::PathBuf> {
         let bytes = image_result.decode_bytes()?;
-        let ext = if image_result.mime_type.contains("jpeg") { "jpg" } else { "png" };
-        let path = std::env::temp_dir().join(format!("kairo_generated_image.{}", ext));
+        let ext = if image_result.mime_type.contains("jpeg") {
+            "jpg"
+        } else {
+            "png"
+        };
+        let path = std::env::temp_dir().join(format!("kairo_generated_image.{ext}"));
         std::fs::write(&path, &bytes)?;
         info!("🖼️  Image written to temp: {:?}", path);
         Ok(path)
@@ -460,8 +515,7 @@ impl ClipboardImageInjector {
         let script = format!(
             "Add-Type -AssemblyName System.Windows.Forms; \
              [System.Windows.Forms.Clipboard]::SetImage(\
-             [System.Drawing.Image]::FromFile('{}'))",
-            path_str
+             [System.Drawing.Image]::FromFile('{path_str}'))"
         );
         let status = std::process::Command::new("powershell")
             .args(["-NoProfile", "-NonInteractive", "-Command", &script])
@@ -479,8 +533,14 @@ impl ClipboardImageInjector {
     pub fn copy_to_clipboard(image_result: &ImageResult) -> Result<()> {
         let path = Self::write_to_temp_file(image_result)?;
         let p = path.to_string_lossy();
-        let script = format!("osascript -e 'set the clipboard to (read (POSIX file \"{p}\") as PNG picture)'");
-        std::process::Command::new("sh").arg("-c").arg(&script).status().ok();
+        let script = format!(
+            "osascript -e 'set the clipboard to (read (POSIX file \"{p}\") as PNG picture)'"
+        );
+        std::process::Command::new("sh")
+            .arg("-c")
+            .arg(&script)
+            .status()
+            .ok();
         info!("📋 Image copied to macOS clipboard");
         Ok(())
     }
@@ -525,7 +585,7 @@ impl WordImageInjector {
             Ok(())
         } else {
             let e = String::from_utf8_lossy(&out.stderr);
-            Err(anyhow::anyhow!("Word injection failed: {}", e))
+            Err(anyhow::anyhow!("Word injection failed: {e}"))
         }
     }
 }
@@ -582,7 +642,10 @@ impl ImageRouter {
 pub fn write_image_to_clipboard(png_bytes: &[u8]) -> Result<()> {
     let tmp_path = std::env::temp_dir().join("kairo_generated_image.png");
     std::fs::write(&tmp_path, png_bytes)?;
-    info!("Image staged at: {} — use Insert > Image in your app", tmp_path.display());
+    info!(
+        "Image staged at: {} — use Insert > Image in your app",
+        tmp_path.display()
+    );
     Ok(())
 }
 

@@ -15,6 +15,7 @@ DEFAULT_REGISTRY = {
     "Browser": "Real",
 }
 
+
 def load_registry() -> dict[str, str]:
     if not REGISTRY_PATH.exists():
         REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -26,10 +27,12 @@ def load_registry() -> dict[str, str]:
     except Exception:
         return DEFAULT_REGISTRY.copy()
 
+
 def save_registry(data: dict[str, str]):
     REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(REGISTRY_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+
 
 def set_domain_mode(domain: str, mode: str):
     data = load_registry()
@@ -41,6 +44,7 @@ def set_domain_mode(domain: str, mode: str):
     if mode in ("Real", "PromptOnly"):
         data[normalized_domain] = mode
         save_registry(data)
+
 
 def get_domain_mode(domain: str) -> str:
     data = load_registry()

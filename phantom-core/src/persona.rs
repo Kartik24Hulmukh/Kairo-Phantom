@@ -1,7 +1,7 @@
 // phantom-core/src/persona.rs
+use crate::document_context::DocumentContext;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use crate::document_context::DocumentContext;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PersonaType {

@@ -14,14 +14,23 @@ fn test_detect_language_10_languages() {
     assert_eq!(phantom_core::code_context::detect_language("go"), "go");
     assert_eq!(phantom_core::code_context::detect_language("cs"), "c_sharp");
     assert_eq!(phantom_core::code_context::detect_language("java"), "java");
-    assert_eq!(phantom_core::code_context::detect_language("ts"), "typescript");
-    assert_eq!(phantom_core::code_context::detect_language("js"), "javascript");
+    assert_eq!(
+        phantom_core::code_context::detect_language("ts"),
+        "typescript"
+    );
+    assert_eq!(
+        phantom_core::code_context::detect_language("js"),
+        "javascript"
+    );
     assert_eq!(phantom_core::code_context::detect_language("c"), "c");
     assert_eq!(phantom_core::code_context::detect_language("cpp"), "cpp");
     assert_eq!(phantom_core::code_context::detect_language("html"), "html");
     assert_eq!(phantom_core::code_context::detect_language("css"), "css");
     assert_eq!(phantom_core::code_context::detect_language("sql"), "sql");
-    assert_eq!(phantom_core::code_context::detect_language("unknown"), "plaintext");
+    assert_eq!(
+        phantom_core::code_context::detect_language("unknown"),
+        "plaintext"
+    );
 }
 
 #[test]
@@ -50,9 +59,15 @@ int calculate_distance(struct Point p1, struct Point p2) {
     let file_path_str = file_path.to_string_lossy().to_string();
     let ctx = phantom_core::code_context::extract_code_context(&file_path_str, 11).unwrap();
     assert_eq!(ctx.language, "c");
-    assert_eq!(ctx.enclosing_function.as_ref().map(|f| f.name.as_str()), Some("calculate_distance"));
+    assert_eq!(
+        ctx.enclosing_function.as_ref().map(|f| f.name.as_str()),
+        Some("calculate_distance")
+    );
     assert!(ctx.imports.iter().any(|i| i.contains("#include <stdio.h>")));
-    assert!(ctx.imports.iter().any(|i| i.contains("#include <stdlib.h>")));
+    assert!(ctx
+        .imports
+        .iter()
+        .any(|i| i.contains("#include <stdlib.h>")));
 }
 
 #[test]
@@ -80,8 +95,14 @@ public:
     let ctx = phantom_core::code_context::extract_code_context(&file_path_str, 8).unwrap();
     assert_eq!(ctx.language, "cpp");
     assert_eq!(ctx.enclosing_class.as_deref(), Some("DataProcessor"));
-    assert_eq!(ctx.enclosing_function.as_ref().map(|f| f.name.as_str()), Some("process"));
-    assert!(ctx.imports.iter().any(|i| i.contains("#include <iostream>")));
+    assert_eq!(
+        ctx.enclosing_function.as_ref().map(|f| f.name.as_str()),
+        Some("process")
+    );
+    assert!(ctx
+        .imports
+        .iter()
+        .any(|i| i.contains("#include <iostream>")));
 }
 
 #[test]
@@ -219,7 +240,10 @@ func (g *Greeter) SayHello() {
     let file_path_str = file_path.to_string_lossy().to_string();
     let ctx = phantom_core::code_context::extract_code_context(&file_path_str, 12).unwrap();
     assert_eq!(ctx.language, "go");
-    assert_eq!(ctx.enclosing_function.as_ref().map(|f| f.name.as_str()), Some("SayHello"));
+    assert_eq!(
+        ctx.enclosing_function.as_ref().map(|f| f.name.as_str()),
+        Some("SayHello")
+    );
     assert!(ctx.imports.iter().any(|i| i.contains("import \"fmt\"")));
     // The struct Greeter is on line 5-7, cursor is on line 12 (inside SayHello)
     // The method receiver type is stored in nearby_symbols
@@ -249,8 +273,14 @@ public class Main {
     let ctx = phantom_core::code_context::extract_code_context(&file_path_str, 7).unwrap();
     assert_eq!(ctx.language, "java");
     assert_eq!(ctx.enclosing_class.as_deref(), Some("Main"));
-    assert_eq!(ctx.enclosing_function.as_ref().map(|f| f.name.as_str()), Some("main"));
-    assert!(ctx.imports.iter().any(|i| i.contains("import java.util.List;")));
+    assert_eq!(
+        ctx.enclosing_function.as_ref().map(|f| f.name.as_str()),
+        Some("main")
+    );
+    assert!(ctx
+        .imports
+        .iter()
+        .any(|i| i.contains("import java.util.List;")));
 }
 
 #[test]
@@ -296,7 +326,14 @@ fn test_code_injection_preserves_indentation() {
     assert_eq!(ctx.indentation, "    ");
 
     let generated = "x = 1\ny = 2";
-    phantom_core::code_injector::inject_code(&file_path_str, 2, generated, &ctx.indentation, ctx.line_ending).unwrap();
+    phantom_core::code_injector::inject_code(
+        &file_path_str,
+        2,
+        generated,
+        &ctx.indentation,
+        ctx.line_ending,
+    )
+    .unwrap();
 
     let result = std::fs::read_to_string(&file_path).unwrap();
     assert!(result.contains("    x = 1"));
@@ -326,7 +363,13 @@ fn test_code_injection_empty_generated_code() {
         file.write_all(code.as_bytes()).unwrap();
     }
     let file_path_str = file_path.to_string_lossy().to_string();
-    let result = phantom_core::code_injector::inject_code(&file_path_str, 1, "", "    ", phantom_core::code_context::LineEnding::LF);
+    let result = phantom_core::code_injector::inject_code(
+        &file_path_str,
+        1,
+        "",
+        "    ",
+        phantom_core::code_context::LineEnding::LF,
+    );
     assert!(result.is_ok());
     // The line should be replaced with empty
     let result_content = std::fs::read_to_string(&file_path).unwrap();
@@ -343,7 +386,14 @@ fn test_code_injection_preserves_other_lines() {
         file.write_all(code.as_bytes()).unwrap();
     }
     let file_path_str = file_path.to_string_lossy().to_string();
-    phantom_core::code_injector::inject_code(&file_path_str, 2, "let x = 42;", "    ", phantom_core::code_context::LineEnding::LF).unwrap();
+    phantom_core::code_injector::inject_code(
+        &file_path_str,
+        2,
+        "let x = 42;",
+        "    ",
+        phantom_core::code_context::LineEnding::LF,
+    )
+    .unwrap();
 
     let result = std::fs::read_to_string(&file_path).unwrap();
     assert!(result.contains("fn main() {"));

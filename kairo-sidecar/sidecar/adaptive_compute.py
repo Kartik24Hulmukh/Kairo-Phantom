@@ -2,6 +2,7 @@
 sidecar/adaptive_compute.py — Adaptive Inference-Time Compute ("Deep Think").
 Estimates task difficulty and dynamically allocates reasoning/thinking budget.
 """
+
 import logging
 from typing import Dict, Any
 
@@ -34,8 +35,18 @@ _BUDGET_TABLE: Dict[str, Dict[str, Any]] = {
 
 # High-stakes keywords that immediately promote to complex difficulty
 _COMPLEX_KEYWORDS = [
-    "contract", "agreement", "indemnification", "liability", "redline", "review",
-    "audit", "financial", "medical", "patient", "diagnose", "legal"
+    "contract",
+    "agreement",
+    "indemnification",
+    "liability",
+    "redline",
+    "review",
+    "audit",
+    "financial",
+    "medical",
+    "patient",
+    "diagnose",
+    "legal",
 ]
 
 # Agents that always warrant complex difficulty
@@ -73,7 +84,9 @@ def estimate_difficulty(
         return "complex"
 
     # 4. Simple check
-    if len(user_prompt) < 50 and not any(k in p_lower for k in ("summary", "explain", "rewrite", "fix")):
+    if len(user_prompt) < 50 and not any(
+        k in p_lower for k in ("summary", "explain", "rewrite", "fix")
+    ):
         return "simple"
 
     return "medium"

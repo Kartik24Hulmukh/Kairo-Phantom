@@ -13,8 +13,6 @@ This test FAILS if any trace or receipt is empty/faked.
 """
 
 import json
-import os
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -24,13 +22,11 @@ from openpyxl import Workbook
 from sidecar.observability.opik_tracer import (
     OpikTracer,
     set_global_tracer,
-    generate_trace_id,
 )
 from sidecar.observability.provenance_bridge import (
     read_receipts,
     verify_receipt_chain,
     verify_trace_receipt_linkage,
-    find_receipts_by_trace_id,
 )
 
 
@@ -95,10 +91,11 @@ class TestEndToEndTraceReceipt:
     def test_word_master_trace_emitted(self, temp_tracer, sample_docx, temp_receipts):
         """WordMaster.apply_operations emits a real trace."""
         from sidecar.masters.word_master import WordMaster
+
         master = WordMaster()
 
         # Call the real domain master
-        result = master.apply_operations(sample_docx, [])
+        master.apply_operations(sample_docx, [])
 
         # Verify trace was emitted
         traces = temp_tracer.read_traces()
@@ -121,7 +118,9 @@ class TestEndToEndTraceReceipt:
             "timestamp": int(time.time()),
             "agent_id": "test_agent_001",
             "action": "apply_operations",
-            "context": json.dumps({"domain": "word", "document": sample_docx, "trace_id": trace_id}),
+            "context": json.dumps(
+                {"domain": "word", "document": sample_docx, "trace_id": trace_id}
+            ),
             "outcome": "ok",
             "prev_hash": "genesis",
             "self_hash": "",
@@ -147,9 +146,10 @@ class TestEndToEndTraceReceipt:
     def test_excel_master_trace_emitted(self, temp_tracer, sample_xlsx, temp_receipts):
         """ExcelMaster.apply_operations emits a real trace."""
         from sidecar.masters.excel_master import ExcelMaster
+
         master = ExcelMaster()
 
-        result = master.apply_operations(sample_xlsx, [])
+        master.apply_operations(sample_xlsx, [])
 
         traces = temp_tracer.read_traces()
         assert len(traces) == 1
@@ -159,9 +159,10 @@ class TestEndToEndTraceReceipt:
     def test_pdf_master_trace_emitted(self, temp_tracer, sample_pdf):
         """PDFMaster.extract_context emits a real trace."""
         from sidecar.masters.other_masters import PDFMaster
+
         master = PDFMaster()
 
-        result = master.extract_context(sample_pdf, None)
+        master.extract_context(sample_pdf, None)
 
         traces = temp_tracer.read_traces()
         assert len(traces) == 1
@@ -179,7 +180,7 @@ class TestEndToEndTraceReceipt:
         This agreement shall automatically renew for successive one-year terms.
         """
 
-        result = analyze_contract(contract_text)
+        analyze_contract(contract_text)
 
         traces = temp_tracer.read_traces()
         assert len(traces) == 1
@@ -300,7 +301,7 @@ class TestEndToEndTraceReceipt:
         r = receipts[0]
 
         # The receipt IS fake — verify our detection catches it
-        is_fake = (r["opik_trace_id"] == "" or r["domain"] == "")
+        is_fake = r["opik_trace_id"] == "" or r["domain"] == ""
         assert is_fake, "Receipt with empty trace_id was NOT detected as fake — detection is BROKEN"
 
         # Also verify that a real receipt (with trace_id) is NOT flagged as fake
@@ -324,5 +325,5 @@ class TestEndToEndTraceReceipt:
 
         all_receipts = read_receipts(temp_receipts)
         real_r = all_receipts[1]
-        is_real = (real_r["opik_trace_id"] != "" and real_r["domain"] != "")
+        is_real = real_r["opik_trace_id"] != "" and real_r["domain"] != ""
         assert is_real, "Real receipt with valid trace_id was incorrectly flagged as fake"

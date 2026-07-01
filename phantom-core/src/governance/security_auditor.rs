@@ -1,5 +1,5 @@
+use crate::governance::{AuditEvent, AuditLogger, AuditOutcome};
 use crate::pii_guard::PiiGuard;
-use crate::governance::{AuditLogger, AuditEvent, AuditOutcome};
 use anyhow::Result;
 use tracing::{info, warn};
 
@@ -21,7 +21,10 @@ impl SecurityAuditor {
 
     /// Performs a pre-flight security check on the context before sending it to an LLM.
     pub fn pre_flight_check(&self, text: &str, app_name: &str) -> Result<String> {
-        info!("🔒 SecurityAuditor: Running pre-flight check for {}", app_name);
+        info!(
+            "🔒 SecurityAuditor: Running pre-flight check for {}",
+            app_name
+        );
 
         // 1. Redact PII
         let (redacted_text, was_redacted) = self.pii_guard.redact(text);
@@ -30,10 +33,18 @@ impl SecurityAuditor {
         }
 
         // 2. Check for sensitive keywords (Enterprise Policy)
-        let sensitive_keywords = ["confidential", "trade secret", "internal use only", "proprietary"];
+        let sensitive_keywords = [
+            "confidential",
+            "trade secret",
+            "internal use only",
+            "proprietary",
+        ];
         for keyword in sensitive_keywords {
             if redacted_text.to_lowercase().contains(keyword) {
-                warn!("⚠️ Sensitive keyword '{}' detected in {}", keyword, app_name);
+                warn!(
+                    "⚠️ Sensitive keyword '{}' detected in {}",
+                    keyword, app_name
+                );
                 self.audit_logger.log_ghost_session(
                     AuditEvent::GhostSessionBlocked,
                     AuditOutcome::Blocked,
@@ -43,7 +54,9 @@ impl SecurityAuditor {
                     redacted_text.len(),
                 );
                 if self.strict {
-                    return Err(anyhow::anyhow!("Sensitive keyword '{}' detected in {} (Strict Block Mode)", keyword, app_name));
+                    return Err(anyhow::anyhow!(
+                        "Sensitive keyword '{keyword}' detected in {app_name} (Strict Block Mode)"
+                    ));
                 }
             }
         }
@@ -55,11 +68,16 @@ impl SecurityAuditor {
     pub fn post_flight_audit(&self, output: &str, app_name: &str) -> Result<()> {
         let findings = self.pii_guard.scan_output(output);
         if !findings.is_empty() {
-            warn!("⚠️ SecurityAuditor: Potential sensitive data leak in AI output for {}: {:?}", app_name, findings);
+            warn!(
+                "⚠️ SecurityAuditor: Potential sensitive data leak in AI output for {}: {:?}",
+                app_name, findings
+            );
             // Log as a security warning
             self.audit_logger.log_ghost_session(
                 AuditEvent::GhostSessionCompleted,
-                AuditOutcome::Error { message: format!("Leak detected: {:?}", findings) },
+                AuditOutcome::Error {
+                    message: format!("Leak detected: {findings:?}"),
+                },
                 app_name,
                 "security_auditor",
                 "n/a",

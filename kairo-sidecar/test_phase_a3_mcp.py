@@ -4,10 +4,9 @@ Phase A3: Expose 12 domain tools through kairo-mcp.
 Test: Start the MCP server as a subprocess, send JSON-RPC requests,
 verify all 12 domain tools are registered and callable.
 """
+
 import json
-import os
 import subprocess
-import sys
 import time
 import pytest
 from pathlib import Path
@@ -37,10 +36,10 @@ def send_request(proc, method, params=None, req_id=1):
     }
     if params:
         request["params"] = params
-    
+
     proc.stdin.write(json.dumps(request) + "\n")
     proc.stdin.flush()
-    
+
     # Read response line
     response_line = proc.stdout.readline()
     if response_line:
@@ -53,17 +52,17 @@ def mcp_server():
     """Start and stop the MCP server for each test."""
     if not MCP_BINARY.exists():
         pytest.skip(f"MCP binary not found at {MCP_BINARY}. Run: cargo build -p kairo-mcp")
-    
+
     proc = start_mcp_server()
     time.sleep(0.5)  # Give server time to start
-    
+
     # Send initialize request
     init_response = send_request(proc, "initialize", req_id=0)
     assert init_response is not None, "No response to initialize"
     assert "result" in init_response
-    
+
     yield proc
-    
+
     proc.terminate()
     proc.wait(timeout=5)
 
@@ -77,10 +76,10 @@ class TestMCPToolRegistration:
         assert response is not None
         assert "result" in response
         assert "tools" in response["result"]
-        
+
         tools = response["result"]["tools"]
         tool_names = [t["name"] for t in tools]
-        
+
         expected_domain_tools = [
             "kairo_word_process",
             "kairo_excel_process",
@@ -95,16 +94,18 @@ class TestMCPToolRegistration:
             "kairo_email_process",
             "kairo_notes_process",
         ]
-        
+
         for tool_name in expected_domain_tools:
             assert tool_name in tool_names, f"Tool '{tool_name}' not found in tools/list"
-        
+
         # Verify each tool has required fields
         for tool_name in expected_domain_tools:
             tool = next(t for t in tools if t["name"] == tool_name)
             assert "description" in tool, f"Tool '{tool_name}' missing description"
             assert "inputSchema" in tool, f"Tool '{tool_name}' missing inputSchema"
-            assert tool["inputSchema"]["type"] == "object", f"Tool '{tool_name}' schema not object type"
+            assert (
+                tool["inputSchema"]["type"] == "object"
+            ), f"Tool '{tool_name}' schema not object type"
 
     def test_each_domain_tool_is_callable(self, mcp_server):
         """Each of the 12 domain tools must be callable via tools/call."""
@@ -122,17 +123,20 @@ class TestMCPToolRegistration:
             ("kairo_email_process", {"instruction": "draft a reply"}),
             ("kairo_notes_process", {"instruction": "create a todo note"}),
         ]
-        
+
         for i, (tool_name, args) in enumerate(domain_tools):
             response = send_request(
-                mcp_server, "tools/call",
+                mcp_server,
+                "tools/call",
                 params={"name": tool_name, "arguments": args},
-                req_id=i + 10
+                req_id=i + 10,
             )
             assert response is not None, f"No response for tool '{tool_name}'"
-            assert "result" in response, f"Tool '{tool_name}' returned error: {response.get('error')}"
+            assert (
+                "result" in response
+            ), f"Tool '{tool_name}' returned error: {response.get('error')}"
             assert "content" in response["result"], f"Tool '{tool_name}' missing content in result"
-            
+
             # The tool should return text content (even if sidecar is not running)
             content = response["result"]["content"]
             assert len(content) > 0, f"Tool '{tool_name}' returned empty content"
@@ -142,13 +146,13 @@ class TestMCPToolRegistration:
     def test_unknown_tool_returns_error(self, mcp_server):
         """Calling an unknown tool should return an error."""
         response = send_request(
-            mcp_server, "tools/call",
+            mcp_server,
+            "tools/call",
             params={"name": "nonexistent_tool", "arguments": {}},
-            req_id=99
+            req_id=99,
         )
         assert response is not None
         # The MCP server should return either an error or an isError result
         assert "error" in response or (
-            "result" in response and 
-            response["result"].get("isError", False)
+            "result" in response and response["result"].get("isError", False)
         ), "Unknown tool should return an error"

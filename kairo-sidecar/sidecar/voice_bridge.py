@@ -16,7 +16,7 @@ import os
 import subprocess
 import urllib.request
 import urllib.error
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 
 class VoiceBridge:
@@ -24,9 +24,22 @@ class VoiceBridge:
 
     # Common filler words to remove from transcriptions
     FILLER_WORDS = {
-        "um", "uh", "uhm", "hmm", "hm", "er", "ah", "like",
-        "you know", "i mean", "basically", "literally", "actually",
-        "so basically", "kind of", "sort of",
+        "um",
+        "uh",
+        "uhm",
+        "hmm",
+        "hm",
+        "er",
+        "ah",
+        "like",
+        "you know",
+        "i mean",
+        "basically",
+        "literally",
+        "actually",
+        "so basically",
+        "kind of",
+        "sort of",
     }
 
     # Voice command patterns → Kairo command mode mappings
@@ -145,7 +158,11 @@ class VoiceBridge:
             # Check single-word fillers
             if words[i].lower().rstrip(",.!?") in self.FILLER_WORDS:
                 # Don't remove "like" when used as comparison ("looks like")
-                if words[i].lower().startswith("like") and i > 0 and words[i-1].lower() in ("looks", "feels", "sounds", "seems"):
+                if (
+                    words[i].lower().startswith("like")
+                    and i > 0
+                    and words[i - 1].lower() in ("looks", "feels", "sounds", "seems")
+                ):
                     result.append(words[i])
                 else:
                     i += 1
@@ -236,9 +253,7 @@ class MoonshineClient:
     def is_available(self) -> bool:
         """Check if the Moonshine service is reachable (non-blocking, 2s timeout)."""
         try:
-            with urllib.request.urlopen(
-                f"{self.service_url}/health", timeout=2
-            ) as resp:
+            with urllib.request.urlopen(f"{self.service_url}/health", timeout=2) as resp:
                 return resp.status == 200
         except Exception:
             return False
@@ -252,7 +267,6 @@ class MoonshineClient:
         Returns None if the service is unavailable or the call fails.
         """
         import json as _json
-        import urllib.request as _req
 
         if not os.path.exists(wav_path):
             return None
@@ -268,7 +282,7 @@ class MoonshineClient:
             with urllib.request.urlopen(request, timeout=60) as resp:
                 data = _json.loads(resp.read())
                 return data
-        except urllib.error.HTTPError as e:
+        except urllib.error.HTTPError:
             return None
         except urllib.error.URLError:
             return None
@@ -278,9 +292,7 @@ class MoonshineClient:
     def get_supported_languages(self) -> list:
         """Get list of languages supported by the loaded Moonshine model."""
         try:
-            with urllib.request.urlopen(
-                f"{self.service_url}/languages", timeout=3
-            ) as resp:
+            with urllib.request.urlopen(f"{self.service_url}/languages", timeout=3) as resp:
                 data = json.loads(resp.read())
                 return data.get("supported", ["en"])
         except Exception:
@@ -330,10 +342,13 @@ def _transcribe_with_whisper_cli(
         result = subprocess.run(
             [
                 whisper_bin,
-                "-m", str(model_path),
-                "-f", wav_path,
+                "-m",
+                str(model_path),
+                "-f",
+                wav_path,
                 "--no-timestamps",
-                "-l", language,
+                "-l",
+                language,
                 "-np",
             ],
             capture_output=True,
@@ -416,9 +431,7 @@ async def transcribe_with_moonshine_or_fallback(
             }
 
     # Moonshine completely unavailable — use whisper.cpp directly
-    whisper_text = _transcribe_with_whisper_cli(
-        wav_path, whisper_language, whisper_model
-    )
+    whisper_text = _transcribe_with_whisper_cli(wav_path, whisper_language, whisper_model)
     if whisper_text:
         return {
             "text": whisper_text,

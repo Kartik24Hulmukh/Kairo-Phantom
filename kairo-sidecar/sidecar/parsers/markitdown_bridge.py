@@ -27,6 +27,7 @@ log = logging.getLogger("kairo-sidecar.markitdown_bridge")
 @dataclass
 class IngestionResult:
     """Result of ingesting a file through the MarkItDown bridge."""
+
     markdown: str
     metadata: Dict[str, Any] = field(default_factory=dict)
     format: str = ""
@@ -75,15 +76,16 @@ def _try_pdf_oxide(file_path: str) -> Optional[str]:
     """
     try:
         import pdf_oxide
+
         # pdf_oxide's API may vary — try the most common extraction method
         # Use AsyncPdf or PdfDocument for text extraction
-        if hasattr(pdf_oxide, 'PdfDocument'):
+        if hasattr(pdf_oxide, "PdfDocument"):
             doc = pdf_oxide.PdfDocument.open(file_path)
             text_parts = []
             for page in doc.pages:
-                if hasattr(page, 'extract_text'):
+                if hasattr(page, "extract_text"):
                     text_parts.append(page.extract_text())
-                elif hasattr(page, 'get_text'):
+                elif hasattr(page, "get_text"):
                     text_parts.append(page.get_text())
             return "\n\n".join(text_parts) if text_parts else None
     except Exception as e:
@@ -98,6 +100,7 @@ def _try_pymupdf(file_path: str) -> Optional[str]:
     """
     try:
         import fitz  # PyMuPDF — AGPL, lazy import
+
         doc = fitz.open(file_path)
         text_parts = []
         for page in doc:
@@ -117,6 +120,7 @@ def _try_markitdown(file_path: str) -> Optional[str]:
     # First try MarkItDown
     try:
         from markitdown import MarkItDown
+
         md = MarkItDown()
         result = md.convert(file_path)
         if result.text_content and result.text_content.strip():
@@ -131,6 +135,7 @@ def _try_markitdown(file_path: str) -> Optional[str]:
     if fmt == "docx":
         try:
             import mammoth
+
             with open(file_path, "rb") as f:
                 result = mammoth.convert_to_markdown(f)
                 text = result.value
@@ -143,11 +148,14 @@ def _try_markitdown(file_path: str) -> Optional[str]:
     elif fmt == "xlsx":
         try:
             from openpyxl import load_workbook
+
             wb = load_workbook(file_path, data_only=True)
             lines = []
             for ws in wb.worksheets:
                 for row in ws.iter_rows(values_only=True):
-                    lines.append("| " + " | ".join(str(c) if c is not None else "" for c in row) + " |")
+                    lines.append(
+                        "| " + " | ".join(str(c) if c is not None else "" for c in row) + " |"
+                    )
             text = "\n".join(lines)
             if text.strip():
                 return text
@@ -157,6 +165,7 @@ def _try_markitdown(file_path: str) -> Optional[str]:
     elif fmt == "pptx":
         try:
             from pptx import Presentation
+
             prs = Presentation(file_path)
             lines = []
             for i, slide in enumerate(prs.slides):
@@ -173,6 +182,7 @@ def _try_markitdown(file_path: str) -> Optional[str]:
     elif fmt == "html":
         try:
             from bs4 import BeautifulSoup
+
             with open(file_path, "r", encoding="utf-8") as f:
                 soup = BeautifulSoup(f.read(), "html.parser")
                 text = soup.get_text(separator="\n", strip=True)
@@ -241,7 +251,9 @@ def ingest(file_path: str) -> IngestionResult:
                     log.debug(f"PDF extracted via MarkItDown: {len(text)} chars")
                 else:
                     result.success = False
-                    result.error = "All PDF extraction methods failed (pdf_oxide, PyMuPDF, MarkItDown)"
+                    result.error = (
+                        "All PDF extraction methods failed (pdf_oxide, PyMuPDF, MarkItDown)"
+                    )
     else:
         # Non-PDF: use MarkItDown directly
         text = _try_markitdown(file_path)
@@ -269,4 +281,5 @@ def is_agpl_guarded() -> bool:
     This function checks that 'fitz' is not imported at module level.
     """
     import sys
-    return 'fitz' not in sys.modules.keys() or True  # True if not yet imported
+
+    return "fitz" not in sys.modules.keys() or True  # True if not yet imported

@@ -22,6 +22,7 @@ import os
 
 logger = logging.getLogger(__name__)
 
+
 class MemorizationError(RuntimeError):
     pass
 
@@ -37,7 +38,7 @@ class WritingIntelligenceOrchestrator:
         self.store = get_voice_store()
         self.auditor = get_memorization_auditor()
         self.db_path = db_path
-        
+
         # Track feedback in-memory for session lifecycle (persisted in mem_machine DB)
         self._feedback_counts: dict[str, int] = {}
         self.feedback_threshold = 10  # Overnight fine-tune triggers after 10-15 cycles
@@ -60,7 +61,9 @@ class WritingIntelligenceOrchestrator:
         """
         return self.auditor.check_memorization(generated_text)
 
-    def process_and_sanitize(self, generated_text: str, max_retries: int = 2) -> tuple[str, AuditResult]:
+    def process_and_sanitize(
+        self, generated_text: str, max_retries: int = 2
+    ) -> tuple[str, AuditResult]:
         """
         Audit output and attempt automatic paraphrasing if memorization is flagged.
         Returns the sanitized text and final audit report.
@@ -75,19 +78,21 @@ class WritingIntelligenceOrchestrator:
             raise MemorizationError("Paraphrase stub is disabled and real service is unavailable.")
 
         logger.warning("LOUD WARNING: Paraphrase stub is active!")
-        logger.warning(f"Memorization detected (risk={result.risk.value}). Applying sanitization...")
-        
+        logger.warning(
+            f"Memorization detected (risk={result.risk.value}). Applying sanitization..."
+        )
+
         current_text = generated_text
         for attempt in range(max_retries):
             # Simple rule-based paraphraser stub for offline pipeline
             # Real pipeline would call LLM with a specific rewrite instruction
             sanitized = self._simulate_paraphrase(current_text, result)
             new_result = self.audit_output(sanitized)
-            
+
             if new_result.safe_to_output and new_result.risk != MemorizationRisk.HIGH:
                 logger.info(f"Sanitization successful on attempt {attempt + 1}")
                 return sanitized, new_result
-            
+
             current_text = sanitized
             result = new_result
 
@@ -104,12 +109,11 @@ class WritingIntelligenceOrchestrator:
             if "Permission is hereby granted, free of charge" in frag:
                 paraphrased = paraphrased.replace(
                     "Permission is hereby granted, free of charge, to any person obtaining",
-                    "This license allows individuals to obtain, free of charge,"
+                    "This license allows individuals to obtain, free of charge,",
                 )
             elif "GNU GENERAL PUBLIC LICENSE" in frag:
                 paraphrased = paraphrased.replace(
-                    "GNU GENERAL PUBLIC LICENSE",
-                    "GNU public software sharing agreement"
+                    "GNU GENERAL PUBLIC LICENSE", "GNU public software sharing agreement"
                 )
         return paraphrased
 
@@ -125,18 +129,19 @@ class WritingIntelligenceOrchestrator:
 
         # Update voice fingerprint with the accepted document
         fingerprint = self.store.load(user_id) or VoiceFingerprint()
-        
+
         # Extract new fingerprint from accepted document and merge
         new_fp = self.adapter.extract_fingerprint([doc_text])
         if new_fp.document_count > 0:
             # Merge logic (running average)
             count = fingerprint.document_count + 1
             fingerprint.avg_sentence_length = (
-                (fingerprint.avg_sentence_length * fingerprint.document_count + new_fp.avg_sentence_length) / count
-            )
+                fingerprint.avg_sentence_length * fingerprint.document_count
+                + new_fp.avg_sentence_length
+            ) / count
             fingerprint.formality_score = (
-                (fingerprint.formality_score * fingerprint.document_count + new_fp.formality_score) / count
-            )
+                fingerprint.formality_score * fingerprint.document_count + new_fp.formality_score
+            ) / count
             fingerprint.document_count = count
             self.store.save(fingerprint, user_id)
             logger.info(f"Updated voice fingerprint for {user_id}. Document count: {count}")
@@ -144,9 +149,11 @@ class WritingIntelligenceOrchestrator:
         # Track fine-tuning cycle count
         current_count = self._feedback_counts.get(user_id, 0) + 1
         self._feedback_counts[user_id] = current_count
-        
+
         if current_count >= self.feedback_threshold:
-            logger.info(f"Feedback threshold ({self.feedback_threshold}) met for {user_id}. Triggering overnight SFT fine-tune...")
+            logger.info(
+                f"Feedback threshold ({self.feedback_threshold}) met for {user_id}. Triggering overnight SFT fine-tune..."
+            )
             self._trigger_overnight_training(user_id)
             # Reset count
             self._feedback_counts[user_id] = 0
@@ -159,9 +166,12 @@ class WritingIntelligenceOrchestrator:
         try:
             # Import PersonalFinetuner dynamically
             import sys
-            sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "scripts" / "training"))
+
+            sys.path.insert(
+                0, str(Path(__file__).parent.parent.parent.parent / "scripts" / "training")
+            )
             from personal_finetune import PersonalFinetuner
-            
+
             tuner = PersonalFinetuner(db_path=self.db_path)
             tuner.trigger_overnight_finetune(user_id)
         except Exception as e:

@@ -33,6 +33,7 @@ log = logging.getLogger("kairo-sidecar.safedocx_bridge")
 # Capability detection
 # ---------------------------------------------------------------------------
 
+
 def _safedocx_installed() -> bool:
     """True if npx is available (safe-docx is invoked via npx)."""
     return shutil.which("npx") is not None
@@ -41,6 +42,7 @@ def _safedocx_installed() -> bool:
 # ---------------------------------------------------------------------------
 # Public interface
 # ---------------------------------------------------------------------------
+
 
 def safedocx_read_file(file_path: str) -> dict:
     """
@@ -137,7 +139,9 @@ def safedocx_replace_text(
 
         log.info(
             "safedocx_replace_text OK: '%s' → '%s' in paragraph %s",
-            old_string, new_string, target_paragraph_id,
+            old_string,
+            new_string,
+            target_paragraph_id,
         )
         return {
             "ok": True,
@@ -265,9 +269,7 @@ def safedocx_batch_edits(
         if not final_save["ok"]:
             return final_save
 
-        log.info(
-            "safedocx_batch_edits: %d applied, %d failed", len(applied), len(failed)
-        )
+        log.info("safedocx_batch_edits: %d applied, %d failed", len(applied), len(failed))
         return {
             "ok": True,
             "data": {
@@ -291,6 +293,7 @@ def safedocx_batch_edits(
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _npx_call(tool_name: str, args: dict[str, Any]) -> dict:
     """

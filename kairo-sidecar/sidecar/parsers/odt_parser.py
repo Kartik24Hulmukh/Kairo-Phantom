@@ -20,6 +20,7 @@ try:
     from odf.opendocument import OpenDocumentText
     from odf import text as odf_text
     from odf import style as odf_style
+
     _ODFPY_AVAILABLE = True
 except ImportError:
     _ODFPY_AVAILABLE = False
@@ -171,7 +172,9 @@ def _extract_paragraph(node, idx: int, style_names: set) -> Dict[str, Any]:
 
     try:
         for child in node.childNodes:
-            child_tag = getattr(child, "qname", (None, None))[1] if hasattr(child, "qname") else None
+            child_tag = (
+                getattr(child, "qname", (None, None))[1] if hasattr(child, "qname") else None
+            )
             if child_tag == "span":
                 span_text = _get_text_from_node(child)
                 span_style = child.getAttribute("stylename") or ""
@@ -182,11 +185,13 @@ def _extract_paragraph(node, idx: int, style_names: set) -> Dict[str, Any]:
                 if span_italic:
                     has_italic = True
                 if span_text:
-                    runs.append({
-                        "text": span_text,
-                        "bold": span_bold,
-                        "italic": span_italic,
-                    })
+                    runs.append(
+                        {
+                            "text": span_text,
+                            "bold": span_bold,
+                            "italic": span_italic,
+                        }
+                    )
     except Exception as exc:
         log.debug(f"Failed to extract spans from ODT paragraph: {exc}")
 
@@ -249,16 +254,20 @@ def _extract_list(node, base_idx: int, style_names: set) -> List[Dict[str, Any]]
                     else:
                         style = "List Bullet"
 
-                    items.append({
-                        "index": item_idx,
-                        "style": style,
-                        "text": text[:500],
-                        "level": 0,
-                        "is_empty": len(text.strip()) == 0,
-                        "bold": False,
-                        "italic": False,
-                        "runs": [{"text": text, "bold": False, "italic": False}] if text else [],
-                    })
+                    items.append(
+                        {
+                            "index": item_idx,
+                            "style": style,
+                            "text": text[:500],
+                            "level": 0,
+                            "is_empty": len(text.strip()) == 0,
+                            "bold": False,
+                            "italic": False,
+                            "runs": [{"text": text, "bold": False, "italic": False}]
+                            if text
+                            else [],
+                        }
+                    )
                     item_idx += 1
 
     return items
@@ -278,7 +287,9 @@ def _extract_table(node, idx: int) -> Dict[str, Any]:
                 row_cells = 0
                 cell_texts = []
                 for cell in child.childNodes:
-                    cell_tag = getattr(cell, "qname", (None, None))[1] if hasattr(cell, "qname") else None
+                    cell_tag = (
+                        getattr(cell, "qname", (None, None))[1] if hasattr(cell, "qname") else None
+                    )
                     if cell_tag == "table-cell":
                         row_cells += 1
                         cell_text = _get_text_from_node(cell).strip()
@@ -305,7 +316,8 @@ def _map_odt_style(odt_style_name: str) -> str:
     if "heading" in name_lower:
         # Try to extract heading level
         import re
-        match = re.search(r'heading\s*(\d+)', name_lower)
+
+        match = re.search(r"heading\s*(\d+)", name_lower)
         if match:
             return f"Heading {match.group(1)}"
         return "Heading 1"
@@ -346,17 +358,16 @@ def save_odt(file_path: str, paragraphs: List[Dict[str, Any]]) -> dict:
 
         for level in range(1, 4):
             hs = odf_style.Style(name=f"Heading_{level}", family="paragraph")
-            hs.addElement(odf_style.TextProperties(
-                fontweight="bold",
-                fontsize=f"{16 - (level - 1) * 2}pt"
-            ))
+            hs.addElement(
+                odf_style.TextProperties(fontweight="bold", fontsize=f"{16 - (level - 1) * 2}pt")
+            )
             doc.styles.addElement(hs)
 
         # Add paragraphs
         for para in paragraphs:
             text = para.get("text", "")
             style = para.get("style", "Normal")
-            runs = para.get("runs", [])
+            para.get("runs", [])
 
             if style.startswith("Heading"):
                 try:
@@ -415,7 +426,8 @@ def odt_to_kairo_context(file_path: str, cursor_paragraph_index: int = 0) -> dic
             "theme_fonts": {"major": "Liberation Sans", "minor": "Liberation Sans"},
             "list_sequences": [
                 {"index": p["index"], "style": p["style"], "text": p["text"][:100]}
-                for p in paragraphs if "List" in p["style"]
+                for p in paragraphs
+                if "List" in p["style"]
             ],
             "document_purpose": "general",
             "cursor_paragraph_index": cursor_paragraph_index,

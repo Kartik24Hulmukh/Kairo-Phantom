@@ -1,8 +1,8 @@
 // phantom-core/tests/test_audit_chain.rs
 // Security Audit G6 — Audit chain tamper detection (12 tests)
 
-use phantom_core::governance::{AuditLogger, AuditEvent, AuditOutcome, AuditEntry};
 use phantom_core::governance::security_auditor::SecurityAuditor;
+use phantom_core::governance::{AuditEntry, AuditEvent, AuditLogger, AuditOutcome};
 use tempfile::tempdir;
 
 fn create_in_memory_logger() -> AuditLogger {
@@ -89,7 +89,7 @@ fn test_audit_06_file_logging() {
     let dir = tempdir().unwrap();
     let log_file = dir.path().join("audit.jsonl");
     let logger = AuditLogger::new(true, Some(log_file.clone()));
-    
+
     logger.log_ghost_session(
         AuditEvent::GhostSessionStarted,
         AuditOutcome::Success,
@@ -124,7 +124,7 @@ fn test_audit_08_security_auditor_pre_flight_redacts_pii() {
     let auditor = SecurityAuditor::new(logger);
     let raw_text = "My email is test@example.com and phone is 555-555-0199.";
     let redacted = auditor.pre_flight_check(raw_text, "TestApp").unwrap();
-    
+
     assert!(redacted.contains("[EMAIL REDACTED]"));
     assert!(redacted.contains("[PHONE REDACTED]"));
 }
@@ -136,14 +136,14 @@ fn test_audit_09_security_auditor_sensitive_word_logs_blocked() {
     auditor.strict = false;
     let raw_text = "This is a confidential trade secret.";
     let _ = auditor.pre_flight_check(raw_text, "TestApp").unwrap();
-    
+
     // Should log GhostSessionBlocked
     let recent = auditor.pre_flight_check("safe text", "TestApp").unwrap(); // trigger logger check
     let logger_ref = auditor.pre_flight_check("Safe", "TestApp").ok(); // just dummy calls
-    // Wait, let's verify if an entry was made in our in-memory logger buffer
-    // Wait, SecurityAuditor owns the logger, but let's see how it was passed:
-    // SecurityAuditor::new(logger) takes ownership. Let's check how we can verify entries.
-    // We can't access logger since it was moved, but we can verify the behavior.
+                                                                       // Wait, let's verify if an entry was made in our in-memory logger buffer
+                                                                       // Wait, SecurityAuditor owns the logger, but let's see how it was passed:
+                                                                       // SecurityAuditor::new(logger) takes ownership. Let's check how we can verify entries.
+                                                                       // We can't access logger since it was moved, but we can verify the behavior.
 }
 
 #[test]
@@ -179,7 +179,8 @@ fn test_audit_11_audit_entry_serialization() {
         outcome: AuditOutcome::Success,
     };
     let serialized = serde_json::to_string(&entry).unwrap();
-    let deserialized: AuditEntry = serde_json::from_slice(serialized.as_bytes()).unwrap_or(entry.clone());
+    let deserialized: AuditEntry =
+        serde_json::from_slice(serialized.as_bytes()).unwrap_or(entry.clone());
     assert_eq!(deserialized.app_name, "Word");
 }
 
@@ -218,22 +219,26 @@ fn test_audit_chain_signature_verification() {
     // Read the file, modify it to cause a signature/hash mismatch, and check that verify_chain detects it
     let contents = std::fs::read_to_string(&log_path).unwrap();
     let mut lines: Vec<&str> = contents.lines().collect();
-    
+
     // Let's modify the last line's signature to be invalid
     if !lines.is_empty() {
         let last_line = lines.last().unwrap();
-        let mut entry: phantom_core::identity::AuditChainEntry = serde_json::from_str(last_line).unwrap();
+        let mut entry: phantom_core::identity::AuditChainEntry =
+            serde_json::from_str(last_line).unwrap();
         entry.signature = "a".repeat(128); // invalid signature
         let tampered_line = serde_json::to_string(&entry).unwrap();
         lines.pop();
         lines.push(&tampered_line);
-        
+
         let new_contents = lines.join("\n") + "\n";
         std::fs::write(&log_path, new_contents).unwrap();
 
         let log_corrupted = phantom_core::identity::TamperEvidentAuditLog::new(log_path);
         let violations_corrupted = log_corrupted.verify_chain();
-        assert!(violations_corrupted > 0, "Expected at least 1 violation after tampering");
+        assert!(
+            violations_corrupted > 0,
+            "Expected at least 1 violation after tampering"
+        );
     }
 }
 
@@ -273,7 +278,10 @@ fn test_receipt_02_chain_integrity() {
     log.emit(&identity, "action_c", "file3.pptx", "abstained");
 
     let violations = log.verify_chain();
-    assert_eq!(violations, 0, "Expected clean chain, got {} violation(s)", violations);
+    assert_eq!(
+        violations, 0,
+        "Expected clean chain, got {violations} violation(s)"
+    );
 
     let contents = std::fs::read_to_string(&path).unwrap();
     assert_eq!(contents.lines().count(), 3);
@@ -385,12 +393,12 @@ fn test_receipt_07_flagship_provenance_not_faked() {
     // Emit 5 receipts with trace metadata — simulating 5 domain master calls
     let domains = ["word", "excel", "pptx", "pdf", "legal"];
     for (i, domain) in domains.iter().enumerate() {
-        let trace_id = format!("trace_{}", i);
-        let trace_url = format!("http://localhost:5173/trace/{}", trace_id);
+        let trace_id = format!("trace_{i}");
+        let trace_url = format!("http://localhost:5173/trace/{trace_id}");
         let r = log.emit_with_trace(
             &identity,
             "domain_master_call",
-            &format!("document_{}.docx", i),
+            &format!("document_{i}.docx"),
             "ok",
             &trace_id,
             &trace_url,
@@ -399,15 +407,28 @@ fn test_receipt_07_flagship_provenance_not_faked() {
 
         // FLAGSHIP ASSERTION: Each receipt must have non-empty trace data
         // If the receipt is faked (empty trace_id), this fails
-        assert!(!r.opik_trace_id.is_empty(), "Receipt {} has empty trace_id — receipt is FAKE", i);
-        assert!(!r.opik_trace_url.is_empty(), "Receipt {} has empty trace_url — receipt is FAKE", i);
-        assert!(!r.domain.is_empty(), "Receipt {} has empty domain — receipt is FAKE", i);
-        assert!(!r.self_hash.is_empty(), "Receipt {} has empty self_hash", i);
-        assert!(!r.signature.is_empty(), "Receipt {} has empty signature", i);
+        assert!(
+            !r.opik_trace_id.is_empty(),
+            "Receipt {i} has empty trace_id — receipt is FAKE"
+        );
+        assert!(
+            !r.opik_trace_url.is_empty(),
+            "Receipt {i} has empty trace_url — receipt is FAKE"
+        );
+        assert!(
+            !r.domain.is_empty(),
+            "Receipt {i} has empty domain — receipt is FAKE"
+        );
+        assert!(!r.self_hash.is_empty(), "Receipt {i} has empty self_hash");
+        assert!(!r.signature.is_empty(), "Receipt {i} has empty signature");
     }
 
     // Verify the entire chain is valid
-    assert_eq!(log.verify_chain(), 0, "Chain verification failed — receipts are tampered");
+    assert_eq!(
+        log.verify_chain(),
+        0,
+        "Chain verification failed — receipts are tampered"
+    );
 
     // Now tamper with a trace_id and verify it's detected
     let contents = std::fs::read_to_string(&path).unwrap();
@@ -417,7 +438,10 @@ fn test_receipt_07_flagship_provenance_not_faked() {
     // Corrupt the third receipt's trace_id
     let mut third: serde_json::Value = serde_json::from_str(&lines[2]).unwrap();
     if let Some(obj) = third.as_object_mut() {
-        obj.insert("opik_trace_id".to_string(), serde_json::Value::String("FAKED".to_string()));
+        obj.insert(
+            "opik_trace_id".to_string(),
+            serde_json::Value::String("FAKED".to_string()),
+        );
     }
     lines[2] = serde_json::to_string(&third).unwrap();
     std::fs::write(&path, lines.join("\n") + "\n").unwrap();
@@ -425,7 +449,10 @@ fn test_receipt_07_flagship_provenance_not_faked() {
     // verify_chain should detect the tampering (self_hash mismatch)
     let log2 = phantom_core::identity::ReceiptLog::new(path);
     let violations = log2.verify_chain();
-    assert!(violations > 0, "Tampering with trace_id was NOT detected — provenance is NOT tamper-proof");
+    assert!(
+        violations > 0,
+        "Tampering with trace_id was NOT detected — provenance is NOT tamper-proof"
+    );
 }
 
 #[test]

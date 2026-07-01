@@ -18,9 +18,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any
 
 log = logging.getLogger("kairo-sidecar.forge_bridge")
+
 
 class ForgeValidator:
     """
@@ -42,7 +42,7 @@ class ForgeValidator:
         "COUNT": (1, 255),
         "COUNTA": (1, 255),
         "COUNTIF": (2, 2),
-        "COUNTIFS": (2, 254), # must be pairs, so even number of args
+        "COUNTIFS": (2, 254),  # must be pairs, so even number of args
         "VLOOKUP": (3, 4),
         "HLOOKUP": (3, 4),
         "INDEX": (2, 4),
@@ -108,37 +108,64 @@ class ForgeValidator:
         if not formula.strip().startswith("="):
             # Try prepending =
             formula = "=" + formula.strip()
-        
+
         if not self._balanced_parens(formula):
             fixed = self._auto_fix_parens(formula)
             return {"valid": False, "error": "Unbalanced parentheses", "corrected": fixed}
-        
+
         # 2. Locale fix
         if locale == "eu" and "," in formula:
             formula = self._replace_locale_delimiter(formula, ",", ";")
         elif locale == "en" and ";" in formula:
             formula = self._replace_locale_delimiter(formula, ";", ",")
-        
+
         # 3. Common pattern fixes
         for pattern, replacement in self.COMMON_FIXES:
             formula = re.sub(pattern, replacement, formula)
-            
+
         # Specific VLOOKUP 2-arg correction
         vlookup_2arg_pattern = r"\bVLOOKUP\(([^,;)]+)\s*[,;]\s*([^,;)]+)\s*\)"
         if locale == "eu":
-            formula = re.sub(vlookup_2arg_pattern, r"VLOOKUP(\1;\2;2;FALSE)", formula, flags=re.IGNORECASE)
+            formula = re.sub(
+                vlookup_2arg_pattern, r"VLOOKUP(\1;\2;2;FALSE)", formula, flags=re.IGNORECASE
+            )
         else:
-            formula = re.sub(vlookup_2arg_pattern, r"VLOOKUP(\1,\2,2,FALSE)", formula, flags=re.IGNORECASE)
-        
+            formula = re.sub(
+                vlookup_2arg_pattern, r"VLOOKUP(\1,\2,2,FALSE)", formula, flags=re.IGNORECASE
+            )
+
         # 4. Check empty or malformed arguments (like "=IF(,)")
-        clean_for_args = re.sub(r'"[^"]*"', '', formula)
-        if ",," in clean_for_args or "(," in clean_for_args or ",)" in clean_for_args or ";;" in clean_for_args or "(;" in clean_for_args or ";)" in clean_for_args:
+        clean_for_args = re.sub(r'"[^"]*"', "", formula)
+        if (
+            ",," in clean_for_args
+            or "(," in clean_for_args
+            or ",)" in clean_for_args
+            or ";;" in clean_for_args
+            or "(;" in clean_for_args
+            or ";)" in clean_for_args
+        ):
             return {"valid": False, "error": "Empty or malformed arguments"}
 
         # Check argument counts for common functions
         # For validation, replace EU semicolons with commas to simplify argument counting
-        norm_formula = self._replace_locale_delimiter(clean_for_args, ";", ",") if locale == "eu" else clean_for_args
-        for fn in ["VLOOKUP", "XLOOKUP", "SUMIF", "COUNTIF", "AVERAGEIF", "IFERROR", "MID", "INDEX", "ROUND", "IF", "LEFT"]:
+        norm_formula = (
+            self._replace_locale_delimiter(clean_for_args, ";", ",")
+            if locale == "eu"
+            else clean_for_args
+        )
+        for fn in [
+            "VLOOKUP",
+            "XLOOKUP",
+            "SUMIF",
+            "COUNTIF",
+            "AVERAGEIF",
+            "IFERROR",
+            "MID",
+            "INDEX",
+            "ROUND",
+            "IF",
+            "LEFT",
+        ]:
             pattern = rf"\b{fn}\(([^)]+)\)"
             for match in re.finditer(pattern, norm_formula, re.IGNORECASE):
                 args_content = match.group(1)
@@ -146,17 +173,17 @@ class ForgeValidator:
                 current_arg = []
                 paren_depth = 0
                 for char in args_content:
-                    if char == '(':
+                    if char == "(":
                         paren_depth += 1
-                    elif char == ')':
+                    elif char == ")":
                         paren_depth -= 1
-                    if char == ',' and paren_depth == 0:
+                    if char == "," and paren_depth == 0:
                         args.append("".join(current_arg).strip())
                         current_arg = []
                     else:
                         current_arg.append(char)
                 args.append("".join(current_arg).strip())
-                
+
                 num_args = len(args)
                 if fn == "VLOOKUP" and num_args < 3:
                     return {"valid": False, "error": "VLOOKUP requires at least 3 arguments"}
@@ -183,7 +210,10 @@ class ForgeValidator:
                 if fn == "VLOOKUP" and num_args >= 3:
                     try:
                         if int(args[2]) <= 0:
-                            return {"valid": False, "error": "VLOOKUP column index must be greater than 0"}
+                            return {
+                                "valid": False,
+                                "error": "VLOOKUP column index must be greater than 0",
+                            }
                     except ValueError:
                         pass
 
@@ -191,12 +221,12 @@ class ForgeValidator:
         unknown_funcs = self._find_unknown_functions(formula)
         if unknown_funcs:
             return {"valid": False, "error": f"Unknown Excel functions: {unknown_funcs}"}
-        
+
         # 6. Reference validation (basic)
         invalid_refs = self._find_invalid_references(formula)
         if invalid_refs:
             return {"valid": False, "error": f"Invalid cell references: {invalid_refs}"}
-        
+
         return {"valid": True, "formula": formula, "corrected": formula}
 
     def _balanced_parens(self, formula: str) -> bool:
@@ -205,9 +235,9 @@ class ForgeValidator:
         for char in formula:
             if char == '"':
                 in_quotes = not in_quotes
-            elif char == '(' and not in_quotes:
+            elif char == "(" and not in_quotes:
                 depth += 1
-            elif char == ')' and not in_quotes:
+            elif char == ")" and not in_quotes:
                 depth -= 1
                 if depth < 0:
                     return False
@@ -220,11 +250,11 @@ class ForgeValidator:
         for char in formula:
             if char == '"':
                 in_quotes = not in_quotes
-            elif char == '(' and not in_quotes:
+            elif char == "(" and not in_quotes:
                 open_count += 1
-            elif char == ')' and not in_quotes:
+            elif char == ")" and not in_quotes:
                 close_count += 1
-                
+
         if open_count > close_count:
             return formula + ")" * (open_count - close_count)
         elif close_count > open_count:
@@ -234,8 +264,8 @@ class ForgeValidator:
         return formula
 
     def _find_unknown_functions(self, formula: str) -> list[str]:
-        clean_formula = re.sub(r'"[^"]*"', '', formula)
-        pattern = r'\b([A-Z0-9_\.]+)\s*\('
+        clean_formula = re.sub(r'"[^"]*"', "", formula)
+        pattern = r"\b([A-Z0-9_\.]+)\s*\("
         found = re.findall(pattern, clean_formula.upper())
         unknown = []
         for fn in found:
@@ -244,8 +274,8 @@ class ForgeValidator:
         return unknown
 
     def _find_invalid_references(self, formula: str) -> list[str]:
-        clean_formula = re.sub(r'"[^"]*"', '', formula)
-        
+        clean_formula = re.sub(r'"[^"]*"', "", formula)
+
         # Check asymmetric ranges like A1:Z
         range_pattern = r"\b[A-Za-z]+\d*:[A-Za-z]+\d*\b"
         for match in re.finditer(range_pattern, clean_formula):
@@ -283,13 +313,19 @@ class ForgeValidator:
                     j = i + 1
                     while j < len(formula) and formula[j].isspace():
                         j += 1
-                    if j < len(formula) and formula[j] == '!':
+                    if j < len(formula) and formula[j] == "!":
                         is_sheet = True
-                    
+
                     if is_sheet:
                         in_single_quote = False
                     else:
-                        formula = formula[:quote_start] + '"' + formula[quote_start+1:i] + '"' + formula[i+1:]
+                        formula = (
+                            formula[:quote_start]
+                            + '"'
+                            + formula[quote_start + 1 : i]
+                            + '"'
+                            + formula[i + 1 :]
+                        )
                         return self._fix_single_quotes(formula)
             i += 1
         return formula
@@ -369,7 +405,7 @@ class ForgeValidator:
                         elif char == ")":
                             depth -= 1
                         args_end += 1
-                    args_str = working_formula[args_start:args_end - 1]
+                    args_str = working_formula[args_start : args_end - 1]
                     # Split args by commas outside parens and quotes
                     args_list = []
                     current_arg = []
@@ -382,7 +418,7 @@ class ForgeValidator:
                             p_depth += 1
                         elif char == ")" and not in_quotes:
                             p_depth -= 1
-                        
+
                         if char == "," and not in_quotes and p_depth == 0:
                             args_list.append("".join(current_arg).strip())
                             current_arg = []
@@ -396,7 +432,9 @@ class ForgeValidator:
                     num_args = len(args_list)
 
                     if num_args < min_args or num_args > max_args:
-                        arg_errors.append(f"Function {fn_name} expected {min_args}-{max_args} arguments, but got {num_args}")
+                        arg_errors.append(
+                            f"Function {fn_name} expected {min_args}-{max_args} arguments, but got {num_args}"
+                        )
 
         # VLOOKUP specific auto-correction for missing arguments
         vlookup_fix = False
@@ -407,7 +445,9 @@ class ForgeValidator:
             if vlookup_match:
                 v_args = [a.strip() for a in vlookup_match.group(1).split(",")]
                 if len(v_args) == 2:
-                    working_formula = working_formula.replace(vlookup_match.group(0), f"VLOOKUP({v_args[0]},{v_args[1]},2,FALSE)")
+                    working_formula = working_formula.replace(
+                        vlookup_match.group(0), f"VLOOKUP({v_args[0]},{v_args[1]},2,FALSE)"
+                    )
                     vlookup_fix = True
 
         # Determine if valid
@@ -437,27 +477,35 @@ class ForgeValidator:
             active = context["active_cell"].upper()
             if active in working_formula.upper():
                 valid = False
-                error_msg = f"Circular reference detected: target cell {active} referenced inside formula"
+                error_msg = (
+                    f"Circular reference detected: target cell {active} referenced inside formula"
+                )
 
         # Semantic evaluation using formulas package
         if valid:
             try:
                 import formulas
-                eval_formula = working_formula if working_formula.startswith("=") else f"={working_formula}"
+
+                eval_formula = (
+                    working_formula if working_formula.startswith("=") else f"={working_formula}"
+                )
                 ast = formulas.Parser().ast(eval_formula)
                 if not ast or len(ast) < 2:
                     raise ValueError("AST parsing returned empty or invalid structure")
                 func = ast[1].compile()
+
                 def col_to_index(col_str: str) -> int:
                     idx = 0
                     for char in col_str.upper():
-                        if 'A' <= char <= 'Z':
-                            idx = idx * 26 + (ord(char) - ord('A') + 1)
+                        if "A" <= char <= "Z":
+                            idx = idx * 26 + (ord(char) - ord("A") + 1)
                     return idx
 
                 def get_mock_input(inp_name: str):
                     if ":" in str(inp_name):
-                        match = re.match(r"^([A-Z]+)(\d*):([A-Z]+)(\d*)$", str(inp_name), re.IGNORECASE)
+                        match = re.match(
+                            r"^([A-Z]+)(\d*):([A-Z]+)(\d*)$", str(inp_name), re.IGNORECASE
+                        )
                         if match:
                             col1_str, row1_str, col2_str, row2_str = match.groups()
                             c1 = col_to_index(col1_str)
@@ -470,8 +518,10 @@ class ForgeValidator:
                             else:
                                 num_rows = 10
                             import numpy as np
+
                             return np.ones((num_rows, num_cols))
                         import numpy as np
+
                         return np.ones((10, 10))
                     return 1.0
 
@@ -516,21 +566,25 @@ class ForgeValidator:
         """Plain-language explanation of what the formula does."""
         if not formula:
             return ""
-        
+
         formula_upper = formula.upper()
         if "SUM(" in formula_upper:
             # extract SUM range
             m = re.search(r"SUM\(([^)]+)\)", formula_upper)
             r = m.group(1) if m else "cells"
             return f"Sums all values in cells {r}"
-        
+
         if "VLOOKUP(" in formula_upper:
             m = re.search(r"VLOOKUP\(([^,)]+),([^,)]+),?([^,)]*)?,?([^,)]*)?\)", formula_upper)
             if m:
                 lookup_val = m.group(1).strip()
                 table_arr = m.group(2).strip()
                 col_idx = m.group(3).strip() or "2"
-                exact = "exact match" if "FALSE" in m.group(4) or "0" in m.group(4) else "approximate match"
+                exact = (
+                    "exact match"
+                    if "FALSE" in m.group(4) or "0" in m.group(4)
+                    else "approximate match"
+                )
                 return f"Looks up the value in {lookup_val} in column 1 of {table_arr}, returns column {col_idx} of the matching row ({exact})"
             return "Performs a vertical lookup on a table range"
 
@@ -562,13 +616,16 @@ class ForgeValidator:
 # Standalone functions used by dispatcher
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def validate_formula(formula: str, context: dict | None = None) -> dict:
     v = ForgeValidator()
     return v.validate(formula, context)
 
+
 def explain_formula(formula: str) -> str:
     v = ForgeValidator()
     return v.explain(formula)
+
 
 def validate_formula_batch(formulas: list[str]) -> list[dict]:
     v = ForgeValidator()

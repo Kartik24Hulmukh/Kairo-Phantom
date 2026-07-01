@@ -1,12 +1,14 @@
-/// Yrs CRDT Peer — Kairo Phantom's collaborative document engine.
-/// Implements AI as a first‑class CRDT participant.
-
-use yrs::{Doc, TextRef, MapRef, ArrayRef, Transact, GetString, ReadTxn, WriteTxn, Options, Text, Map, Array};
-use yrs::updates::decoder::Decode;
+use serde_json::json;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
-use serde_json::json;
+use yrs::updates::decoder::Decode;
+/// Yrs CRDT Peer — Kairo Phantom's collaborative document engine.
+/// Implements AI as a first‑class CRDT participant.
+use yrs::{
+    Array, ArrayRef, Doc, GetString, Map, MapRef, Options, ReadTxn, Text, TextRef, Transact,
+    WriteTxn,
+};
 
 /// Kairo's AI peer — joins Yjs collaborative sessions as a first‑class
 /// participant with permanent attribution.
@@ -38,12 +40,13 @@ impl KairoCollaborativePeer {
     pub fn new() -> Self {
         // Create Doc with options
         let client_id_str = format!("kairo-ai-{}", Uuid::new_v4());
-        
+
         // Derive a numeric clientID for yrs Doc
         let client_id_num = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
-            .as_nanos() as u64 & 0x0000_0000_FFFF_FFFF;
+            .as_nanos() as u64
+            & 0x0000_0000_FFFF_FFFF;
 
         let options = Options {
             client_id: client_id_num,
@@ -78,8 +81,12 @@ impl KairoCollaborativePeer {
     /// Connect to a Yjs sync server via WebSocket.
     pub async fn connect(&mut self, ws_url: &str, doc_id: &str) -> anyhow::Result<()> {
         // E2E Network P2P Pointers and Sync Protocol Bridge
-        tracing::info!("🔗 Connecting collaborative AI Peer to Yjs server: {} (doc: {})", ws_url, doc_id);
-        
+        tracing::info!(
+            "🔗 Connecting collaborative AI Peer to Yjs server: {} (doc: {})",
+            ws_url,
+            doc_id
+        );
+
         // Mock socket connection for local server compatibility
         let (tx, mut rx) = tokio::sync::mpsc::channel::<Vec<u8>>(100);
         self.ws_sender = Some(tx);
@@ -95,7 +102,10 @@ impl KairoCollaborativePeer {
         });
 
         // Trigger Sync Step 1
-        let state_vector = self.doc.transact().encode_state_as_update_v1(&Default::default());
+        let state_vector = self
+            .doc
+            .transact()
+            .encode_state_as_update_v1(&Default::default());
         if let Some(ref sender) = self.ws_sender {
             let _ = sender.send(state_vector).await;
         }
@@ -127,13 +137,15 @@ impl KairoCollaborativePeer {
                 "content": text_to_insert,
                 "status": "proposed",
                 "timestamp": chrono::Utc::now().to_rfc3339(),
-            }).to_string();
+            })
+            .to_string();
 
             self.proposals.insert(&mut txn, proposal_idx, proposal_data);
 
             // Update metadata
-            self.metadata.insert(&mut txn, "last_edit_at", chrono::Utc::now().to_rfc3339());
-            
+            self.metadata
+                .insert(&mut txn, "last_edit_at", chrono::Utc::now().to_rfc3339());
+
             let total = self.proposals.len(&txn) as f64;
             self.metadata.insert(&mut txn, "total_edits", total);
         }

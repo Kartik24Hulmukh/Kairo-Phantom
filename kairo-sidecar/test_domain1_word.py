@@ -105,6 +105,7 @@ A regular paragraph with no heading.
 
 # ─── Gate 3: Legal Contract Review ──────────────────────────────────────────
 
+
 class TestCuadClauseDetection:
     """Gate 3: CUAD detection on sample contract."""
 
@@ -112,7 +113,9 @@ class TestCuadClauseDetection:
         result = detect_cuad_clauses(SAMPLE_CONTRACT)
         assert result["ok"] is True
         ids = [c["id"] for c in result["data"]["detected_clauses"]]
-        assert "termination_for_convenience" in ids, f"Expected termination_for_convenience, got: {ids}"
+        assert (
+            "termination_for_convenience" in ids
+        ), f"Expected termination_for_convenience, got: {ids}"
 
     def test_detects_ip_ownership(self):
         result = detect_cuad_clauses(SAMPLE_CONTRACT)
@@ -163,7 +166,9 @@ class TestCuadClauseDetection:
         assert "HIGH" in summary
         assert "MEDIUM" in summary
         assert "total_flagged" in summary
-        assert summary["total_flagged"] >= 4, f"Expected ≥4 flagged clauses, got {summary['total_flagged']}"
+        assert (
+            summary["total_flagged"] >= 4
+        ), f"Expected ≥4 flagged clauses, got {summary['total_flagged']}"
 
     def test_high_risk_count_correct(self):
         result = detect_cuad_clauses(SAMPLE_CONTRACT)
@@ -183,8 +188,9 @@ class TestCuadClauseDetection:
         result = detect_cuad_clauses(SAMPLE_CONTRACT)
         assert result["ok"] is True
         for c in result["data"]["detected_clauses"]:
-            assert 0.0 <= c["confidence"] <= 1.0, \
-                f"Clause {c['id']} confidence {c['confidence']} out of [0,1]"
+            assert (
+                0.0 <= c["confidence"] <= 1.0
+            ), f"Clause {c['id']} confidence {c['confidence']} out of [0,1]"
 
     def test_empty_text_returns_error(self):
         result = detect_cuad_clauses("")
@@ -217,9 +223,7 @@ class TestRedlineGeneration:
 
     def test_liability_cap_redline_contains_carveout(self):
         clause_text = "The aggregate liability shall not exceed fees paid."
-        result = generate_redlines_for_clause(
-            clause_text, "liability_cap", "balanced", "client"
-        )
+        result = generate_redlines_for_clause(clause_text, "liability_cap", "balanced", "client")
         assert result["ok"] is True
         suggested = result["data"]["suggested_text"]
         # Should add carveout language
@@ -227,9 +231,7 @@ class TestRedlineGeneration:
 
     def test_auto_renewal_redline_increases_notice(self):
         clause_text = "Agreement shall renew unless 15 days prior notice is given."
-        result = generate_redlines_for_clause(
-            clause_text, "auto_renewal", "balanced", "client"
-        )
+        result = generate_redlines_for_clause(clause_text, "auto_renewal", "balanced", "client")
         assert result["ok"] is True
         suggested = result["data"]["suggested_text"]
         assert "60" in suggested or "sixty" in suggested.lower()
@@ -243,16 +245,12 @@ class TestRedlineGeneration:
         assert result["data"]["original_text"] == clause_text
 
     def test_redline_has_rationale(self):
-        result = generate_redlines_for_clause(
-            "standard clause text", "liability_cap", "balanced"
-        )
+        result = generate_redlines_for_clause("standard clause text", "liability_cap", "balanced")
         assert result["ok"] is True
         assert len(result["data"]["rationale"]) > 10
 
     def test_risk_reduction_present(self):
-        result = generate_redlines_for_clause(
-            "Some clause text", "liability_cap", "aggressive"
-        )
+        result = generate_redlines_for_clause("Some clause text", "liability_cap", "aggressive")
         assert result["ok"] is True
         assert "→" in result["data"]["risk_reduction"]
 
@@ -262,7 +260,9 @@ class TestRedlineGeneration:
 
     def test_aggressive_stance_gives_more_reduction(self):
         result_agg = generate_redlines_for_clause("cap on liability", "liability_cap", "aggressive")
-        result_con = generate_redlines_for_clause("cap on liability", "liability_cap", "conservative")
+        result_con = generate_redlines_for_clause(
+            "cap on liability", "liability_cap", "conservative"
+        )
         assert result_agg["ok"] and result_con["ok"]
         # Aggressive should reduce more (HIGH → LOW vs HIGH → MEDIUM)
         assert "LOW" in result_agg["data"]["risk_reduction"]
@@ -328,6 +328,7 @@ class TestFullContractAnalysis:
 
 # ─── Gate 1 & 2: Adeu Bridge Unit Tests ──────────────────────────────────────
 
+
 class TestAdeuBridgeHelpers:
     """Gate 1 & 2: Adeu bridge internal helpers."""
 
@@ -381,38 +382,42 @@ class TestAdeuBridgeHelpers:
         from sidecar.parsers.adeu_bridge import adeu_apply_edits
         from unittest.mock import patch
         from docx import Document
-        
+
         # Create a temp docx file
         temp_dir = tempfile.mkdtemp()
         docx_path = os.path.join(temp_dir, "test.docx")
         doc = Document()
         doc.add_paragraph("This is a sample agreement.")
         doc.save(docx_path)
-        
+
         edits = [{"target_text": "sample", "new_text": "drafted"}]
         out_path = os.path.join(temp_dir, "test_redlined.docx")
-        
-        with patch("sidecar.parsers.adeu_bridge._adeu_installed", return_value=False), \
-             patch("sidecar.parsers.adeu_bridge._adeu_sdk_available", return_value=False), \
-             patch("sidecar.parsers.adeu_bridge._word_is_open_with_file", return_value=False):
+
+        with (
+            patch("sidecar.parsers.adeu_bridge._adeu_installed", return_value=False),
+            patch("sidecar.parsers.adeu_bridge._adeu_sdk_available", return_value=False),
+            patch("sidecar.parsers.adeu_bridge._word_is_open_with_file", return_value=False),
+        ):
             res = adeu_apply_edits(docx_path, edits, output_path=out_path)
-            
+
         assert res["ok"] is True
         assert res["data"]["backend"] == "python_docx_fallback"
         assert res["data"]["applied_count"] == 1
-        
+
         # Verify document was modified and exists
         assert os.path.exists(out_path)
         doc2 = Document(out_path)
         # Check that revision tracking was turned on via XML
         from docx.oxml.ns import qn
-        assert doc2.settings.element.find(qn('w:trackRevisions')) is not None
-        
+
+        assert doc2.settings.element.find(qn("w:trackRevisions")) is not None
+
         # Clean up
         shutil.rmtree(temp_dir)
 
 
 # ─── Gate 2: safe-docx Bridge Unit Tests ─────────────────────────────────────
+
 
 class TestSafeDocxBridgeHelpers:
     """Gate 2: safe-docx bridge internal helpers."""
@@ -434,6 +439,7 @@ class TestSafeDocxBridgeHelpers:
 
 # ─── Gate 4: W3 Regression — Zero Role/System Prompt Leakage ─────────────────
 
+
 class TestW3Regression:
     """Gate 4: Ensure no system prompt / role information leaks into outputs."""
 
@@ -451,8 +457,9 @@ class TestW3Regression:
             "as a language model",
         ]
         for phrase in forbidden_phrases:
-            assert phrase not in output_text, \
-                f"Leaked forbidden phrase '{phrase}' in contract analysis output"
+            assert (
+                phrase not in output_text
+            ), f"Leaked forbidden phrase '{phrase}' in contract analysis output"
 
     def test_redline_output_no_role_leakage(self):
         result = generate_redlines_for_clause(
@@ -478,11 +485,11 @@ class TestW3Regression:
         output_text = json.dumps(result["data"]).lower()
         forbidden = ["system_prompt", "ghost_session", "alt+m", "kairo phantom internal"]
         for phrase in forbidden:
-            assert phrase not in output_text, \
-                f"Leaked internal info '{phrase}' in summary"
+            assert phrase not in output_text, f"Leaked internal info '{phrase}' in summary"
 
 
 # ─── CUAD Catalogue Integrity ─────────────────────────────────────────────────
+
 
 class TestCuadCatalogueIntegrity:
     """Verify the CUAD clause catalogue is structurally correct."""
@@ -500,20 +507,22 @@ class TestCuadCatalogueIntegrity:
     def test_risk_levels_valid(self):
         valid = {"HIGH", "MEDIUM", "LOW"}
         for clause in CUAD_HIGH_RISK_CLAUSES:
-            assert clause["risk_level"] in valid, \
-                f"Clause {clause['id']} has invalid risk_level: {clause['risk_level']}"
+            assert (
+                clause["risk_level"] in valid
+            ), f"Clause {clause['id']} has invalid risk_level: {clause['risk_level']}"
 
     def test_keywords_non_empty(self):
         for clause in CUAD_HIGH_RISK_CLAUSES:
-            assert len(clause["keywords"]) >= 1, \
-                f"Clause {clause['id']} has no keywords"
+            assert len(clause["keywords"]) >= 1, f"Clause {clause['id']} has no keywords"
 
     def test_catalogue_has_minimum_clauses(self):
-        assert len(CUAD_HIGH_RISK_CLAUSES) >= 15, \
-            f"Expected ≥15 CUAD clauses, got {len(CUAD_HIGH_RISK_CLAUSES)}"
+        assert (
+            len(CUAD_HIGH_RISK_CLAUSES) >= 15
+        ), f"Expected ≥15 CUAD clauses, got {len(CUAD_HIGH_RISK_CLAUSES)}"
 
 
 # ─── Rule-Based Redline Helpers ───────────────────────────────────────────────
+
 
 class TestRuleBasedRedlines:
     """Unit-test the deterministic redline rule engine."""
@@ -545,8 +554,9 @@ class TestRuleBasedRedlines:
     def test_risk_reduction_balanced_high_to_medium(self):
         r = _estimate_risk_reduction("liability_cap", "balanced")
         assert "MEDIUM" in r
+
     def test_word_writer_routes_to_adeu_on_track_revisions(self):
-        from sidecar.masters.word_master import WordWriter, WordContext
+        from sidecar.masters.word_master import WordWriter
         from docx import Document
         from docx.oxml import OxmlElement
         from docx.oxml.ns import qn
@@ -559,41 +569,47 @@ class TestRuleBasedRedlines:
         docx_path = os.path.join(temp_dir, "track_test.docx")
         doc = Document()
         doc.add_paragraph("This is the original paragraph.")
-        
+
         # Turn on track revisions
         settings_element = doc.settings.element
-        track_revisions = OxmlElement('w:trackRevisions')
+        track_revisions = OxmlElement("w:trackRevisions")
         settings_element.append(track_revisions)
         doc.save(docx_path)
 
         # Call apply_operations
         writer = WordWriter()
         from unittest.mock import MagicMock
+
         context = MagicMock()
-        ops = [{
-            "type": "replace_paragraph",
-            "paragraph_index": 0,
-            "runs": [{"text": "This is the updated paragraph."}]
-        }]
-        
+        ops = [
+            {
+                "type": "replace_paragraph",
+                "paragraph_index": 0,
+                "runs": [{"text": "This is the updated paragraph."}],
+            }
+        ]
+
         # Mock _adeu_installed and _adeu_sdk_available to force python_docx_fallback path
         from unittest.mock import patch
-        with patch("sidecar.parsers.adeu_bridge._adeu_installed", return_value=False), \
-             patch("sidecar.parsers.adeu_bridge._adeu_sdk_available", return_value=False):
+
+        with (
+            patch("sidecar.parsers.adeu_bridge._adeu_installed", return_value=False),
+            patch("sidecar.parsers.adeu_bridge._adeu_sdk_available", return_value=False),
+        ):
             res = writer.apply_operations(docx_path, ops, context)
 
         assert "errors" in res
         assert res["applied_count"] == 1
-        
+
         # Verify the saved document
         doc2 = Document(docx_path)
         # Verify that w:ins exists
-        assert doc2.settings.element.find(qn('w:trackRevisions')) is not None
+        assert doc2.settings.element.find(qn("w:trackRevisions")) is not None
         # Verify w:del and w:ins exist in the XML
         body_xml = doc2._body._element.xml
         assert "w:del" in body_xml
         assert "w:ins" in body_xml
-        
+
         # Clean up
         shutil.rmtree(temp_dir)
 
@@ -601,4 +617,5 @@ class TestRuleBasedRedlines:
 if __name__ == "__main__":
     # Allow running directly for quick validation
     import pytest
+
     sys.exit(pytest.main([__file__, "-v", "--tb=short"]))

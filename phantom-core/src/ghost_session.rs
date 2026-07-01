@@ -2,12 +2,10 @@
 /// Implements: streaming cancel (Esc), Tab accept, word-by-word accept (Ctrl+Right),
 /// two alternatives (Alt+1/Alt+2), inline correction (Ctrl+/), agent-aware undo (Ctrl+Z),
 /// confidence bands (High/Medium/Low), and Yjs CRDT peer mode.
-
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info};
-
 
 // ─── Session State ────────────────────────────────────────────────────────────
 
@@ -90,7 +88,11 @@ pub struct GhostBuffer {
 
 impl GhostBuffer {
     pub fn active_text(&self) -> &str {
-        if self.using_b { &self.text_b } else { &self.text_a }
+        if self.using_b {
+            &self.text_b
+        } else {
+            &self.text_a
+        }
     }
 
     pub fn accepted_text(&self) -> &str {
@@ -110,7 +112,9 @@ impl GhostBuffer {
                 i = idx + 1;
                 break;
             }
-            if ch != ' ' { found = true; }
+            if ch != ' ' {
+                found = true;
+            }
             i = idx + ch.len_utf8();
         }
         self.accepted_chars = (self.accepted_chars + i).min(text.len());
@@ -201,7 +205,10 @@ impl GhostSession {
     pub async fn toggle_alternative(&self) {
         let mut buf = self.buffer.lock().await;
         buf.toggle_alternative();
-        info!("🔄 Switched to alternative {}", if buf.using_b { "B" } else { "A" });
+        info!(
+            "🔄 Switched to alternative {}",
+            if buf.using_b { "B" } else { "A" }
+        );
     }
 
     /// Push a token to the primary stream buffer
@@ -235,14 +242,19 @@ impl GhostSession {
     pub fn status_line(&self) -> String {
         let buf = self.buffer.blocking_lock();
         let alt = if !buf.text_b.is_empty() {
-            if buf.using_b { " [Alt B] " } else { " [Alt A] " }
-        } else { "" };
+            if buf.using_b {
+                " [Alt B] "
+            } else {
+                " [Alt A] "
+            }
+        } else {
+            ""
+        };
         let confidence = self.confidence.label();
         let chars = buf.active_text().len();
 
         format!(
-            "👻 Kairo Ghost{} | {} chars | Confidence: {} | Tab=Accept  Esc=Cancel  Ctrl+/=Correct  Alt+]=Switch",
-            alt, chars, confidence
+            "👻 Kairo Ghost{alt} | {chars} chars | Confidence: {confidence} | Tab=Accept  Esc=Cancel  Ctrl+/=Correct  Alt+]=Switch"
         )
     }
 
@@ -302,7 +314,10 @@ pub struct YjsPeer {
 
 impl YjsPeer {
     pub fn new(config: YjsConfig, crdt_session: Arc<crate::crdt::CrdtSession>) -> Self {
-        Self { config, crdt_session }
+        Self {
+            config,
+            crdt_session,
+        }
     }
 
     /// Detect if the currently active app is a Yjs-powered web app
@@ -313,13 +328,18 @@ impl YjsPeer {
 
         // Known Yjs-powered apps
         let yjs_apps = [
-            "notion", "google docs", "tiptap", "linear.app",
-            "liveblocks", "hocuspocus", "blocksuite"
+            "notion",
+            "google docs",
+            "tiptap",
+            "linear.app",
+            "liveblocks",
+            "hocuspocus",
+            "blocksuite",
         ];
 
-        yjs_apps.iter().any(|app| {
-            title_lower.contains(app) || url_lower.contains(app)
-        })
+        yjs_apps
+            .iter()
+            .any(|app| title_lower.contains(app) || url_lower.contains(app))
     }
 
     /// Write AI-generated text as CRDT ops into the shared document.
@@ -327,7 +347,11 @@ impl YjsPeer {
     pub fn write_as_crdt_peer(&self, text: &str, position: u32) -> Result<(), String> {
         // Use the existing CrdtSession from crdt.rs
         self.crdt_session.insert_ai_text(text);
-        info!("📡 YjsPeer: wrote {} chars to CRDT at position {}", text.len(), position);
+        info!(
+            "📡 YjsPeer: wrote {} chars to CRDT at position {}",
+            text.len(),
+            position
+        );
         Ok(())
     }
 
@@ -335,7 +359,10 @@ impl YjsPeer {
     pub fn broadcast_thinking_state(&self, progress: f32) {
         // In a full implementation, this would send a Yjs Awareness update
         // with { status: 'thinking', progress: progress, clientID: "kairo-ai-{uuid}" }
-        debug!("📡 YjsPeer: broadcasting thinking state (progress: {:.0}%)", progress * 100.0);
+        debug!(
+            "📡 YjsPeer: broadcasting thinking state (progress: {:.0}%)",
+            progress * 100.0
+        );
     }
 }
 
@@ -349,7 +376,10 @@ pub struct UndoManager {
 
 impl UndoManager {
     pub fn new() -> Self {
-        Self { entries: Vec::new(), redo_stack: Vec::new() }
+        Self {
+            entries: Vec::new(),
+            redo_stack: Vec::new(),
+        }
     }
 
     pub fn push(&mut self, entry: HistoryEntry) {
@@ -377,12 +407,18 @@ impl UndoManager {
         }
     }
 
-    pub fn has_undo(&self) -> bool { !self.entries.is_empty() }
-    pub fn has_redo(&self) -> bool { !self.redo_stack.is_empty() }
+    pub fn has_undo(&self) -> bool {
+        !self.entries.is_empty()
+    }
+    pub fn has_redo(&self) -> bool {
+        !self.redo_stack.is_empty()
+    }
 }
 
 impl Default for UndoManager {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 // ─── Pipeline Progress (Layer 3 overlay integration) ──────────────────────────
@@ -419,4 +455,3 @@ pub struct PipelineProgress {
     pub total_steps: Option<usize>,
     pub details: String,
 }
-

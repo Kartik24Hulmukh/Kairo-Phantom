@@ -1,19 +1,19 @@
 #[cfg(feature = "cua")]
 mod tests {
+    use serde_json::json;
     use std::time::Duration;
     use tokio::time::sleep;
-    use serde_json::json;
-    
-    use phantom_core::cua::vlm_bridge::VlmBridge;
+
     use phantom_core::cua::cua_planner::CuaPlanner;
-    use phantom_core::cua::CuaContext;
+    use phantom_core::cua::vlm_bridge::VlmBridge;
     use phantom_core::cua::world_model;
+    use phantom_core::cua::CuaContext;
 
     #[cfg(target_os = "windows")]
     async fn start_mock_sidecar(pipe_name: String) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
-            use tokio::net::windows::named_pipe::ServerOptions;
             use tokio::io::{AsyncReadExt, AsyncWriteExt};
+            use tokio::net::windows::named_pipe::ServerOptions;
 
             if let Ok(mut server) = ServerOptions::new()
                 .first_pipe_instance(true)
@@ -36,7 +36,7 @@ mod tests {
                                     "latency_ms": 120.0
                                 }
                             });
-                            let resp_str = format!("{}\n", resp.to_string());
+                            let resp_str = format!("{resp}\n");
                             let _ = server.write_all(resp_str.as_bytes()).await;
                         }
                     }
@@ -48,9 +48,9 @@ mod tests {
     #[cfg(not(target_os = "windows"))]
     async fn start_mock_sidecar(socket_path: String) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
-            use tokio::net::UnixListener;
-            use tokio::io::{AsyncReadExt, AsyncWriteExt};
             use std::fs;
+            use tokio::io::{AsyncReadExt, AsyncWriteExt};
+            use tokio::net::UnixListener;
 
             let _ = fs::remove_file(&socket_path);
             if let Ok(listener) = UnixListener::bind(&socket_path) {
@@ -70,7 +70,7 @@ mod tests {
                                     "latency_ms": 120.0
                                 }
                             });
-                            let resp_str = format!("{}\n", resp.to_string());
+                            let resp_str = format!("{resp}\n");
                             let _ = stream.write_all(resp_str.as_bytes()).await;
                         }
                     }
@@ -95,11 +95,17 @@ mod tests {
 
         // Instantiate VlmBridge pointing to our mock pipe/socket
         let bridge = VlmBridge::with_config(pipe_name, Duration::from_secs(5));
-        
+
         // Exercise element grounding
-        let res = bridge.ground_element("dummy_screenshot.png", "Submit button").await;
-        
-        assert!(res.is_ok(), "Failed to call ground_element on VlmBridge: {:?}", res.err());
+        let res = bridge
+            .ground_element("dummy_screenshot.png", "Submit button")
+            .await;
+
+        assert!(
+            res.is_ok(),
+            "Failed to call ground_element on VlmBridge: {:?}",
+            res.err()
+        );
         let resp = res.unwrap();
         assert!(resp.found, "Expected element to be found");
         assert_eq!(resp.x, 840);
@@ -129,7 +135,10 @@ mod tests {
 
         // Asserting world model tracking registers correctly
         let total_actions = world_model::TOTAL_ACTIONS.load(std::sync::atomic::Ordering::SeqCst);
-        assert!(total_actions > 0, "CUA Planner did not increment world model action counters");
+        assert!(
+            total_actions > 0,
+            "CUA Planner did not increment world model action counters"
+        );
     }
 }
 

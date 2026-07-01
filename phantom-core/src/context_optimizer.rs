@@ -21,7 +21,7 @@ impl ContextOptimizer {
 
         // 1. App-specific bias (Highest priority)
         if let Some(bias) = memory.app_bias.get(app_name) {
-            fragments.push((100, format!("- App-specific pattern: {}", bias)));
+            fragments.push((100, format!("- App-specific pattern: {bias}")));
         }
 
         // 2. High-weight user preferences
@@ -31,19 +31,32 @@ impl ContextOptimizer {
 
         // 3. User model (Persona info)
         for (k, v) in &memory.user_model.word_preferences {
-             fragments.push((80, format!("- Word Pref {}: {}", k, v)));
+            fragments.push((80, format!("- Word Pref {k}: {v}")));
         }
 
         // 4. Low-weight user preferences
-        for pref in memory.preferences.iter().filter(|p| p.weight <= 0.7 && p.weight > 0.3) {
+        for pref in memory
+            .preferences
+            .iter()
+            .filter(|p| p.weight <= 0.7 && p.weight > 0.3)
+        {
             fragments.push((50, format!("- {}: {}", pref.key, pref.value)));
         }
 
         // 5. Recent interactions (Recency bias)
         let recent_limit = 5;
-        for (i, interaction) in memory.interactions.iter().rev().take(recent_limit).enumerate() {
+        for (i, interaction) in memory
+            .interactions
+            .iter()
+            .rev()
+            .take(recent_limit)
+            .enumerate()
+        {
             let weight = 40 - i; // Older = lower weight
-            fragments.push((weight, format!("- Previous {}: {}", interaction.app, interaction.prompt)));
+            fragments.push((
+                weight,
+                format!("- Previous {}: {}", interaction.app, interaction.prompt),
+            ));
         }
 
         // Sort by weight descending

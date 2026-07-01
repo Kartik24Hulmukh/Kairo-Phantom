@@ -1,0 +1,73 @@
+# =============================================================================
+# Kairo-Phantom — cargo-deny configuration (SINGLE source of truth for Rust)
+# =============================================================================
+# This file is the ONE config for Rust advisory ignores + license policy.
+# cargo-deny reads this file via `cargo deny check --config deny.toml`.
+#
+# We do NOT use standalone `cargo audit` because it reads audit.toml, not
+# deny.toml — that would create two sources of truth for advisory ignores.
+# cargo-deny's [advisories] section is the single source of truth.
+#
+# GOVERNANCE:
+#   - Only RUSTSEC IDs listed in [advisories] ignore are accepted.
+#   - Each ignored advisory MUST have a reason.
+#   - Any NEW advisory or any advisory affecting a DIRECT dependency → FAIL.
+#   - cargo-audit reports 0 Rust CVEs (PROGRESS.md C2); the ignore list is
+#     empty but the structure is in place for when advisories appear.
+# =============================================================================
+
+[graph]
+# Use the workspace Cargo.lock — no override needed.
+
+[advisories]
+# ── Accepted (ignored) advisories ──
+# Format: { id = "RUSTSEC-YYYY-NNNN", reason = "..." }
+# Currently: 1 accepted Rust advisory (unmaintained, no safe upgrade).
+ignore = [
+    { id = "RUSTSEC-2025-0141", reason = "bincode 1.3.3 is unmaintained (not a vulnerability). Used for LAN sync packet serialization and embedding blob storage in MemMachine. No safe upgrade exists (crate ceased development). Replacing with postcard/rmp-serde would break backward compatibility with existing stored embeddings and LAN sync protocol. bincode 1.3.3 is feature-complete for our usage (serialize/deserialize simple structs). Reviewed 2026-06-27." },
+]
+
+# ── Unfixed advisories: treat as vulnerabilities (not warnings) ──
+unmaintained = "workspace"
+yanked = "deny"
+
+[licenses]
+# ── Allow only permissive / weak copyleft licenses ──
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+    "Unicode-3.0",
+    "Zlib",
+    "CC0-1.0",
+    "MPL-2.0",
+    "OpenSSL",
+]
+# ── Copyleft / restrictive licenses are BLOCKED by default-deny ──
+# In cargo-deny 0.19+ (PR #611), the `deny` field was removed and the default
+# behavior changed to: any license NOT in the `allow` list above is DENIED.
+# This is STRICTER than the old explicit `deny` blocklist — unknown/unlisted
+# licenses are now denied (previously they were only warned).
+# The copyleft licenses below (GPL, AGPL, LGPL, SSPL, EUPL, BUSL) are not in
+# the `allow` list, so they are blocked by the default-deny mechanism.
+confidence-threshold = 0.93
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+highlight = "all"
+allow = []
+deny = [
+    { name = "openssl", version = "<0.10.55", reason = "Multiple CVEs in old openssl bindings" },
+]
+skip = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

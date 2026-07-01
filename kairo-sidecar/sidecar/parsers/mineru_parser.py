@@ -45,6 +45,7 @@ else:
 
 try:
     import fitz  # PyMuPDF  # type: ignore
+
     _PYMUPDF_AVAILABLE = True
     log.debug("PyMuPDF (fitz) is available.")
 except ImportError:
@@ -131,6 +132,7 @@ def _is_likely_heading_block(block: dict, font_size: float, is_bold: bool) -> Tu
 # MinerU output JSON → Kairo schema mapper
 # ---------------------------------------------------------------------------
 
+
 def _map_mineru_content_list(
     content_list: List[Dict[str, Any]],
     source_path: str,
@@ -165,27 +167,31 @@ def _map_mineru_content_list(
         if item_type == "title":
             level = int(item.get("level", 1))
             style = _heading_style_from_level(level)
-            paragraphs.append({
-                "index": p_idx,
-                "text": text,
-                "style": style,
-                "level": level,
-                "page": page,
-                "runs": [{"text": text, "bold": True, "italic": False}],
-            })
+            paragraphs.append(
+                {
+                    "index": p_idx,
+                    "text": text,
+                    "style": style,
+                    "level": level,
+                    "page": page,
+                    "runs": [{"text": text, "bold": True, "italic": False}],
+                }
+            )
             p_idx += 1
 
         elif item_type in ("text", "equation", "figure"):
             # Equations are kept as raw LaTeX / MathML string in the text field
             style = "Normal"
-            paragraphs.append({
-                "index": p_idx,
-                "text": text,
-                "style": style,
-                "level": 0,
-                "page": page,
-                "runs": [{"text": text, "bold": False, "italic": False}],
-            })
+            paragraphs.append(
+                {
+                    "index": p_idx,
+                    "text": text,
+                    "style": style,
+                    "level": 0,
+                    "page": page,
+                    "runs": [{"text": text, "bold": False, "italic": False}],
+                }
+            )
             p_idx += 1
 
         elif item_type == "table":
@@ -194,32 +200,38 @@ def _map_mineru_content_list(
             caption = (item.get("table_caption") or "").strip()
             if caption:
                 # Prepend table caption as a Normal paragraph
-                paragraphs.append({
-                    "index": p_idx,
-                    "text": caption,
-                    "style": "Normal",
-                    "level": 0,
-                    "page": page,
-                    "runs": [{"text": caption, "bold": False, "italic": True}],
-                })
+                paragraphs.append(
+                    {
+                        "index": p_idx,
+                        "text": caption,
+                        "style": "Normal",
+                        "level": 0,
+                        "page": page,
+                        "runs": [{"text": caption, "bold": False, "italic": True}],
+                    }
+                )
                 p_idx += 1
-            tables.append({
-                "after_paragraph_index": max(p_idx - 1, 0),
-                "rows": rows,
-                "page": page,
-            })
+            tables.append(
+                {
+                    "after_paragraph_index": max(p_idx - 1, 0),
+                    "rows": rows,
+                    "page": page,
+                }
+            )
 
         else:
             # Unrecognised item type – treat as plain text if non-empty
             if text:
-                paragraphs.append({
-                    "index": p_idx,
-                    "text": text,
-                    "style": "Normal",
-                    "level": 0,
-                    "page": page,
-                    "runs": [{"text": text, "bold": False, "italic": False}],
-                })
+                paragraphs.append(
+                    {
+                        "index": p_idx,
+                        "text": text,
+                        "style": "Normal",
+                        "level": 0,
+                        "page": page,
+                        "runs": [{"text": text, "bold": False, "italic": False}],
+                    }
+                )
                 p_idx += 1
 
     return {
@@ -246,14 +258,14 @@ def _parse_mineru_table(item: Dict[str, Any]) -> List[List[str]]:
     if "<tr" in table_body.lower():
         try:
             import re
+
             tr_pattern = re.compile(r"<tr[^>]*>(.*?)</tr>", re.IGNORECASE | re.DOTALL)
             td_pattern = re.compile(r"<t[dh][^>]*>(.*?)</t[dh]>", re.IGNORECASE | re.DOTALL)
             tag_strip = re.compile(r"<[^>]+>")
             for tr_match in tr_pattern.finditer(table_body):
                 row_html = tr_match.group(1)
                 cells = [
-                    tag_strip.sub("", td.group(1)).strip()
-                    for td in td_pattern.finditer(row_html)
+                    tag_strip.sub("", td.group(1)).strip() for td in td_pattern.finditer(row_html)
                 ]
                 if cells:
                     rows.append(cells)
@@ -279,6 +291,7 @@ def _parse_mineru_table(item: Dict[str, Any]) -> List[List[str]]:
 # ---------------------------------------------------------------------------
 # PyMuPDF fallback parser
 # ---------------------------------------------------------------------------
+
 
 def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
     """
@@ -310,14 +323,16 @@ def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
             for block in page.get_text("blocks"):
                 block_text = block[4].strip() if len(block) > 4 else ""
                 if block_text:
-                    paragraphs.append({
-                        "index": p_idx,
-                        "text": block_text,
-                        "style": "Normal",
-                        "level": 0,
-                        "page": page_no,
-                        "runs": [{"text": block_text, "bold": False, "italic": False}],
-                    })
+                    paragraphs.append(
+                        {
+                            "index": p_idx,
+                            "text": block_text,
+                            "style": "Normal",
+                            "level": 0,
+                            "page": page_no,
+                            "runs": [{"text": block_text, "bold": False, "italic": False}],
+                        }
+                    )
                     p_idx += 1
             continue
 
@@ -336,7 +351,7 @@ def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
                         continue
                     size = float(span.get("size", 11.0))
                     flags = int(span.get("flags", 0))
-                    bold = bool(flags & 2**4)   # bit 4 = bold in PyMuPDF
+                    bold = bool(flags & 2**4)  # bit 4 = bold in PyMuPDF
                     italic = bool(flags & 2**1)  # bit 1 = italic
                     max_font_size = max(max_font_size, size)
                     if bold:
@@ -348,9 +363,7 @@ def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
             if not full_text:
                 continue
 
-            is_heading, h_level = _is_likely_heading_block(
-                block, max_font_size, is_bold_block
-            )
+            is_heading, h_level = _is_likely_heading_block(block, max_font_size, is_bold_block)
 
             if is_heading:
                 style = _heading_style_from_level(h_level)
@@ -358,14 +371,16 @@ def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
                 style = "Normal"
                 h_level = 0
 
-            paragraphs.append({
-                "index": p_idx,
-                "text": full_text,
-                "style": style,
-                "level": h_level,
-                "page": page_no,
-                "runs": runs if runs else [{"text": full_text, "bold": False, "italic": False}],
-            })
+            paragraphs.append(
+                {
+                    "index": p_idx,
+                    "text": full_text,
+                    "style": style,
+                    "level": h_level,
+                    "page": page_no,
+                    "runs": runs if runs else [{"text": full_text, "bold": False, "italic": False}],
+                }
+            )
             p_idx += 1
 
         # Simple table extraction (PyMuPDF ≥ 1.23 find_tables API)
@@ -374,11 +389,15 @@ def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
             for tab in tabs:
                 tab_rows = tab.extract()
                 if tab_rows:
-                    tables.append({
-                        "after_paragraph_index": max(p_idx - 1, 0),
-                        "rows": [[str(c) if c is not None else "" for c in row] for row in tab_rows],
-                        "page": page_no,
-                    })
+                    tables.append(
+                        {
+                            "after_paragraph_index": max(p_idx - 1, 0),
+                            "rows": [
+                                [str(c) if c is not None else "" for c in row] for row in tab_rows
+                            ],
+                            "page": page_no,
+                        }
+                    )
         except Exception:
             pass
 
@@ -396,6 +415,7 @@ def _parse_with_pymupdf(abs_path: str) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # MineruParser class
 # ---------------------------------------------------------------------------
+
 
 class MineruParser:
     """
@@ -513,9 +533,12 @@ class MineruParser:
         try:
             cmd = [
                 _MINERU_CMD,
-                "-p", abs_path,
-                "-o", tmpdir,
-                "-m", "auto",
+                "-p",
+                abs_path,
+                "-o",
+                tmpdir,
+                "-m",
+                "auto",
             ]
             log.debug("MineruParser: running %s", " ".join(cmd))
 
@@ -528,14 +551,10 @@ class MineruParser:
 
             if proc.returncode != 0:
                 stderr_snippet = (proc.stderr or "")[:500]
-                raise RuntimeError(
-                    f"MinerU exited with code {proc.returncode}: {stderr_snippet}"
-                )
+                raise RuntimeError(f"MinerU exited with code {proc.returncode}: {stderr_snippet}")
 
             # Locate content_list JSON
-            content_list_path = (
-                Path(tmpdir) / stem / "auto" / f"{stem}_content_list.json"
-            )
+            content_list_path = Path(tmpdir) / stem / "auto" / f"{stem}_content_list.json"
 
             # MinerU may sanitise the stem (spaces → underscores, etc.)
             if not content_list_path.exists():
@@ -570,6 +589,7 @@ class MineruParser:
 # ---------------------------------------------------------------------------
 # Module-level public API
 # ---------------------------------------------------------------------------
+
 
 def parse_with_mineru(file_path: str, format: str = "pdf") -> Dict[str, Any]:  # noqa: A002
     """

@@ -52,7 +52,7 @@ class SemanticMemoryStore:
     def __init__(self):
         self.prompt_shield = PromptShield()
         self.pii_guard = PiiGuard()
-        self._memories: List[Dict] = []        # list of {id, text, user_id, embedding, metadata}
+        self._memories: List[Dict] = []  # list of {id, text, user_id, embedding, metadata}
         self._lock = threading.Lock()
         self._next_id = 0
 
@@ -65,7 +65,9 @@ class SemanticMemoryStore:
                 "embed_text() returned a zero vector — model2vec is not loaded. "
                 "pip install model2vec"
             )
-        log.info(f"SemanticMemoryStore initialized (embedding dim={len(test_vec)}, nonzero={nonzero})")
+        log.info(
+            f"SemanticMemoryStore initialized (embedding dim={len(test_vec)}, nonzero={nonzero})"
+        )
 
     def add(self, text: str, user_id: str = "local", metadata: Optional[Dict] = None) -> int:
         """
@@ -91,13 +93,15 @@ class SemanticMemoryStore:
         with self._lock:
             mem_id = self._next_id
             self._next_id += 1
-            self._memories.append({
-                "id": mem_id,
-                "text": cleaned,
-                "user_id": user_id,
-                "embedding": embedding,
-                "metadata": metadata or {},
-            })
+            self._memories.append(
+                {
+                    "id": mem_id,
+                    "text": cleaned,
+                    "user_id": user_id,
+                    "embedding": embedding,
+                    "metadata": metadata or {},
+                }
+            )
 
         log.info(f"Memory {mem_id} added for user {user_id} (len={len(cleaned)})")
         return mem_id
@@ -144,12 +148,14 @@ class SemanticMemoryStore:
         # Return top_k results
         results = []
         for score, mem in scored[:top_k]:
-            results.append({
-                "id": mem["id"],
-                "text": mem["text"],
-                "score": score,
-                "metadata": mem.get("metadata", {}),
-            })
+            results.append(
+                {
+                    "id": mem["id"],
+                    "text": mem["text"],
+                    "score": score,
+                    "metadata": mem.get("metadata", {}),
+                }
+            )
         return results
 
     def count(self, user_id: Optional[str] = None) -> int:
@@ -166,10 +172,12 @@ class SemanticMemoryStore:
             for mem in self._memories:
                 if user_id is not None and mem["user_id"] != user_id:
                     continue
-                results.append({
-                    "id": mem["id"],
-                    "text": mem["text"],
-                    "user_id": mem["user_id"],
-                    "metadata": mem.get("metadata", {}),
-                })
+                results.append(
+                    {
+                        "id": mem["id"],
+                        "text": mem["text"],
+                        "user_id": mem["user_id"],
+                        "metadata": mem.get("metadata", {}),
+                    }
+                )
             return results

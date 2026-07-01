@@ -11,12 +11,12 @@ Usage:
     result = stt.transcribe('/path/to/audio.wav')
     # → {text, segments, language, duration}
 """
+
 from __future__ import annotations
 
 import logging
 import os
 import time
-from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -29,10 +29,13 @@ HAS_FASTER_WHISPER: bool = False
 
 try:
     from faster_whisper import WhisperModel  # type: ignore
+
     HAS_FASTER_WHISPER = True
 except ImportError:
-    log.info("faster-whisper not installed — FasterWhisperSTT will raise on init. "
-             "Install: pip install faster-whisper")
+    log.info(
+        "faster-whisper not installed — FasterWhisperSTT will raise on init. "
+        "Install: pip install faster-whisper"
+    )
     WhisperModel = None  # type: ignore
 
 
@@ -50,9 +53,7 @@ class FasterWhisperSTT:
         compute_type: str = "int8",
     ):
         if not HAS_FASTER_WHISPER:
-            raise RuntimeError(
-                "faster-whisper not installed. pip install faster-whisper"
-            )
+            raise RuntimeError("faster-whisper not installed. pip install faster-whisper")
 
         self.model_size = model_size
         self.device = device
@@ -96,11 +97,13 @@ class FasterWhisperSTT:
         segments: List[Dict] = []
         full_text_parts: List[str] = []
         for seg in segments_iter:
-            segments.append({
-                "start": round(seg.start, 3),
-                "end": round(seg.end, 3),
-                "text": seg.text.strip(),
-            })
+            segments.append(
+                {
+                    "start": round(seg.start, 3),
+                    "end": round(seg.end, 3),
+                    "text": seg.text.strip(),
+                }
+            )
             full_text_parts.append(seg.text.strip())
 
         elapsed = time.monotonic() - t0
@@ -119,9 +122,7 @@ class FasterWhisperSTT:
             "duration": duration,
         }
 
-    def transcribe_audio_array(
-        self, audio: np.ndarray, sample_rate: int
-    ) -> Dict:
+    def transcribe_audio_array(self, audio: np.ndarray, sample_rate: int) -> Dict:
         """
         Transcribe audio from a numpy array.
 
@@ -150,11 +151,13 @@ class FasterWhisperSTT:
         segments: List[Dict] = []
         full_text_parts: List[str] = []
         for seg in segments_iter:
-            segments.append({
-                "start": round(seg.start, 3),
-                "end": round(seg.end, 3),
-                "text": seg.text.strip(),
-            })
+            segments.append(
+                {
+                    "start": round(seg.start, 3),
+                    "end": round(seg.end, 3),
+                    "text": seg.text.strip(),
+                }
+            )
             full_text_parts.append(seg.text.strip())
 
         elapsed = time.monotonic() - t0

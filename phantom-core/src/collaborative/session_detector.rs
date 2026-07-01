@@ -1,5 +1,4 @@
 /// Detects Yjs‑powered collaborative sessions from active application context.
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -13,10 +12,10 @@ pub struct CollaborativeSession {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SyncProviderType {
-    WebSocket,    // y-websocket, hocuspocus
-    WebRTC,       // y-webrtc (P2P)
-    YSweet,       // y-sweet (S3-persisted)
-    Local,        // Local document (no sync)
+    WebSocket, // y-websocket, hocuspocus
+    WebRTC,    // y-webrtc (P2P)
+    YSweet,    // y-sweet (S3-persisted)
+    Local,     // Local document (no sync)
     Unknown,
 }
 
@@ -49,7 +48,6 @@ impl CollaborativeSession {
                 detected: true,
             });
         }
-
 
         // Tiptap / Hocuspocus editors
         if let Some(url) = browser_url {

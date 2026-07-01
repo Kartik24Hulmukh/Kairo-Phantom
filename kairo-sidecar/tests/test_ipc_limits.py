@@ -3,6 +3,7 @@ import pytest
 import json
 from sidecar.ipc import NamedPipeProtocol, MAX_MESSAGE_BYTES, MAX_CONCURRENT_REQUESTS
 
+
 class MockTransport:
     def __init__(self):
         self.written = []

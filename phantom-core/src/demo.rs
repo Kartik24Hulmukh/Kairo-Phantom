@@ -7,10 +7,10 @@ pub async fn run_demo_mode(app_handle: &tauri::AppHandle) {
     println!("Starting Kairo Phantom Demo Mode...");
 
     // 1. Open fake document window
-    let window = tauri::WindowBuilder::new(
+    let window = tauri::WebviewWindowBuilder::new(
         app_handle,
         "demo_window",
-        tauri::WindowUrl::App("demo.html".into())
+        tauri::WebviewUrl::App("demo.html".into())
     )
     .inner_size(800.0, 600.0)
     .title("Document1 — Kairo Phantom Demo")

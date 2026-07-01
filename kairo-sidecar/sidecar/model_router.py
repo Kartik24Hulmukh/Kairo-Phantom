@@ -25,22 +25,32 @@ from typing import Optional
 log = logging.getLogger("kairo-sidecar.model_router")
 
 # ─── Model Alias Constants ──────────────────────────────────────────────────
-MODEL_FAST     = "kairo-fast"       # 4B fine-tuned or qwen2.5:7b fallback
-MODEL_STANDARD = "kairo-standard"   # qwen2.5:7b
-MODEL_THINK    = "kairo-think"      # qwen3:8b with reasoning
-MODEL_CLOUD    = "kairo-cloud"      # Claude Sonnet (opt-in)
+MODEL_FAST = "kairo-fast"  # 4B fine-tuned or qwen2.5:7b fallback
+MODEL_STANDARD = "kairo-standard"  # qwen2.5:7b
+MODEL_THINK = "kairo-think"  # qwen3:8b with reasoning
+MODEL_CLOUD = "kairo-cloud"  # Claude Sonnet (opt-in)
 
 # Default for backward compatibility
-MODEL_DEFAULT  = MODEL_STANDARD
+MODEL_DEFAULT = MODEL_STANDARD
 
 # High-complexity waza agents that need reasoning tier
 _THINK_AGENTS = frozenset({"legal_reviewer", "medical_scribe", "financial_analyst"})
 
 # Simple task types that qualify for the fast tier
-_FAST_TASK_TYPES = frozenset({
-    "insert", "insert_paragraph", "append", "replace", "replace_paragraph",
-    "explain", "summarize", "title_update", "fix_typo", "format",
-})
+_FAST_TASK_TYPES = frozenset(
+    {
+        "insert",
+        "insert_paragraph",
+        "append",
+        "replace",
+        "replace_paragraph",
+        "explain",
+        "summarize",
+        "title_update",
+        "fix_typo",
+        "format",
+    }
+)
 
 
 def select_model(
@@ -81,31 +91,39 @@ def select_model(
 
     # Tier 4 — Cloud (opt-in only, web search required or very long context)
     if requires_web_search or estimated_tokens > 1500:
-        log.debug(f"model_router: → kairo-cloud (web_search={requires_web_search}, tokens={estimated_tokens})")
+        log.debug(
+            f"model_router: → kairo-cloud (web_search={requires_web_search}, tokens={estimated_tokens})"
+        )
         return MODEL_CLOUD
 
     # Tier 3 — Think (legal, medical, or high-complexity with many tokens)
     if waza_agent in _THINK_AGENTS or (estimated_tokens > 500 and confidence < 0.75):
-        log.debug(f"model_router: → kairo-think (waza_agent={waza_agent!r}, tokens={estimated_tokens})")
+        log.debug(
+            f"model_router: → kairo-think (waza_agent={waza_agent!r}, tokens={estimated_tokens})"
+        )
         return MODEL_THINK
 
     # Tier 1 — Fast (simple ops, high confidence, short prompt)
     normalized_task = task_type.lower().replace("-", "_")
     is_simple_task = any(normalized_task.startswith(t) for t in _FAST_TASK_TYPES)
     if is_simple_task and confidence >= 0.75 and estimated_tokens <= 150:
-        log.debug(f"model_router: → kairo-fast (task={task_type!r}, conf={confidence:.2f}, tokens={estimated_tokens})")
+        log.debug(
+            f"model_router: → kairo-fast (task={task_type!r}, conf={confidence:.2f}, tokens={estimated_tokens})"
+        )
         return MODEL_FAST
 
     # Tier 2 — Standard (everything else)
-    log.debug(f"model_router: → kairo-standard (task={task_type!r}, conf={confidence:.2f}, tokens={estimated_tokens})")
+    log.debug(
+        f"model_router: → kairo-standard (task={task_type!r}, conf={confidence:.2f}, tokens={estimated_tokens})"
+    )
     return MODEL_STANDARD
 
 
 def model_tier_label(model_alias: str) -> str:
     """Returns a human-readable label for a model alias."""
     return {
-        MODEL_FAST:     "KairoDocWriter-4B (fast)",
+        MODEL_FAST: "KairoDocWriter-4B (fast)",
         MODEL_STANDARD: "Qwen2.5-7B (standard)",
-        MODEL_THINK:    "Qwen3-8B reasoning (think)",
-        MODEL_CLOUD:    "Claude Sonnet (cloud)",
+        MODEL_THINK: "Qwen3-8B reasoning (think)",
+        MODEL_CLOUD: "Claude Sonnet (cloud)",
     }.get(model_alias, model_alias)

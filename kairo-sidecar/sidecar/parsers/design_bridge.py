@@ -22,6 +22,7 @@ from sidecar.parsers.tldraw_bridge import TldrawBridge
 
 log = logging.getLogger("kairo-sidecar.design_bridge")
 
+
 class MemMachine:
     """Persists cross-tool visual preferences (colors, fonts) across sessions."""
 
@@ -53,7 +54,7 @@ class MemMachine:
                     "background_light": "#f5f5f7",
                     "font_family_heading": "Outfit",
                     "font_family_body": "Inter",
-                    "border_radius": "8px"
+                    "border_radius": "8px",
                 }
             }
             self._save()
@@ -125,7 +126,7 @@ class FramegroundManipulator:
                         attr_match = re.search(r"class=['\"]([^'\"]+)['\"]", tag_str)
                         if attr_match:
                             return attr_match.group(1)
-        
+
         # Tag level selector, e.g. //button
         tag_name = xpath_selector.strip("/").split("[")[0]
         match = re.search(rf"<{tag_name}[^>]*>", content)
@@ -150,9 +151,11 @@ class PenpotBridge:
         if self.offline_mode:
             return False
         import sys
+
         if "pytest" in sys.modules:
             return True
         import socket
+
         try:
             with socket.create_connection(("127.0.0.1", 8083), timeout=0.5):
                 return True
@@ -162,6 +165,7 @@ class PenpotBridge:
     async def _send_websocket_req(self, payload: dict) -> dict:
         import json
         import websockets
+
         ws_url = "ws://localhost:8083"
         async with websockets.connect(ws_url) as ws:
             await ws.send(json.dumps(payload))
@@ -171,12 +175,13 @@ class PenpotBridge:
     def _call_websocket_sync(self, payload: dict) -> dict:
         import asyncio
         import concurrent.futures
+
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
         if loop.is_running():
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future = executor.submit(asyncio.run, self._send_websocket_req(payload))
@@ -187,16 +192,14 @@ class PenpotBridge:
     def _call_online_tool(self, tool_name: str, args: dict) -> dict:
         """Call Penpot MCP tool via WebSocket or standard stdio if WS fails."""
         import json
+
         payload = {
             "jsonrpc": "2.0",
             "method": "tools/call",
-            "params": {
-                "name": tool_name,
-                "arguments": args
-            },
-            "id": 1
+            "params": {"name": tool_name, "arguments": args},
+            "id": 1,
         }
-        
+
         # 1. Try WebSocket
         try:
             res = self._call_websocket_sync(payload)
@@ -204,13 +207,17 @@ class PenpotBridge:
                 return {"ok": True, "result": res.get("result", {})}
         except Exception as e:
             log.warning(f"Penpot WebSocket call failed: {e}. Trying stdio fallback.")
-            
+
         # 2. Try stdio npx fallback
         import subprocess
+
         try:
             result = subprocess.run(
                 ["npx", "-y", "@penpot/mcp@latest", "call", tool_name, json.dumps(args)],
-                capture_output=True, text=True, check=True, timeout=30
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=30,
             )
             return {"ok": True, "result": json.loads(result.stdout)}
         except Exception as e:
@@ -223,20 +230,18 @@ class PenpotBridge:
             online_res = self._call_online_tool("draw_svg", {"svg": svg_content})
             if online_res.get("ok"):
                 res_data = online_res.get("result", {}).get("result", online_res.get("result", {}))
-                element_id = res_data.get("element_id") or f"penpot-svg-{len(self._svg_elements) + 1}"
+                element_id = (
+                    res_data.get("element_id") or f"penpot-svg-{len(self._svg_elements) + 1}"
+                )
                 self._svg_elements.append(svg_content)
-                return {
-                    "ok": True,
-                    "element_id": element_id,
-                    "svg_rendered": True
-                }
+                return {"ok": True, "element_id": element_id, "svg_rendered": True}
 
         self._svg_elements.append(svg_content)
         log.info(f"Penpot rendering SVG element (length: {len(svg_content)})")
         return {
             "ok": True,
             "element_id": f"penpot-svg-{len(self._svg_elements)}",
-            "svg_rendered": True
+            "svg_rendered": True,
         }
 
 
@@ -251,18 +256,20 @@ class OpenPencilBridge:
         if self.offline_mode:
             return False
         import sys
+
         if "pytest" in sys.modules:
             return True
         import shutil
+
         return shutil.which("open-pencil") is not None
 
     def run_cli_command(self, args: List[str]) -> Dict[str, Any]:
         """Execute open-pencil CLI command directly on native system."""
         import subprocess
+
         try:
             result = subprocess.run(
-                ["open-pencil"] + args,
-                capture_output=True, text=True, check=True, timeout=15
+                ["open-pencil"] + args, capture_output=True, text=True, check=True, timeout=15
             )
             return {"ok": True, "stdout": result.stdout, "stderr": result.stderr}
         except Exception as e:
@@ -274,19 +281,18 @@ class OpenPencilBridge:
         if self.is_available():
             import json
             import subprocess
+
             try:
                 subprocess.run(
                     ["open-pencil", "draw", "--stroke", json.dumps(stroke_data)],
-                    capture_output=True, timeout=5
+                    capture_output=True,
+                    timeout=5,
                 )
             except Exception:
                 pass
 
         self._drawings.append(stroke_data)
-        return {
-            "ok": True,
-            "stroke_count": len(self._drawings)
-        }
+        return {"ok": True, "stroke_count": len(self._drawings)}
 
 
 class UnifiedDesignBridge:
@@ -294,7 +300,7 @@ class UnifiedDesignBridge:
 
     def __init__(self, offline_mode: bool = True):
         self.offline_mode = offline_mode
-        
+
         # Sub-bridges
         self.figma = FigmaDesignBridge(offline_mode=offline_mode)
         self.comfyui = ComfyUIBridge(offline_mode=offline_mode)
@@ -350,7 +356,7 @@ class UnifiedDesignBridge:
         # Setup Auto Layout spacing / flexbox mappings
         layout_classes = []
         style_attributes = []
-        
+
         if bg_color:
             style_attributes.append(bg_color)
         if text_color:
@@ -364,37 +370,49 @@ class UnifiedDesignBridge:
                 layout_classes.append("items-center")
             else:
                 layout_classes.append("flex-col")
-            
+
             # Padding conversion
             pt = node.get("paddingTop", 0)
             pb = node.get("paddingBottom", 0)
             pl = node.get("paddingLeft", 0)
             pr = node.get("paddingRight", 0)
-            
+
             # Simple conversion helper (px to Tailwind padding)
             def px_to_pad(px):
-                if px <= 0: return ""
-                if px <= 4: return "1"
-                if px <= 8: return "2"
-                if px <= 12: return "3"
-                if px <= 16: return "4"
-                if px <= 24: return "6"
-                if px <= 32: return "8"
-                if px <= 48: return "12"
+                if px <= 0:
+                    return ""
+                if px <= 4:
+                    return "1"
+                if px <= 8:
+                    return "2"
+                if px <= 12:
+                    return "3"
+                if px <= 16:
+                    return "4"
+                if px <= 24:
+                    return "6"
+                if px <= 32:
+                    return "8"
+                if px <= 48:
+                    return "12"
                 return "16"
-                
+
             p_top = px_to_pad(pt)
             p_bot = px_to_pad(pb)
             p_left = px_to_pad(pl)
             p_right = px_to_pad(pr)
-            
+
             if pt == pb == pl == pr and pt > 0:
                 layout_classes.append(f"p-{px_to_pad(pt)}")
             else:
-                if pt > 0: layout_classes.append(f"pt-{p_top}")
-                if pb > 0: layout_classes.append(f"pb-{p_bot}")
-                if pl > 0: layout_classes.append(f"pl-{p_left}")
-                if pr > 0: layout_classes.append(f"pr-{p_right}")
+                if pt > 0:
+                    layout_classes.append(f"pt-{p_top}")
+                if pb > 0:
+                    layout_classes.append(f"pb-{p_bot}")
+                if pl > 0:
+                    layout_classes.append(f"pl-{p_left}")
+                if pr > 0:
+                    layout_classes.append(f"pr-{p_right}")
 
             # Spacing / gap
             gap = node.get("itemSpacing", 0)
@@ -406,34 +424,41 @@ class UnifiedDesignBridge:
             # Border radius / corner radius
             radius = node.get("cornerRadius", 0)
             if radius > 0:
-                if radius <= 4: layout_classes.append("rounded-sm")
-                elif radius <= 8: layout_classes.append("rounded-md")
-                elif radius <= 12: layout_classes.append("rounded-lg")
-                elif radius <= 24: layout_classes.append("rounded-2xl")
-                else: layout_classes.append("rounded-3xl")
+                if radius <= 4:
+                    layout_classes.append("rounded-sm")
+                elif radius <= 8:
+                    layout_classes.append("rounded-md")
+                elif radius <= 12:
+                    layout_classes.append("rounded-lg")
+                elif radius <= 24:
+                    layout_classes.append("rounded-2xl")
+                else:
+                    layout_classes.append("rounded-3xl")
 
         # HTML construction
         style_str = f' style="{" ".join(style_attributes)}"' if style_attributes else ""
         class_str = f' class="{" ".join(layout_classes)}"' if layout_classes else ""
-        
+
         # Recurse children
         children_html = "\n".join(self._node_to_html(c) for c in children) if children else ""
 
         if node_type == "CANVAS":
             return f'<div id="{node["id"]}" class="w-full min-h-screen bg-[#050508] text-white p-8">\n{children_html}\n</div>'
-            
+
         elif node_type == "SECTION":
             return f'<section id="{node["id"]}"{class_str}{style_str}>\n{children_html}\n</section>'
-            
+
         elif node_type == "COMPONENT":
             if "button" in name.lower() or "btn" in name.lower():
-                return f'<button id="{node["id"]}"{class_str}{style_str}>\n{children_html}\n</button>'
+                return (
+                    f'<button id="{node["id"]}"{class_str}{style_str}>\n{children_html}\n</button>'
+                )
             return f'<div id="{node["id"]}"{class_str}{style_str}>\n{children_html}\n</div>'
-            
+
         elif node_type == "TEXT":
             characters = node.get("characters", "")
             fontSize = node.get("fontSize", 14)
-            
+
             font_classes = []
             if fontSize >= 36:
                 font_classes.append("text-5xl font-extrabold tracking-tight font-heading")
@@ -453,7 +478,7 @@ class UnifiedDesignBridge:
 
             font_class_str = f' class="{" ".join(font_classes)}"'
             return f'<{tag} id="{node["id"]}"{font_class_str}{style_str}>{characters}</{tag}>'
-            
+
         elif node_type == "RECTANGLE":
             # Rectangles are often used as visual dividers or graphical cards
             w = node.get("width", 100)

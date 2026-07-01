@@ -1,12 +1,11 @@
-import os
-import re
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List
 
 
 # ---------------------------------------------------------------------------
 # PromptBuilder — canonical variable injection order for all domains
 # ---------------------------------------------------------------------------
+
 
 class PromptBuilder:
     """
@@ -74,10 +73,7 @@ class PromptBuilder:
 
         # ── 1. app_name ───────────────────────────────────────────────────────
         app_name_str = str(app_name) if app_name else "Unknown Application"
-        parts.append(
-            f"=== APP CONTEXT ===\n"
-            f"Application Name: {app_name_str}"
-        )
+        parts.append(f"=== APP CONTEXT ===\n" f"Application Name: {app_name_str}")
 
         # ── 2. doc_context ────────────────────────────────────────────────────
         if doc_context is not None:
@@ -98,15 +94,15 @@ class PromptBuilder:
         else:
             doc_json = "{}"
 
-        parts.append(
-            f"=== DOCUMENT CONTEXT ===\n{doc_json}"
-        )
+        parts.append(f"=== DOCUMENT CONTEXT ===\n{doc_json}")
 
         # ── 3. mem_context ────────────────────────────────────────────────────
-        mem_str = mem_context if mem_context else "No writing preferences learned yet. Use professional defaults."
-        parts.append(
-            f"=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{mem_str}"
+        mem_str = (
+            mem_context
+            if mem_context
+            else "No writing preferences learned yet. Use professional defaults."
         )
+        parts.append(f"=== MEMORY CONTEXT ===\nUser Writing Preferences:\n{mem_str}")
 
         # ── 4. classification ─────────────────────────────────────────────────
         if classification is not None:
@@ -118,15 +114,14 @@ class PromptBuilder:
                 cls_str = json.dumps(classification.model_dump())
             elif hasattr(classification, "__dataclass_fields__"):
                 import dataclasses
+
                 cls_str = json.dumps(dataclasses.asdict(classification))
             else:
                 cls_str = str(classification)
         else:
             cls_str = "unknown"
 
-        parts.append(
-            f"=== INTENT CLASSIFICATION ===\nClassification: {cls_str}"
-        )
+        parts.append(f"=== INTENT CLASSIFICATION ===\nClassification: {cls_str}")
 
         # ── 5. output_schema_hint (optional) ─────────────────────────────────
         if output_schema_hint:
@@ -142,6 +137,7 @@ class PromptBuilder:
         parts.append(f"USER INSTRUCTION: {safe_prompt}\nOUTPUT (JSON only):")
 
         return self._BLOCK_SEP.join(parts)
+
 
 # Helper wrapper to support both custom objects and dictionaries
 class UniversalContextWrapper:
@@ -199,16 +195,17 @@ class UniversalContextWrapper:
         if isinstance(self._obj, dict):
             return key in self._obj
         else:
-            return hasattr(self._obj, key) or (hasattr(self._obj, "__dict__") and key in self._obj.__dict__)
+            return hasattr(self._obj, key) or (
+                hasattr(self._obj, "__dict__") and key in self._obj.__dict__
+            )
+
 
 # Maintain DictAttrWrapper alias for compatibility
 DictAttrWrapper = UniversalContextWrapper
 
+
 def build_word_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.word_master import WordContext
     from sidecar.masters.word_prompt_builder import build_word_prompt as _build_word
@@ -238,7 +235,7 @@ def build_word_prompt(
         document_purpose = doc_context.get("document_purpose", "business_memo")
         cursor_paragraph_index = doc_context.get("cursor_paragraph_index", 0)
         total_paragraphs = doc_context.get("total_paragraphs", len(paragraphs))
-        
+
         context_obj = WordContext(
             styles=styles,
             paragraphs=paragraphs,
@@ -247,7 +244,7 @@ def build_word_prompt(
             list_sequences=list_sequences,
             document_purpose=document_purpose,
             cursor_paragraph_index=cursor_paragraph_index,
-            total_paragraphs=total_paragraphs
+            total_paragraphs=total_paragraphs,
         )
     else:
         context_obj = doc_context
@@ -258,9 +255,19 @@ def build_word_prompt(
         if isinstance(classification, str):
             intent_classification = classification
         elif isinstance(classification, dict):
-            intent_classification = classification.get("task_type") or classification.get("intent") or classification.get("classification") or "Document Operation Generation"
+            intent_classification = (
+                classification.get("task_type")
+                or classification.get("intent")
+                or classification.get("classification")
+                or "Document Operation Generation"
+            )
         else:
-            intent_classification = getattr(classification, "task_type", None) or getattr(classification, "intent", None) or getattr(classification, "classification", None) or "Document Operation Generation"
+            intent_classification = (
+                getattr(classification, "task_type", None)
+                or getattr(classification, "intent", None)
+                or getattr(classification, "classification", None)
+                or "Document Operation Generation"
+            )
 
     return _build_word(
         user_instruction=user_prompt,
@@ -269,15 +276,12 @@ def build_word_prompt(
         file_path=file_path,
         app_name="Microsoft Word",
         app_type="Word Processor",
-        intent_classification=intent_classification
+        intent_classification=intent_classification,
     )
 
 
 def build_excel_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     if isinstance(doc_context, UniversalContextWrapper):
         doc_context = doc_context._obj
@@ -300,12 +304,14 @@ def build_excel_prompt(
                 val = c.get("value") if isinstance(c, dict) else getattr(c, "value", "")
                 formula = c.get("formula") if isinstance(c, dict) else getattr(c, "formula", "")
                 active_cell = getattr(context, "active_cell", "A1")
-                row_dict.setdefault(row_num, []).append({
-                    "ref": ref,
-                    "value": val or "",
-                    "formula": formula or "",
-                    "is_active": ref == active_cell,
-                })
+                row_dict.setdefault(row_num, []).append(
+                    {
+                        "ref": ref,
+                        "value": val or "",
+                        "formula": formula or "",
+                        "is_active": ref == active_cell,
+                    }
+                )
             for r_num in sorted(row_dict.keys()):
                 grid_rows.append(row_dict[r_num])
 
@@ -315,7 +321,7 @@ def build_excel_prompt(
     sheet_names_list = getattr(context, "sheet_names", ["Sheet1"])
     sheet_names = json.dumps(sheet_names_list)
     cell_grid_json = json.dumps(grid_rows, indent=2)
-    
+
     headers_val = getattr(context, "headers", {})
     if isinstance(headers_val, dict):
         headers = json.dumps(list(headers_val.values()))
@@ -323,11 +329,11 @@ def build_excel_prompt(
         headers = json.dumps(headers_val)
     else:
         headers = json.dumps([])
-        
+
     named_ranges_val = getattr(context, "named_ranges", [])
     named_ranges = json.dumps(named_ranges_val)
     locale = getattr(context, "locale", "en") or "en"
-    
+
     column_types_dict = {}
     cells_list = getattr(context, "cells", [])
     if cells_list:
@@ -350,7 +356,7 @@ def build_excel_prompt(
                 column_types_dict[col_letter] = "Text"
     column_types = json.dumps(column_types_dict)
 
-    app_context_part = f"""=== APP CONTEXT ===
+    app_context_part = """=== APP CONTEXT ===
 Application Name: Microsoft Excel
 Application Type: Spreadsheet
 File Path: Unknown"""
@@ -370,7 +376,7 @@ Locale: {locale} (en=comma separator, eu=semicolon separator)"""
 User Writing Preferences:
 {memory_str}"""
 
-    classification_part = f"""=== INTENT CLASSIFICATION ===
+    classification_part = """=== INTENT CLASSIFICATION ===
 Intent Classification: Spreadsheet Formula / Data Operation Generation"""
 
     system_rules = """SYSTEM:
@@ -434,112 +440,102 @@ OUTPUT SCHEMA:
 USER INSTRUCTION: {user_prompt}
 OUTPUT (JSON only):"""
 
+
 def build_powerpoint_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import PowerPointMaster
+
     master = PowerPointMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_code_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import CodeMaster
+
     master = CodeMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_pdf_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import PDFMaster
+
     master = PDFMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_browser_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import BrowserMaster
+
     master = BrowserMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_terminal_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import TerminalMaster
+
     master = TerminalMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_email_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import EmailMaster
+
     master = EmailMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_notes_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import NotesMaster
+
     master = NotesMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_design_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import DesignMaster
+
     master = DesignMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_media_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import MediaMaster
+
     master = MediaMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)
 
+
 def build_data_prompt(
-    user_prompt: str,
-    doc_context: Any,
-    mem_context: str,
-    classification: Any = None
+    user_prompt: str, doc_context: Any, mem_context: str, classification: Any = None
 ) -> str:
     from sidecar.masters.other_masters import DataMaster
+
     master = DataMaster()
     context = UniversalContextWrapper(doc_context)
     return master.build_prompt(user_prompt, context, mem_context, classification)

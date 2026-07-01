@@ -1,6 +1,6 @@
-use anyhow::{Result, anyhow};
-use async_trait::async_trait;
 use super::IntegrationAdapter;
+use anyhow::{anyhow, Result};
+use async_trait::async_trait;
 
 pub struct NotionAdapter {
     api_key: Option<String>,
@@ -18,10 +18,13 @@ impl NotionAdapter {
     }
 
     fn get_api_key(&self) -> Result<String> {
-        self.api_key.clone().or_else(|| {
-            // Mock: Get from env or config
-            std::env::var("NOTION_API_KEY").ok()
-        }).ok_or_else(|| anyhow!("Notion API key not configured"))
+        self.api_key
+            .clone()
+            .or_else(|| {
+                // Mock: Get from env or config
+                std::env::var("NOTION_API_KEY").ok()
+            })
+            .ok_or_else(|| anyhow!("Notion API key not configured"))
     }
 }
 
@@ -37,9 +40,12 @@ impl IntegrationAdapter for NotionAdapter {
 
     async fn get_deep_context(&self) -> Result<String> {
         let _key = self.get_api_key()?;
-        
+
         // Mock Notion API call to fetch workspace metadata
-        Ok("Notion Workspace: Kairo Team\nDatabases: [Projects, Tasks, Knowledge Base]".to_string())
+        Ok(
+            "Notion Workspace: Kairo Team\nDatabases: [Projects, Tasks, Knowledge Base]"
+                .to_string(),
+        )
     }
 
     async fn execute_action(&self, action: &str, data: &str) -> Result<()> {
@@ -48,10 +54,10 @@ impl IntegrationAdapter for NotionAdapter {
         match action {
             "append_block" => {
                 // Mock Notion API call to append block
-                println!("Notion: Appending block with data: {}", data);
+                println!("Notion: Appending block with data: {data}");
                 Ok(())
             }
-            _ => Err(anyhow!("Unsupported action: {}", action)),
+            _ => Err(anyhow!("Unsupported action: {action}")),
         }
     }
 }

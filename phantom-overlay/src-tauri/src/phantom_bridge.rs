@@ -29,7 +29,7 @@ impl PhantomBridge {
             .build()?;
 
         let resp = client
-            .post(format!("http://127.0.0.1:{}/materialize", PHANTOM_PORT))
+            .post(format!("http://127.0.0.1:{PHANTOM_PORT}/materialize"))
             .json(&MaterializeRequest { context: None })
             .send()
             .await?
@@ -44,7 +44,7 @@ impl PhantomBridge {
     pub async fn ping() -> bool {
         let client = Client::new();
         client
-            .get(format!("http://127.0.0.1:{}/health", PHANTOM_PORT))
+            .get(format!("http://127.0.0.1:{PHANTOM_PORT}/health"))
             .timeout(std::time::Duration::from_secs(1))
             .send()
             .await

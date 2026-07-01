@@ -1,0 +1,77 @@
+# =============================================================================
+# Kairo-Phantom — Gitleaks configuration
+# =============================================================================
+# Scans for hardcoded secrets (API keys, tokens, passwords, private keys).
+# A real GitHub PAT was leaked previously — this gate is MANDATORY.
+#
+# PROVEN FACTS:
+#   scripts/ci/sbom_gate.py EXISTS (ls confirmed: 8208 bytes)
+# =============================================================================
+
+title = "Kairo-Phantom Secret Scan"
+
+[extend]
+# Use the default gitleaks rules as a base, then add Kairo-specific patterns.
+useDefault = true
+
+[[rules]]
+# ── GitHub Personal Access Token (the one that was leaked before) ──
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''gh[pousr]_[A-Za-z0-9]{36,}'''
+tags = ["github", "token", "key"]
+keywords = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"]
+
+[[rules]]
+# ── Ed25519 private key (Kairo audit chain keys) ──
+id = "ed25519-private-key"
+description = "Ed25519 private key material"
+regex = '''-----BEGIN (ED25519|OPENSSH|PRIVATE) KEY-----'''
+tags = ["key", "crypto", "ed25519"]
+
+[[rules]]
+# ── Ollama API key (if used for cloud Ollama) ──
+id = "ollama-api-key"
+description = "Ollama API key"
+regex = '''ollama[_-]?api[_-]?key\s*[=:]\s*["']?[A-Za-z0-9_-]{20,}["']?'''
+tags = ["ollama", "api-key"]
+
+[[rules]]
+# ── OpenAI / Anthropic / LLM API keys ──
+id = "llm-api-key"
+description = "LLM provider API key"
+regex = '''(sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9_-]{20,})'''
+tags = ["openai", "anthropic", "api-key"]
+
+[allowlist]
+description = "Allowed paths and patterns (test fixtures, mock keys, docs)"
+paths = [
+    # Test files use mock/dummy keys — not real secrets
+    '''kairo-sidecar/tests/.*''',
+    '''phantom-core/tests/.*''',
+    # The SBOM gate script contains a documented mock key (hex representation)
+    # PROVEN: scripts/ci/sbom_gate.py exists (8208 bytes)
+    '''scripts/ci/sbom_gate\.py''',
+    # Agent briefing docs may reference secret patterns for documentation
+    '''\.agents/.*''',
+    # This file itself
+    '''\.gitleaks\.toml''',
+]
+regexes = [
+    # Mock/test key patterns
+    '''MOCK_PRIVATE_KEY_HEX''',
+    '''mock.*key''',
+    '''test.*key''',
+    '''example.*key''',
+    '''dummy.*key''',
+    # Hex strings shorter than 32 chars (not real key material)
+    '''[0-9a-f]{1,31}''',
+]
+stopwords = [
+    "mock",
+    "test",
+    "example",
+    "dummy",
+    "fake",
+    "sample",
+]

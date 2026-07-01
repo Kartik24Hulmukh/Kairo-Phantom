@@ -20,30 +20,33 @@ from __future__ import annotations
 import os
 import platform
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 
 # ─── Model Registry ──────────────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class VlmModelSpec:
     """Specification for a VLM model variant."""
-    ollama_name: str          # Ollama model tag (for ollama pull/run)
-    gguf_filename: str        # GGUF filename in model cache
-    hf_repo: str              # Hugging Face repo for download
-    hf_filename: str          # Hugging Face filename
-    size_gb: float            # Approximate download/disk size
-    min_vram_gb: float        # Minimum VRAM for GPU inference
-    quant: str                # Quantization level
+
+    ollama_name: str  # Ollama model tag (for ollama pull/run)
+    gguf_filename: str  # GGUF filename in model cache
+    hf_repo: str  # Hugging Face repo for download
+    hf_filename: str  # Hugging Face filename
+    size_gb: float  # Approximate download/disk size
+    min_vram_gb: float  # Minimum VRAM for GPU inference
+    quant: str  # Quantization level
     description: str
-    ollama_pull_tag: str = ""          # Human-readable description
+    ollama_pull_tag: str = ""  # Human-readable description
 
 
 # Primary model: 7B Q4_K_M — best accuracy, needs ≥6 GB VRAM
 VLM_7B_Q4 = VlmModelSpec(
-    ollama_name="kairo-vlm-7b", ollama_pull_tag="qwen2.5vl:7b",
+    ollama_name="kairo-vlm-7b",
+    ollama_pull_tag="qwen2.5vl:7b",
     gguf_filename="qwen2.5-vl-7b-instruct-Q4_K_M.gguf",
     hf_repo="bartowski/Qwen2.5-VL-7B-Instruct-GGUF",
     hf_filename="Qwen2.5-VL-7B-Instruct-Q4_K_M.gguf",
@@ -55,7 +58,8 @@ VLM_7B_Q4 = VlmModelSpec(
 
 # Fallback model: 3B Q4_K_M — lower VRAM, good for simple GUIs
 VLM_3B_Q4 = VlmModelSpec(
-    ollama_name="kairo-vlm-3b", ollama_pull_tag="qwen2.5vl:3b",
+    ollama_name="kairo-vlm-3b",
+    ollama_pull_tag="qwen2.5vl:3b",
     gguf_filename="qwen2.5-vl-3b-instruct-Q4_K_M.gguf",
     hf_repo="bartowski/Qwen2.5-VL-3B-Instruct-GGUF",
     hf_filename="Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
@@ -69,16 +73,17 @@ VLM_3B_Q4 = VlmModelSpec(
 @dataclass
 class VlmConfig:
     """Runtime VLM configuration — resolved once at startup."""
+
     selected_model: VlmModelSpec
     model_cache_dir: Path
     ollama_url: str = "http://127.0.0.1:11434"
-    keep_alive: int = 0            # seconds: 0 = unload immediately after task
+    keep_alive: int = 0  # seconds: 0 = unload immediately after task
     context_length: int = 4096
-    temperature: float = 0.0       # deterministic for grounding tasks
+    temperature: float = 0.0  # deterministic for grounding tasks
     max_tokens: int = 512
     gpu_available: bool = False
     vram_gb: float = 0.0
-    hardware_tier: str = "cpu"     # "gpu-7b", "gpu-3b", "cpu"
+    hardware_tier: str = "cpu"  # "gpu-7b", "gpu-3b", "cpu"
 
     @property
     def model_path(self) -> Path:
@@ -103,12 +108,15 @@ class VlmConfig:
 
 # ─── Hardware Detection ───────────────────────────────────────────────────────
 
+
 def _get_nvidia_vram_gb() -> float:
     """Query NVIDIA VRAM via nvidia-smi. Returns 0.0 if not available."""
     try:
         result = subprocess.run(
             ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=5
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0:
             lines = result.stdout.strip().splitlines()
@@ -125,14 +133,16 @@ def _get_amd_vram_gb() -> float:
     try:
         result = subprocess.run(
             ["rocm-smi", "--showmeminfo", "vram", "--csv"],
-            capture_output=True, text=True, timeout=5
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0:
             for line in result.stdout.splitlines():
                 if "VRAM Total Memory (B)" in line:
                     parts = line.split(",")
                     if len(parts) >= 2:
-                        return int(parts[1].strip()) / (1024 ** 3)
+                        return int(parts[1].strip()) / (1024**3)
     except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
         pass
     return 0.0
@@ -144,18 +154,20 @@ def _get_total_ram_gb() -> float:
         if platform.system() == "Windows":
             result = subprocess.run(
                 ["wmic", "computersystem", "get", "TotalPhysicalMemory"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 line = line.strip()
                 if line.isdigit():
-                    return int(line) / (1024 ** 3)
+                    return int(line) / (1024**3)
         else:
             with open("/proc/meminfo") as f:
                 for line in f:
                     if line.startswith("MemTotal:"):
                         kb = int(line.split()[1])
-                        return kb / (1024 ** 2)
+                        return kb / (1024**2)
     except Exception:
         pass
     return 8.0  # assume 8GB if detection fails
@@ -164,7 +176,7 @@ def _get_total_ram_gb() -> float:
 def detect_hardware() -> tuple[bool, float, str]:
     """
     Detect GPU availability and VRAM.
-    
+
     Returns:
         (gpu_available, vram_gb, tier)
         tier: "gpu-7b", "gpu-3b", or "cpu"
@@ -201,6 +213,7 @@ def select_model(tier: str) -> VlmModelSpec:
 
 # ─── Config Builder ───────────────────────────────────────────────────────────
 
+
 def build_vlm_config(
     model_cache_dir: Optional[Path] = None,
     ollama_url: str = "http://127.0.0.1:11434",
@@ -208,12 +221,12 @@ def build_vlm_config(
 ) -> VlmConfig:
     """
     Build the VlmConfig for this machine.
-    
+
     Args:
         model_cache_dir: Override model cache directory (default: ~/.kairo-phantom/models)
         ollama_url: Ollama server URL
         force_tier: Force a specific tier ("gpu-7b", "gpu-3b", "cpu") for testing
-    
+
     Returns:
         Fully resolved VlmConfig
     """
@@ -230,7 +243,7 @@ def build_vlm_config(
 
     if model_cache_dir is None:
         model_cache_dir = Path.home() / ".kairo-phantom" / "models"
-    
+
     model_cache_dir.mkdir(parents=True, exist_ok=True)
 
     gpu_available, vram_gb, detected_tier = detect_hardware()
@@ -249,10 +262,11 @@ def build_vlm_config(
 
 # ─── Modelfile Generator ──────────────────────────────────────────────────────
 
+
 def write_modelfile(config: VlmConfig) -> Path:
     """
     Write the Ollama Modelfile for kairo-vlm.
-    
+
     The Modelfile references the GGUF at the model cache path, enabling
     `ollama create kairo-vlm -f Modelfile` to register it without re-downloading.
     """

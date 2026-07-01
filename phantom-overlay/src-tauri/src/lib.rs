@@ -2,9 +2,9 @@
 // Manages the glassmorphic ghost UI, global shortcuts, and IPC to phantom-core
 
 use tauri::{
-    AppHandle, Emitter, Manager, WebviewWindow,
-    tray::TrayIconBuilder,
     menu::{Menu, MenuItem},
+    tray::TrayIconBuilder,
+    AppHandle, Emitter, Manager, WebviewWindow,
 };
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
 
@@ -17,17 +17,21 @@ use phantom_bridge::PhantomBridge;
 /// IPC command: trigger AI materialization (called from frontend hotkey or button)
 #[tauri::command]
 async fn trigger_materialize(app: AppHandle) -> Result<String, String> {
-    app.emit("phantom:status", "capturing").map_err(|e| e.to_string())?;
+    app.emit("phantom:status", "capturing")
+        .map_err(|e| e.to_string())?;
 
     match PhantomBridge::materialize().await {
         Ok(suggestion) => {
-            app.emit("phantom:suggestion", &suggestion).map_err(|e| e.to_string())?;
-            app.emit("phantom:status", "idle").map_err(|e| e.to_string())?;
+            app.emit("phantom:suggestion", &suggestion)
+                .map_err(|e| e.to_string())?;
+            app.emit("phantom:status", "idle")
+                .map_err(|e| e.to_string())?;
             Ok(suggestion)
         }
         Err(e) => {
-            app.emit("phantom:status", "error").map_err(|e| e.to_string())?;
-            Err(format!("Phantom error: {}", e))
+            app.emit("phantom:status", "error")
+                .map_err(|e| e.to_string())?;
+            Err(format!("Phantom error: {e}"))
         }
     }
 }
@@ -73,18 +77,19 @@ pub fn run() {
             let _app_handle = app.handle().clone();
             let shortcut = Shortcut::new(Some(Modifiers::CONTROL), Code::Space);
 
-            app.global_shortcut().on_shortcut(shortcut, move |app, _shortcut, _event| {
-                let window = app.get_webview_window("main").unwrap();
+            app.global_shortcut()
+                .on_shortcut(shortcut, move |app, _shortcut, _event| {
+                    let window = app.get_webview_window("main").unwrap();
 
-                if window.is_visible().unwrap_or(false) {
-                    // Already visible — trigger materialization
-                    let _ = app.emit("phantom:hotkey", ());
-                } else {
-                    // Show the overlay
-                    let _ = window.show();
-                    let _ = app.emit("phantom:hotkey", ());
-                }
-            })?;
+                    if window.is_visible().unwrap_or(false) {
+                        // Already visible — trigger materialization
+                        let _ = app.emit("phantom:hotkey", ());
+                    } else {
+                        // Show the overlay
+                        let _ = window.show();
+                        let _ = app.emit("phantom:hotkey", ());
+                    }
+                })?;
 
             // System tray setup
             let quit = MenuItem::with_id(app, "quit", "Quit Kairo Phantom", true, None::<&str>)?;

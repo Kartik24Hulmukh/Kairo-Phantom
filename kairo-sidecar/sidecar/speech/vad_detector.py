@@ -14,14 +14,14 @@ Usage:
     is_speech = vad.is_speech(audio_chunk_bytes, sample_rate=16000)
     segments = vad.detect_speech_segments('/path/to/audio.wav')
 """
+
 from __future__ import annotations
 
 import logging
 import math
-import struct
 import wave
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 
@@ -34,6 +34,7 @@ HAS_TORCH: bool = False
 
 try:
     import torch  # type: ignore
+
     HAS_TORCH = True
 except ImportError:
     pass
@@ -90,9 +91,7 @@ class VADDetector:
             log.info("torch not installed, using energy-based VAD")
 
         if not self._use_silero:
-            log.info(
-                f"Energy-based VAD initialized: threshold={threshold}"
-            )
+            log.info(f"Energy-based VAD initialized: threshold={threshold}")
 
     @property
     def engine(self) -> str:
@@ -149,7 +148,7 @@ class VADDetector:
             return False
 
         # Compute RMS energy
-        rms = math.sqrt(np.mean(samples ** 2))
+        rms = math.sqrt(np.mean(samples**2))
 
         # Normalize to 0.0–1.0 range (relative to full-scale int16)
         normalized_energy = rms / self._ENERGY_SCALE
@@ -208,7 +207,7 @@ class VADDetector:
         speech_start = 0.0
 
         for i in range(0, len(samples), frame_samples):
-            frame = samples[i:i + frame_samples]
+            frame = samples[i : i + frame_samples]
             if len(frame) == 0:
                 break
 
@@ -217,7 +216,7 @@ class VADDetector:
             frame_is_speech = self.is_speech(frame_bytes, sample_rate)
 
             frame_start = float(i) / float(sample_rate)
-            frame_end = float(min(i + frame_samples, len(samples))) / float(sample_rate)
+            float(min(i + frame_samples, len(samples))) / float(sample_rate)
 
             if frame_is_speech and not in_speech:
                 # Speech onset
@@ -226,19 +225,23 @@ class VADDetector:
             elif not frame_is_speech and in_speech:
                 # Speech offset
                 in_speech = False
-                segments.append({
-                    "start": round(speech_start, 3),
-                    "end": round(frame_start, 3),
-                    "duration": round(frame_start - speech_start, 3),
-                })
+                segments.append(
+                    {
+                        "start": round(speech_start, 3),
+                        "end": round(frame_start, 3),
+                        "duration": round(frame_start - speech_start, 3),
+                    }
+                )
 
         # Close any open segment at end
         if in_speech:
-            segments.append({
-                "start": round(speech_start, 3),
-                "end": round(total_duration, 3),
-                "duration": round(total_duration - speech_start, 3),
-            })
+            segments.append(
+                {
+                    "start": round(speech_start, 3),
+                    "end": round(total_duration, 3),
+                    "duration": round(total_duration - speech_start, 3),
+                }
+            )
 
         log.info(
             f"VAD detected {len(segments)} speech segments in "

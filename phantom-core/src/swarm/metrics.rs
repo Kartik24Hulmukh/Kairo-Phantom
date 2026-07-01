@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use std::sync::Mutex;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use std::collections::HashMap;
+use std::sync::Mutex;
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct AgentMetrics {
@@ -32,7 +32,7 @@ impl PerformanceDashboard {
     pub fn record_call(&self, agent_id: &str, latency_ms: u64, success: bool) {
         let mut lock = self.metrics.lock().unwrap();
         let stats = lock.entry(agent_id.to_string()).or_default();
-        
+
         stats.total_calls += 1;
         if success {
             stats.success_count += 1;

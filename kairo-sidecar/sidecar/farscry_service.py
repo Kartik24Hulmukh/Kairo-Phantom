@@ -32,7 +32,6 @@ import logging
 import time
 from dataclasses import dataclass, field
 from typing import Optional, Dict, List
-import threading
 
 log = logging.getLogger("kairo-sidecar.farscry")
 
@@ -41,20 +40,20 @@ log = logging.getLogger("kairo-sidecar.farscry")
 # ---------------------------------------------------------------------------
 
 _PROCESS_LABELS: Dict[str, str] = {
-    "winword":         "Microsoft Word",
-    "excel":           "Microsoft Excel",
-    "powerpnt":        "Microsoft PowerPoint",
-    "outlook":         "Microsoft Outlook",
-    "code":            "Visual Studio Code",
-    "notepad++":       "Notepad++",
-    "notepad":         "Notepad",
-    "chrome":          "Google Chrome",
-    "msedge":          "Microsoft Edge",
-    "firefox":         "Mozilla Firefox",
-    "acrobat":         "Adobe Acrobat",
-    "powershell":      "PowerShell",
+    "winword": "Microsoft Word",
+    "excel": "Microsoft Excel",
+    "powerpnt": "Microsoft PowerPoint",
+    "outlook": "Microsoft Outlook",
+    "code": "Visual Studio Code",
+    "notepad++": "Notepad++",
+    "notepad": "Notepad",
+    "chrome": "Google Chrome",
+    "msedge": "Microsoft Edge",
+    "firefox": "Mozilla Firefox",
+    "acrobat": "Adobe Acrobat",
+    "powershell": "PowerShell",
     "windowsterminal": "Windows Terminal",
-    "cmd":             "Command Prompt",
+    "cmd": "Command Prompt",
 }
 
 
@@ -70,20 +69,20 @@ def _label_for_process(process_name: str) -> str:
 def _domain_for_label(label: str) -> str:
     """Map an app label to a Kairo domain key."""
     _LABEL_TO_DOMAIN: Dict[str, str] = {
-        "Microsoft Word":       "word",
-        "Microsoft Excel":      "excel",
+        "Microsoft Word": "word",
+        "Microsoft Excel": "excel",
         "Microsoft PowerPoint": "powerpoint",
-        "Microsoft Outlook":    "word",     # email body is Word-like
-        "Visual Studio Code":   "code",
-        "Notepad++":            "code",
-        "Notepad":              "notes",
-        "Google Chrome":        "browser",
-        "Microsoft Edge":       "browser",
-        "Mozilla Firefox":      "browser",
-        "Adobe Acrobat":        "pdf",
-        "PowerShell":           "terminal",
-        "Windows Terminal":     "terminal",
-        "Command Prompt":       "terminal",
+        "Microsoft Outlook": "word",  # email body is Word-like
+        "Visual Studio Code": "code",
+        "Notepad++": "code",
+        "Notepad": "notes",
+        "Google Chrome": "browser",
+        "Microsoft Edge": "browser",
+        "Mozilla Firefox": "browser",
+        "Adobe Acrobat": "pdf",
+        "PowerShell": "terminal",
+        "Windows Terminal": "terminal",
+        "Command Prompt": "terminal",
     }
     return _LABEL_TO_DOMAIN.get(label, "general")
 
@@ -92,9 +91,11 @@ def _domain_for_label(label: str) -> str:
 # Data types
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AppChangedEvent:
     """Emitted each time the active application changes."""
+
     process_name: str
     app_label: str
     domain: str
@@ -117,6 +118,7 @@ class KairoEyeContext:
 # Platform-specific foreground window probe
 # ---------------------------------------------------------------------------
 
+
 class _Win32Probe:
     """
     Single-call foreground window query using ctypes.
@@ -128,6 +130,7 @@ class _Win32Probe:
         try:
             import ctypes
             import ctypes.wintypes
+
             self._ctypes = ctypes
             self._wintypes = ctypes.wintypes
             self._kernel32 = ctypes.windll.kernel32
@@ -200,6 +203,7 @@ class _Win32Probe:
 # FarScry Service
 # ---------------------------------------------------------------------------
 
+
 class FarScryService:
     """
     Asyncio-compatible foreground window watcher with Kairo Eye cursor-OCR context.
@@ -215,7 +219,7 @@ class FarScryService:
     print(event.app_label, event.domain)
     """
 
-    POLL_INTERVAL: float = 0.25        # seconds
+    POLL_INTERVAL: float = 0.25  # seconds
     MAX_SUBSCRIBERS: int = 32
     CACHE_TTL_MS: int = 100
 
@@ -299,7 +303,7 @@ class FarScryService:
             try:
                 q.put_nowait(event)
             except asyncio.QueueFull:
-                log.debug(f"[FarScry] Subscriber queue full — event dropped")
+                log.debug("[FarScry] Subscriber queue full — event dropped")
 
     async def get_context(self) -> KairoEyeContext:
         """
@@ -323,14 +327,14 @@ class FarScryService:
             log.debug(f"OCR failed: {e}")
 
         elapsed_ms = (time.perf_counter() - t0) * 1000
-        
+
         ctx = KairoEyeContext(
             app_name=app_name,
             window_title=window_title,
             domain=domain,
             cursor_region_text=ocr_text,
             confidence=0.9,
-            assembled_ms=elapsed_ms
+            assembled_ms=elapsed_ms,
         )
         self._cache = ctx
         self._cache_time = now
@@ -342,10 +346,13 @@ class FarScryService:
             import pytesseract
             from PIL import Image
             import io
+
             img = Image.open(io.BytesIO(image_bytes))
             return pytesseract.image_to_string(img, timeout=2)
         except ImportError:
-            log.debug("[FarscryService] pytesseract not installed — OCR unavailable, using empty string")
+            log.debug(
+                "[FarscryService] pytesseract not installed — OCR unavailable, using empty string"
+            )
             return ""
         except Exception as e:
             log.debug(f"[FarscryService] OCR failed: {e}")
@@ -356,6 +363,7 @@ class FarScryService:
         try:
             import pyautogui
             import io
+
             x, y = pyautogui.position()
             left = max(0, x - 100)
             top = max(0, y - 100)
@@ -375,6 +383,7 @@ class FarScryService:
 # ---------------------------------------------------------------------------
 # Convenience helpers
 # ---------------------------------------------------------------------------
+
 
 def farscry_app_name() -> str:
     """

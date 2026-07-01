@@ -13,14 +13,12 @@ Verifies:
 """
 
 import os
-import pytest
 from unittest.mock import patch
 
 from sidecar.observability.headroom_proxy import (
     compress_context,
     compress_spreadsheet_context,
     count_tokens,
-    is_compression_enabled,
     get_headroom_client,
 )
 
@@ -31,7 +29,8 @@ class TestHeadroomAvailability:
     def test_headroom_imports(self):
         """Headroom must be importable."""
         import headroom
-        assert hasattr(headroom, 'compress')
+
+        assert hasattr(headroom, "compress")
 
     def test_headroom_client_initializes(self):
         """Headroom client must initialize without error."""
@@ -50,10 +49,10 @@ class TestCompressContext:
 
         # If compression is enabled, tokens_after should be less
         if metrics["compressed"]:
-            assert metrics["tokens_after"] < metrics["tokens_before"], \
-                "Compression did not reduce token count"
-            assert metrics["compression_ratio"] < 1.0, \
-                "Compression ratio should be < 1.0"
+            assert (
+                metrics["tokens_after"] < metrics["tokens_before"]
+            ), "Compression did not reduce token count"
+            assert metrics["compression_ratio"] < 1.0, "Compression ratio should be < 1.0"
             assert len(compressed) > 0, "Compressed text is empty"
         else:
             # If compression is disabled, text should be unchanged
@@ -83,8 +82,12 @@ class TestCompressContext:
         _, metrics = compress_context(text)
 
         required_fields = [
-            "tokens_before", "tokens_after", "compression_ratio",
-            "chars_before", "chars_after", "compressed",
+            "tokens_before",
+            "tokens_after",
+            "compression_ratio",
+            "chars_before",
+            "chars_after",
+            "compressed",
         ]
         for field in required_fields:
             assert field in metrics, f"Missing metric: {field}"
@@ -110,7 +113,9 @@ class TestCompressContext:
             # At least 2 of these key terms should be present
             key_terms = ["acme", "beta", "1500000", "california", "500000", "2024", "2025"]
             found = sum(1 for term in key_terms if term in combined)
-            assert found >= 2, f"Only {found}/7 key terms survived compression — content was destroyed"
+            assert (
+                found >= 2
+            ), f"Only {found}/7 key terms survived compression — content was destroyed"
 
 
 class TestDisabledMode:
@@ -168,7 +173,8 @@ class TestCompressionRatioBenchmark:
 
     def test_contract_text_compression(self):
         """Contract text should achieve meaningful compression."""
-        contract = """
+        contract = (
+            """
         THIS AGREEMENT is made and entered into as of this 15th day of January, 2024,
         by and between Acme Corporation, a Delaware corporation ("Company"), and
         Beta Industries, a California corporation ("Contractor").
@@ -196,14 +202,18 @@ class TestCompressionRatioBenchmark:
         5. LIABILITY. Liability shall be limited to $50,000.
 
         6. GOVERNING LAW. This agreement shall be governed by California law.
-        """ * 5  # Repeat to make it long enough for meaningful compression
+        """
+            * 5
+        )  # Repeat to make it long enough for meaningful compression
 
         compressed, metrics = compress_context(contract)
         if metrics["compressed"]:
             # Target: >=60% token reduction (compression_ratio <= 0.4)
             # Note: actual ratio depends on Headroom's algorithm
-            print(f"Contract compression: {metrics['tokens_before']}→{metrics['tokens_after']} "
-                  f"({metrics['compression_ratio']:.1%})")
+            print(
+                f"Contract compression: {metrics['tokens_before']}→{metrics['tokens_after']} "
+                f"({metrics['compression_ratio']:.1%})"
+            )
             # At minimum, some reduction should occur
             assert metrics["tokens_after"] <= metrics["tokens_before"]
 
@@ -212,8 +222,11 @@ class TestCompressionRatioBenchmark:
         repetitive = "The quick brown fox jumps over the lazy dog. " * 200
         compressed, metrics = compress_context(repetitive)
         if metrics["compressed"]:
-            print(f"Repetitive text: {metrics['tokens_before']}→{metrics['tokens_after']} "
-                  f"({metrics['compression_ratio']:.1%})")
+            print(
+                f"Repetitive text: {metrics['tokens_before']}→{metrics['tokens_after']} "
+                f"({metrics['compression_ratio']:.1%})"
+            )
             # Repetitive text should compress significantly
-            assert metrics["compression_ratio"] < 0.8, \
-                f"Repetitive text only compressed to {metrics['compression_ratio']:.1%}"
+            assert (
+                metrics["compression_ratio"] < 0.8
+            ), f"Repetitive text only compressed to {metrics['compression_ratio']:.1%}"

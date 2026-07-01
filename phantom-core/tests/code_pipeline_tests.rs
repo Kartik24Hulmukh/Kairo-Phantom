@@ -6,7 +6,7 @@ use tempfile::tempdir;
 fn test_python_context_extraction_and_injection() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("test_script.py");
-    
+
     let python_code = r#"import sys
 import os
 
@@ -37,12 +37,15 @@ class MathHelper:
 
     assert_eq!(ctx.language, "python");
     assert_eq!(ctx.enclosing_class.as_deref(), Some("MathHelper"));
-    assert_eq!(ctx.enclosing_function.as_ref().map(|f| f.name.as_str()), Some("process_data"));
-    
+    assert_eq!(
+        ctx.enclosing_function.as_ref().map(|f| f.name.as_str()),
+        Some("process_data")
+    );
+
     // Check that we identified the imports
     assert!(ctx.imports.contains(&"import sys".to_string()));
     assert!(ctx.imports.contains(&"import os".to_string()));
-    
+
     // Indentation checking
     assert_eq!(ctx.indentation, "        ");
     assert_eq!(ctx.cursor_col, 8);
@@ -62,12 +65,12 @@ class MathHelper:
     assert!(inject_result.is_ok(), "Failed to inject code");
 
     let injected_content = std::fs::read_to_string(&file_path).unwrap();
-    
+
     // Verify that the comment prompt `# refactor:` was removed, and the new code is there and properly indented
     assert!(injected_content.contains("        # Optimized implementation"));
     assert!(injected_content.contains("        squared = value * value"));
     assert!(injected_content.contains("        result = squared * self.multiplier"));
-    
+
     // Verify that other parts of the script are intact
     assert!(injected_content.contains("class MathHelper:"));
     assert!(injected_content.contains("    def unused_func(self):"));
@@ -77,7 +80,7 @@ class MathHelper:
 fn test_rust_context_extraction_and_injection() {
     let dir = tempdir().unwrap();
     let file_path = dir.path().join("main.rs");
-    
+
     let rust_code = r#"use std::collections::HashMap;
 
 struct Database {
@@ -107,9 +110,14 @@ impl Database {
 
     assert_eq!(ctx.language, "rust");
     assert_eq!(ctx.enclosing_class.as_deref(), Some("Database"));
-    assert_eq!(ctx.enclosing_function.as_ref().map(|f| f.name.as_str()), Some("query"));
-    
-    assert!(ctx.imports.contains(&"use std::collections::HashMap;".to_string()));
+    assert_eq!(
+        ctx.enclosing_function.as_ref().map(|f| f.name.as_str()),
+        Some("query")
+    );
+
+    assert!(ctx
+        .imports
+        .contains(&"use std::collections::HashMap;".to_string()));
     assert_eq!(ctx.indentation, "        ");
 
     // Inject Rust code
@@ -128,7 +136,7 @@ impl Database {
     assert!(inject_result.is_ok(), "Failed to inject Rust code");
 
     let injected_content = std::fs::read_to_string(&file_path).unwrap();
-    
+
     assert!(injected_content.contains("        if sql.is_empty() {"));
     assert!(injected_content.contains("            return Err(\"Empty query\".into());"));
     assert!(injected_content.contains("        info!(\"SQL: {}\", sql);"));

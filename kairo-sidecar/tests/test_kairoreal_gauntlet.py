@@ -7,11 +7,11 @@ Requirements:
   - Verifies task_completion_rate.json schema and pass_rate_active >= 80% after a full run
   - Must pass in headless/CI environments with no UI, no network, no real applications
 """
+
 from __future__ import annotations
 
 import importlib.util
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -39,9 +39,7 @@ def _load_gauntlet():
     """Import run_kairoreal_gauntlet as a module (cached per process)."""
     if "run_kairoreal_gauntlet" in sys.modules:
         return sys.modules["run_kairoreal_gauntlet"]
-    spec = importlib.util.spec_from_file_location(
-        "run_kairoreal_gauntlet", str(_GAUNTLET_SCRIPT)
-    )
+    spec = importlib.util.spec_from_file_location("run_kairoreal_gauntlet", str(_GAUNTLET_SCRIPT))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     sys.modules["run_kairoreal_gauntlet"] = mod
@@ -49,6 +47,7 @@ def _load_gauntlet():
 
 
 # ── Test 1: importable + scenario count ──────────────────────────────────────
+
 
 def test_gauntlet_script_importable_and_scenarios_count():
     """Verify run_kairoreal_gauntlet.py is importable and scenarios.json has 200 entries."""
@@ -64,15 +63,27 @@ def test_gauntlet_script_importable_and_scenarios_count():
 
     # All 14 categories must have executors
     expected_categories = {
-        "Word", "Excel", "PPT", "PDF", "Legal", "Design",
-        "Code", "Terminal", "Email", "Memory", "Security",
-        "Offline", "Degradation", "Performance",
+        "Word",
+        "Excel",
+        "PPT",
+        "PDF",
+        "Legal",
+        "Design",
+        "Code",
+        "Terminal",
+        "Email",
+        "Memory",
+        "Security",
+        "Offline",
+        "Degradation",
+        "Performance",
     }
     missing = expected_categories - set(rkg._CATEGORY_EXECUTORS.keys())
     assert not missing, f"Missing category executors: {missing}"
 
 
 # ── Test 2: mini gauntlet execution ──────────────────────────────────────────
+
 
 def test_mini_gauntlet_execution():
     """Run <=5 active scenarios across >=2 categories; all must PASS or SKIP."""
@@ -109,6 +120,7 @@ def test_mini_gauntlet_execution():
 
 # ── Test 3: full run schema + gate ────────────────────────────────────────────
 
+
 @pytest.mark.slow
 def test_task_completion_rate_schema(tmp_path: Path):
     """
@@ -123,8 +135,10 @@ def test_task_completion_rate_schema(tmp_path: Path):
         [
             sys.executable,
             str(_GAUNTLET_SCRIPT),
-            "--output", str(output_path),
-            "--workers", "4",
+            "--output",
+            str(output_path),
+            "--workers",
+            "4",
         ],
         capture_output=True,
         text=True,
@@ -143,12 +157,23 @@ def test_task_completion_rate_schema(tmp_path: Path):
 
     # ── Required top-level fields ─────────────────────────────────────────────
     required_top = [
-        "product", "gauntlet_version", "run_at", "elapsed_seconds",
-        "total", "active", "pending", "excluded",
-        "passed", "failed", "skipped",
-        "pass_rate_active", "pass_rate_all",
-        "verdict", "gate_threshold",
-        "categories", "results",
+        "product",
+        "gauntlet_version",
+        "run_at",
+        "elapsed_seconds",
+        "total",
+        "active",
+        "pending",
+        "excluded",
+        "passed",
+        "failed",
+        "skipped",
+        "pass_rate_active",
+        "pass_rate_all",
+        "verdict",
+        "gate_threshold",
+        "categories",
+        "results",
     ]
     for field in required_top:
         assert field in data, f"Required field missing from report: '{field}'"
@@ -170,15 +195,24 @@ def test_task_completion_rate_schema(tmp_path: Path):
         f"verdict={data['verdict']}  active_passed={data.get('active_passed')}/"
         f"{data['active']}"
     )
-    assert data["verdict"] in ("PASS", "PARTIAL"), (
-        f"Unexpected verdict '{data['verdict']}'"
-    )
+    assert data["verdict"] in ("PASS", "PARTIAL"), f"Unexpected verdict '{data['verdict']}'"
 
     # ── Category structure ────────────────────────────────────────────────────
     expected_cats = {
-        "Word", "Excel", "PPT", "PDF", "Legal", "Design",
-        "Code", "Terminal", "Email", "Memory", "Security",
-        "Offline", "Degradation", "Performance",
+        "Word",
+        "Excel",
+        "PPT",
+        "PDF",
+        "Legal",
+        "Design",
+        "Code",
+        "Terminal",
+        "Email",
+        "Memory",
+        "Security",
+        "Offline",
+        "Degradation",
+        "Performance",
     }
     for cat in expected_cats:
         assert cat in data["categories"], f"Category '{cat}' missing from report"
@@ -187,14 +221,13 @@ def test_task_completion_rate_schema(tmp_path: Path):
             assert sub in cs, f"Field '{sub}' missing from category '{cat}'"
 
     # ── Results list ──────────────────────────────────────────────────────────
-    assert len(data["results"]) == 215, (
-        f"Expected 215 result entries, got {len(data['results'])}"
-    )
+    assert len(data["results"]) == 215, f"Expected 215 result entries, got {len(data['results'])}"
     for r in data["results"]:
         for field in ("id", "category", "status", "oracle_verdict", "reason", "elapsed_s"):
-            assert field in r, (
-                f"Field '{field}' missing from result entry {r.get('id', '?')}"
-            )
-        assert r["oracle_verdict"] in ("PASS", "FAIL", "SKIP", "PENDING-REAL-APP"), (
-            f"Invalid oracle_verdict '{r['oracle_verdict']}' in {r['id']}"
-        )
+            assert field in r, f"Field '{field}' missing from result entry {r.get('id', '?')}"
+        assert r["oracle_verdict"] in (
+            "PASS",
+            "FAIL",
+            "SKIP",
+            "PENDING-REAL-APP",
+        ), f"Invalid oracle_verdict '{r['oracle_verdict']}' in {r['id']}"

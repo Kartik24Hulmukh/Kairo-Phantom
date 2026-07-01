@@ -11,7 +11,7 @@
 // The embedding dimension is 256 to match the existing MemMachine schema.
 // sqlite-vec is loaded as a runtime extension on the SQLite connection.
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use rusqlite::Connection;
 use std::path::PathBuf;
 use tracing::{info, warn};
@@ -52,8 +52,7 @@ fn embed_fastembed(text: &str) -> Result<Vec<f32>> {
     let engine = ENGINE.get_or_try_init(|| {
         info!("🧠 Embedding: Initialising fastembed all-MiniLM-L6-v2 …");
         TextEmbedding::try_new(
-            InitOptions::new(EmbeddingModel::AllMiniLML6V2)
-                .with_show_download_progress(false)
+            InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
         )
     })?;
 
@@ -137,8 +136,7 @@ impl VectorStore {
         // Create vec0 virtual table for 256-dim embeddings
         conn.execute(
             &format!(
-                "CREATE VIRTUAL TABLE IF NOT EXISTS memory_embeddings USING vec0(embedding float[{}], episode_id text)",
-                EMBED_DIM
+                "CREATE VIRTUAL TABLE IF NOT EXISTS memory_embeddings USING vec0(embedding float[{EMBED_DIM}], episode_id text)"
             ),
             [],
         )?;
@@ -155,8 +153,7 @@ impl VectorStore {
         Self::verify_vec_extension(&conn)?;
         conn.execute(
             &format!(
-                "CREATE VIRTUAL TABLE IF NOT EXISTS memory_embeddings USING vec0(embedding float[{}], episode_id text)",
-                EMBED_DIM
+                "CREATE VIRTUAL TABLE IF NOT EXISTS memory_embeddings USING vec0(embedding float[{EMBED_DIM}], episode_id text)"
             ),
             [],
         )?;
@@ -171,12 +168,17 @@ impl VectorStore {
         use std::sync::Once;
 
         static INIT: Once = Once::new();
-        INIT.call_once(|| {
-            unsafe {
-                sqlite3_auto_extension(Some(std::mem::transmute(
-                    sqlite_vec::sqlite3_vec_init as *const (),
-                )));
-            }
+        INIT.call_once(|| unsafe {
+            sqlite3_auto_extension(Some(std::mem::transmute::<
+                *const (),
+                unsafe extern "C" fn(
+                    *mut rusqlite::ffi::sqlite3,
+                    *mut *mut std::os::raw::c_char,
+                    *const rusqlite::ffi::sqlite3_api_routines,
+                ) -> std::os::raw::c_int,
+            >(
+                sqlite_vec::sqlite3_vec_init as *const ()
+            )));
         });
     }
 
@@ -184,7 +186,7 @@ impl VectorStore {
     fn verify_vec_extension(conn: &Connection) -> Result<()> {
         let version: String = conn
             .query_row("SELECT vec_version()", [], |row| row.get(0))
-            .map_err(|e| anyhow!("sqlite-vec extension not loaded: {}", e))?;
+            .map_err(|e| anyhow!("sqlite-vec extension not loaded: {e}"))?;
         info!("sqlite-vec loaded: version {}", version);
         Ok(())
     }
@@ -206,10 +208,7 @@ impl VectorStore {
         }
 
         // Serialize embedding as bytes for vec0
-        let embedding_bytes: Vec<u8> = embedding
-            .iter()
-            .flat_map(|f| f.to_le_bytes())
-            .collect();
+        let embedding_bytes: Vec<u8> = embedding.iter().flat_map(|f| f.to_le_bytes()).collect();
 
         self.conn.execute(
             "INSERT INTO memory_embeddings (embedding, episode_id) VALUES (?, ?)",
@@ -243,10 +242,7 @@ impl VectorStore {
         )?;
 
         let rows = stmt.query_map(rusqlite::params![query_bytes, k as i64], |row| {
-            Ok((
-                row.get::<_, String>(0)?,
-                row.get::<_, f32>(1)?,
-            ))
+            Ok((row.get::<_, String>(0)?, row.get::<_, f32>(1)?))
         })?;
 
         let mut results = Vec::new();
@@ -258,11 +254,11 @@ impl VectorStore {
 
     /// Get the count of stored vectors.
     pub fn count(&self) -> Result<i64> {
-        let count: i64 = self.conn.query_row(
-            "SELECT COUNT(*) FROM memory_embeddings",
-            [],
-            |row| row.get(0),
-        )?;
+        let count: i64 =
+            self.conn
+                .query_row("SELECT COUNT(*) FROM memory_embeddings", [], |row| {
+                    row.get(0)
+                })?;
         Ok(count)
     }
 }
@@ -333,7 +329,11 @@ mod tests {
     #[test]
     fn test_embed_returns_correct_dimension() {
         let vec = embed("hello world").unwrap();
-        assert_eq!(vec.len(), EMBED_DIM, "Embedding dimension must be {}", EMBED_DIM);
+        assert_eq!(
+            vec.len(),
+            EMBED_DIM,
+            "Embedding dimension must be {EMBED_DIM}"
+        );
     }
 
     #[test]
@@ -349,7 +349,10 @@ mod tests {
         let v2 = embed("contract termination").unwrap();
         // Same input must produce same output (deterministic)
         for (a, b) in v1.iter().zip(v2.iter()) {
-            assert!((a - b).abs() < 1e-6, "Embedding is not deterministic — random/stub");
+            assert!(
+                (a - b).abs() < 1e-6,
+                "Embedding is not deterministic — random/stub"
+            );
         }
     }
 
@@ -359,7 +362,10 @@ mod tests {
         let v2 = embed("pizza recipe").unwrap();
         let sim = cosine_similarity(&v1, &v2);
         // Different texts should not be identical
-        assert!(sim < 0.99, "Different texts produced identical vectors — embedding is a stub");
+        assert!(
+            sim < 0.99,
+            "Different texts produced identical vectors — embedding is a stub"
+        );
     }
 
     #[test]
@@ -475,7 +481,10 @@ mod tests {
         let store = VectorStore::in_memory().unwrap();
         let wrong_dim = vec![0.0f32; 128];
         let result = store.knn_query(&wrong_dim, 5);
-        assert!(result.is_err(), "KNN query with wrong dimension should error");
+        assert!(
+            result.is_err(),
+            "KNN query with wrong dimension should error"
+        );
     }
 
     // ── SEMANTIC RELEVANCE TEST (requires real fastembed model) ──────────────
@@ -505,12 +514,16 @@ mod tests {
         // Target: semantically related to "cancel subscription" but different words
         let target_text = "We regret to inform you that your membership will be terminated at the end of the billing cycle.";
         let target_emb = embed(target_text).unwrap();
-        store.insert("ep_membership_termination", &target_emb).unwrap();
+        store
+            .insert("ep_membership_termination", &target_emb)
+            .unwrap();
 
         // Distractor 1: lexically similar to query but semantically unrelated
         let distractor1_text = "How to subscribe to our newsletter for weekly updates.";
         let distractor1_emb = embed(distractor1_text).unwrap();
-        store.insert("ep_newsletter_subscribe", &distractor1_emb).unwrap();
+        store
+            .insert("ep_newsletter_subscribe", &distractor1_emb)
+            .unwrap();
 
         // Distractor 2: completely unrelated
         let distractor2_text = "The weather forecast shows rain tomorrow afternoon.";
@@ -555,12 +568,17 @@ mod tests {
         // Under hash embeddings, semantically similar texts will have LOW similarity
         // (because hash is based on character content, not meaning).
         // This test documents that fact — it's NOT a failure, it's a known limitation.
-        println!("Hash embedding similarity for semantically-similar texts: {:.4}", sim);
+        println!("Hash embedding similarity for semantically-similar texts: {sim:.4}");
         println!("NOTE: This similarity is NOT meaningful — hash embeddings are non-semantic.");
-        println!("      Real semantic search requires --features local-embeddings (fastembed model).");
+        println!(
+            "      Real semantic search requires --features local-embeddings (fastembed model)."
+        );
 
         // The test passes regardless of the similarity value — it's documentation,
         // not a gate. But it prints the value so we can see the limitation.
-        assert!(sim >= -1.0 && sim <= 1.0, "Cosine similarity out of range");
+        assert!(
+            (-1.0..=1.0).contains(&sim),
+            "Cosine similarity out of range"
+        );
     }
 }

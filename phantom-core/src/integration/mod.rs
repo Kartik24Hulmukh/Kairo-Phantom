@@ -19,8 +19,8 @@ pub trait IntegrationAdapter: Send + Sync {
     async fn execute_action(&self, action: &str, data: &str) -> Result<()>;
 }
 
-pub mod obsidian;
 pub mod notion;
+pub mod obsidian;
 pub mod slack;
 
 /// A registry of available integration adapters.
@@ -47,10 +47,9 @@ impl IntegrationManager {
 
     pub async fn get_adapter(&self, id: &str) -> Option<&dyn IntegrationAdapter> {
         for adapter in &self.adapters {
-            if adapter.id() == id
-                && adapter.is_available().await {
-                    return Some(adapter.as_ref());
-                }
+            if adapter.id() == id && adapter.is_available().await {
+                return Some(adapter.as_ref());
+            }
         }
         None
     }

@@ -1,13 +1,14 @@
+use crate::document_context::{
+    DocKind, DocumentContext, DocumentContextExtractor, FormatMetadata, OutlineItem,
+};
+use serde::{Deserialize, Serialize};
 /// Kreuzberg Multi-Format Document Extractor — Advancement 3
 /// Adds universal document parsing for 88+ file formats via Kreuzberg (Python subprocess)
 /// and PDF spatial extraction with column/table awareness.
-
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use serde::{Deserialize, Serialize};
-use tracing::{info, warn};
 use text_splitter::TextSplitter;
-use crate::document_context::{DocumentContext, DocumentContextExtractor, DocKind, OutlineItem, FormatMetadata};
+use tracing::{info, warn};
 
 // ─── Extraction Result ────────────────────────────────────────────────────────
 
@@ -47,10 +48,10 @@ impl ExtractedDocument {
     pub fn to_prompt_fragment(&self) -> String {
         let mut parts = Vec::new();
         if let Some(ref mime) = self.mime_type {
-            parts.push(format!("Format: {}", mime));
+            parts.push(format!("Format: {mime}"));
         }
         if let Some(n) = self.page_count {
-            parts.push(format!("Pages: {}", n));
+            parts.push(format!("Pages: {n}"));
         }
         parts.push(format!("Words: {}", self.word_count));
         if self.ocr_used {
@@ -62,7 +63,10 @@ impl ExtractedDocument {
         if !self.tables.is_empty() {
             parts.push(format!("Tables: {} detected", self.tables.len()));
         }
-        parts.push(format!("Content (first 2000 chars):\n{}", &self.text[..self.text.len().min(2000)]));
+        parts.push(format!(
+            "Content (first 2000 chars):\n{}",
+            &self.text[..self.text.len().min(2000)]
+        ));
         parts.join("\n")
     }
 }
@@ -77,7 +81,8 @@ pub struct KreuzbergExtractor;
 impl KreuzbergExtractor {
     /// Check if Kreuzberg is installed.
     pub fn is_available() -> bool {
-        Command::new("python").args(["-c", "import kreuzberg; print('ok')"])
+        Command::new("python")
+            .args(["-c", "import kreuzberg; print('ok')"])
             .output()
             .map(|o| String::from_utf8_lossy(&o.stdout).contains("ok"))
             .unwrap_or(false)
@@ -86,7 +91,7 @@ impl KreuzbergExtractor {
     /// Extract text from a file using Kreuzberg.
     pub fn extract(file_path: &Path) -> Result<ExtractedDocument, String> {
         if !file_path.exists() {
-            return Err(format!("File not found: {:?}", file_path));
+            return Err(format!("File not found: {file_path:?}"));
         }
 
         let script = format!(
@@ -115,11 +120,16 @@ except Exception as e:
         let output = Command::new("python")
             .args(["-c", &script])
             .output()
-            .map_err(|e| format!("Python subprocess error: {}", e))?;
+            .map_err(|e| format!("Python subprocess error: {e}"))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let result: serde_json::Value = serde_json::from_str(stdout.trim())
-            .map_err(|e| format!("JSON parse error: {} | raw: {}", e, &stdout[..stdout.len().min(200)]))?;
+        let result: serde_json::Value = serde_json::from_str(stdout.trim()).map_err(|e| {
+            format!(
+                "JSON parse error: {} | raw: {}",
+                e,
+                &stdout[..stdout.len().min(200)]
+            )
+        })?;
 
         if let Some(err) = result.get("error") {
             return Err(err.as_str().unwrap_or("unknown error").to_string());
@@ -129,11 +139,15 @@ except Exception as e:
         let word_count = result["word_count"].as_u64().unwrap_or(0) as usize;
 
         // Extract headings from text heuristically
-        let headings: Vec<String> = text.lines()
+        let headings: Vec<String> = text
+            .lines()
             .filter(|l| {
                 let t = l.trim();
-                !t.is_empty() && t.len() < 100 &&
-                (t.starts_with('#') || (t.chars().next().map(|c| c.is_uppercase()).unwrap_or(false) && t.ends_with(':')))
+                !t.is_empty()
+                    && t.len() < 100
+                    && (t.starts_with('#')
+                        || (t.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
+                            && t.ends_with(':')))
             })
             .take(10)
             .map(|l| l.trim_start_matches('#').trim().to_string())
@@ -146,7 +160,12 @@ except Exception as e:
             }
         }
 
-        info!("[Kreuzberg] Extracted {:?}: {} words, {} headings", file_path.file_name().unwrap_or_default(), word_count, headings.len());
+        info!(
+            "[Kreuzberg] Extracted {:?}: {} words, {} headings",
+            file_path.file_name().unwrap_or_default(),
+            word_count,
+            headings.len()
+        );
 
         Ok(ExtractedDocument {
             text,
@@ -164,12 +183,18 @@ except Exception as e:
 
     /// Supported extensions (subset — Kreuzberg handles many more).
     pub fn supported_extensions() -> &'static [&'static str] {
-        &["docx", "odt", "rtf", "html", "htm", "epub", "md", "txt",
-          "csv", "xml", "eml", "msg", "wpd", "pages", "numbers", "key"]
+        &[
+            "docx", "odt", "rtf", "html", "htm", "epub", "md", "txt", "csv", "xml", "eml", "msg",
+            "wpd", "pages", "numbers", "key",
+        ]
     }
 
     pub fn can_handle(path: &Path) -> bool {
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_lowercase();
         Self::supported_extensions().contains(&ext.as_str())
     }
 }
@@ -182,7 +207,8 @@ pub struct PdfSpatialExtractor;
 
 impl PdfSpatialExtractor {
     pub fn is_available() -> bool {
-        Command::new("python").args(["-c", "import pypdf; print('ok')"])
+        Command::new("python")
+            .args(["-c", "import pypdf; print('ok')"])
             .output()
             .map(|o| String::from_utf8_lossy(&o.stdout).contains("ok"))
             .unwrap_or(false)
@@ -190,7 +216,7 @@ impl PdfSpatialExtractor {
 
     pub fn extract(file_path: &Path) -> Result<ExtractedDocument, String> {
         if !file_path.exists() {
-            return Err(format!("File not found: {:?}", file_path));
+            return Err(format!("File not found: {file_path:?}"));
         }
 
         let script = format!(
@@ -221,11 +247,11 @@ except Exception as e:
         let output = Command::new("python")
             .args(["-c", &script])
             .output()
-            .map_err(|e| format!("Python error: {}", e))?;
+            .map_err(|e| format!("Python error: {e}"))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let result: serde_json::Value = serde_json::from_str(stdout.trim())
-            .map_err(|e| format!("JSON error: {}", e))?;
+        let result: serde_json::Value =
+            serde_json::from_str(stdout.trim()).map_err(|e| format!("JSON error: {e}"))?;
 
         if let Some(err) = result.get("error") {
             return Err(err.as_str().unwrap_or("").to_string());
@@ -242,11 +268,17 @@ except Exception as e:
             }
         }
 
-        info!("[PDF] Extracted {:?}: {} words, {} pages",
-            file_path.file_name().unwrap_or_default(), word_count, page_count.unwrap_or(0));
+        info!(
+            "[PDF] Extracted {:?}: {} words, {} pages",
+            file_path.file_name().unwrap_or_default(),
+            word_count,
+            page_count.unwrap_or(0)
+        );
 
         Ok(ExtractedDocument {
-            text, word_count, page_count,
+            text,
+            word_count,
+            page_count,
             language: None,
             mime_type: Some("application/pdf".into()),
             ocr_used: false,
@@ -266,7 +298,8 @@ pub struct UniversalExtractor;
 impl UniversalExtractor {
     /// Extract from any file path. Priority: PDF spatial → Kreuzberg → ZIP/OOXML fallback.
     pub fn extract(file_path: &Path) -> Result<ExtractedDocument, String> {
-        let ext = file_path.extension()
+        let ext = file_path
+            .extension()
             .and_then(|e| e.to_str())
             .unwrap_or("")
             .to_lowercase();
@@ -298,7 +331,7 @@ impl UniversalExtractor {
             });
         }
 
-        Err(format!("Could not extract text from {:?}", file_path))
+        Err(format!("Could not extract text from {file_path:?}"))
     }
 
     /// Try to extract the active document from a window title.
@@ -326,8 +359,10 @@ pub struct KreuzbergExtractorAdapter;
 
 impl DocumentContextExtractor for KreuzbergExtractorAdapter {
     fn supported_extensions(&self) -> &[&str] {
-        &["docx", "doc", "pptx", "ppt", "xlsx", "xls", "odt", "rtf", "html", "htm", "epub",
-          "csv", "xml", "eml", "msg", "wpd", "pages", "numbers", "key"]
+        &[
+            "docx", "doc", "pptx", "ppt", "xlsx", "xls", "odt", "rtf", "html", "htm", "epub",
+            "csv", "xml", "eml", "msg", "wpd", "pages", "numbers", "key",
+        ]
     }
 
     fn extract(
@@ -338,12 +373,16 @@ impl DocumentContextExtractor for KreuzbergExtractorAdapter {
     ) -> Option<DocumentContext> {
         match KreuzbergExtractor::extract(path) {
             Ok(doc) => {
-                let outline: Vec<OutlineItem> = doc.headings.iter().enumerate()
+                let outline: Vec<OutlineItem> = doc
+                    .headings
+                    .iter()
+                    .enumerate()
                     .map(|(i, h)| OutlineItem {
                         level: 1,
                         text: h.clone(),
                         position: i * 100,
-                    }).collect();
+                    })
+                    .collect();
 
                 let doc_kind = match path.extension().and_then(|e| e.to_str()).unwrap_or("") {
                     "html" | "htm" => DocKind::PlainText,
@@ -353,7 +392,8 @@ impl DocumentContextExtractor for KreuzbergExtractorAdapter {
 
                 // Semantic chunking (Step 2 of Roadmap)
                 let splitter = TextSplitter::new(2048);
-                let chunks: Vec<String> = splitter.chunks(&doc.text).map(|s| s.to_string()).collect();
+                let chunks: Vec<String> =
+                    splitter.chunks(&doc.text).map(|s| s.to_string()).collect();
 
                 Some(DocumentContext::from_parsed(
                     doc_kind,
@@ -363,7 +403,9 @@ impl DocumentContextExtractor for KreuzbergExtractorAdapter {
                     outline,
                     vec![],
                     chunks,
-                    None, None, false,
+                    None,
+                    None,
+                    false,
                     FormatMetadata {
                         original_format: doc.mime_type.unwrap_or_default(),
                         style_names: vec![],
@@ -383,7 +425,9 @@ impl DocumentContextExtractor for KreuzbergExtractorAdapter {
 pub struct PdfExtractorAdapter;
 
 impl DocumentContextExtractor for PdfExtractorAdapter {
-    fn supported_extensions(&self) -> &[&str] { &["pdf"] }
+    fn supported_extensions(&self) -> &[&str] {
+        &["pdf"]
+    }
 
     fn extract(
         &self,
@@ -394,7 +438,8 @@ impl DocumentContextExtractor for PdfExtractorAdapter {
         match PdfSpatialExtractor::extract(path) {
             Ok(doc) => {
                 let splitter = TextSplitter::new(2048);
-                let chunks: Vec<String> = splitter.chunks(&doc.text).map(|s| s.to_string()).collect();
+                let chunks: Vec<String> =
+                    splitter.chunks(&doc.text).map(|s| s.to_string()).collect();
 
                 Some(DocumentContext::from_parsed(
                     DocKind::PdfDocument,
@@ -425,8 +470,15 @@ impl DocumentContextExtractor for PdfExtractorAdapter {
 // ─── Fast-Path Olga Extractor (15-40x speed) ──────────────────────────────────
 pub struct OlgaExtractorAdapter;
 impl DocumentContextExtractor for OlgaExtractorAdapter {
-    fn supported_extensions(&self) -> &[&str] { &["pdf", "docx", "xlsx", "html"] }
-    fn extract(&self, path: &std::path::Path, prompt_text: &str, _active_slide: Option<usize>) -> Option<DocumentContext> {
+    fn supported_extensions(&self) -> &[&str] {
+        &["pdf", "docx", "xlsx", "html"]
+    }
+    fn extract(
+        &self,
+        path: &std::path::Path,
+        prompt_text: &str,
+        _active_slide: Option<usize>,
+    ) -> Option<DocumentContext> {
         info!("[Olga] Attempting fast extraction for {:?}", path);
         // Fallback to Universal for now, but label it as Olga
         UniversalExtractor::extract(path).ok().map(|doc| {
@@ -435,8 +487,16 @@ impl DocumentContextExtractor for OlgaExtractorAdapter {
                 path.to_path_buf(),
                 doc.text,
                 prompt_text.to_string(),
-                vec![], vec![], vec![], None, None, false,
-                FormatMetadata { original_format: "olga-fast".into(), ..Default::default() }
+                vec![],
+                vec![],
+                vec![],
+                None,
+                None,
+                false,
+                FormatMetadata {
+                    original_format: "olga-fast".into(),
+                    ..Default::default()
+                },
             )
         })
     }
@@ -445,17 +505,32 @@ impl DocumentContextExtractor for OlgaExtractorAdapter {
 // ─── Enterprise Docling Extractor (Markdown/JSON) ─────────────────────────────
 pub struct DoclingExtractorAdapter;
 impl DocumentContextExtractor for DoclingExtractorAdapter {
-    fn supported_extensions(&self) -> &[&str] { &["pdf", "docx", "pptx", "html", "md", "png", "jpg"] }
-    fn extract(&self, path: &std::path::Path, prompt_text: &str, _active_slide: Option<usize>) -> Option<DocumentContext> {
+    fn supported_extensions(&self) -> &[&str] {
+        &["pdf", "docx", "pptx", "html", "md", "png", "jpg"]
+    }
+    fn extract(
+        &self,
+        path: &std::path::Path,
+        prompt_text: &str,
+        _active_slide: Option<usize>,
+    ) -> Option<DocumentContext> {
         info!("[Docling] Attempting enterprise extraction for {:?}", path);
         UniversalExtractor::extract(path).ok().map(|doc| {
-             DocumentContext::from_parsed(
+            DocumentContext::from_parsed(
                 DocKind::WordDocument,
                 path.to_path_buf(),
                 doc.text,
                 prompt_text.to_string(),
-                vec![], vec![], vec![], None, None, false,
-                FormatMetadata { original_format: "docling-enterprise".into(), ..Default::default() }
+                vec![],
+                vec![],
+                vec![],
+                None,
+                None,
+                false,
+                FormatMetadata {
+                    original_format: "docling-enterprise".into(),
+                    ..Default::default()
+                },
             )
         })
     }
@@ -464,17 +539,32 @@ impl DocumentContextExtractor for DoclingExtractorAdapter {
 // ─── Surya OCR Extractor (Layout & Table Recognition) ─────────────────────────
 pub struct SuryaOcrExtractorAdapter;
 impl DocumentContextExtractor for SuryaOcrExtractorAdapter {
-    fn supported_extensions(&self) -> &[&str] { &["pdf", "png", "jpg", "jpeg", "tiff"] }
-    fn extract(&self, path: &std::path::Path, prompt_text: &str, _active_slide: Option<usize>) -> Option<DocumentContext> {
+    fn supported_extensions(&self) -> &[&str] {
+        &["pdf", "png", "jpg", "jpeg", "tiff"]
+    }
+    fn extract(
+        &self,
+        path: &std::path::Path,
+        prompt_text: &str,
+        _active_slide: Option<usize>,
+    ) -> Option<DocumentContext> {
         info!("[Surya] Attempting OCR for {:?}", path);
         UniversalExtractor::extract(path).ok().map(|doc| {
-             DocumentContext::from_parsed(
+            DocumentContext::from_parsed(
                 DocKind::PdfDocument,
                 path.to_path_buf(),
                 doc.text,
                 prompt_text.to_string(),
-                vec![], vec![], vec![], None, None, true,
-                FormatMetadata { original_format: "surya-ocr".into(), ..Default::default() }
+                vec![],
+                vec![],
+                vec![],
+                None,
+                None,
+                true,
+                FormatMetadata {
+                    original_format: "surya-ocr".into(),
+                    ..Default::default()
+                },
             )
         })
     }
@@ -483,17 +573,32 @@ impl DocumentContextExtractor for SuryaOcrExtractorAdapter {
 // ─── OlmOCR Extractor (VLM-based PDF OCR) ─────────────────────────────────────
 pub struct OlmOcrExtractorAdapter;
 impl DocumentContextExtractor for OlmOcrExtractorAdapter {
-    fn supported_extensions(&self) -> &[&str] { &["pdf"] }
-    fn extract(&self, path: &std::path::Path, prompt_text: &str, _active_slide: Option<usize>) -> Option<DocumentContext> {
+    fn supported_extensions(&self) -> &[&str] {
+        &["pdf"]
+    }
+    fn extract(
+        &self,
+        path: &std::path::Path,
+        prompt_text: &str,
+        _active_slide: Option<usize>,
+    ) -> Option<DocumentContext> {
         info!("[OlmOCR] Attempting VLM-based OCR for {:?}", path);
         UniversalExtractor::extract(path).ok().map(|doc| {
-             DocumentContext::from_parsed(
+            DocumentContext::from_parsed(
                 DocKind::PdfDocument,
                 path.to_path_buf(),
                 doc.text,
                 prompt_text.to_string(),
-                vec![], vec![], vec![], None, None, true,
-                FormatMetadata { original_format: "olmocr-vlm".into(), ..Default::default() }
+                vec![],
+                vec![],
+                vec![],
+                None,
+                None,
+                true,
+                FormatMetadata {
+                    original_format: "olmocr-vlm".into(),
+                    ..Default::default()
+                },
             )
         })
     }
@@ -502,17 +607,32 @@ impl DocumentContextExtractor for OlmOcrExtractorAdapter {
 // ─── OcrRs Extractor (Minimalist Rust OCR) ────────────────────────────────────
 pub struct OcrRsExtractorAdapter;
 impl DocumentContextExtractor for OcrRsExtractorAdapter {
-    fn supported_extensions(&self) -> &[&str] { &["pdf", "png", "jpg", "jpeg"] }
-    fn extract(&self, path: &std::path::Path, prompt_text: &str, _active_slide: Option<usize>) -> Option<DocumentContext> {
+    fn supported_extensions(&self) -> &[&str] {
+        &["pdf", "png", "jpg", "jpeg"]
+    }
+    fn extract(
+        &self,
+        path: &std::path::Path,
+        prompt_text: &str,
+        _active_slide: Option<usize>,
+    ) -> Option<DocumentContext> {
         info!("[ocr-rs] Attempting minimalist OCR for {:?}", path);
         UniversalExtractor::extract(path).ok().map(|doc| {
-             DocumentContext::from_parsed(
+            DocumentContext::from_parsed(
                 DocKind::PdfDocument,
                 path.to_path_buf(),
                 doc.text,
                 prompt_text.to_string(),
-                vec![], vec![], vec![], None, None, true,
-                FormatMetadata { original_format: "ocr-rs".into(), ..Default::default() }
+                vec![],
+                vec![],
+                vec![],
+                None,
+                None,
+                true,
+                FormatMetadata {
+                    original_format: "ocr-rs".into(),
+                    ..Default::default()
+                },
             )
         })
     }

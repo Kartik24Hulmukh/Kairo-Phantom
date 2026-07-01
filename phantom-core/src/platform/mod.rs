@@ -112,3 +112,69 @@ pub mod macos;
 
 #[cfg(target_os = "linux")]
 pub mod linux;
+
+// ─── Monitor enumeration (Windows) ──────────────────────────────────────────────
+
+#[cfg(target_os = "windows")]
+mod win_monitors {
+    use crate::monitor::{MonitorInfo, MonitorLayout};
+    use std::cell::RefCell;
+    use windows::Win32::Foundation::{BOOL, LPARAM, RECT, TRUE};
+    use windows::Win32::Graphics::Gdi::{
+        EnumDisplayMonitors, GetMonitorInfoW, HDC, HMONITOR, MONITORINFO, MONITORINFOEXW,
+    };
+    // MONITORINFOF_PRIMARY is not re-exported by windows 0.58's Gdi module;
+    // use the stable wingdi.h value (0x0000_0001).
+    const MONITORINFOF_PRIMARY: u32 = 0x0000_0001;
+    use windows::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
+
+    thread_local! {
+        static ACC: RefCell<Vec<MonitorInfo>> = const { RefCell::new(Vec::new()) };
+    }
+
+    unsafe extern "system" fn cb(hmon: HMONITOR, _hdc: HDC, _rc: *mut RECT, _lp: LPARAM) -> BOOL {
+        let mut info = MONITORINFOEXW::default();
+        info.monitorInfo.cbSize = std::mem::size_of::<MONITORINFOEXW>() as u32;
+        if GetMonitorInfoW(hmon, &mut info.monitorInfo as *mut MONITORINFO).as_bool() {
+            let rc = info.monitorInfo.rcMonitor;
+            let mut dpi_x: u32 = 96;
+            let mut dpi_y: u32 = 96;
+            let _ = GetDpiForMonitor(hmon, MDT_EFFECTIVE_DPI, &mut dpi_x, &mut dpi_y);
+            let primary = (info.monitorInfo.dwFlags & MONITORINFOF_PRIMARY) != 0;
+            ACC.with(|a| {
+                a.borrow_mut().push(MonitorInfo {
+                    id: format!(
+                        "{}x{}+{}+{}",
+                        rc.right - rc.left,
+                        rc.bottom - rc.top,
+                        rc.left,
+                        rc.top
+                    ),
+                    x: rc.left,
+                    y: rc.top,
+                    width: rc.right - rc.left,
+                    height: rc.bottom - rc.top,
+                    scale: dpi_x as f64 / 96.0,
+                    primary,
+                })
+            });
+        }
+        TRUE
+    }
+
+    pub fn enumerate() -> MonitorLayout {
+        ACC.with(|a| a.borrow_mut().clear());
+        unsafe {
+            let _ = EnumDisplayMonitors(HDC::default(), None, Some(cb), LPARAM(0));
+        }
+        let monitors = ACC.with(|a| std::mem::take(&mut *a.borrow_mut()));
+        MonitorLayout::new(monitors)
+    }
+}
+
+/// Enumerate connected monitors (origin, size, per-monitor effective DPI scale)
+/// via `EnumDisplayMonitors` + `GetMonitorInfoW` + `GetDpiForMonitor`.
+#[cfg(target_os = "windows")]
+pub fn enumerate_monitors() -> crate::monitor::MonitorLayout {
+    win_monitors::enumerate()
+}

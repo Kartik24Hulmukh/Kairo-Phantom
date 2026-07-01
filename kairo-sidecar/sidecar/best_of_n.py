@@ -2,17 +2,18 @@
 sidecar/best_of_n.py — Best-of-N candidate selection using deterministic oracles.
 Scores N candidates at inference time using docx/xlsx/pptx/pdf oracles.
 """
+
 import os
 import shutil
 import logging
-import copy
-from typing import List, Any, Type, Dict
+from typing import List, Any, Type
 from pydantic import BaseModel
 
 from sidecar.llm_caller import call_with_schema
 from sidecar.oracles import verify_docx, verify_xlsx, verify_pptx, verify_pdf
 
 log = logging.getLogger("kairo-sidecar.best_of_n")
+
 
 def run_best_of_n(
     prompt: str,
@@ -22,7 +23,7 @@ def run_best_of_n(
     file_path: str,
     master: Any,
     doc_context: Any,
-    N: int = 3
+    N: int = 3,
 ) -> BaseModel:
     """
     Generates N candidate responses from LLM, applies each to a temporary copy of the document,
@@ -64,27 +65,35 @@ def run_best_of_n(
         temp_file = os.path.join(temp_dir, f"candidate_{i}{os.path.splitext(file_path)[1]}")
         try:
             shutil.copy2(file_path, temp_file)
-            
+
             # Apply candidate operations to temp file
             # validate_operations and apply_operations can modify file
             validated_ops = master.validate_operations(candidate, doc_context)
             # Apply using master's writer/apply logic
             if domain == "word":
                 from sidecar.writers.docx_writer import write_docx
+
                 # validated_ops is a list of DocxOperation
-                write_docx(temp_file, [op.model_dump() if hasattr(op, "model_dump") else op for op in validated_ops])
-                
+                write_docx(
+                    temp_file,
+                    [op.model_dump() if hasattr(op, "model_dump") else op for op in validated_ops],
+                )
+
                 # Score using verify_docx
                 try:
                     verify_docx(temp_file)
                     score = 1.0
                 except AssertionError:
                     score = 0.0
-                    
+
             elif domain == "excel":
                 from sidecar.writers.xlsx_writer import write_xlsx
-                write_xlsx(temp_file, [op.model_dump() if hasattr(op, "model_dump") else op for op in validated_ops])
-                
+
+                write_xlsx(
+                    temp_file,
+                    [op.model_dump() if hasattr(op, "model_dump") else op for op in validated_ops],
+                )
+
                 try:
                     # Collect cell formulas or values to verify
                     cell_formulas = {}
@@ -98,7 +107,7 @@ def run_best_of_n(
                             cell_formulas[cell_ref] = formula
                         elif value:
                             cell_values[cell_ref] = value
-                            
+
                     verify_xlsx(temp_file, cell_values=cell_values, cell_formulas=cell_formulas)
                     score = 1.0
                 except AssertionError:
@@ -106,8 +115,12 @@ def run_best_of_n(
 
             elif domain == "powerpoint":
                 from sidecar.writers.pptx_writer import write_pptx
-                write_pptx(temp_file, [op.model_dump() if hasattr(op, "model_dump") else op for op in validated_ops])
-                
+
+                write_pptx(
+                    temp_file,
+                    [op.model_dump() if hasattr(op, "model_dump") else op for op in validated_ops],
+                )
+
                 try:
                     verify_pptx(temp_file)
                     score = 1.0
@@ -138,7 +151,7 @@ def run_best_of_n(
 
             else:
                 score = 1.0  # Default fallback score for unhandled domains
-                
+
             scores.append(score)
             log.info(f"[Best-of-N] Candidate {i+1} scored: {score}")
         except Exception as e:

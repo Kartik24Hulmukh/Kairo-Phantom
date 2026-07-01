@@ -1,14 +1,12 @@
 import os
-import shutil
 import logging
 import traceback
 import re
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Union, Optional
+from typing import List, Dict, Any, Optional
 
-import openpyxl
 from openpyxl import load_workbook
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter, column_index_from_string
 
 from sidecar.parsers.forge_bridge import ForgeValidator  # Single canonical source
@@ -46,10 +44,12 @@ class ValidationResult:
 class ExcelContextExtractor:
     """Reads spreadsheet context centered on active cell (15x15 region) with full details."""
 
-    def extract(self, file_path: str, active_cell: str, active_sheet: Optional[str] = None) -> ExcelContext:
+    def extract(
+        self, file_path: str, active_cell: str, active_sheet: Optional[str] = None
+    ) -> ExcelContext:
         try:
             wb = load_workbook(file_path, data_only=False)  # data_only=False → get formulas
-            
+
             # Resolve active sheet
             if active_sheet and active_sheet in wb.sheetnames:
                 ws = wb[active_sheet]
@@ -67,16 +67,22 @@ class ExcelContextExtractor:
             max_col = min(ws.max_column or 1, col_letter + 7)
 
             cells = []
-            for row in ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col):
+            for row in ws.iter_rows(
+                min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col
+            ):
                 for cell in row:
-                    cells.append({
-                        "address": cell.coordinate,
-                        "value": cell.value,
-                        "formula": str(cell.value) if str(cell.value or "").startswith("=") else None,
-                        "data_type": cell.data_type,
-                        "number_format": cell.number_format,
-                        "is_empty": cell.value is None,
-                    })
+                    cells.append(
+                        {
+                            "address": cell.coordinate,
+                            "value": cell.value,
+                            "formula": str(cell.value)
+                            if str(cell.value or "").startswith("=")
+                            else None,
+                            "data_type": cell.data_type,
+                            "number_format": cell.number_format,
+                            "is_empty": cell.value is None,
+                        }
+                    )
 
             # Detect header row
             headers = self._detect_headers(ws)
@@ -105,11 +111,9 @@ class ExcelContextExtractor:
                 for sname in wb.sheetnames:
                     ws2 = wb[sname]
                     for tname, tobj in (getattr(ws2, "tables", {}) or {}).items():
-                        tables.append({
-                            "name": tname,
-                            "sheet": sname,
-                            "range": getattr(tobj, "ref", "")
-                        })
+                        tables.append(
+                            {"name": tname, "sheet": sname, "range": getattr(tobj, "ref", "")}
+                        )
             except Exception:
                 pass
 
@@ -125,9 +129,9 @@ class ExcelContextExtractor:
                 max_row=ws.max_row or 0,
                 max_col=ws.max_column or 0,
                 file_path=file_path,
-                tables=tables
+                tables=tables,
             )
-        except Exception as e:
+        except Exception:
             log.error(f"ExcelContextExtractor error: {traceback.format_exc()}")
             return ExcelContext(
                 active_cell=active_cell,
@@ -141,32 +145,34 @@ class ExcelContextExtractor:
                 max_row=0,
                 max_col=0,
                 file_path=file_path,
-                tables=[]
+                tables=[],
             )
 
     def _parse_cell_address(self, active_cell: str) -> tuple[int, int]:
         col_str = "".join(c for c in active_cell if c.isalpha())
         row_str = "".join(c for c in active_cell if c.isdigit())
-        
+
         # Convert col_str to 1-indexed column number
         col_num = 0
         for char in col_str.upper():
-            col_num = col_num * 26 + (ord(char) - ord('A') + 1)
-            
+            col_num = col_num * 26 + (ord(char) - ord("A") + 1)
+
         row_num = int(row_str) if row_str else 1
         return col_num if col_num > 0 else 1, row_num
 
     def _detect_headers(self, ws) -> Dict[str, str]:
         best_row = 1
         best_score = -1
-        
+
         # Scan first 10 rows and at most first 100 columns
         max_scan = min(10, ws.max_row or 1)
         max_col = min(ws.max_column or 1, 100)
-        
+
         # Use iter_rows to avoid individual ws.cell() lookups and creation
-        rows = list(ws.iter_rows(min_row=1, max_row=max_scan, min_col=1, max_col=max_col, values_only=True))
-        
+        rows = list(
+            ws.iter_rows(min_row=1, max_row=max_scan, min_col=1, max_col=max_col, values_only=True)
+        )
+
         for r_idx, row in enumerate(rows, start=1):
             text_count = 0
             num_count = 0
@@ -182,15 +188,19 @@ class ExcelContextExtractor:
                         text_count += 1
                 elif isinstance(val, (int, float)):
                     num_count += 1
-                    
+
             score = text_count - num_count
             if text_count > 0 and score > best_score:
                 best_score = score
                 best_row = r_idx
-                
+
         headers = {}
         # Fetch only the cells in the best_row up to max_col
-        best_row_cells = list(ws.iter_rows(min_row=best_row, max_row=best_row, min_col=1, max_col=max_col, values_only=True))[0]
+        best_row_cells = list(
+            ws.iter_rows(
+                min_row=best_row, max_row=best_row, min_col=1, max_col=max_col, values_only=True
+            )
+        )[0]
         for c_idx, val in enumerate(best_row_cells, start=1):
             if val is not None:
                 headers[get_column_letter(c_idx)] = str(val)
@@ -198,7 +208,7 @@ class ExcelContextExtractor:
 
     def _infer_column_types(self, ws, headers: Dict[str, str]) -> Dict[str, str]:
         column_types = {}
-        
+
         # Determine which row headers came from
         header_row = 1
         if headers:
@@ -207,8 +217,10 @@ class ExcelContextExtractor:
                 min_c = min(col_indices)
                 max_c = max(col_indices)
                 max_r = min(15, (ws.max_row or 1) + 1)
-                
-                rows_header_scan = list(ws.iter_rows(min_row=1, max_row=max_r, min_col=min_c, max_col=max_c))
+
+                rows_header_scan = list(
+                    ws.iter_rows(min_row=1, max_row=max_r, min_col=min_c, max_col=max_c)
+                )
                 for r_idx, row in enumerate(rows_header_scan, start=1):
                     match_count = 0
                     for cell in row:
@@ -218,24 +230,26 @@ class ExcelContextExtractor:
                     if match_count > 0:
                         header_row = r_idx
                         break
-                    
+
         start_row = header_row + 1
         end_row = min((ws.max_row or 1), start_row + 50)
-        
+
         if headers:
             col_indices = [column_index_from_string(col_letter) for col_letter in headers.keys()]
             min_c = min(col_indices)
             max_c = max(col_indices)
-            
+
             # Read all cell values in a single iter_rows call
-            rows_data = list(ws.iter_rows(min_row=start_row, max_row=end_row, min_col=min_c, max_col=max_c))
-            
+            rows_data = list(
+                ws.iter_rows(min_row=start_row, max_row=end_row, min_col=min_c, max_col=max_c)
+            )
+
             cells_by_col = {c: [] for c in col_indices}
             for row in rows_data:
                 for cell in row:
                     if cell.column in cells_by_col:
                         cells_by_col[cell.column].append(cell)
-                    
+
             for col_letter in headers.keys():
                 c_idx = column_index_from_string(col_letter)
                 types = []
@@ -243,7 +257,7 @@ class ExcelContextExtractor:
                     val = cell.value
                     if val is None:
                         continue
-                    
+
                     if isinstance(val, str) and val.startswith("="):
                         types.append("formula")
                     elif isinstance(val, (int, float)):
@@ -259,18 +273,20 @@ class ExcelContextExtractor:
                                 types.append("text")
                     else:
                         import datetime
+
                         if isinstance(val, (datetime.datetime, datetime.date)):
                             types.append("date")
                         else:
                             types.append("text")
-                            
+
                 if not types:
                     column_types[col_letter] = "text"
                 else:
                     from collections import Counter
+
                     most_common = Counter(types).most_common(1)[0][0]
                     column_types[col_letter] = most_common
-                    
+
         return column_types
 
     def _detect_locale(self, ws, active_cell: Optional[str] = None) -> str:
@@ -282,7 +298,13 @@ class ExcelContextExtractor:
                 max_row = min(ws.max_row or 1, row_num + 7)
                 min_col = max(1, col_letter - 7)
                 max_col = min(ws.max_column or 1, col_letter + 7)
-                for row in ws.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col, values_only=False):
+                for row in ws.iter_rows(
+                    min_row=min_row,
+                    max_row=max_row,
+                    min_col=min_col,
+                    max_col=max_col,
+                    values_only=False,
+                ):
                     for cell in row:
                         val = cell.value
                         if isinstance(val, str) and val.startswith("="):
@@ -290,9 +312,9 @@ class ExcelContextExtractor:
                             for char in val:
                                 if char == '"':
                                     in_quotes = not in_quotes
-                                elif char == ';' and not in_quotes:
+                                elif char == ";" and not in_quotes:
                                     return "eu"
-                                elif char == ',' and not in_quotes:
+                                elif char == "," and not in_quotes:
                                     pass
             except Exception:
                 pass
@@ -300,7 +322,9 @@ class ExcelContextExtractor:
         # 2. Bounded scan of the first 100 rows and 20 columns as fallback
         max_r = min(ws.max_row or 1, 100)
         max_c = min(ws.max_column or 1, 20)
-        for row in ws.iter_rows(min_row=1, max_row=max_r, min_col=1, max_col=max_c, values_only=False):
+        for row in ws.iter_rows(
+            min_row=1, max_row=max_r, min_col=1, max_col=max_c, values_only=False
+        ):
             for cell in row:
                 val = cell.value
                 if isinstance(val, str) and val.startswith("="):
@@ -308,13 +332,11 @@ class ExcelContextExtractor:
                     for char in val:
                         if char == '"':
                             in_quotes = not in_quotes
-                        elif char == ';' and not in_quotes:
+                        elif char == ";" and not in_quotes:
                             return "eu"
-                        elif char == ',' and not in_quotes:
+                        elif char == "," and not in_quotes:
                             pass
         return "en"
-
-
 
 
 class ExcelOperationValidator:
@@ -334,7 +356,7 @@ class ExcelOperationValidator:
                     return ValidationResult(
                         valid=False,
                         error=f"Circular reference detected: target cell {context.active_cell} referenced in formula '{formula}'",
-                        op=op
+                        op=op,
                     )
 
                 # Missing equals prefix correction
@@ -344,7 +366,7 @@ class ExcelOperationValidator:
 
                 # 2. Invoke Forge Formula Validator
                 res = self.validator.validate_and_fix(formula, context.locale)
-                
+
                 # Apply corrected formula if available
                 if res.get("corrected"):
                     op["formula"] = res["corrected"]
@@ -357,9 +379,7 @@ class ExcelOperationValidator:
                             op["formula"] = sub_res["formula"]
                             return ValidationResult(valid=True, op=op)
                     return ValidationResult(
-                        valid=False,
-                        error=f"Formula validation error: {res['error']}",
-                        op=op
+                        valid=False, error=f"Formula validation error: {res['error']}", op=op
                     )
 
                 op["formula"] = res["formula"]
@@ -369,7 +389,7 @@ class ExcelOperationValidator:
                     return ValidationResult(
                         valid=False,
                         error=f"Circular reference detected in formula: {context.active_cell} in '{op['formula']}'",
-                        op=op
+                        op=op,
                     )
 
         return ValidationResult(valid=True, op=op)
@@ -382,12 +402,20 @@ class ExcelWriter:
         # STRATEGY: Try COM first if file is open in live Excel (windows only)
         try:
             import sys
+
             if sys.platform == "win32":
                 from sidecar.parsers.excelmcp_bridge import excel_is_open
+
                 has_cf = any(op.get("conditional_formatting") for op in operations)
                 if excel_is_open(file_path) and not has_cf:
-                    log.info("Excel is open and no conditional formatting requested. Applying operations via live COM...")
-                    from sidecar.parsers.excelmcp_bridge import excelmcp_write_cell, excelmcp_write_range
+                    log.info(
+                        "Excel is open and no conditional formatting requested. Applying operations via live COM..."
+                    )
+                    from sidecar.parsers.excelmcp_bridge import (
+                        excelmcp_write_cell,
+                        excelmcp_write_range,
+                    )
+
                     applied = []
                     errors = []
                     for op in operations:
@@ -395,35 +423,44 @@ class ExcelWriter:
                         cell = op.get("cell")
                         formula = op.get("formula")
                         value = op.get("value")
-                        
+
                         try:
                             if op_type == "write_cell":
-                                res = excelmcp_write_cell(file_path, cell, value=value, formula=formula)
+                                res = excelmcp_write_cell(
+                                    file_path, cell, value=value, formula=formula
+                                )
                                 if res.get("ok"):
                                     applied.append(op)
                                 else:
                                     errors.append(f"COM write_cell failed: {res.get('error')}")
                             elif op_type == "write_range":
                                 range_spec = op.get("range") or cell
-                                res = excelmcp_write_range(file_path, range_spec, values=op.get("values"), formulas=op.get("formulas"))
+                                res = excelmcp_write_range(
+                                    file_path,
+                                    range_spec,
+                                    values=op.get("values"),
+                                    formulas=op.get("formulas"),
+                                )
                                 if res.get("ok"):
                                     applied.append(op)
                                 else:
                                     errors.append(f"COM write_range failed: {res.get('error')}")
                         except Exception as e:
                             errors.append(f"COM operation error: {e}")
-                    
+
                     if not errors:
                         return {"applied_count": len(applied), "errors": []}
         except Exception as e:
-            log.warning(f"COM live Excel automation failed: {e}. Falling back to openpyxl formatting writer.")
+            log.warning(
+                f"COM live Excel automation failed: {e}. Falling back to openpyxl formatting writer."
+            )
 
         # Fallback: Write via openpyxl preserving formatting and macros
         try:
             wb = load_workbook(file_path, keep_vba=True)
             applied_count = 0
             errors = []
-            
+
             for op in operations:
                 try:
                     op_type = op.get("type", op.get("action", ""))
@@ -432,7 +469,7 @@ class ExcelWriter:
                         ws = wb[sheet_name]
                     else:
                         ws = wb.active
-                        
+
                     # Check sheet protection
                     if ws.protection.sheet or ws.protection.enabled:
                         formula_val = op.get("formula") or op.get("value")
@@ -440,34 +477,37 @@ class ExcelWriter:
                             f"Sheet '{ws.title}' is protected. "
                             f"Please copy the formula manually from the Ghost Review Panel: {formula_val}"
                         )
-                        
+
                     if op_type == "write_cell":
                         cell_ref = op.get("cell") or op.get("range")
                         target_cell = ws[cell_ref]
-                        
+
                         existing_format = target_cell.number_format
-                        
+
                         formula = op.get("formula")
                         if formula:
                             from sidecar.parsers.forge_bridge import validate_formula
+
                             val_res = validate_formula(formula, {"active_cell": cell_ref})
                             if not val_res["valid"]:
-                                raise ValueError(f"Invalid Excel formula rejected: {formula}. Error: {val_res.get('error')}")
+                                raise ValueError(
+                                    f"Invalid Excel formula rejected: {formula}. Error: {val_res.get('error')}"
+                                )
                             target_cell.value = val_res["corrected"]
                         elif op.get("value") is not None:
                             target_cell.value = op["value"]
-                            
+
                         if op.get("bold"):
                             target_cell.font = Font(bold=True)
-                            
+
                         # Preserve format if not explicitly changed
                         if not op.get("number_format"):
                             target_cell.number_format = existing_format
                         else:
                             target_cell.number_format = op["number_format"]
-                            
+
                         applied_count += 1
-                        
+
                     elif op_type == "write_range":
                         start_cell_ref = op.get("start_cell", op.get("cell", op.get("range", "A1")))
                         if ":" in start_cell_ref:
@@ -475,7 +515,7 @@ class ExcelWriter:
                         start_cell = ws[start_cell_ref]
                         start_row = start_cell.row
                         start_col = start_cell.column
-                        
+
                         values = op.get("values", op.get("data", []))
                         if not values and "formulas" in op:
                             values = op["formulas"]
@@ -484,29 +524,44 @@ class ExcelWriter:
                                 if isinstance(value, str) and value.startswith("="):
                                     from sidecar.parsers.forge_bridge import validate_formula
                                     from openpyxl.utils import get_column_letter
+
                                     current_cell_ref = f"{get_column_letter(start_col+c_offset)}{start_row+r_offset}"
-                                    val_res = validate_formula(value, {"active_cell": current_cell_ref})
+                                    val_res = validate_formula(
+                                        value, {"active_cell": current_cell_ref}
+                                    )
                                     if not val_res["valid"]:
-                                        raise ValueError(f"Invalid Excel formula in range rejected: {value}. Error: {val_res.get('error')}")
+                                        raise ValueError(
+                                            f"Invalid Excel formula in range rejected: {value}. Error: {val_res.get('error')}"
+                                        )
                                     value = val_res["corrected"]
-                                ws.cell(row=start_row+r_offset, column=start_col+c_offset, value=value)
+                                ws.cell(
+                                    row=start_row + r_offset,
+                                    column=start_col + c_offset,
+                                    value=value,
+                                )
                                 applied_count += 1
-                                
+
                     elif op_type == "create_chart":
-                        from openpyxl.chart import BarChart, LineChart, PieChart, ScatterChart, AreaChart, Reference
+                        from openpyxl.chart import (
+                            BarChart,
+                            LineChart,
+                            PieChart,
+                            Reference,
+                        )
+
                         sheet_name, cell_range = _parse_range_spec(op.get("source_range"), ws.title)
                         ws_data = wb[sheet_name]
-                        
+
                         # Parse range boundaries
                         parts = cell_range.upper().split(":")
                         min_cell = parts[0]
                         max_cell = parts[1] if len(parts) > 1 else parts[0]
                         min_col_str, min_row = parse_cell_ref(min_cell)
                         max_col_str, max_row = parse_cell_ref(max_cell)
-                        
+
                         min_col = column_index_from_string(min_col_str)
                         max_col = column_index_from_string(max_col_str)
-                        
+
                         ctype = op.get("chart_type", "column").lower()
                         if ctype in ("bar", "column"):
                             chart = BarChart()
@@ -518,23 +573,29 @@ class ExcelWriter:
                         else:
                             chart = BarChart()
                             chart.type = "col"
-                            
+
                         chart.title = op.get("title", "Chart")
-                        data = Reference(ws_data, min_col=min_col, min_row=min_row, max_col=max_col, max_row=max_row)
+                        data = Reference(
+                            ws_data,
+                            min_col=min_col,
+                            min_row=min_row,
+                            max_col=max_col,
+                            max_row=max_row,
+                        )
                         chart.add_data(data, titles_from_data=True)
-                        
+
                         t_sheet = op.get("target_sheet") or sheet_name
                         if t_sheet not in wb.sheetnames:
                             wb.create_sheet(t_sheet)
                         ws_target = wb[t_sheet]
-                        
+
                         ws_target.add_chart(chart, f"{get_column_letter(max_col + 1)}{min_row}")
                         applied_count += 1
-                        
+
                     elif op_type == "create_pivot":
                         sheet_name, cell_range = _parse_range_spec(op.get("source_range"), ws.title)
                         ws_src = wb[sheet_name]
-                        
+
                         parts = cell_range.upper().split(":")
                         min_cell = parts[0]
                         _, min_row = parse_cell_ref(min_cell)
@@ -543,40 +604,46 @@ class ExcelWriter:
                         max_col = column_index_from_string(max_col_str)
                         min_col_str, _ = parse_cell_ref(min_cell)
                         min_col = column_index_from_string(min_col_str)
-                        
+
                         header_map = {}
                         for c in range(min_col, max_col + 1):
                             h = ws_src.cell(row=min_row, column=c).value
                             if h:
                                 header_map[str(h)] = get_column_letter(c)
-                                
+
                         t_sheet = op.get("target_sheet") or (sheet_name + "_Pivot")
                         if t_sheet in wb.sheetnames:
                             del wb[t_sheet]
                         ws_pivot = wb.create_sheet(t_sheet)
-                        
-                        pivot_headers = op.get("rows", []) + op.get("columns", []) + op.get("values", [])
+
+                        pivot_headers = (
+                            op.get("rows", []) + op.get("columns", []) + op.get("values", [])
+                        )
                         for i, h in enumerate(pivot_headers, start=1):
                             ws_pivot.cell(row=1, column=i).value = h
-                            
+
                         formula_row = 2
                         for val_col in op.get("values", []):
                             val_letter = header_map.get(val_col, "A")
                             for row_field in op.get("rows", []):
                                 row_letter = header_map.get(row_field, "A")
-                                ws_pivot.cell(row=formula_row, column=1).value = f"={row_field} totals"
-                                formula = f"=SUMIF({sheet_name}!{row_letter}:{row_letter},\"<>\",{sheet_name}!{val_letter}:{val_letter})"
-                                ws_pivot.cell(row=formula_row, column=len(pivot_headers)).value = formula
+                                ws_pivot.cell(
+                                    row=formula_row, column=1
+                                ).value = f"={row_field} totals"
+                                formula = f'=SUMIF({sheet_name}!{row_letter}:{row_letter},"<>",{sheet_name}!{val_letter}:{val_letter})'
+                                ws_pivot.cell(
+                                    row=formula_row, column=len(pivot_headers)
+                                ).value = formula
                                 formula_row += 1
                         applied_count += 1
-                        
+
                 except Exception as e:
                     errors.append(str(e))
                     log.error(f"ExcelWriter operation failed: {e}")
-                    
+
             if errors:
                 return {"applied_count": applied_count, "errors": errors}
-                
+
             # Atomic save
             tmp = file_path + ".kairo_tmp"
             wb.save(tmp)
@@ -584,7 +651,7 @@ class ExcelWriter:
                 os.replace(tmp, file_path)
             else:
                 os.rename(tmp, file_path)
-                
+
             return {"applied_count": applied_count, "errors": []}
         except Exception as e:
             log.error(f"ExcelWriter failed: {traceback.format_exc()}")
@@ -593,7 +660,9 @@ class ExcelWriter:
 
 def _parse_range_spec(range_spec: str, default_sheet: str) -> tuple[str, str]:
     if "!" in range_spec:
-        sheet, cell_range = range_spec.split("1", 1) if "!" not in range_spec else range_spec.split("!", 1)
+        sheet, cell_range = (
+            range_spec.split("1", 1) if "!" not in range_spec else range_spec.split("!", 1)
+        )
         return sheet.strip("'\""), cell_range
     return default_sheet, range_spec
 
@@ -611,6 +680,7 @@ def parse_cell_ref(ref: str) -> tuple[str, int]:
 # into the standard master interface: extract_context / build_prompt /
 # validate_operations / apply_operations / get_schema_class.
 # ---------------------------------------------------------------------------
+
 
 class ExcelMaster:
     """
@@ -735,4 +805,5 @@ OUTPUT (JSON only):
     def get_schema_class(self):
         """Return the Pydantic schema class for LLM structured output."""
         from sidecar.schemas.xlsx_schema import ExcelResponse
+
         return ExcelResponse

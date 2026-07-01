@@ -1,8 +1,10 @@
 """PPTX SmartContextCapture — Auto-context for presentations."""
+
 from sidecar.parsers.pptx_mcp_bridge import PptxMcpBridge
 import logging
 
 log = logging.getLogger("kairo-sidecar.pptx_context")
+
 
 class PptxContextCapture:
     """Captures rich presentation context before every Alt+Ctrl+M."""
@@ -18,7 +20,7 @@ class PptxContextCapture:
             "slide_text": "",
             "slide_count": 0,
             "theme": "Default",
-            "user_preferences": self._get_user_ppt_preferences()
+            "user_preferences": self._get_user_ppt_preferences(),
         }
 
         if not pres_id:
@@ -61,12 +63,14 @@ class PptxContextCapture:
         if prefs:
             frag.append(f"User preferences: {prefs}")
 
-        frag.append("CRITICAL: Generate slide-appropriate content. "
-                    "Segoe UI typography is the default. "
-                    "Titles ≤ 7 words. Bullets ≤ 7 words each. "
-                    "Maximum 5 bullets per slide. "
-                    "Use the active presentation's theme fonts and colors. "
-                    "Generate speaker notes for every slide.")
+        frag.append(
+            "CRITICAL: Generate slide-appropriate content. "
+            "Segoe UI typography is the default. "
+            "Titles ≤ 7 words. Bullets ≤ 7 words each. "
+            "Maximum 5 bullets per slide. "
+            "Use the active presentation's theme fonts and colors. "
+            "Generate speaker notes for every slide."
+        )
 
         return "\n".join(frag)
 

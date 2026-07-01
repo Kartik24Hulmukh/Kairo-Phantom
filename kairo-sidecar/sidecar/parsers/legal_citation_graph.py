@@ -30,7 +30,6 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any
 
 import networkx as nx
 
@@ -127,67 +126,78 @@ class CitationGraph:
 
             # Build search patterns from the target document name
             # Extract key words from the document name for fuzzy matching
-            doc_base = re.sub(r'\.(docx?|pdf|txt)$', '', target_doc, flags=re.IGNORECASE)
-            doc_words = [w for w in re.split(r'[_\-\s]+', doc_base) if len(w) > 2]
+            doc_base = re.sub(r"\.(docx?|pdf|txt)$", "", target_doc, flags=re.IGNORECASE)
+            doc_words = [w for w in re.split(r"[_\-\s]+", doc_base) if len(w) > 2]
 
             # Pattern 1: "Section X of [document name/words]"
             for word in doc_words:
-                pattern = rf'(?:Section|Article|Clause|Paragraph)\s+(\d+[.\d]*)\s+(?:of|in|under)\s+(?:the\s+)?\S*{re.escape(word)}\S*'
+                pattern = rf"(?:Section|Article|Clause|Paragraph)\s+(\d+[.\d]*)\s+(?:of|in|under)\s+(?:the\s+)?\S*{re.escape(word)}\S*"
                 for m in re.finditer(pattern, source_text, re.IGNORECASE):
                     section = f"Section {m.group(1)}"
-                    ref_text = source_text[max(0, m.start()-50):m.end()+50].strip()
+                    ref_text = source_text[max(0, m.start() - 50) : m.end() + 50].strip()
                     self.add_citation(
-                        source_doc, target_doc,
+                        source_doc,
+                        target_doc,
                         section=section,
                         reference_text=ref_text,
                         confidence=0.85,
                     )
-                    detected.append({
-                        "source": source_doc,
-                        "target": target_doc,
-                        "section": section,
-                        "reference_text": ref_text,
-                        "confidence": 0.85,
-                    })
+                    detected.append(
+                        {
+                            "source": source_doc,
+                            "target": target_doc,
+                            "section": section,
+                            "reference_text": ref_text,
+                            "confidence": 0.85,
+                        }
+                    )
 
             # Pattern 2: "[document name], Section X"
             for word in doc_words:
-                pattern2 = rf'{re.escape(word)}\S*(?:\.docx?)?\s*,?\s*(?:Section|Article)\s+(\d+[.\d]*)'
+                pattern2 = (
+                    rf"{re.escape(word)}\S*(?:\.docx?)?\s*,?\s*(?:Section|Article)\s+(\d+[.\d]*)"
+                )
                 for m in re.finditer(pattern2, source_text, re.IGNORECASE):
                     section = f"Section {m.group(1)}"
-                    ref_text = source_text[max(0, m.start()-50):m.end()+50].strip()
+                    ref_text = source_text[max(0, m.start() - 50) : m.end() + 50].strip()
                     self.add_citation(
-                        source_doc, target_doc,
+                        source_doc,
+                        target_doc,
                         section=section,
                         reference_text=ref_text,
                         confidence=0.80,
                     )
-                    detected.append({
-                        "source": source_doc,
-                        "target": target_doc,
-                        "section": section,
-                        "reference_text": ref_text,
-                        "confidence": 0.80,
-                    })
+                    detected.append(
+                        {
+                            "source": source_doc,
+                            "target": target_doc,
+                            "section": section,
+                            "reference_text": ref_text,
+                            "confidence": 0.80,
+                        }
+                    )
 
             # Pattern 3: "pursuant to [document name]" / "in accordance with [document name]"
             for word in doc_words:
-                pattern3 = rf'(?:pursuant\s+to|in\s+accordance\s+with|as\s+defined\s+in|under)\s+(?:the\s+)?\S*{re.escape(word)}\S*'
+                pattern3 = rf"(?:pursuant\s+to|in\s+accordance\s+with|as\s+defined\s+in|under)\s+(?:the\s+)?\S*{re.escape(word)}\S*"
                 for m in re.finditer(pattern3, source_text, re.IGNORECASE):
-                    ref_text = source_text[max(0, m.start()-30):m.end()+80].strip()
+                    ref_text = source_text[max(0, m.start() - 30) : m.end() + 80].strip()
                     self.add_citation(
-                        source_doc, target_doc,
+                        source_doc,
+                        target_doc,
                         section="",
                         reference_text=ref_text,
                         confidence=0.70,
                     )
-                    detected.append({
-                        "source": source_doc,
-                        "target": target_doc,
-                        "section": "",
-                        "reference_text": ref_text,
-                        "confidence": 0.70,
-                    })
+                    detected.append(
+                        {
+                            "source": source_doc,
+                            "target": target_doc,
+                            "section": "",
+                            "reference_text": ref_text,
+                            "confidence": 0.70,
+                        }
+                    )
 
         log.info("auto_detect_citations: found %d citations from %s", len(detected), source_doc)
         return detected
@@ -209,42 +219,48 @@ class CitationGraph:
         for source, target, data in self.graph.in_edges(target_doc, data=True):
             if section and data.get("section", "").lower() != section.lower():
                 continue
-            results.append({
-                "source_doc": source,
-                "target_doc": target,
-                "section": data.get("section", ""),
-                "clause_type": data.get("clause_type", ""),
-                "reference_text": data.get("reference_text", ""),
-                "confidence": data.get("confidence", 0.0),
-            })
+            results.append(
+                {
+                    "source_doc": source,
+                    "target_doc": target,
+                    "section": data.get("section", ""),
+                    "clause_type": data.get("clause_type", ""),
+                    "reference_text": data.get("reference_text", ""),
+                    "confidence": data.get("confidence", 0.0),
+                }
+            )
         return results
 
     def find_references_from(self, source_doc: str) -> list[dict]:
         """Find all documents that the given source document references."""
         results: list[dict] = []
         for source, target, data in self.graph.out_edges(source_doc, data=True):
-            results.append({
-                "source_doc": source,
-                "target_doc": target,
-                "section": data.get("section", ""),
-                "clause_type": data.get("clause_type", ""),
-                "reference_text": data.get("reference_text", ""),
-                "confidence": data.get("confidence", 0.0),
-            })
+            results.append(
+                {
+                    "source_doc": source,
+                    "target_doc": target,
+                    "section": data.get("section", ""),
+                    "clause_type": data.get("clause_type", ""),
+                    "reference_text": data.get("reference_text", ""),
+                    "confidence": data.get("confidence", 0.0),
+                }
+            )
         return results
 
     def get_all_citations(self) -> list[dict]:
         """Return all citation edges in the graph."""
         results: list[dict] = []
         for source, target, data in self.graph.edges(data=True):
-            results.append({
-                "source_doc": source,
-                "target_doc": target,
-                "section": data.get("section", ""),
-                "clause_type": data.get("clause_type", ""),
-                "reference_text": data.get("reference_text", ""),
-                "confidence": data.get("confidence", 0.0),
-            })
+            results.append(
+                {
+                    "source_doc": source,
+                    "target_doc": target,
+                    "section": data.get("section", ""),
+                    "clause_type": data.get("clause_type", ""),
+                    "reference_text": data.get("reference_text", ""),
+                    "confidence": data.get("confidence", 0.0),
+                }
+            )
         return results
 
     def get_documents(self) -> list[str]:

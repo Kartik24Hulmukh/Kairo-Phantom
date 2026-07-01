@@ -29,17 +29,20 @@ log = logging.getLogger("kairo-sidecar.connectors.paperless")
 
 class PaperlessConnectionError(ConnectionError):
     """Raised when paperless-ngx is unreachable."""
+
     pass
 
 
 class PaperlessAuthError(PermissionError):
     """Raised when the paperless-ngx token is invalid."""
+
     pass
 
 
 @dataclass
 class PaperlessDocument:
     """A document retrieved from paperless-ngx."""
+
     id: int
     title: str
     content: str
@@ -92,22 +95,17 @@ class PaperlessBridge:
                     return json_module.loads(response.read().decode("utf-8"))
                 elif response.status == 401:
                     raise PaperlessAuthError(
-                        f"paperless-ngx rejected auth token (HTTP 401). "
-                        f"Check your token: kairo connectors enable paperless --token <TOKEN>"
+                        "paperless-ngx rejected auth token (HTTP 401). "
+                        "Check your token: kairo connectors enable paperless --token <TOKEN>"
                     )
                 else:
-                    raise PaperlessConnectionError(
-                        f"paperless-ngx returned HTTP {response.status}"
-                    )
+                    raise PaperlessConnectionError(f"paperless-ngx returned HTTP {response.status}")
         except urllib.error.HTTPError as e:
             if e.code == 401:
                 raise PaperlessAuthError(
-                    f"paperless-ngx rejected auth token (HTTP 401). "
-                    f"Check your token."
+                    "paperless-ngx rejected auth token (HTTP 401). " "Check your token."
                 )
-            raise PaperlessConnectionError(
-                f"paperless-ngx returned HTTP {e.code}: {e.reason}"
-            )
+            raise PaperlessConnectionError(f"paperless-ngx returned HTTP {e.code}: {e.reason}")
         except urllib.error.URLError as e:
             raise PaperlessConnectionError(
                 f"paperless-ngx unreachable at {self.base_url}: {e.reason}. "

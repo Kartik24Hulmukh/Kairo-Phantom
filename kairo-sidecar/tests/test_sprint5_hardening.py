@@ -5,25 +5,24 @@ Covers:
   Item 31: Best-of-N PDF oracle scoring
   Item 32: Adaptive compute enhancements (page_count signal, token budget, unknown difficulty)
 """
+
 import sys
 import os
-import json
-import tempfile
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
 from unittest.mock import patch, MagicMock
 
 from sidecar.domain_registry import (
-    set_domain_mode, get_domain_mode,
-    get_prompt_only_domains, get_public_domains,
-    load_registry, save_registry,
+    get_prompt_only_domains,
+    get_public_domains,
+    save_registry,
 )
 from sidecar.adaptive_compute import estimate_difficulty, get_compute_budget
 
 
 # ─── Item 30: Thin Domain Capability Stripping ────────────────────────────────
+
 
 class TestThinDomainCapabilities:
     """Verifies get_prompt_only_domains() and get_public_domains() work correctly."""
@@ -69,6 +68,7 @@ class TestThinDomainCapabilities:
 
 # ─── Item 32: Adaptive Compute — page count and token budget ─────────────────
 
+
 class TestAdaptiveComputeEnhancements:
     """Verifies the page_count signal and thinking_token_budget in adaptive compute."""
 
@@ -91,16 +91,23 @@ class TestAdaptiveComputeEnhancements:
         """All difficulties must include a thinking_token_budget key."""
         for difficulty in ("simple", "medium", "complex"):
             budget = get_compute_budget(difficulty)
-            assert "thinking_token_budget" in budget, \
-                f"thinking_token_budget missing for difficulty='{difficulty}'"
+            assert (
+                "thinking_token_budget" in budget
+            ), f"thinking_token_budget missing for difficulty='{difficulty}'"
 
     def test_get_compute_budget_complex_has_high_token_budget(self):
         """Complex difficulty must have the highest thinking token budget."""
         simple_budget = get_compute_budget("simple")
         medium_budget = get_compute_budget("medium")
         complex_budget = get_compute_budget("complex")
-        assert complex_budget["thinking_token_budget"] > medium_budget["thinking_token_budget"] >= simple_budget["thinking_token_budget"]
-        assert complex_budget["thinking_token_budget"] >= 4000, "Complex must allocate at least 4000 thinking tokens"
+        assert (
+            complex_budget["thinking_token_budget"]
+            > medium_budget["thinking_token_budget"]
+            >= simple_budget["thinking_token_budget"]
+        )
+        assert (
+            complex_budget["thinking_token_budget"] >= 4000
+        ), "Complex must allocate at least 4000 thinking tokens"
 
     def test_get_compute_budget_returns_copy_not_reference(self):
         """Modifying the returned dict must not affect subsequent calls."""
@@ -118,6 +125,7 @@ class TestAdaptiveComputeEnhancements:
 
 
 # ─── Item 31: Best-of-N PDF Domain ────────────────────────────────────────────
+
 
 class TestBestOfNPDFDomain:
     """Verifies PDF domain oracle scoring is wired into Best-of-N."""
@@ -152,6 +160,7 @@ class TestBestOfNPDFDomain:
         # If PyMuPDF is not installed, this test must FAIL (ImportError), not silently skip.
         # PyMuPDF>=1.23.0 is in requirements.txt; CI must install it.
         import fitz  # noqa: PLC0415 — hard dependency; do NOT replace with importorskip
+
         file_path = str(tmp_path / "test.pdf")
         doc = fitz.open()
         page = doc.new_page()
@@ -163,6 +172,7 @@ class TestBestOfNPDFDomain:
         bad_candidate = DocSchema(content="xyz_nonexistent_text_12345")
 
         call_count = [0]
+
         def mock_call(prompt, schema, **kwargs):
             call_count[0] += 1
             return good_candidate if call_count[0] == 1 else bad_candidate
@@ -174,19 +184,20 @@ class TestBestOfNPDFDomain:
             # Since PDF writing is not done in this test (no actual write), use N=1 to test oracle path
             # The PDF scoring path is tested in isolation
             res = run_best_of_n(
-                "prompt", DocSchema, "model", "pdf",
-                file_path, mock_master, None, N=1
+                "prompt", DocSchema, "model", "pdf", file_path, mock_master, None, N=1
             )
             assert res is not None
 
 
 # ─── Item 33: Document length and page count helper functions ──────────────────
 
+
 class TestDocLenAndPageCountHelpers:
     """Verifies _get_doc_len and _get_page_count helpers in sidecar/router.py."""
 
     def test_get_doc_len_dict_standard_keys(self):
         from sidecar.router import _get_doc_len
+
         assert _get_doc_len({"full_text": "hello"}) == 5
         assert _get_doc_len({"extracted_content": "world!"}) == 6
         assert _get_doc_len({"slide_text": "presentation"}) == 12
@@ -194,6 +205,7 @@ class TestDocLenAndPageCountHelpers:
 
     def test_get_doc_len_obj_standard_attributes(self):
         from sidecar.router import _get_doc_len
+
         class SimpleObj:
             def __init__(self, **kwargs):
                 for k, v in kwargs.items():
@@ -206,6 +218,7 @@ class TestDocLenAndPageCountHelpers:
 
     def test_get_doc_len_word_paragraphs(self):
         from sidecar.router import _get_doc_len
+
         class ParaObj:
             def __init__(self, text):
                 self.text = text
@@ -214,17 +227,19 @@ class TestDocLenAndPageCountHelpers:
         assert _get_doc_len({"paragraphs": [{"text": "hello"}, {"text": " world"}]}) == 11
         # Test dict with list of objects
         assert _get_doc_len({"paragraphs": [ParaObj("hello"), ParaObj(" world")]}) == 11
-        
+
         # Test object with list of dicts
         class DocObj:
             def __init__(self, paragraphs):
                 self.paragraphs = paragraphs
+
         assert _get_doc_len(DocObj([{"text": "hello"}, {"text": " world"}])) == 11
         # Test object with list of objects
         assert _get_doc_len(DocObj([ParaObj("hello"), ParaObj(" world")])) == 11
 
     def test_get_doc_len_excel_cells(self):
         from sidecar.router import _get_doc_len
+
         class CellObj:
             def __init__(self, value):
                 self.value = value
@@ -238,12 +253,14 @@ class TestDocLenAndPageCountHelpers:
         class SheetObj:
             def __init__(self, cells):
                 self.cells = cells
+
         assert _get_doc_len(SheetObj([{"value": "val1"}, {"value": 123}, {"value": None}])) == 7
         # Test object with list of objects
         assert _get_doc_len(SheetObj([CellObj("val1"), CellObj(123), CellObj(None)])) == 7
 
     def test_get_page_count_dict_and_obj(self):
         from sidecar.router import _get_page_count
+
         class SimpleObj:
             def __init__(self, **kwargs):
                 for k, v in kwargs.items():
@@ -256,4 +273,3 @@ class TestDocLenAndPageCountHelpers:
         assert _get_page_count(SimpleObj(total_slides="10")) == 10
         assert _get_page_count(SimpleObj(slide_count="invalid")) == 0
         assert _get_page_count(None) == 0
-

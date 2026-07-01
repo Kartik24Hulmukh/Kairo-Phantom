@@ -52,13 +52,35 @@ impl DocumentHealthChecker {
     fn detect_passive_voice(text: &str) -> Vec<HealthIssue> {
         // Common passive voice patterns: "is/are/was/were/been/being + past participle"
         let passive_patterns = [
-            "is being", "are being", "was being", "were being",
-            "has been", "have been", "had been",
-            "will be", "would be", "should be", "could be", "may be", "might be",
-            "is done", "was done", "are done", "were done",
-            "is made", "was made", "is given", "was given",
-            "is used", "was used", "is shown", "was shown",
-            "is considered", "was considered", "is known", "was known",
+            "is being",
+            "are being",
+            "was being",
+            "were being",
+            "has been",
+            "have been",
+            "had been",
+            "will be",
+            "would be",
+            "should be",
+            "could be",
+            "may be",
+            "might be",
+            "is done",
+            "was done",
+            "are done",
+            "were done",
+            "is made",
+            "was made",
+            "is given",
+            "was given",
+            "is used",
+            "was used",
+            "is shown",
+            "was shown",
+            "is considered",
+            "was considered",
+            "is known",
+            "was known",
         ];
 
         let text_lower = text.to_lowercase();
@@ -69,10 +91,14 @@ impl DocumentHealthChecker {
                 issues.push(HealthIssue {
                     category: HealthCategory::PassiveVoice,
                     severity: "suggestion",
-                    description: format!("Passive voice detected: \"{}\" — consider active voice", pattern),
+                    description: format!(
+                        "Passive voice detected: \"{pattern}\" — consider active voice"
+                    ),
                     location_hint: None,
                 });
-                if issues.len() >= 5 { break; } // Cap at 5 to avoid noise
+                if issues.len() >= 5 {
+                    break;
+                } // Cap at 5 to avoid noise
             }
         }
 
@@ -97,14 +123,18 @@ impl DocumentHealthChecker {
         }
 
         // Check mixed capitalization in short spans (ALL CAPS vs Title Case)
-        let all_caps_count = doc.full_text.split_whitespace()
+        let all_caps_count = doc
+            .full_text
+            .split_whitespace()
             .filter(|w| w.len() > 3 && w.chars().all(|c| c.is_uppercase() || !c.is_alphabetic()))
             .count();
         if all_caps_count > 10 {
             issues.push(HealthIssue {
                 category: HealthCategory::Consistency,
                 severity: "suggestion",
-                description: format!("Heavy use of ALL CAPS ({} words) — consider title case for professional tone", all_caps_count),
+                description: format!(
+                    "Heavy use of ALL CAPS ({all_caps_count} words) — consider title case for professional tone"
+                ),
                 location_hint: None,
             });
         }
@@ -131,7 +161,9 @@ impl DocumentHealthChecker {
             issues.push(HealthIssue {
                 category: HealthCategory::StructureIssue,
                 severity: "suggestion",
-                description: "Long document (500+ words) has no headings — consider adding structure".to_string(),
+                description:
+                    "Long document (500+ words) has no headings — consider adding structure"
+                        .to_string(),
                 location_hint: None,
             });
         }
@@ -142,7 +174,7 @@ impl DocumentHealthChecker {
             issues.push(HealthIssue {
                 category: HealthCategory::StructureIssue,
                 severity: "info",
-                description: format!("Short document ({} words) — is this a draft?", word_count),
+                description: format!("Short document ({word_count} words) — is this a draft?"),
                 location_hint: None,
             });
         }
@@ -151,14 +183,19 @@ impl DocumentHealthChecker {
     }
 
     fn count_sentences(text: &str) -> usize {
-        text.chars().filter(|&c| c == '.' || c == '!' || c == '?').count().max(1)
+        text.chars()
+            .filter(|&c| c == '.' || c == '!' || c == '?')
+            .count()
+            .max(1)
     }
 
     /// Flesch Reading Ease (simplified). >60 = easy, <30 = very hard.
     fn flesch_reading_ease(text: &str) -> f32 {
         let words: Vec<&str> = text.split_whitespace().collect();
         let word_count = words.len();
-        if word_count == 0 { return 100.0; }
+        if word_count == 0 {
+            return 100.0;
+        }
 
         let sentence_count = Self::count_sentences(text);
         let syllable_count: usize = words.iter().map(|w| Self::count_syllables(w)).sum();
@@ -176,11 +213,15 @@ impl DocumentHealthChecker {
         let mut prev_vowel = false;
         for &c in &chars {
             let is_vowel = vowels.contains(&c);
-            if is_vowel && !prev_vowel { count += 1; }
+            if is_vowel && !prev_vowel {
+                count += 1;
+            }
             prev_vowel = is_vowel;
         }
         // Remove silent 'e' at end
-        if word.ends_with('e') && count > 1 { count -= 1; }
+        if word.ends_with('e') && count > 1 {
+            count -= 1;
+        }
         count.max(1)
     }
 }
@@ -198,11 +239,11 @@ impl HealthReport {
     pub fn format(&self) -> String {
         let readability_label = match self.readability_score as i32 {
             90..=200 => "Very Easy",
-            70..=89  => "Easy",
-            60..=69  => "Standard",
-            50..=59  => "Fairly Difficult",
-            30..=49  => "Difficult",
-            _        => "Very Difficult",
+            70..=89 => "Easy",
+            60..=69 => "Standard",
+            50..=59 => "Fairly Difficult",
+            30..=49 => "Difficult",
+            _ => "Very Difficult",
         };
 
         let mut out = format!(
@@ -215,23 +256,41 @@ impl HealthReport {
         if self.issues.is_empty() {
             out.push_str("✅ No issues found — document looks healthy!\n");
         } else {
-            let errors: Vec<_> = self.issues.iter().filter(|i| i.severity == "error").collect();
-            let warnings: Vec<_> = self.issues.iter().filter(|i| i.severity == "warning").collect();
-            let suggestions: Vec<_> = self.issues.iter().filter(|i| i.severity == "suggestion" || i.severity == "info").collect();
+            let errors: Vec<_> = self
+                .issues
+                .iter()
+                .filter(|i| i.severity == "error")
+                .collect();
+            let warnings: Vec<_> = self
+                .issues
+                .iter()
+                .filter(|i| i.severity == "warning")
+                .collect();
+            let suggestions: Vec<_> = self
+                .issues
+                .iter()
+                .filter(|i| i.severity == "suggestion" || i.severity == "info")
+                .collect();
 
             if !errors.is_empty() {
                 out.push_str(&format!("❌ {} Error(s):\n", errors.len()));
-                for e in &errors { out.push_str(&format!("  • {}\n", e.description)); }
+                for e in &errors {
+                    out.push_str(&format!("  • {}\n", e.description));
+                }
                 out.push('\n');
             }
             if !warnings.is_empty() {
                 out.push_str(&format!("⚠️  {} Warning(s):\n", warnings.len()));
-                for w in &warnings { out.push_str(&format!("  • {}\n", w.description)); }
+                for w in &warnings {
+                    out.push_str(&format!("  • {}\n", w.description));
+                }
                 out.push('\n');
             }
             if !suggestions.is_empty() {
                 out.push_str(&format!("💡 {} Suggestion(s):\n", suggestions.len()));
-                for s in &suggestions { out.push_str(&format!("  • {}\n", s.description)); }
+                for s in &suggestions {
+                    out.push_str(&format!("  • {}\n", s.description));
+                }
             }
         }
         out

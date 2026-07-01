@@ -18,7 +18,7 @@ from sidecar.oracles import (
     excel_libreoffice_recompute,
     verify_xlsx_recomputed_values,
     NetworkSnifferOracle,
-    verify_screenshot_diff
+    verify_screenshot_diff,
 )
 from sidecar.test_fix_loop import TestFixLoop
 
@@ -34,10 +34,10 @@ def test_verify_docx(temp_dir):
     doc.add_heading("Performance Metrics", level=2)
     doc.add_paragraph("Kairo CUA latency is under 2ms.")
     doc.save(docx_path)
-    
+
     # Verification should pass
     assert verify_docx(docx_path, ["Performance Metrics", "latency is under 2ms"])
-    
+
     # Verification should raise AssertionError for missing text
     with pytest.raises(AssertionError) as excinfo:
         verify_docx(docx_path, ["Nonexistent Text"])
@@ -52,14 +52,14 @@ def test_verify_xlsx(temp_dir):
     ws["A2"] = 20
     ws["A3"] = "=SUM(A1:A2)"
     wb.save(xlsx_path)
-    
+
     # Verification should pass for formula match
     assert verify_xlsx(xlsx_path, cell_formulas={"A3": "=SUM(A1:A2)"})
-    
+
     # Verification should fail for wrong formula
     with pytest.raises(AssertionError):
         verify_xlsx(xlsx_path, cell_formulas={"A3": "=SUM(A1:A3)"})
-        
+
     # Verification should match evaluated values (openpyxl load fallback writes values)
     assert verify_xlsx(xlsx_path, cell_values={"A1": 10, "A2": 20})
 
@@ -69,17 +69,17 @@ def test_verify_pptx(temp_dir):
     prs = pptx.Presentation()
     blank_slide_layout = prs.slide_layouts[6]
     slide = prs.slides.add_slide(blank_slide_layout)
-    
+
     # Add textbox with content
     txBox = slide.shapes.add_textbox(0, 0, 100, 100)
     tf = txBox.text_frame
     p = tf.add_paragraph()
     p.text = "- Run E2E harness on Windows Sandbox."
     prs.save(pptx_path)
-    
+
     # Verification should pass
     assert verify_pptx(pptx_path, expected_slide_count=1, bullet_word_limit=12)
-    
+
     # Verification should fail for wrong slide count
     with pytest.raises(AssertionError):
         verify_pptx(pptx_path, expected_slide_count=2)
@@ -92,10 +92,10 @@ def test_verify_pdf(temp_dir):
     page.insert_text((50, 50), "PDF Oracle Verification Test.")
     doc.save(pdf_path)
     doc.close()
-    
+
     # Verification should pass
     assert verify_pdf(pdf_path, ["PDF Oracle", "Verification"])
-    
+
     # Verification should fail for missing text
     with pytest.raises(AssertionError):
         verify_pdf(pdf_path, ["Outbound connection blocked"])
@@ -105,8 +105,9 @@ def test_libreoffice_recompute_not_found(temp_dir):
     xlsx_path = os.path.join(temp_dir, "test.xlsx")
     wb = openpyxl.Workbook()
     wb.save(xlsx_path)
-    
+
     import shutil
+
     if shutil.which("soffice") is None:
         # LibreOffice NOT installed → should raise FileNotFoundError
         with pytest.raises(FileNotFoundError) as excinfo:
@@ -116,10 +117,10 @@ def test_libreoffice_recompute_not_found(temp_dir):
         # LibreOffice IS installed → should succeed (or raise a different error)
         # The test name says "not found" but we adapt for environments where it IS found.
         try:
-            result = excel_libreoffice_recompute(xlsx_path, temp_dir)
+            excel_libreoffice_recompute(xlsx_path, temp_dir)
         except FileNotFoundError:
             pass  # Acceptable if the binary path resolution fails
-        except Exception as e:
+        except Exception:
             # Other errors (e.g., empty workbook) are acceptable — we just verify
             # it doesn't silently succeed with a broken file
             pass
@@ -128,10 +129,10 @@ def test_libreoffice_recompute_not_found(temp_dir):
 def test_network_sniffer_oracle():
     sniffer = NetworkSnifferOracle()
     sniffer.start()
-    
+
     # Check that starting doesn't crash and destinations is a set
     assert isinstance(sniffer.external_destinations, set)
-    
+
     sniffer.stop()
 
 
@@ -139,25 +140,26 @@ def test_verify_screenshot_diff(temp_dir):
     path_a = os.path.join(temp_dir, "a.png")
     path_b = os.path.join(temp_dir, "b.png")
     path_c = os.path.join(temp_dir, "c.png")
-    
+
     img_a = Image.new("RGB", (100, 100), color="white")
     img_a.save(path_a)
-    
+
     img_b = Image.new("RGB", (100, 100), color="white")
     img_b.save(path_b)
-    
+
     img_c = Image.new("RGB", (100, 100), color="black")
     img_c.save(path_c)
-    
+
     # A and B match
     assert verify_screenshot_diff(path_a, path_b)
-    
+
     # A and C do not match
     with pytest.raises(AssertionError):
         verify_screenshot_diff(path_a, path_c)
 
 
 # ─── New Oracle Tests ─────────────────────────────────────────────────────────
+
 
 def test_verify_docx_deterministic_normalization(temp_dir):
     docx_path = os.path.join(temp_dir, "norm_test.docx")
@@ -191,7 +193,7 @@ def test_verify_xlsx_rounding_normalization(temp_dir):
     assert verify_xlsx(
         xlsx_path,
         cell_values={"A1": 3.3333, "A2": "whitespace folded"},
-        cell_formulas={"A3": "=SUM(A1:A1)"}
+        cell_formulas={"A3": "=SUM(A1:A1)"},
     )
 
     # Test failing value check
@@ -215,7 +217,9 @@ def test_verify_pptx_visual_sorting(temp_dir):
     prs.save(pptx_path)
 
     # Shapes must be sorted visually: top-to-bottom, then left-to-right.
-    assert verify_pptx(pptx_path, expected_slide_count=1, expected_text_substrings=["First text. Second text."])
+    assert verify_pptx(
+        pptx_path, expected_slide_count=1, expected_text_substrings=["First text. Second text."]
+    )
 
 
 def test_verify_pdf_visual_sorting(temp_dir):
@@ -247,7 +251,9 @@ def test_verify_xlsx_recomputed_values_success(temp_dir):
     doc.close()
 
     # Mock excel_libreoffice_recompute to return the dummy PDF
-    with patch("sidecar.oracles.excel_libreoffice_recompute", return_value=dummy_pdf_path) as mock_recompute:
+    with patch(
+        "sidecar.oracles.excel_libreoffice_recompute", return_value=dummy_pdf_path
+    ) as mock_recompute:
         assert verify_xlsx_recomputed_values(xlsx_path, temp_dir, ["Recomputed Value: 42"])
         mock_recompute.assert_called_once_with(xlsx_path, temp_dir)
 
@@ -278,28 +284,29 @@ def test_network_sniffer_oracle_fallback():
     with patch("psutil.net_connections", side_effect=psutil.AccessDenied()):
         mock_conn1 = MagicMock()
         mock_conn1.raddr = MagicMock(ip="127.0.0.1")
-        
+
         mock_conn2 = MagicMock()
         mock_conn2.raddr = MagicMock(ip="10.0.0.1")
-        
+
         mock_conn3 = MagicMock()
         mock_conn3.raddr = MagicMock(ip="8.8.8.8")
-        
+
         mock_conn4 = MagicMock()
         mock_conn4.raddr = None
 
         mock_proc = MagicMock()
         mock_proc.connections.return_value = [mock_conn1, mock_conn4]
-        
+
         mock_child = MagicMock()
         mock_child.connections.return_value = [mock_conn2, mock_conn3]
-        
+
         mock_proc.children.return_value = [mock_child]
 
         with patch("psutil.Process", return_value=mock_proc):
             sniffer = NetworkSnifferOracle()
             sniffer.start()
             import time
+
             time.sleep(0.5)
             sniffer.stop()
 
@@ -338,6 +345,7 @@ def test_verify_screenshot_diff_imagehash(temp_dir):
 def test_cryptographic_signature_protection(temp_dir):
     import builtins
     import io
+
     loop = TestFixLoop(workspace_root=temp_dir)
     loop.verify_oracles_signature()
 
@@ -373,4 +381,3 @@ def test_verify_screenshot_diff_modes(temp_dir):
 
     # Verification should pass as both are converted to RGB internally
     assert verify_screenshot_diff(path_a, path_b)
-

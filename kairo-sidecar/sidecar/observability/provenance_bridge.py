@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import hashlib
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -44,8 +43,18 @@ def canonical_receipt_json(receipt: Dict[str, Any]) -> str:
     # opik_trace_id, opik_trace_url, domain
     ordered = {}
     for key in [
-        "seq", "timestamp", "agent_id", "action", "context", "outcome",
-        "prev_hash", "self_hash", "signature", "opik_trace_id", "opik_trace_url", "domain",
+        "seq",
+        "timestamp",
+        "agent_id",
+        "action",
+        "context",
+        "outcome",
+        "prev_hash",
+        "self_hash",
+        "signature",
+        "opik_trace_id",
+        "opik_trace_url",
+        "domain",
     ]:
         if key in temp:
             ordered[key] = temp[key]

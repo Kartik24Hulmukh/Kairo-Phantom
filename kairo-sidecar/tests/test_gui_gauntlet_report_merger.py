@@ -1,4 +1,5 @@
 """Unit tests for gui_gauntlet_report_merger.py."""
+
 import sys
 import os
 import json
@@ -10,6 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from scripts.gui_gauntlet_report_merger import merge_reports
 
+
 @pytest.fixture
 def cleanup_report():
     """Ensure gui_gauntlet_report.json is cleaned up after each test."""
@@ -19,6 +21,7 @@ def cleanup_report():
     yield
     if os.path.exists(report_file):
         os.remove(report_file)
+
 
 def test_merge_reports_pass(cleanup_report):
     """Test merge_reports when gate threshold is met."""
@@ -35,7 +38,13 @@ def test_merge_reports_pass(cleanup_report):
         ]
         results_excel = [
             {"id": "EXCEL_001", "app": "Excel", "status": "PASSED", "elapsed": 150},
-            {"id": "EXCEL_002", "app": "Excel", "status": "ORACLE_FAILED", "elapsed": 180, "error": "Mismatch"},
+            {
+                "id": "EXCEL_002",
+                "app": "Excel",
+                "status": "ORACLE_FAILED",
+                "elapsed": 180,
+                "error": "Mismatch",
+            },
             {"id": "EXCEL_003", "app": "Excel", "status": "PASSED", "elapsed": 110},
         ]
 
@@ -59,6 +68,7 @@ def test_merge_reports_pass(cleanup_report):
         assert report["pass_rate"] == 80.0
         assert len(report["results"]) == 5
 
+
 def test_merge_reports_fail(cleanup_report):
     """Test merge_reports when gate threshold is not met."""
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -67,7 +77,13 @@ def test_merge_reports_fail(cleanup_report):
 
         results_word = [
             {"id": "WORD_001", "app": "Word", "status": "PASSED", "elapsed": 100},
-            {"id": "WORD_002", "app": "Word", "status": "ORACLE_FAILED", "elapsed": 120, "error": "Fail"},
+            {
+                "id": "WORD_002",
+                "app": "Word",
+                "status": "ORACLE_FAILED",
+                "elapsed": 120,
+                "error": "Fail",
+            },
         ]
 
         with open(os.path.join(dir1, "results.json"), "w", encoding="utf-8") as f:
@@ -86,6 +102,7 @@ def test_merge_reports_fail(cleanup_report):
         assert report["failed"] == 1
         assert report["pass_rate"] == 50.0
 
+
 def test_merge_reports_no_files(cleanup_report):
     """Test merge_reports when no results.json files are found."""
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -102,6 +119,7 @@ def test_merge_reports_no_files(cleanup_report):
         assert report["failed"] == 0
         assert report["pass_rate"] == 0.0
         assert len(report["results"]) == 0
+
 
 def test_merge_reports_malformed_results(cleanup_report):
     """Test merge_reports when a results.json file is malformed."""

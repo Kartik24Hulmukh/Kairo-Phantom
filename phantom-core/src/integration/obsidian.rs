@@ -1,6 +1,6 @@
-use anyhow::{Result, anyhow};
-use async_trait::async_trait;
 use super::IntegrationAdapter;
+use anyhow::{anyhow, Result};
+use async_trait::async_trait;
 use std::path::PathBuf;
 use tokio::fs;
 
@@ -28,7 +28,7 @@ impl ObsidianAdapter {
         // Mock detection: check common locations or config
         let home = dirs::home_dir().ok_or_else(|| anyhow!("Could not find home directory"))?;
         let possible_vault = home.join("Documents/Obsidian Vault");
-        
+
         if fs::metadata(&possible_vault).await.is_ok() {
             self.vault_path = Some(possible_vault.clone());
             Ok(possible_vault)
@@ -47,32 +47,38 @@ impl IntegrationAdapter for ObsidianAdapter {
     async fn is_available(&self) -> bool {
         // Check if Obsidian process is running or if vault is accessible
         // For now, check if vault exists
-        let mut self_clone = Self { vault_path: self.vault_path.clone() };
+        let mut self_clone = Self {
+            vault_path: self.vault_path.clone(),
+        };
         self_clone.detect_vault().await.is_ok()
     }
 
     async fn get_deep_context(&self) -> Result<String> {
-        let mut self_clone = Self { vault_path: self.vault_path.clone() };
+        let mut self_clone = Self {
+            vault_path: self.vault_path.clone(),
+        };
         let vault = self_clone.detect_vault().await?;
-        
+
         // Example: List recent notes or tags to provide context
         let mut context = format!("Obsidian Vault: {}\n", vault.display());
         context.push_str("Recent Files: [mock_list_of_files.md]\n");
-        
+
         Ok(context)
     }
 
     async fn execute_action(&self, action: &str, data: &str) -> Result<()> {
-        let mut self_clone = Self { vault_path: self.vault_path.clone() };
+        let mut self_clone = Self {
+            vault_path: self.vault_path.clone(),
+        };
         let vault = self_clone.detect_vault().await?;
 
         match action {
             "create_note" => {
-                let file_path = vault.join(format!("{}.md", data));
+                let file_path = vault.join(format!("{data}.md"));
                 fs::write(file_path, "# New Note\nCreated by Kairo Phantom").await?;
                 Ok(())
             }
-            _ => Err(anyhow!("Unsupported action: {}", action)),
+            _ => Err(anyhow!("Unsupported action: {action}")),
         }
     }
 }

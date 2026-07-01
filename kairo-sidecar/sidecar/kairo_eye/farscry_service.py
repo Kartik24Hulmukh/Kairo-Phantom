@@ -6,9 +6,10 @@ import tempfile
 import subprocess
 import logging
 from enum import Enum
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Optional
 
 log = logging.getLogger("kairo-sidecar.farscry_service")
+
 
 class ElementType(str, Enum):
     DATE = "DATE"
@@ -19,6 +20,7 @@ class ElementType(str, Enum):
     ERROR_MESSAGE = "ERROR_MESSAGE"
     TABLE = "TABLE"
     TEXT_BLOCK = "TEXT_BLOCK"
+
 
 class FarscryService:
     """Screen visual analysis for Alt+Shift+M pointer mode."""
@@ -34,17 +36,19 @@ class FarscryService:
         # 1. Capture screen region centered around cursor
         try:
             from PIL import ImageGrab
+
             # Box: (left, top, right, bottom)
             left = max(0, cursor_x - 200)
             top = max(0, cursor_y - 150)
             right = cursor_x + 200
             bottom = cursor_y + 150
-            
+
             img = ImageGrab.grab(bbox=(left, top, right, bottom))
         except Exception as e:
             log.warning(f"PIL ImageGrab not available or failed: {e}. Simulating capture.")
             # Mock image for headless/test environments
             from PIL import Image
+
             img = Image.new("RGB", (400, 300), color="white")
 
         # 2. Save region to a temp file
@@ -60,12 +64,14 @@ class FarscryService:
                     [self.farscry_path, "extract", tmp_path],
                     capture_output=True,
                     text=True,
-                    timeout=5.0
+                    timeout=5.0,
                 )
                 if res.returncode == 0:
                     vasp_output = json.loads(res.stdout)
             except Exception as e:
-                log.warning(f"farscry execution failed: {e}. Falling back to deterministic parsing.")
+                log.warning(
+                    f"farscry execution failed: {e}. Falling back to deterministic parsing."
+                )
 
         # Cleanup temp file
         try:
@@ -89,10 +95,10 @@ class FarscryService:
         """Finds matching visual element at coordinates from farscry VASP output."""
         elements = vasp.get("elements", [])
         for elem in elements:
-            box = elem.get("box", [0, 0, 0, 0]) # [x1, y1, x2, y2]
+            box = elem.get("box", [0, 0, 0, 0])  # [x1, y1, x2, y2]
             if box[0] <= x <= box[2] and box[1] <= y <= box[3]:
                 return elem
-        
+
         # Fallback default element
         return {
             "text": "Default text block at position",
@@ -108,7 +114,9 @@ class FarscryService:
             return ElementType.TEXT_BLOCK
 
         # Check for DATE format (e.g. 05/31/2026, 2026-05-31)
-        if re.search(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", text) or re.search(r"\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b", text):
+        if re.search(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", text) or re.search(
+            r"\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b", text
+        ):
             return ElementType.DATE
 
         # Check for numeric / financial format (e.g., $1,250.00, 45%, 1234)
@@ -124,7 +132,9 @@ class FarscryService:
             return ElementType.CODE
 
         # Check for error tracebacks / alerts
-        if any(kw in text.lower() for kw in ["error:", "exception:", "failed", "traceback", "fatal"]):
+        if any(
+            kw in text.lower() for kw in ["error:", "exception:", "failed", "traceback", "fatal"]
+        ):
             return ElementType.ERROR_MESSAGE
 
         # Check for tables
@@ -134,52 +144,50 @@ class FarscryService:
         return ElementType.TEXT_BLOCK
 
     def _looks_like_code(self, text: str) -> bool:
-        indicators = ["def ", "class ", "import ", "fn ", "let ", "const ", "struct ", "public static void", "&&", "||", " {", "};"]
-        return any(ind in text for ind in indicators) or len(text.split("\n")) > 1 and ("=" in text or "(" in text)
+        indicators = [
+            "def ",
+            "class ",
+            "import ",
+            "fn ",
+            "let ",
+            "const ",
+            "struct ",
+            "public static void",
+            "&&",
+            "||",
+            " {",
+            "};",
+        ]
+        return (
+            any(ind in text for ind in indicators)
+            or len(text.split("\n")) > 1
+            and ("=" in text or "(" in text)
+        )
 
-    def _get_contextual_actions(self, element_type: ElementType, element: Dict[str, Any]) -> List[str]:
+    def _get_contextual_actions(
+        self, element_type: ElementType, element: Dict[str, Any]
+    ) -> List[str]:
         actions_map = {
             ElementType.DATE: [
                 "Schedule meeting from this date",
                 "Calculate days from today",
-                "Add to calendar"
+                "Add to calendar",
             ],
             ElementType.NUMBER: [
                 "Explain this figure",
                 "Add to Excel spreadsheet",
-                "Calculate percentage change"
+                "Calculate percentage change",
             ],
-            ElementType.CODE: [
-                "Explain this code",
-                "Improve this code",
-                "Write unit test"
-            ],
+            ElementType.CODE: ["Explain this code", "Improve this code", "Write unit test"],
             ElementType.IMAGE: [
                 "Describe this image",
                 "Extract text from image",
-                "Generate similar"
+                "Generate similar",
             ],
-            ElementType.URL: [
-                "Summarize this page",
-                "Check if link is live",
-                "Extract key info"
-            ],
-            ElementType.ERROR_MESSAGE: [
-                "Explain this error",
-                "Suggest fix",
-                "Search for solution"
-            ],
-            ElementType.TABLE: [
-                "Extract to Excel",
-                "Summarize data",
-                "Create chart from this"
-            ],
-            ElementType.TEXT_BLOCK: [
-                "Improve this text",
-                "Summarize",
-                "Translate",
-                "Expand"
-            ]
+            ElementType.URL: ["Summarize this page", "Check if link is live", "Extract key info"],
+            ElementType.ERROR_MESSAGE: ["Explain this error", "Suggest fix", "Search for solution"],
+            ElementType.TABLE: ["Extract to Excel", "Summarize data", "Create chart from this"],
+            ElementType.TEXT_BLOCK: ["Improve this text", "Summarize", "Translate", "Expand"],
         }
         return actions_map.get(element_type, ["Ask Kairo about this"])
 

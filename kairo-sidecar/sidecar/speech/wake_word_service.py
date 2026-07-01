@@ -14,10 +14,10 @@ Environment variables:
     WAKE_WORD_PHRASE        Wake phrase (default: hey kairo)
     WAKE_WORD_NOTIFY_PORT   Port to send HTTP notification (default: 7441)
 """
+
 from __future__ import annotations
 
 import argparse
-import asyncio
 import json
 import logging
 import os
@@ -57,8 +57,9 @@ _openwakeword_available = False
 _sounddevice_available = False
 
 try:
-    import openwakeword  # type: ignore
+    import openwakeword  # type: ignore  # noqa: F401
     from openwakeword.model import Model as OwwModel  # type: ignore
+
     _openwakeword_available = True
     log.info("✅ openwakeword detected")
 except ImportError:
@@ -66,7 +67,8 @@ except ImportError:
 
 try:
     import sounddevice as sd  # type: ignore
-    import numpy as np  # type: ignore
+    import numpy as np  # type: ignore  # noqa: F401
+
     _sounddevice_available = True
     log.info("✅ sounddevice detected")
 except ImportError:
@@ -75,17 +77,20 @@ except ImportError:
 
 # ── Notification client ───────────────────────────────────────────────────────
 
+
 def _notify_kairo(confidence: float, notify_port: int) -> None:
     """Send wake word detection notification to Kairo Phantom sidecar."""
     import urllib.request
     import urllib.error
 
-    payload = json.dumps({
-        "event": "wake_word_detected",
-        "confidence": round(confidence, 3),
-        "phrase": DEFAULT_PHRASE,
-        "timestamp": time.time(),
-    }).encode()
+    payload = json.dumps(
+        {
+            "event": "wake_word_detected",
+            "confidence": round(confidence, 3),
+            "phrase": DEFAULT_PHRASE,
+            "timestamp": time.time(),
+        }
+    ).encode()
 
     try:
         req = urllib.request.Request(
@@ -105,6 +110,7 @@ def _notify_kairo(confidence: float, notify_port: int) -> None:
 
 
 # ── openwakeword Detection Loop ───────────────────────────────────────────────
+
 
 class WakeWordDetector:
     """
@@ -209,9 +215,7 @@ class WakeWordDetector:
                         now = time.time()
                         if now - self._last_detection >= self.cooldown_secs:
                             self._last_detection = now
-                            log.info(
-                                f"👂 WAKE WORD DETECTED! confidence={confidence:.3f}"
-                            )
+                            log.info(f"👂 WAKE WORD DETECTED! confidence={confidence:.3f}")
                             # Notify in background thread
                             threading.Thread(
                                 target=_notify_kairo,
@@ -236,6 +240,7 @@ class WakeWordDetector:
 
 
 # ── Fallback: text-based simulation ──────────────────────────────────────────
+
 
 class FallbackWakeWordDetector:
     """
@@ -263,19 +268,23 @@ class FallbackWakeWordDetector:
 
 # ── HTTP notification endpoint (for Kairo to receive wake events) ─────────────
 
+
 async def _http_notify_handler(request):
     """Receives wake word events (when this service acts as server, not client)."""
     try:
         from aiohttp import web
+
         data = await request.json()
         log.info(f"Received wake event: {data}")
         return web.json_response({"ok": True})
     except Exception as e:
         from aiohttp import web
+
         return web.json_response({"ok": False, "error": str(e)}, status=400)
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -283,17 +292,21 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "--sensitivity", type=float,
+        "--sensitivity",
+        type=float,
         default=DEFAULT_SENSITIVITY,
         help="Detection sensitivity (0.0=low false positives, 1.0=high recall)",
     )
     parser.add_argument(
-        "--notify-port", type=int,
+        "--notify-port",
+        type=int,
         default=DEFAULT_NOTIFY_PORT,
         help="Port to send HTTP wake word notifications",
     )
     parser.add_argument(
-        "--cooldown", type=float, default=5.0,
+        "--cooldown",
+        type=float,
+        default=5.0,
         help="Seconds to wait after detection before listening again",
     )
     args = parser.parse_args()

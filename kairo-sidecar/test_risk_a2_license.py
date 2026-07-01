@@ -3,9 +3,8 @@ Risk A2: AGPL License Contamination.
 Test: no AGPL/GPL code is statically linked into the core.
 PyMuPDF must be lazy-imported (not at module level).
 """
-import os
+
 import sys
-import importlib
 import ast
 import pytest
 from pathlib import Path
@@ -20,7 +19,7 @@ class TestAGPLLicenseGuard:
         """PyMuPDF (AGPL) must NOT be imported at module level in any sidecar module."""
         sidecar_dir = Path(__file__).parent / "sidecar"
         violations = []
-        
+
         for py_file in sidecar_dir.rglob("*.py"):
             if "__pycache__" in str(py_file) or "test_" in py_file.name:
                 continue
@@ -35,7 +34,7 @@ class TestAGPLLicenseGuard:
                             names = [a.name for a in node.names]
                         elif isinstance(node, ast.ImportFrom):
                             names = [node.module or ""]
-                        
+
                         for name in names:
                             if name and ("fitz" in name.lower() or "pymupdf" in name.lower()):
                                 # Check if it's inside a try/except (lazy import)
@@ -43,20 +42,19 @@ class TestAGPLLicenseGuard:
                                 violations.append(f"{py_file.name}: top-level import of {name}")
             except Exception:
                 pass
-        
-        assert len(violations) == 0, \
-            f"AGPL violation: PyMuPDF imported at top level: {violations}"
+
+        assert len(violations) == 0, f"AGPL violation: PyMuPDF imported at top level: {violations}"
 
     def test_pymupdf_not_in_compile_time_deps(self):
         """PyMuPDF must not be imported when sidecar starts (only at runtime when needed)."""
         # Import the main sidecar module and check fitz is NOT in sys.modules
         # unless explicitly requested
-        modules_before = set(sys.modules.keys())
+        set(sys.modules.keys())
         try:
-            import sidecar.oracles  # This module uses fitz
+            import sidecar.oracles  # This module uses fitz  # noqa: F401
         except ImportError:
             pytest.skip("sidecar.oracles not importable")
-        
+
         # fitz should be in sys.modules only because oracles.py imports it
         # But it should be behind a try/except
         # The key test: the core sidecar module should work WITHOUT fitz
@@ -68,8 +66,9 @@ class TestAGPLLicenseGuard:
         oracles_path = Path(__file__).parent / "sidecar" / "oracles.py"
         if oracles_path.exists():
             content = oracles_path.read_text()
-            assert "HAS_FITZ" in content or "try:" in content, \
-                "oracles.py must use lazy import pattern for PyMuPDF (AGPL)"
+            assert (
+                "HAS_FITZ" in content or "try:" in content
+            ), "oracles.py must use lazy import pattern for PyMuPDF (AGPL)"
 
     def test_no_agpl_in_requirements_lock(self):
         """requirements.txt may list AGPL packages but must comment them as AGPL/optional."""
@@ -94,8 +93,10 @@ class TestAGPLLicenseGuard:
         if bridge_path.exists():
             content = bridge_path.read_text()
             # Must use urllib/requests (HTTP), not import paperless code
-            assert "import urllib" in content or "import requests" in content, \
-                "paperless bridge must use HTTP client, not import GPL code"
+            assert (
+                "import urllib" in content or "import requests" in content
+            ), "paperless bridge must use HTTP client, not import GPL code"
             # Must NOT import any paperless_ngx module
-            assert "import paperless" not in content, \
-                "paperless bridge imports GPL paperless-ngx code — LICENSE CONTAMINATION"
+            assert (
+                "import paperless" not in content
+            ), "paperless bridge imports GPL paperless-ngx code — LICENSE CONTAMINATION"

@@ -16,6 +16,7 @@ def _enforce_title_words(text: str, max_words: int = 7) -> str:
 def _write_title(shape, text: str):
     """Write title text with Segoe UI 40pt bold."""
     from pptx.util import Pt
+
     tf = shape.text_frame
     tf.text = _enforce_title_words(text, 7)
     for p in tf.paragraphs:
@@ -27,6 +28,7 @@ def _write_title(shape, text: str):
 def _write_bullets(shape, bullets: list):
     """Write up to 5 bullets (≤ 7 words each) into a content shape."""
     from pptx.util import Pt
+
     tf = shape.text_frame
     tf.clear()
     for i, b in enumerate(bullets[:5]):
@@ -110,7 +112,9 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                         _write_title(title_shape, title_text)
                     else:
                         # No title placeholder on this layout → add text box
-                        tb = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(1))
+                        tb = slide.shapes.add_textbox(
+                            Inches(0.5), Inches(0.3), Inches(12), Inches(1)
+                        )
                         _write_title(tb, title_text)
 
                 # Bullets
@@ -119,14 +123,18 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                     body = _find_body_shape(slide)
                     if not body:
                         # No body placeholder → add text box
-                        body = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5))
+                        body = slide.shapes.add_textbox(
+                            Inches(0.5), Inches(1.5), Inches(12), Inches(5)
+                        )
                     _write_bullets(body, bullets)
 
-                applied.append({
-                    "type": "add_slide",
-                    "title": title_text,
-                    "bullets": len(bullets),
-                })
+                applied.append(
+                    {
+                        "type": "add_slide",
+                        "title": title_text,
+                        "bullets": len(bullets),
+                    }
+                )
                 continue
 
             # ── Mode 2: Update existing slide ─────────────────────────────────
@@ -155,7 +163,9 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                             title_shape = shape
                             break
                 if not title_shape:
-                    title_shape = slide.shapes.add_textbox(Inches(1), Inches(0.5), Inches(11.3), Inches(1))
+                    title_shape = slide.shapes.add_textbox(
+                        Inches(1), Inches(0.5), Inches(11.3), Inches(1)
+                    )
                 _write_title(title_shape, op.get("text", ""))
                 applied.append({"type": "update_title", "slide_index": slide_idx})
 
@@ -171,7 +181,9 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                     if not bullets and paragraphs_data:
                         bullets = [p.get("text", "") for p in paragraphs_data]
                     slide.notes_slide.notes_text_frame.text = "\n".join(bullets)
-                    applied.append({"type": "update_shape_text", "slide_index": slide_idx, "notes": bullets})
+                    applied.append(
+                        {"type": "update_shape_text", "slide_index": slide_idx, "notes": bullets}
+                    )
                     continue
 
                 target_shape = None
@@ -182,7 +194,9 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                 if not target_shape:
                     target_shape = _find_body_shape(slide)
                 if not target_shape:
-                    target_shape = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5))
+                    target_shape = slide.shapes.add_textbox(
+                        Inches(0.5), Inches(1.5), Inches(12), Inches(5)
+                    )
 
                 if op.get("left") is not None:
                     target_shape.left = Inches(float(op["left"]))
@@ -194,6 +208,7 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                     target_shape.height = Inches(float(op["height"]))
 
                 from pptx.util import Pt
+
                 tf = target_shape.text_frame
                 tf.clear()
                 bullets_written = 0
@@ -201,7 +216,11 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                     is_bullet = para_data.get("bullet", True)
                     if is_bullet and bullets_written >= 5:
                         continue
-                    p_text = _enforce_title_words(para_data.get("text", ""), 7) if is_bullet else para_data.get("text", "")
+                    p_text = (
+                        _enforce_title_words(para_data.get("text", ""), 7)
+                        if is_bullet
+                        else para_data.get("text", "")
+                    )
                     p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
                     p.text = p_text
                     p.level = para_data.get("level", 0)
@@ -225,7 +244,7 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                     slide_id_element = slides_id_list[-1]
                     slides_id_list.remove(slide_id_element)
                     slides_id_list.insert(after_idx + 1, slide_id_element)
-                
+
                 # Write title if provided
                 title_text = op.get("title")
                 if title_text:
@@ -233,7 +252,9 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                     if title_shape:
                         _write_title(title_shape, title_text)
                     else:
-                        tb = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(1))
+                        tb = slide.shapes.add_textbox(
+                            Inches(0.5), Inches(0.3), Inches(12), Inches(1)
+                        )
                         _write_title(tb, title_text)
 
                 # Write bullets if provided
@@ -241,7 +262,9 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
                 if bullets:
                     body = _find_body_shape(slide)
                     if not body:
-                        body = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5))
+                        body = slide.shapes.add_textbox(
+                            Inches(0.5), Inches(1.5), Inches(12), Inches(5)
+                        )
                     _write_bullets(body, bullets)
 
                 applied.append({"type": "add_slide", "after_index": after_idx})
@@ -307,4 +330,3 @@ def write_pptx(file_path: str, operations: List[Dict[str, Any]]) -> dict:
         "errors": errors,
         "slides": [a for a in applied],
     }
-

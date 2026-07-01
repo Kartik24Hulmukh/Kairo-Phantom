@@ -1,10 +1,9 @@
 import os
 import shutil
 import logging
-import traceback
 import re
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any
 
 from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
@@ -20,12 +19,14 @@ log = logging.getLogger("kairo-sidecar.word_master")
 try:
     from sidecar.parsers.docling_parser import parse_docx_structured as _docling_parse_docx
     from sidecar.parsers.docling_parser import _DOCLING_AVAILABLE as _REAL_DOCLING_AVAILABLE
+
     _DOCLING_AVAILABLE = _REAL_DOCLING_AVAILABLE
     log.debug(f"word_master: Docling integration available: {_DOCLING_AVAILABLE}")
 except ImportError as e:
     _docling_parse_docx = None  # type: ignore
     _DOCLING_AVAILABLE = False
     log.debug(f"word_master: Docling not available ({e}), using python-docx only.")
+
 
 @dataclass
 class WordContext:
@@ -41,11 +42,13 @@ class WordContext:
     def to_dict(self):
         return asdict(self)
 
+
 class ValidationResult:
     def __init__(self, valid: bool, error: str = "", op: dict = None):
         self.valid = valid
         self.error = error
         self.op = op
+
 
 class WordContextExtractor:
     """Reads COMPLETE document state before any LLM call."""
@@ -69,7 +72,7 @@ class WordContextExtractor:
                 character_styles.append(name)
             elif stype == WD_STYLE_TYPE.TABLE:
                 table_styles.append(name)
-        
+
         styles = {
             "paragraph": paragraph_styles,
             "character": character_styles,
@@ -89,16 +92,18 @@ class WordContextExtractor:
                     for dp in docling_paras:
                         text = dp.get("text", "")
                         runs = dp.get("runs", [])
-                        paragraphs.append({
-                            "index": dp.get("index", len(paragraphs)),
-                            "style": dp.get("style", "Normal"),
-                            "text": text[:200],
-                            "level": dp.get("level", None),
-                            "is_empty": len(text.strip()) == 0,
-                            "has_runs": len(runs) > 0,
-                            "page": dp.get("page"),
-                            "runs": runs,
-                        })
+                        paragraphs.append(
+                            {
+                                "index": dp.get("index", len(paragraphs)),
+                                "style": dp.get("style", "Normal"),
+                                "text": text[:200],
+                                "level": dp.get("level", None),
+                                "is_empty": len(text.strip()) == 0,
+                                "has_runs": len(runs) > 0,
+                                "page": dp.get("page"),
+                                "runs": runs,
+                            }
+                        )
                     _docling_used = True
                     log.info(
                         "WordContextExtractor: Docling paragraph inventory used (tier=%s, count=%d)",
@@ -106,7 +111,9 @@ class WordContextExtractor:
                         len(paragraphs),
                     )
             except Exception as exc:
-                log.debug(f"WordContextExtractor: Docling parse failed ({exc}), falling back to python-docx.")
+                log.debug(
+                    f"WordContextExtractor: Docling parse failed ({exc}), falling back to python-docx."
+                )
 
         # Fallback: python-docx paragraph extraction
         list_sequences = []
@@ -141,57 +148,67 @@ class WordContextExtractor:
                         style_name = "Normal"
 
                 # Speed up text extraction
-                t_elements = para._p.xpath('.//w:t')
+                t_elements = para._p.xpath(".//w:t")
                 para_text = "".join(t.text for t in t_elements if t.text is not None)
 
                 # Speed up run traversal
-                has_runs = bool(para._p.xpath('.//w:r'))
+                has_runs = bool(para._p.xpath(".//w:r"))
 
-                paragraphs.append({
-                    "index": i,
-                    "style": style_name,
-                    "text": para_text[:200],  # truncated for context
-                    "level": level,
-                    "is_empty": len(para_text.strip()) == 0,
-                    "has_runs": has_runs,
-                })
-
-                # Build list_sequences in the first and only pass!
-                if style_name and ("List" in style_name or "bullet" in style_name.lower() or "number" in style_name.lower()):
-                    list_sequences.append({
+                paragraphs.append(
+                    {
                         "index": i,
                         "style": style_name,
-                        "text": para_text[:100]
-                    })
+                        "text": para_text[:200],  # truncated for context
+                        "level": level,
+                        "is_empty": len(para_text.strip()) == 0,
+                        "has_runs": has_runs,
+                    }
+                )
+
+                # Build list_sequences in the first and only pass!
+                if style_name and (
+                    "List" in style_name
+                    or "bullet" in style_name.lower()
+                    or "number" in style_name.lower()
+                ):
+                    list_sequences.append(
+                        {"index": i, "style": style_name, "text": para_text[:100]}
+                    )
         else:
             for p in paragraphs:
                 style_name = p.get("style", "")
-                if style_name and ("List" in style_name or "bullet" in style_name.lower() or "number" in style_name.lower()):
-                    list_sequences.append({
-                        "index": p["index"],
-                        "style": style_name,
-                        "text": p["text"][:100]
-                    })
+                if style_name and (
+                    "List" in style_name
+                    or "bullet" in style_name.lower()
+                    or "number" in style_name.lower()
+                ):
+                    list_sequences.append(
+                        {"index": p["index"], "style": style_name, "text": p["text"][:100]}
+                    )
 
         # 3. Table inventory (pre-map table elements to paragraph index positions to avoid O(N*M))
         tbl_to_para_index = {}
         p_idx = -1
         for child in doc.element.body:
             tag = child.tag
-            if tag.endswith('p'):
+            if tag.endswith("p"):
                 p_idx += 1
-            elif tag.endswith('tbl'):
+            elif tag.endswith("tbl"):
                 tbl_to_para_index[child] = p_idx
 
         tables = []
         for i, table in enumerate(doc.tables):
-            tables.append({
-                "index": i,
-                "rows": len(table.rows),
-                "cols": len(table.columns),
-                "after_paragraph": tbl_to_para_index.get(table._element, -1),
-                "header_text": [cell.text[:50] for cell in table.rows[0].cells] if table.rows else [],
-            })
+            tables.append(
+                {
+                    "index": i,
+                    "rows": len(table.rows),
+                    "cols": len(table.columns),
+                    "after_paragraph": tbl_to_para_index.get(table._element, -1),
+                    "header_text": [cell.text[:50] for cell in table.rows[0].cells]
+                    if table.rows
+                    else [],
+                }
+            )
 
         # 4. Theme fonts
         theme_fonts = self._extract_theme_fonts(doc)
@@ -218,11 +235,11 @@ class WordContextExtractor:
     def _find_table_position(self, doc, table) -> int:
         p_idx = -1
         for child in doc.element.body:
-            if child.tag.endswith('p'):
+            if child.tag.endswith("p"):
                 p_idx += 1
-            elif child.tag.endswith('tbl'):
+            elif child.tag.endswith("tbl"):
                 if child is table._element:
-                     return p_idx
+                    return p_idx
         return -1
 
     def _extract_theme_fonts(self, doc) -> Dict[str, str]:
@@ -240,7 +257,11 @@ class WordContextExtractor:
         sequences = []
         for i, p in enumerate(doc.paragraphs):
             style_name = p.style.name if p.style else ""
-            if style_name and ("List" in style_name or "bullet" in style_name.lower() or "number" in style_name.lower()):
+            if style_name and (
+                "List" in style_name
+                or "bullet" in style_name.lower()
+                or "number" in style_name.lower()
+            ):
                 sequences.append({"index": i, "style": style_name, "text": p.text[:100]})
         return sequences
 
@@ -256,12 +277,18 @@ class WordContextExtractor:
             first_para_style = (paragraphs[0]["style"] or "").lower()
             first_para_text = paragraphs[0]["text"].lower()
 
-        is_legal_first = "whereas" in first_para_text or "agreement" in first_para_text or "legal" in first_para_style
+        is_legal_first = (
+            "whereas" in first_para_text
+            or "agreement" in first_para_text
+            or "legal" in first_para_style
+        )
 
         # Presence of footnotes (direct XML check is much faster)
         has_footnotes = False
         try:
-            has_footnotes = bool(doc.element.body.xpath('./w:p[position() <= 50]//w:footnoteReference'))
+            has_footnotes = bool(
+                doc.element.body.xpath("./w:p[position() <= 50]//w:footnoteReference")
+            )
         except Exception as e:
             log.debug(f"Footnote detection error: {e}")
 
@@ -280,11 +307,20 @@ class WordContextExtractor:
         if sentences:
             avg_sentence_len = sum(len(s.split()) for s in sentences) / len(sentences)
 
-        if is_legal_first or any(w in first_500 for w in ["whereas", "parties agree", "non-disclosure", "nda", "confidentiality"]):
+        if is_legal_first or any(
+            w in first_500
+            for w in ["whereas", "parties agree", "non-disclosure", "nda", "confidentiality"]
+        ):
             return "legal"
-        if has_footnotes or any(w in first_500 for w in ["abstract", "introduction", "methodology", "references", "hypothesis"]):
+        if has_footnotes or any(
+            w in first_500
+            for w in ["abstract", "introduction", "methodology", "references", "hypothesis"]
+        ):
             return "academic"
-        if has_numbered_sections or any(w in first_500 for w in ["installation", "api documentation", "deployment", "configuration"]):
+        if has_numbered_sections or any(
+            w in first_500
+            for w in ["installation", "api documentation", "deployment", "configuration"]
+        ):
             return "technical"
         if avg_sentence_len > 25:
             return "legal"
@@ -297,7 +333,7 @@ class WordOperationValidator:
 
     def validate(self, op: dict, context: WordContext) -> ValidationResult:
         op_type = op.get("type", op.get("action", ""))
-        
+
         if op_type in ("insert_paragraph", "replace_paragraph", "append", "insert_after_heading"):
             style = op.get("style", "Normal")
             # CRITICAL: verify style actually exists in this document
@@ -308,7 +344,7 @@ class WordOperationValidator:
                 else:
                     return ValidationResult(
                         valid=False,
-                        error=f"Style '{style}' not in document. Available: {context.styles['paragraph'][:5]}"
+                        error=f"Style '{style}' not in document. Available: {context.styles['paragraph'][:5]}",
                     )
 
         if op_type == "insert_paragraph":
@@ -329,18 +365,18 @@ class WordOperationValidator:
 
     def _fuzzy_style_match(self, requested: str, available: List[str]) -> str | None:
         normalized = requested.replace(" ", "").replace("_", "").replace("-", "").lower()
-        
+
         # 1. Exact normalized match
         for style in available:
             if style.replace(" ", "").replace("_", "").replace("-", "").lower() == normalized:
                 return style
-                
+
         # 2. Substring fallback match
         for style in available:
             style_norm = style.replace(" ", "").replace("_", "").replace("-", "").lower()
             if normalized in style_norm or style_norm in normalized:
                 return style
-                
+
         # 3. Known style family aliases mapping
         aliases = {
             "heading1": ["heading 1", "heading1", "h1"],
@@ -350,7 +386,7 @@ class WordOperationValidator:
             "listbullet": ["list bullet", "listbullet", "bullet", "bullets", "list paragraph"],
             "listnumber": ["list number", "listnumber", "number", "numbers"],
             "quote": ["quote", "blockquote"],
-            "normal": ["normal", "body", "paragraph", "body text"]
+            "normal": ["normal", "body", "paragraph", "body text"],
         }
         for canonical, alias_list in aliases.items():
             if normalized in alias_list:
@@ -365,6 +401,7 @@ class WordAgent:
     """
     COM/app APIs wrapper for Word matching UseIt-AI/use-it-agent interface.
     """
+
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.doc = None
@@ -374,6 +411,7 @@ class WordAgent:
         try:
             import win32com.client
             import pythoncom
+
             pythoncom.CoInitialize()
             path = os.path.abspath(self.file_path)
             try:
@@ -397,6 +435,7 @@ class WordAgent:
             return False
         try:
             from sidecar.writers.docx_writer import _try_com_write
+
             com_ops = []
             for op in operations:
                 cop = op.copy()
@@ -413,7 +452,9 @@ class WordAgent:
 class WordWriter:
     """python-docx writer that preserves ALL formatting details."""
 
-    def apply_operations(self, file_path: str, operations: List[dict], context: WordContext) -> dict:
+    def apply_operations(
+        self, file_path: str, operations: List[dict], context: WordContext
+    ) -> dict:
         # Try WordAgent() COM path first (UseIt-AI integration)
         try:
             agent = WordAgent(file_path)
@@ -421,27 +462,37 @@ class WordWriter:
                 log.info("UseIt-AI: Applying live injection using WordAgent COM API...")
                 success = agent.apply_operations(operations)
                 if success:
-                    return {"ok": True, "applied_count": len(operations), "errors": [], "path": file_path}
+                    return {
+                        "ok": True,
+                        "applied_count": len(operations),
+                        "errors": [],
+                        "path": file_path,
+                    }
         except Exception as e:
-            log.debug(f"WordAgent COM live injection failed: {e}. Falling back to standard COM/python-docx write.")
+            log.debug(
+                f"WordAgent COM live injection failed: {e}. Falling back to standard COM/python-docx write."
+            )
         # COM Write path for active document
         try:
             import win32com.client
             import pythoncom
             import subprocess
+
             pythoncom.CoInitialize()
-            
+
             word = None
             target_doc = None
             path = os.path.abspath(file_path)
-            
+
             word_running = False
             try:
-                out = subprocess.run(["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True)
+                out = subprocess.run(
+                    ["tasklist", "/FI", "IMAGENAME eq winword.exe"], capture_output=True, text=True
+                )
                 word_running = "winword.exe" in out.stdout.lower()
             except Exception as exc:
                 log.debug(f"Tasklist task checking failed: {exc}")
-                
+
             if word_running:
                 try:
                     word = win32com.client.GetActiveObject("Word.Application")
@@ -454,10 +505,11 @@ class WordWriter:
                             log.debug(f"COM Doc FullName check failed: {doc_exc}")
                 except Exception as act_exc:
                     log.debug(f"COM ActiveObject check failed: {act_exc}")
-                        
+
             if target_doc:
                 log.info("Applying Word operations via live COM...")
                 from sidecar.writers.docx_writer import _try_com_write
+
                 # Adapt operations key format ('type' -> 'action')
                 com_ops = []
                 for op in operations:
@@ -489,10 +541,11 @@ class WordWriter:
 
             # Check track revisions setting to avoid silent degradation
             from docx.oxml.ns import qn
+
             settings = doc.settings
             track_active = False
             if settings is not None and settings.element is not None:
-                track_active = settings.element.find(qn('w:trackRevisions')) is not None
+                track_active = settings.element.find(qn("w:trackRevisions")) is not None
 
             if track_active:
                 log.info("Track changes active in Word document, routing via adeu_apply_edits...")
@@ -504,53 +557,70 @@ class WordWriter:
                         idx = op.get("paragraph_index", -1)
                         if 0 <= idx < len(original_paragraphs):
                             orig_text = original_paragraphs[idx].text
-                            new_text = "".join(run_data.get("text", "") for run_data in op.get("runs", []))
-                            edits.append({
-                                "target_text": orig_text,
-                                "new_text": new_text,
-                                "comment": op.get("comment", "")
-                            })
+                            new_text = "".join(
+                                run_data.get("text", "") for run_data in op.get("runs", [])
+                            )
+                            edits.append(
+                                {
+                                    "target_text": orig_text,
+                                    "new_text": new_text,
+                                    "comment": op.get("comment", ""),
+                                }
+                            )
                     elif op_type == "delete_paragraph":
                         idx = op.get("paragraph_index", -1)
                         if 0 <= idx < len(original_paragraphs):
                             orig_text = original_paragraphs[idx].text
-                            edits.append({
-                                "target_text": orig_text,
-                                "new_text": "",
-                                "comment": op.get("comment", "")
-                            })
+                            edits.append(
+                                {
+                                    "target_text": orig_text,
+                                    "new_text": "",
+                                    "comment": op.get("comment", ""),
+                                }
+                            )
                     elif op_type == "append_to_run":
                         idx = op.get("paragraph_index", -1)
                         if 0 <= idx < len(original_paragraphs):
                             orig_text = original_paragraphs[idx].text
-                            runs_text = "".join(run_data.get("text", "") for run_data in op.get("runs", []))
+                            runs_text = "".join(
+                                run_data.get("text", "") for run_data in op.get("runs", [])
+                            )
                             new_text = orig_text + runs_text
-                            edits.append({
-                                "target_text": orig_text,
-                                "new_text": new_text,
-                                "comment": op.get("comment", "")
-                            })
+                            edits.append(
+                                {
+                                    "target_text": orig_text,
+                                    "new_text": new_text,
+                                    "comment": op.get("comment", ""),
+                                }
+                            )
                     elif op_type == "insert_paragraph":
                         idx = op.get("after_paragraph_index", -1)
-                        new_para_text = "".join(run_data.get("text", "") for run_data in op.get("runs", []))
+                        new_para_text = "".join(
+                            run_data.get("text", "") for run_data in op.get("runs", [])
+                        )
                         if idx == -1:
                             if original_paragraphs:
                                 orig_text = original_paragraphs[-1].text
-                                edits.append({
-                                    "target_text": orig_text,
-                                    "new_text": orig_text + "\n" + new_para_text,
-                                    "comment": op.get("comment", "")
-                                })
+                                edits.append(
+                                    {
+                                        "target_text": orig_text,
+                                        "new_text": orig_text + "\n" + new_para_text,
+                                        "comment": op.get("comment", ""),
+                                    }
+                                )
                         elif 0 <= idx < len(original_paragraphs):
                             orig_text = original_paragraphs[idx].text
-                            edits.append({
-                                "target_text": orig_text,
-                                "new_text": orig_text + "\n" + new_para_text,
-                                "comment": op.get("comment", "")
-                            })
+                            edits.append(
+                                {
+                                    "target_text": orig_text,
+                                    "new_text": orig_text + "\n" + new_para_text,
+                                    "comment": op.get("comment", ""),
+                                }
+                            )
 
                 if edits:
                     from sidecar.parsers.adeu_bridge import adeu_apply_edits
+
                     tmp_out = file_path + ".kairo_track_tmp"
                     if os.path.exists(tmp_out):
                         try:
@@ -569,7 +639,7 @@ class WordWriter:
                         return {
                             "applied_count": res.get("applied_count", len(edits)),
                             "errors": [],
-                            "path": file_path
+                            "path": file_path,
                         }
                     else:
                         if os.path.exists(tmp_out):
@@ -584,9 +654,19 @@ class WordWriter:
 
             # Sort operations in reverse index order to preserve indices
             sorted_ops = sorted(
-                [op for op in operations if op.get("type", op.get("action")) in ("insert_paragraph", "replace_paragraph", "delete_paragraph", "append_to_run")],
+                [
+                    op
+                    for op in operations
+                    if op.get("type", op.get("action"))
+                    in (
+                        "insert_paragraph",
+                        "replace_paragraph",
+                        "delete_paragraph",
+                        "append_to_run",
+                    )
+                ],
                 key=lambda x: x.get("paragraph_index", x.get("after_paragraph_index", 0)),
-                reverse=True
+                reverse=True,
             )
 
             applied = []
@@ -611,7 +691,17 @@ class WordWriter:
                     errors.append(f"Operation {op_type} failed: {e}")
 
             # Non-index-shifting operations (like insert_table)
-            other_ops = [op for op in operations if op.get("type", op.get("action")) not in ("insert_paragraph", "replace_paragraph", "delete_paragraph", "append_to_run")]
+            other_ops = [
+                op
+                for op in operations
+                if op.get("type", op.get("action"))
+                not in (
+                    "insert_paragraph",
+                    "replace_paragraph",
+                    "delete_paragraph",
+                    "append_to_run",
+                )
+            ]
             for op in other_ops:
                 op_type = op.get("type", op.get("action", ""))
                 try:
@@ -662,11 +752,7 @@ class WordWriter:
                     log.debug(f"Temp file removal failed: {exc}")
             raise e
 
-        return {
-            "applied_count": len(applied),
-            "errors": errors,
-            "path": file_path
-        }
+        return {"applied_count": len(applied), "errors": errors, "path": file_path}
 
     def _insert_paragraph(self, doc, op, context):
         """
@@ -674,14 +760,13 @@ class WordWriter:
         Never use doc.add_paragraph() for insertion — it always appends.
         Use paragraph._element.addnext() / addprevious() for correct positioning.
         """
-        from docx.oxml.ns import qn
         from docx.oxml import OxmlElement
         from docx.text.paragraph import Paragraph
 
         after_idx = op.get("after_paragraph_index", -1)
         style = op.get("style", "Normal")
 
-        p_elem = OxmlElement('w:p')
+        p_elem = OxmlElement("w:p")
         if 0 <= after_idx < len(doc.paragraphs):
             ref_para = doc.paragraphs[after_idx]
             ref_para._element.addnext(p_elem)
@@ -705,7 +790,7 @@ class WordWriter:
     def _replace_paragraph(self, doc, op, original_paragraphs):
         idx = op.get("paragraph_index", -1)
         style = op.get("style", "Normal")
-        
+
         if 0 <= idx < len(original_paragraphs):
             para = original_paragraphs[idx]
             for run in para.runs:
@@ -771,6 +856,7 @@ class WordWriter:
 # validate_operations / apply_operations / get_schema_class.
 # ---------------------------------------------------------------------------
 
+
 class WordMaster:
     """
     Unified Word Domain Master.
@@ -800,13 +886,15 @@ class WordMaster:
         if not mem_context:
             mem_context = ""
         # Check for style hints in mem_context
-        if 'bullet' in mem_context.lower():
-            reasons.append('Using List Bullet style based on your preferred format (MemMachine recall).')
-        if 'heading' in mem_context.lower() or 'h2' in mem_context.lower():
-            reasons.append('Using Heading 2 because surrounding headings are H2.')
+        if "bullet" in mem_context.lower():
+            reasons.append(
+                "Using List Bullet style based on your preferred format (MemMachine recall)."
+            )
+        if "heading" in mem_context.lower() or "h2" in mem_context.lower():
+            reasons.append("Using Heading 2 because surrounding headings are H2.")
         if not reasons:
-            reasons.append('Analyzing document structure and applying matching paragraph style.')
-        return ' '.join(reasons[:2])
+            reasons.append("Analyzing document structure and applying matching paragraph style.")
+        return " ".join(reasons[:2])
 
     def build_prompt(
         self,
@@ -818,6 +906,7 @@ class WordMaster:
         """Build a fully-assembled Word domain prompt with zero unreplaced variables."""
         self._last_reasoning = self._generate_reasoning(doc_context, mem_context)
         from sidecar.masters.word_prompt_builder import build_word_prompt
+
         prompt = build_word_prompt(
             user_instruction=user_prompt,
             context=doc_context,
@@ -825,15 +914,19 @@ class WordMaster:
             file_path=getattr(doc_context, "file_path", None),
             app_name="Microsoft Word",
             app_type="Word Processor",
-            intent_classification=getattr(classification, "task_type", "insert") if classification else "insert",
+            intent_classification=getattr(classification, "task_type", "insert")
+            if classification
+            else "insert",
         )
         prompt += '\nAlso output a "reasoning" field explaining: which paragraph style you chose and why, and your word count rationale based on the document context.\n'
         return prompt
 
     def validate_operations(self, raw_response, doc_context: WordContext) -> list:
         """Validate and fuzzy-match operations from the LLM response."""
-        if hasattr(raw_response, 'reasoning'):
-            raw_response.reasoning = getattr(self, '_last_reasoning', '') or getattr(raw_response, 'reasoning', '')
+        if hasattr(raw_response, "reasoning"):
+            raw_response.reasoning = getattr(self, "_last_reasoning", "") or getattr(
+                raw_response, "reasoning", ""
+            )
         validated = []
         ops = getattr(raw_response, "operations", [])
         if isinstance(ops, list):
@@ -847,7 +940,9 @@ class WordMaster:
         return validated
 
     @track("word", "apply_operations")
-    def apply_operations(self, file_path: str, operations: list, context: WordContext = None) -> dict:
+    def apply_operations(
+        self, file_path: str, operations: list, context: WordContext = None
+    ) -> dict:
         """Write validated operations to the .docx file atomically."""
         if context is None:
             # Create a minimal context so the writer can function
@@ -894,10 +989,12 @@ class WordMaster:
 
         elif ext == ".rtf":
             from sidecar.parsers.rtf_parser import rtf_to_kairo_context
+
             return rtf_to_kairo_context(file_path, 0)
 
         elif ext == ".odt":
             from sidecar.parsers.odt_parser import odt_to_kairo_context
+
             return odt_to_kairo_context(file_path, 0)
 
         else:
@@ -946,10 +1043,12 @@ class WordMaster:
 
         elif format == "rtf":
             from sidecar.parsers.rtf_parser import save_rtf
+
             return save_rtf(file_path, paragraphs)
 
         elif format == "odt":
             from sidecar.parsers.odt_parser import save_odt
+
             return save_odt(file_path, paragraphs)
 
         else:
@@ -958,4 +1057,5 @@ class WordMaster:
     def get_schema_class(self):
         """Return the Pydantic schema class for LLM structured output."""
         from sidecar.schemas.docx_schema import DocxResponse
+
         return DocxResponse

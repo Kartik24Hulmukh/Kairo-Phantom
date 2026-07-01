@@ -1,6 +1,7 @@
 import json
 from sidecar.masters.word_master import WordContext
 
+
 def build_word_prompt(
     user_instruction: str,
     context: WordContext,
@@ -8,18 +9,20 @@ def build_word_prompt(
     file_path: str = "Unknown",
     app_name: str = "Microsoft Word",
     app_type: str = "Word Processor",
-    intent_classification: str = "Document Operation Generation"
+    intent_classification: str = "Document Operation Generation",
 ) -> str:
     # 1. Fallbacks for styles
-    styles_list = context.styles.get('paragraph', []) if context.styles else []
+    styles_list = context.styles.get("paragraph", []) if context.styles else []
     if not styles_list:
         styles_str = "Normal, Heading 1, Heading 2, List Bullet, List Number"
     else:
         styles_str = ", ".join(styles_list[:15])
 
     memory_str = mem_context or "No writing preferences learned yet. Use professional defaults."
-    
-    surrounding_paragraphs = context.paragraphs[max(0, context.cursor_paragraph_index-3):context.cursor_paragraph_index+4]
+
+    surrounding_paragraphs = context.paragraphs[
+        max(0, context.cursor_paragraph_index - 3) : context.cursor_paragraph_index + 4
+    ]
     surrounding_paragraphs_json = json.dumps(surrounding_paragraphs, indent=2)
 
     app_context_part = f"""=== APP CONTEXT ===
@@ -234,5 +237,3 @@ USER INSTRUCTION: {user_instruction}
 OUTPUT (JSON only):
 """
     return prompt
-
-

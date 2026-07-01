@@ -1,8 +1,8 @@
 // phantom-core/src/sentinel.rs
-use std::collections::HashSet;
-use uuid::Uuid;
-use tracing::info;
 use regex::Regex;
+use std::collections::HashSet;
+use tracing::info;
+use uuid::Uuid;
 
 /// SentinelSanitizer prevents system prompt leakage and provides multi-layer security.
 pub struct SentinelSanitizer {
@@ -67,8 +67,12 @@ impl SentinelSanitizer {
         sanitized = sanitized.replace("<output>", "").replace("</output>", "");
         sanitized = sanitized.replace("<thought>", "").replace("</thought>", "");
         // Strip internal agent XML tags that sometimes leak into responses
-        sanitized = sanitized.replace("<SWARM_ROLE>", "").replace("</SWARM_ROLE>", "");
-        sanitized = sanitized.replace("[DOCUMENT CONTEXT]", "").replace("[DOCUMENT INTELLIGENCE]", "");
+        sanitized = sanitized
+            .replace("<SWARM_ROLE>", "")
+            .replace("</SWARM_ROLE>", "");
+        sanitized = sanitized
+            .replace("[DOCUMENT CONTEXT]", "")
+            .replace("[DOCUMENT INTELLIGENCE]", "");
 
         // 2. Strip any [MCP:...] command blocks (defence-in-depth for MCP leakage)
         //    This is also done in main.rs before injection, but we do it here too
@@ -78,12 +82,15 @@ impl SentinelSanitizer {
             let bytes = sanitized.as_bytes();
             let mut i = 0;
             while i < bytes.len() {
-                if i + 5 <= bytes.len() && &bytes[i..i+5] == b"[MCP:" {
+                if i + 5 <= bytes.len() && &bytes[i..i + 5] == b"[MCP:" {
                     i += 5;
                     let mut depth = 1i32;
                     while i < bytes.len() && depth > 0 {
-                        if bytes[i] == b'[' { depth += 1; }
-                        else if bytes[i] == b']' { depth -= 1; }
+                        if bytes[i] == b'[' {
+                            depth += 1;
+                        } else if bytes[i] == b']' {
+                            depth -= 1;
+                        }
                         i += 1;
                     }
                 } else {
@@ -114,8 +121,11 @@ impl SentinelSanitizer {
     /// Validates if a prompt contains injection attempts (ClawdStrike style).
     pub fn is_safe_prompt(&self, prompt: &str) -> bool {
         let prompt_lower = prompt.to_lowercase();
-        if prompt_lower.contains("ignore above") || prompt_lower.contains("new rules") 
-           || prompt_lower.contains("ignore previous") || prompt_lower.contains("ignore system") {
+        if prompt_lower.contains("ignore above")
+            || prompt_lower.contains("new rules")
+            || prompt_lower.contains("ignore previous")
+            || prompt_lower.contains("ignore system")
+        {
             return false;
         }
         true
@@ -149,8 +159,11 @@ impl SentinelSanitizer {
 
         // Check 2: AI identity leak ("I am an AI", "as a language model")
         let ai_leaks = [
-            "i am an ai", "as a language model", "i'm an ai assistant",
-            "as an artificial intelligence", "my training data",
+            "i am an ai",
+            "as a language model",
+            "i'm an ai assistant",
+            "as an artificial intelligence",
+            "my training data",
         ];
         if ai_leaks.iter().any(|p| response_lower.contains(p)) {
             tracing::warn!("[Sentinel] verify_response: AI identity leak detected");
@@ -159,17 +172,17 @@ impl SentinelSanitizer {
 
         // Check 3: Refusal when not appropriate (ghost-writing context)
         // If the prompt is a writing request, a refusal is a failure
-        let is_writing_request = prompt_lower.contains("write") 
+        let is_writing_request = prompt_lower.contains("write")
             || prompt_lower.contains("rewrite")
             || prompt_lower.contains("generate")
             || prompt_lower.contains("create")
             || prompt_lower.contains("draft");
-        
+
         let is_refusal = response_lower.starts_with("i can't")
             || response_lower.starts_with("i cannot")
             || response_lower.starts_with("i'm sorry, but")
             || response_lower.starts_with("as an ai");
-        
+
         if is_writing_request && is_refusal {
             tracing::warn!("[Sentinel] verify_response: unjustified refusal on writing request");
             return false;
@@ -190,13 +203,13 @@ impl SentinelSanitizer {
 
         true
     }
-
 }
 
 impl Default for SentinelSanitizer {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -211,7 +224,10 @@ mod tests {
         let safe_output = "Hello world";
         let leaked_output = format!("The sentinel is {}", sanitizer.sentinel());
         assert_eq!(sanitizer.sanitize(safe_output), "Hello world");
-        assert_eq!(sanitizer.sanitize(&leaked_output), "[BLOCKED: SECURITY POLICY VIOLATION]");
+        assert_eq!(
+            sanitizer.sanitize(&leaked_output),
+            "[BLOCKED: SECURITY POLICY VIOLATION]"
+        );
     }
 
     #[test]
@@ -220,8 +236,10 @@ mod tests {
         // Simulate VS Code internal config leaking into LLM output
         let leaked = r#"editor.accessibilityMode = "screen-reader-optimized";"#;
         let result = sanitizer.sanitize(leaked);
-        assert_eq!(result, "[BLOCKED: SECURITY POLICY VIOLATION]",
-            "accessibilityMode output must be blocked by sentinel");
+        assert_eq!(
+            result, "[BLOCKED: SECURITY POLICY VIOLATION]",
+            "accessibilityMode output must be blocked by sentinel"
+        );
     }
 
     #[test]
@@ -229,8 +247,10 @@ mod tests {
         let sanitizer = SentinelSanitizer::new();
         let leaked = "Swarm Role: CodeSpecialist\nSwarm Brain: routing...";
         let result = sanitizer.sanitize(leaked);
-        assert_eq!(result, "[BLOCKED: SECURITY POLICY VIOLATION]",
-            "Swarm internal strings must be blocked");
+        assert_eq!(
+            result, "[BLOCKED: SECURITY POLICY VIOLATION]",
+            "Swarm internal strings must be blocked"
+        );
     }
 
     #[test]
@@ -238,7 +258,9 @@ mod tests {
         let sanitizer = SentinelSanitizer::new();
         let safe = "Here is a detailed report on Zerodha FY2026.\n\nZerodha has achieved remarkable growth...";
         let result = sanitizer.sanitize(safe);
-        assert!(!result.contains("BLOCKED"), "Normal output must pass sentinel");
+        assert!(
+            !result.contains("BLOCKED"),
+            "Normal output must pass sentinel"
+        );
     }
 }
-

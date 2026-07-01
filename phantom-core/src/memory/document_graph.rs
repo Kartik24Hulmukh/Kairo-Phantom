@@ -1,11 +1,11 @@
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use anyhow::{Result, Context};
-use rusqlite::{params, Connection};
+use anyhow::{Context, Result};
 use petgraph::graph::DiGraph;
 use petgraph::visit::EdgeRef;
+use rusqlite::{params, Connection};
 use serde::Deserialize;
-use tracing::{info, error};
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use tracing::{error, info};
 
 use crate::ai::AiBackend;
 use crate::document_context::ExtractorRegistry;
@@ -48,7 +48,10 @@ impl DocumentGraph {
 
     /// Scan directory and index new files
     pub async fn index_directory(&self, dir_path: &Path) -> Result<()> {
-        info!("🕸️  [DocumentGraph] Scanning folder: {}", dir_path.display());
+        info!(
+            "🕸️  [DocumentGraph] Scanning folder: {}",
+            dir_path.display()
+        );
         if !dir_path.exists() {
             std::fs::create_dir_all(dir_path).ok();
             return Ok(());
@@ -61,11 +64,19 @@ impl DocumentGraph {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_file() {
-                let file_name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                let file_name = path
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+                    .to_string();
                 let file_id = path.to_string_lossy().to_string();
 
                 // Skip non-documents
-                let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+                let ext = path
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("")
+                    .to_lowercase();
                 if !["txt", "md", "docx", "doc", "pdf", "xlsx", "xls"].contains(&ext.as_str()) {
                     continue;
                 }
@@ -114,10 +125,17 @@ impl DocumentGraph {
                 // Call LLM to extract entities
                 match self.extract_entities_via_llm(&current_text).await {
                     Ok(entities) => {
-                        info!("🕸️  [DocumentGraph] Extracted {} entities from {}", entities.len(), file_name);
+                        info!(
+                            "🕸️  [DocumentGraph] Extracted {} entities from {}",
+                            entities.len(),
+                            file_name
+                        );
                         for ent in entities {
-                            let ent_id = format!("entity:{}", ent.name.to_lowercase().trim().replace(' ', "-"));
-                            
+                            let ent_id = format!(
+                                "entity:{}",
+                                ent.name.to_lowercase().trim().replace(' ', "-")
+                            );
+
                             // Insert entity node (ignore if conflict)
                             conn.execute(
                                 "INSERT OR IGNORE INTO nodes (id, name, node_type, content) VALUES (?1, ?2, ?3, '')",
@@ -132,7 +150,10 @@ impl DocumentGraph {
                         }
                     }
                     Err(e) => {
-                        error!("❌ [DocumentGraph] Entity extraction failed for {}: {:?}", file_name, e);
+                        error!(
+                            "❌ [DocumentGraph] Entity extraction failed for {}: {:?}",
+                            file_name, e
+                        );
                     }
                 }
             }
@@ -152,10 +173,11 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
 
         // Take first 4000 characters of the document text to avoid token limits
         let text_snippet: String = text.chars().take(4000).collect();
-        let user_prompt = format!("Document text:\n\"\"\"\n{}\n\"\"\"", text_snippet);
+        let user_prompt = format!("Document text:\n\"\"\"\n{text_snippet}\n\"\"\"");
 
         let response = self.backend.complete(system_prompt, &user_prompt).await?;
-        let cleaned = response.trim()
+        let cleaned = response
+            .trim()
             .trim_start_matches("```json")
             .trim_start_matches("```")
             .trim_end_matches("```")
@@ -183,7 +205,11 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
         // 2. Load edges
         let mut stmt = conn.prepare("SELECT source, target, relation FROM edges")?;
         let rows = stmt.query_map([], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+            ))
         })?;
         for (src, tgt, rel) in rows.flatten() {
             if let (Some(&s_idx), Some(&t_idx)) = (node_indices.get(&src), node_indices.get(&tgt)) {
@@ -198,13 +224,17 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
     pub fn query_entity(&self, name: &str) -> Result<String> {
         let conn = Connection::open(&self.db_path)?;
         let mut stmt = conn.prepare(
-            "SELECT id, name, node_type FROM nodes WHERE LOWER(name) = ?1 OR LOWER(id) = ?1"
+            "SELECT id, name, node_type FROM nodes WHERE LOWER(name) = ?1 OR LOWER(id) = ?1",
         )?;
         let mut rows = stmt.query(params![name.to_lowercase().trim()])?;
-        
+
         let (entity_id, entity_name, entity_type) = match rows.next()? {
-            Some(row) => (row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?),
-            None => return Ok(format!("Entity '{}' not found in document graph.", name)),
+            Some(row) => (
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+            ),
+            None => return Ok(format!("Entity '{name}' not found in document graph.")),
         };
 
         // Load graph in memory
@@ -213,7 +243,7 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
         // Find target entity node in the DiGraph in memory
         let node_idx = match graph.node_indices().find(|&idx| graph[idx] == entity_id) {
             Some(idx) => idx,
-            None => return Ok(format!("Entity '{}' not found in document graph.", name)),
+            None => return Ok(format!("Entity '{name}' not found in document graph.")),
         };
 
         let mut connected = Vec::new();
@@ -226,7 +256,7 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
             connected.push((graph[edge.source()].clone(), edge.weight().clone(), "in"));
         }
 
-        let mut out_str = format!("Entity: {} ({})\nRelationships:\n", entity_name, entity_type);
+        let mut out_str = format!("Entity: {entity_name} ({entity_type})\nRelationships:\n");
         let mut has_rels = false;
 
         // Look up metadata/content from SQLite database using those IDs only when needed
@@ -238,9 +268,13 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
                 let tgt_type: String = row.get(1)?;
                 has_rels = true;
                 if dir == "out" {
-                    out_str.push_str(&format!("  - [{}] -> [{}] -> [{}] ({})\n", entity_name, relation, tgt_name, tgt_type));
+                    out_str.push_str(&format!(
+                        "  - [{entity_name}] -> [{relation}] -> [{tgt_name}] ({tgt_type})\n"
+                    ));
                 } else {
-                    out_str.push_str(&format!("  - [{}] -> [{}] -> [{}] ({})\n", tgt_name, relation, entity_name, entity_type));
+                    out_str.push_str(&format!(
+                        "  - [{tgt_name}] -> [{relation}] -> [{entity_name}] ({entity_type})\n"
+                    ));
                 }
             }
         }
@@ -254,15 +288,18 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
     /// List all indexed entities
     pub fn list_entities(&self) -> Result<String> {
         let conn = Connection::open(&self.db_path)?;
-        let mut stmt = conn.prepare("SELECT name, node_type FROM nodes WHERE node_type != 'document'")?;
-        let rows = stmt.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)))?;
+        let mut stmt =
+            conn.prepare("SELECT name, node_type FROM nodes WHERE node_type != 'document'")?;
+        let rows = stmt.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })?;
 
         let mut out = String::from("Document Graph Entities:\n");
         let mut count = 0;
         for entity in rows.flatten() {
             count += 1;
             let (name, node_type) = entity;
-            out.push_str(&format!("  • {} ({})\n", name, node_type));
+            out.push_str(&format!("  • {name} ({node_type})\n"));
         }
         if count == 0 {
             out.push_str("  No entities indexed yet. Add documents to the Kairo folder.\n");
@@ -273,8 +310,15 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
     /// Enrich the prompt if it references known entities
     pub fn enrich_context(&self, prompt: &str) -> Result<Option<String>> {
         let conn = Connection::open(&self.db_path)?;
-        let mut stmt = conn.prepare("SELECT id, name, node_type FROM nodes WHERE node_type != 'document'")?;
-        let rows = stmt.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?)))?;
+        let mut stmt =
+            conn.prepare("SELECT id, name, node_type FROM nodes WHERE node_type != 'document'")?;
+        let rows = stmt.query_map([], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+            ))
+        })?;
 
         let prompt_lower = prompt.to_lowercase();
         let mut matched_entities = Vec::new();
@@ -290,15 +334,19 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
             return Ok(None);
         }
 
-        info!("🕸️  [DocumentGraph] Matched {} entity/entities in prompt: {:?}", matched_entities.len(), matched_entities);
+        info!(
+            "🕸️  [DocumentGraph] Matched {} entity/entities in prompt: {:?}",
+            matched_entities.len(),
+            matched_entities
+        );
 
         // Load graph in memory
         let graph = self.build_in_memory_graph()?;
 
         let mut context_block = String::from("\n🕸️  [DOCUMENT GRAPH CONTEXT]\n");
         for (id, name, node_type) in matched_entities {
-            context_block.push_str(&format!("Entity: {} ({})\n", name, node_type));
-            
+            context_block.push_str(&format!("Entity: {name} ({node_type})\n"));
+
             // Find target entity node in the DiGraph in memory
             let node_idx = match graph.node_indices().find(|&idx| graph[idx] == id) {
                 Some(idx) => idx,
@@ -317,7 +365,8 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
 
             // Look up metadata/content from SQLite database using those IDs only when needed
             for conn_id in connected_ids {
-                let mut stmt = conn.prepare("SELECT name, content, node_type FROM nodes WHERE id = ?1")?;
+                let mut stmt =
+                    conn.prepare("SELECT name, content, node_type FROM nodes WHERE id = ?1")?;
                 let mut rows = stmt.query(params![conn_id])?;
                 if let Some(row) = rows.next()? {
                     let doc_name: String = row.get(0)?;
@@ -325,7 +374,9 @@ Do NOT include any markdown code blocks (e.g. ```json). Output ONLY valid JSON."
                     let node_type: String = row.get(2)?;
                     if node_type == "document" {
                         let snippet: String = doc_content.chars().take(500).collect();
-                        context_block.push_str(&format!("  From Document '{}':\n\"\"\"\n{}\n\"\"\"\n", doc_name, snippet));
+                        context_block.push_str(&format!(
+                            "  From Document '{doc_name}':\n\"\"\"\n{snippet}\n\"\"\"\n"
+                        ));
                     }
                 }
             }

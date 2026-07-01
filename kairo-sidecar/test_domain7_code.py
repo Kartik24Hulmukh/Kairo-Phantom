@@ -16,9 +16,7 @@ Tests:
 import json
 import os
 import sys
-import tempfile
 import textwrap
-from pathlib import Path
 
 import networkx as nx
 import pytest
@@ -28,16 +26,18 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
 from sidecar.parsers.code_graph import CodeGraph, NODE_FILE, NODE_CLASS, NODE_FUNCTION
 from sidecar.safety.prompt_shield import PromptShield
-from sidecar.connectors.openhands_bridge import OpenHandsBridge, is_openhands_enabled
+from sidecar.connectors.openhands_bridge import OpenHandsBridge
 
 
 # ── Fixture: 5-file mini project ───────────────────────────────────────
+
 
 @pytest.fixture
 def mini_project(tmp_path):
     """Create a 5-file mini Python project in a temp directory."""
     # main.py — imports utils.py, calls DataHelper.process(), references User
-    (tmp_path / "main.py").write_text(textwrap.dedent("""\
+    (tmp_path / "main.py").write_text(
+        textwrap.dedent("""\
         import utils
         from models import User
 
@@ -49,50 +49,60 @@ def mini_project(tmp_path):
 
         if __name__ == "__main__":
             main()
-        """))
+        """)
+    )
 
     # utils.py — has class DataHelper with method process()
-    (tmp_path / "utils.py").write_text(textwrap.dedent("""\
+    (tmp_path / "utils.py").write_text(
+        textwrap.dedent("""\
         class DataHelper:
             def process(self):
                 return "processed"
 
             def validate(self):
                 return True
-        """))
+        """)
+    )
 
     # models.py — has class User
-    (tmp_path / "models.py").write_text(textwrap.dedent("""\
+    (tmp_path / "models.py").write_text(
+        textwrap.dedent("""\
         class User:
             def __init__(self, name):
                 self.name = name
 
             def get_name(self):
                 return self.name
-        """))
+        """)
+    )
 
     # test_helper.py — imports utils.py
-    (tmp_path / "test_helper.py").write_text(textwrap.dedent("""\
+    (tmp_path / "test_helper.py").write_text(
+        textwrap.dedent("""\
         import utils
 
         def test_process():
             helper = utils.DataHelper()
             assert helper.process() == "processed"
-        """))
+        """)
+    )
 
     # helpers.py — standalone with a function that calls process
-    (tmp_path / "helpers.py").write_text(textwrap.dedent("""\
+    (tmp_path / "helpers.py").write_text(
+        textwrap.dedent("""\
         from utils import DataHelper
 
         def run_helper():
             dh = DataHelper()
             return dh.process()
-        """))
+        """)
+    )
 
     return tmp_path
 
 
 # ── Test 1: build_graph → correct nodes and edges ─────────────────────
+
 
 class TestBuildGraph:
     def test_build_graph_returns_digraph(self, mini_project):
@@ -110,7 +120,7 @@ class TestBuildGraph:
     def test_build_graph_has_class_nodes(self, mini_project):
         cg = CodeGraph()
         g = cg.build_graph(str(mini_project))
-        class_nodes = [n for n, d in g.nodes(data=True) if d.get("type") == NODE_CLASS]
+        [n for n, d in g.nodes(data=True) if d.get("type") == NODE_CLASS]
         # DataHelper, User
         class_names = {d.get("name") for n, d in g.nodes(data=True) if d.get("type") == NODE_CLASS}
         assert "DataHelper" in class_names, f"DataHelper not found in {class_names}"
@@ -119,7 +129,9 @@ class TestBuildGraph:
     def test_build_graph_has_function_nodes(self, mini_project):
         cg = CodeGraph()
         g = cg.build_graph(str(mini_project))
-        func_names = {d.get("name") for n, d in g.nodes(data=True) if d.get("type") == NODE_FUNCTION}
+        func_names = {
+            d.get("name") for n, d in g.nodes(data=True) if d.get("type") == NODE_FUNCTION
+        }
         assert "main" in func_names, f"main not in {func_names}"
         assert "test_process" in func_names
         assert "run_helper" in func_names
@@ -149,13 +161,16 @@ class TestBuildGraph:
 
 # ── Test 2: find_callers('process') ────────────────────────────────────
 
+
 class TestFindCallers:
     def test_find_callers_process(self, mini_project):
         cg = CodeGraph()
         cg.build_graph(str(mini_project))
         callers = cg.find_callers("process")
         # process is called from main(), test_process(), run_helper()
-        assert len(callers) >= 3, f"Expected >=3 callers of 'process', got {len(callers)}: {callers}"
+        assert (
+            len(callers) >= 3
+        ), f"Expected >=3 callers of 'process', got {len(callers)}: {callers}"
         # Verify each caller has required keys
         for c in callers:
             assert "file" in c
@@ -170,7 +185,9 @@ class TestFindCallers:
         caller_files = {c["file"] for c in callers}
         # Should include main.py, test_helper.py, helpers.py
         assert "main.py" in caller_files, f"main.py not in caller files {caller_files}"
-        assert "test_helper.py" in caller_files, f"test_helper.py not in caller files {caller_files}"
+        assert (
+            "test_helper.py" in caller_files
+        ), f"test_helper.py not in caller files {caller_files}"
         assert "helpers.py" in caller_files, f"helpers.py not in caller files {caller_files}"
 
     def test_find_callers_nonexistent_function(self, mini_project):
@@ -181,6 +198,7 @@ class TestFindCallers:
 
 
 # ── Test 3: find_dependencies('utils.py') ──────────────────────────────
+
 
 class TestFindDependencies:
     def test_find_dependencies_utils(self, mini_project):
@@ -206,6 +224,7 @@ class TestFindDependencies:
 
 
 # ── Test 4: get_symbol_table ───────────────────────────────────────────
+
 
 class TestSymbolTable:
     def test_symbol_table_has_all_symbols(self, mini_project):
@@ -247,6 +266,7 @@ class TestSymbolTable:
 
 # ── Test 5: to_json / from_json round-trip ─────────────────────────────
 
+
 class TestSerialization:
     def test_to_json_returns_valid_json(self, mini_project):
         cg = CodeGraph()
@@ -262,12 +282,12 @@ class TestSerialization:
         original = cg.build_graph(str(mini_project))
         j = cg.to_json()
         restored = CodeGraph.from_json(j)
-        assert restored.number_of_nodes() == original.number_of_nodes(), (
-            f"Node count mismatch: {restored.number_of_nodes()} vs {original.number_of_nodes()}"
-        )
-        assert restored.number_of_edges() == original.number_of_edges(), (
-            f"Edge count mismatch: {restored.number_of_edges()} vs {original.number_of_edges()}"
-        )
+        assert (
+            restored.number_of_nodes() == original.number_of_nodes()
+        ), f"Node count mismatch: {restored.number_of_nodes()} vs {original.number_of_nodes()}"
+        assert (
+            restored.number_of_edges() == original.number_of_edges()
+        ), f"Edge count mismatch: {restored.number_of_edges()} vs {original.number_of_edges()}"
 
     def test_from_json_preserves_node_attributes(self, mini_project):
         cg = CodeGraph()
@@ -283,13 +303,18 @@ class TestSerialization:
         cg.build_graph(str(mini_project))
         j = cg.to_json()
         restored = CodeGraph.from_json(j)
-        import_edges = [(u, v, d) for u, v, d in restored.edges(data=True) if d.get("type") == "imports"]
-        call_edges = [(u, v, d) for u, v, d in restored.edges(data=True) if d.get("type") == "calls"]
+        import_edges = [
+            (u, v, d) for u, v, d in restored.edges(data=True) if d.get("type") == "imports"
+        ]
+        call_edges = [
+            (u, v, d) for u, v, d in restored.edges(data=True) if d.get("type") == "calls"
+        ]
         assert len(import_edges) >= 4
         assert len(call_edges) >= 3
 
 
 # ── Test 6: 10 injection payloads in code comments → blocked ───────────
+
 
 class TestPromptShieldInjection:
     """Verify that 10 injection payloads embedded in code comments are
@@ -358,6 +383,7 @@ class TestPromptShieldInjection:
 
 # ── Test 7-9: OpenHands bridge when service is down ────────────────────
 
+
 class TestOpenHandsBridgeDown:
     """Tests that verify the OpenHands bridge fails loudly when the
     service is not running (which it isn't in this sandbox — no Docker)."""
@@ -406,6 +432,7 @@ class TestOpenHandsBridgeDown:
         in the shipped (non-test) code."""
         import sidecar.connectors.openhands_bridge as ob
         import inspect
+
         source = inspect.getsource(ob)
         # Check that the module doesn't use unittest.mock
         assert "unittest.mock" not in source, "Bridge must not use unittest.mock"
@@ -415,9 +442,11 @@ class TestOpenHandsBridgeDown:
 
 # ── Test: Multi-language support (Rust/Go/TS) ──────────────────────────
 
+
 class TestMultiLanguage:
     def test_rust_file_parsed(self, tmp_path):
-        (tmp_path / "main.rs").write_text(textwrap.dedent("""\
+        (tmp_path / "main.rs").write_text(
+            textwrap.dedent("""\
             use std::io;
 
             struct Config {
@@ -433,15 +462,21 @@ class TestMultiLanguage:
                     self.path.clone()
                 }
             }
-            """))
+            """)
+        )
         cg = CodeGraph()
         g = cg.build_graph(str(tmp_path))
-        names = {d.get("name") for n, d in g.nodes(data=True) if d.get("type") in (NODE_CLASS, NODE_FUNCTION)}
+        names = {
+            d.get("name")
+            for n, d in g.nodes(data=True)
+            if d.get("type") in (NODE_CLASS, NODE_FUNCTION)
+        }
         assert "main" in names, f"Rust fn main not found in {names}"
         assert "Config" in names, f"Rust struct Config not found in {names}"
 
     def test_go_file_parsed(self, tmp_path):
-        (tmp_path / "main.go").write_text(textwrap.dedent("""\
+        (tmp_path / "main.go").write_text(
+            textwrap.dedent("""\
             package main
 
             import "fmt"
@@ -453,15 +488,21 @@ class TestMultiLanguage:
             func main() {
                 fmt.Println("hello")
             }
-            """))
+            """)
+        )
         cg = CodeGraph()
         g = cg.build_graph(str(tmp_path))
-        names = {d.get("name") for n, d in g.nodes(data=True) if d.get("type") in (NODE_CLASS, NODE_FUNCTION)}
+        names = {
+            d.get("name")
+            for n, d in g.nodes(data=True)
+            if d.get("type") in (NODE_CLASS, NODE_FUNCTION)
+        }
         assert "main" in names, f"Go func main not found in {names}"
         assert "Server" in names, f"Go struct Server not found in {names}"
 
     def test_typescript_file_parsed(self, tmp_path):
-        (tmp_path / "app.ts").write_text(textwrap.dedent("""\
+        (tmp_path / "app.ts").write_text(
+            textwrap.dedent("""\
             import { Component } from 'react';
 
             class App {
@@ -471,19 +512,26 @@ class TestMultiLanguage:
             function init() {
                 return new App();
             }
-            """))
+            """)
+        )
         cg = CodeGraph()
         g = cg.build_graph(str(tmp_path))
-        names = {d.get("name") for n, d in g.nodes(data=True) if d.get("type") in (NODE_CLASS, NODE_FUNCTION)}
+        names = {
+            d.get("name")
+            for n, d in g.nodes(data=True)
+            if d.get("type") in (NODE_CLASS, NODE_FUNCTION)
+        }
         assert "init" in names, f"TS function init not found in {names}"
         assert "App" in names, f"TS class App not found in {names}"
 
 
 # ── Test: Inheritance edges ────────────────────────────────────────────
 
+
 class TestInheritance:
     def test_inheritance_edge_detected(self, tmp_path):
-        (tmp_path / "animals.py").write_text(textwrap.dedent("""\
+        (tmp_path / "animals.py").write_text(
+            textwrap.dedent("""\
             class Animal:
                 def speak(self):
                     pass
@@ -491,7 +539,8 @@ class TestInheritance:
             class Dog(Animal):
                 def speak(self):
                     return "woof"
-            """))
+            """)
+        )
         cg = CodeGraph()
         g = cg.build_graph(str(tmp_path))
         inherit_edges = [(u, v, d) for u, v, d in g.edges(data=True) if d.get("type") == "inherits"]

@@ -4,6 +4,7 @@ Scans source files for hardcoded credentials, API keys, tokens, and PII.
 Returns structured findings with file path, line number, and pattern name.
 Used in CI to block commits containing secrets.
 """
+
 import os
 import re
 import logging
@@ -17,9 +18,17 @@ log = logging.getLogger("kairo.secret_gate")
 SECRET_PATTERNS = [
     # Cloud provider secrets
     ("AWS_ACCESS_KEY", r"AKIA[0-9A-Z]{16}", "CRITICAL"),
-    ("AWS_SECRET_KEY", r"(?i)aws[_\-]?secret[_\-]?access[_\-]?key\s*=\s*['\"]?[A-Za-z0-9/+=]{40}", "CRITICAL"),
+    (
+        "AWS_SECRET_KEY",
+        r"(?i)aws[_\-]?secret[_\-]?access[_\-]?key\s*=\s*['\"]?[A-Za-z0-9/+=]{40}",
+        "CRITICAL",
+    ),
     ("GCP_SERVICE_ACCOUNT", r'"type":\s*"service_account"', "HIGH"),
-    ("AZURE_CLIENT_SECRET", r"(?i)azure[_\-]?client[_\-]?secret\s*=\s*['\"]?[A-Za-z0-9\-_~.]{32,}", "CRITICAL"),
+    (
+        "AZURE_CLIENT_SECRET",
+        r"(?i)azure[_\-]?client[_\-]?secret\s*=\s*['\"]?[A-Za-z0-9\-_~.]{32,}",
+        "CRITICAL",
+    ),
     # API keys & tokens
     ("OPENAI_API_KEY", r"sk-[a-zA-Z0-9]{32,}", "CRITICAL"),
     ("OPENAI_PROJECT_KEY", r"sk-proj-[a-zA-Z0-9\-_]{20,}", "CRITICAL"),
@@ -39,7 +48,17 @@ SECRET_PATTERNS = [
 ]
 
 # Files and directories to always skip (build artifacts, test fixtures, etc.)
-SKIP_DIRS = {".git", "target", ".venv", "__pycache__", "node_modules", ".tox", "tests", "test", "testing"}
+SKIP_DIRS = {
+    ".git",
+    "target",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+    ".tox",
+    "tests",
+    "test",
+    "testing",
+}
 SKIP_FILE_SUFFIXES = (".pyc", ".pyo", ".so", ".dll", ".exe", ".bin")
 SKIP_FILES_CONTAINING = ("test_", "mock_", "_test", "_mock", "fixture", ".min.js")
 
@@ -47,6 +66,7 @@ SKIP_FILES_CONTAINING = ("test_", "mock_", "_test", "_mock", "fixture", ".min.js
 @dataclass
 class SecretFinding:
     """A single secret finding with location and severity."""
+
     file: str
     line: int
     pattern_name: str
@@ -57,6 +77,7 @@ class SecretFinding:
 @dataclass
 class SecretGateResult:
     """Summary result of a secret gate scan."""
+
     clean: bool
     total_files_scanned: int
     findings: List[SecretFinding] = field(default_factory=list)
@@ -95,20 +116,25 @@ def scan_file(file_path: str) -> List[SecretFinding]:
                 stripped = line.strip()
                 if stripped.startswith(("#", "//", "*")) and "mock" in stripped.lower():
                     continue
-                if any(w in stripped.lower() for w in ("mock", "example", "placeholder", "todo", "fixme")):
+                if any(
+                    w in stripped.lower()
+                    for w in ("mock", "example", "placeholder", "todo", "fixme")
+                ):
                     continue
                 for pattern_name, regex, risk in SECRET_PATTERNS:
                     match = re.search(regex, line)
                     if match:
                         # Truncate match to avoid logging full secret
                         matched_prefix = match.group(0)[:8] + "..."
-                        findings.append(SecretFinding(
-                            file=file_path,
-                            line=line_num,
-                            pattern_name=pattern_name,
-                            risk_level=risk,
-                            matched_prefix=matched_prefix,
-                        ))
+                        findings.append(
+                            SecretFinding(
+                                file=file_path,
+                                line=line_num,
+                                pattern_name=pattern_name,
+                                risk_level=risk,
+                                matched_prefix=matched_prefix,
+                            )
+                        )
     except Exception as e:
         log.debug(f"[SecretGate] Could not scan {file_path}: {e}")
     return findings
@@ -154,7 +180,9 @@ def scan_directory(
 
     if not clean:
         for f in all_findings:
-            log.error(f"[SecretGate] {f.risk_level}: {f.pattern_name} in {f.file}:{f.line} (prefix={f.matched_prefix})")
+            log.error(
+                f"[SecretGate] {f.risk_level}: {f.pattern_name} in {f.file}:{f.line} (prefix={f.matched_prefix})"
+            )
     else:
         log.info(f"[SecretGate] [OK] Clean: scanned {files_scanned} files, no secrets found.")
 
@@ -168,10 +196,14 @@ def run_gate(root_dir: str, fail_on_high: bool = True) -> bool:
     """
     result = scan_directory(root_dir)
     if result.critical_count > 0:
-        log.error(f"[SecretGate] [FAIL] BLOCKED: {result.critical_count} CRITICAL finding(s). Fix before commit.")
+        log.error(
+            f"[SecretGate] [FAIL] BLOCKED: {result.critical_count} CRITICAL finding(s). Fix before commit."
+        )
         return False
     if fail_on_high and result.high_count > 0:
-        log.error(f"[SecretGate] [FAIL] BLOCKED: {result.high_count} HIGH finding(s). Fix before commit.")
+        log.error(
+            f"[SecretGate] [FAIL] BLOCKED: {result.high_count} HIGH finding(s). Fix before commit."
+        )
         return False
     if result.clean:
         log.info(f"[SecretGate] [OK] Clean: {result.total_files_scanned} files scanned.")

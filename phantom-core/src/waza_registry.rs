@@ -46,14 +46,18 @@ impl WazaSkillManager {
 }
 
 impl Default for WazaSkillManager {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl WazaSkillManager {
     /// Add a skill from a GitHub URL: `kairo skill add <url>`
     pub async fn add_skill(&self, url: &str, allow_unsigned: bool) -> Result<SkillManifest> {
         // Fetch the skill's manifest TOML
-        let client = crate::config::get_client_builder().build().unwrap_or_default();
+        let client = crate::config::get_client_builder()
+            .build()
+            .unwrap_or_default();
 
         // If URL points to a SKILL.md, derive manifest URL
         let manifest_url = if url.ends_with("SKILL.md") {
@@ -102,19 +106,27 @@ impl WazaSkillManager {
             if let Some(sig) = &manifest.signature {
                 tracing::info!("🔐 Verifying Ed25519 signature for {}", manifest.id);
                 Self::verify_wasm_signature(&wasm_bytes, sig)?;
+            } else if allow_unsigned {
+                tracing::warn!(
+                    "⚠️  Skill '{}' has no WASM signature — using anyway (--allow-unsigned passed)",
+                    manifest.id
+                );
             } else {
-                if allow_unsigned {
-                    tracing::warn!("⚠️  Skill '{}' has no WASM signature — using anyway (--allow-unsigned passed)", manifest.id);
-                } else {
-                    anyhow::bail!("WASM signature verification failed: skill is unsigned but signatures are required");
-                }
+                anyhow::bail!("WASM signature verification failed: skill is unsigned but signatures are required");
             }
 
             std::fs::write(skill_dir.join("plugin.wasm"), &wasm_bytes)?;
         }
 
-        tracing::info!("✅ Skill installed: {} v{}", manifest.name, manifest.version);
-        println!("✅ Installed: {} v{} by {}", manifest.name, manifest.version, manifest.author);
+        tracing::info!(
+            "✅ Skill installed: {} v{}",
+            manifest.name,
+            manifest.version
+        );
+        println!(
+            "✅ Installed: {} v{} by {}",
+            manifest.name, manifest.version, manifest.author
+        );
         println!("   Category: {}", manifest.category);
         println!("   {}", manifest.description);
 
@@ -142,9 +154,9 @@ impl WazaSkillManager {
         let skill_dir = self.skills_dir.join(skill_id);
         if skill_dir.exists() {
             std::fs::remove_dir_all(&skill_dir)?;
-            println!("✅ Removed skill: {}", skill_id);
+            println!("✅ Removed skill: {skill_id}");
         } else {
-            anyhow::bail!("Skill '{}' not found", skill_id);
+            anyhow::bail!("Skill '{skill_id}' not found");
         }
         Ok(())
     }
@@ -164,46 +176,58 @@ impl WazaSkillManager {
         std::fs::create_dir_all(&skill_dir)?;
 
         // SKILL.md template
-        std::fs::write(skill_dir.join("SKILL.md"), format!(
-            "# {}\n\n## What this skill does\n\nDescribe your skill here.\n\n\
+        std::fs::write(
+            skill_dir.join("SKILL.md"),
+            format!(
+                "# {name}\n\n## What this skill does\n\nDescribe your skill here.\n\n\
              ## Activation\n\nThis skill activates when the user types:\n\n\
-             ```\n// {}: <your prompt here>\n```\n\n\
+             ```\n// {safe_name}: <your prompt here>\n```\n\n\
              ## System Prompt\n\n```\nYou are a specialist in...\n```\n\n\
-             ## Examples\n\n- Input: `// {}: improve tone`\n- Output: ...\n",
-            name, safe_name, safe_name
-        ))?;
+             ## Examples\n\n- Input: `// {safe_name}: improve tone`\n- Output: ...\n"
+            ),
+        )?;
 
         // manifest.toml template (valid TOML, parseable by list_installed)
-        std::fs::write(skill_dir.join("manifest.toml"), format!(
-            r#"id = "{}"
-name = "{}"
+        std::fs::write(
+            skill_dir.join("manifest.toml"),
+            format!(
+                r#"id = "{safe_name}"
+name = "{name}"
 version = "0.1.0"
 description = "A Kairo skill for ..."
 author = "Your Name"
 category = "general"
-skill_md_url = "https://github.com/YOUR/REPO/raw/main/skills/{}/SKILL.md"
+skill_md_url = "https://github.com/YOUR/REPO/raw/main/skills/{safe_name}/SKILL.md"
 requires_kairo = "0.3.0"
 tags = ["custom"]
-"#,
-            safe_name, name, safe_name
-        ))?;
+"#
+            ),
+        )?;
 
         // Test harness (KMB-1 compatible)
-        std::fs::write(skill_dir.join("test.toml"), format!(
-            r#"# KMB-1 compatible test cases for {}
+        std::fs::write(
+            skill_dir.join("test.toml"),
+            format!(
+                r#"# KMB-1 compatible test cases for {name}
 [[tests]]
 input = "sample input that triggers this skill"
 expected_contains = ["expected keyword in output"]
 max_words = 100
-"#,
-            name
-        ))?;
+"#
+            ),
+        )?;
 
         println!("✅ Scaffolded skill: {}", skill_dir.display());
-        println!("   Edit {} to define your skill's behavior.", skill_dir.join("SKILL.md").display());
-        println!("   Edit {} to fill in metadata.", skill_dir.join("manifest.toml").display());
+        println!(
+            "   Edit {} to define your skill's behavior.",
+            skill_dir.join("SKILL.md").display()
+        );
+        println!(
+            "   Edit {} to fill in metadata.",
+            skill_dir.join("manifest.toml").display()
+        );
         println!("   Run: kairo skill list   (to see it appear)");
-        println!("   Run: kairo skill test {} to validate", safe_name);
+        println!("   Run: kairo skill test {safe_name} to validate");
 
         Ok(skill_dir)
     }
@@ -212,16 +236,16 @@ max_words = 100
         if signature_b64.is_empty() {
             anyhow::bail!("Empty WASM signature");
         }
-        let config_dir = dirs::home_dir()
-            .unwrap_or_default()
-            .join(".kairo-phantom");
+        let config_dir = dirs::home_dir().unwrap_or_default().join(".kairo-phantom");
         let vault = crate::identity::SignatureVault::new(&config_dir);
         let trusted_keys = vault.load_trusted_keys();
         if !trusted_keys.is_empty() {
             if vault.verify_signature(wasm_bytes, signature_b64) {
                 tracing::info!("✅ WASM signature verified against trusted enterprise key vault.");
             } else {
-                anyhow::bail!("WASM signature verification failed: not signed by any trusted enterprise key.");
+                anyhow::bail!(
+                    "WASM signature verification failed: not signed by any trusted enterprise key."
+                );
             }
         } else {
             tracing::warn!("⚠️  No trusted keys registered in SignatureVault — skipping strict signature verification.");
@@ -235,12 +259,16 @@ pub async fn run_skill_command(sub: &str, args: &[String]) -> anyhow::Result<()>
     let mgr = WazaSkillManager::new();
     match sub {
         "add" => {
-            let url = args.first().ok_or_else(|| anyhow::anyhow!("Usage: kairo skill add <url> [--allow-unsigned]"))?;
+            let url = args.first().ok_or_else(|| {
+                anyhow::anyhow!("Usage: kairo skill add <url> [--allow-unsigned]")
+            })?;
             let allow_unsigned = args.contains(&"--allow-unsigned".to_string());
             mgr.add_skill(url, allow_unsigned).await?;
         }
         "remove" | "rm" => {
-            let id = args.first().ok_or_else(|| anyhow::anyhow!("Usage: kairo skill remove <id>"))?;
+            let id = args
+                .first()
+                .ok_or_else(|| anyhow::anyhow!("Usage: kairo skill remove <id>"))?;
             mgr.remove_skill(id)?;
         }
         "new" => {
@@ -254,7 +282,10 @@ pub async fn run_skill_command(sub: &str, args: &[String]) -> anyhow::Result<()>
             } else {
                 println!("Installed skills ({}):", installed.len());
                 for s in &installed {
-                    println!("  • {} v{} [{}] — {}", s.name, s.version, s.category, s.description);
+                    println!(
+                        "  • {} v{} [{}] — {}",
+                        s.name, s.version, s.category, s.description
+                    );
                 }
             }
         }

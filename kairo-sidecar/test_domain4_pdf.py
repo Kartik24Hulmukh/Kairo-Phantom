@@ -49,9 +49,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 import fitz  # PyMuPDF (hard dependency)
 
 _OPENDATALOADER_AVAILABLE: Optional[bool] = None  # lazily resolved inside tests
-_OLMOCR_AVAILABLE: Optional[bool] = None          # lazily resolved inside tests
-_SURYA_AVAILABLE: Optional[bool] = None           # lazily resolved inside tests
-_REPORTLAB_AVAILABLE: Optional[bool] = None       # lazily resolved inside tests
+_OLMOCR_AVAILABLE: Optional[bool] = None  # lazily resolved inside tests
+_SURYA_AVAILABLE: Optional[bool] = None  # lazily resolved inside tests
+_REPORTLAB_AVAILABLE: Optional[bool] = None  # lazily resolved inside tests
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -59,12 +59,14 @@ _REPORTLAB_AVAILABLE: Optional[bool] = None       # lazily resolved inside tests
 # for the unit-test harness — mirrors the pdf_parser.py design patterns)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class ExtractionTier(str, Enum):
     """Four-tier PDF extraction hierarchy used by Kairo Phantom."""
-    PYMUPDF        = "pymupdf"        # Tier 1 – born-digital, high text yield
-    OPENDATALOADER = "opendataloader" # Tier 2 – rich table/layout extraction
-    OLMOCR         = "olmocr"         # Tier 3 – low text yield / scanned pages
-    SURYA          = "surya"          # Tier 4 – CJK / multilingual OCR
+
+    PYMUPDF = "pymupdf"  # Tier 1 – born-digital, high text yield
+    OPENDATALOADER = "opendataloader"  # Tier 2 – rich table/layout extraction
+    OLMOCR = "olmocr"  # Tier 3 – low text yield / scanned pages
+    SURYA = "surya"  # Tier 4 – CJK / multilingual OCR
 
 
 class ExtractionResult:
@@ -104,6 +106,7 @@ def _check_opendataloader() -> bool:
     """Return True when opendataloader is importable."""
     try:
         import opendataloader  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -113,6 +116,7 @@ def _check_olmocr() -> bool:
     """Return True when olmocr is importable."""
     try:
         import olmocr  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -122,6 +126,7 @@ def _check_surya() -> bool:
     """Return True when surya is importable."""
     try:
         import surya  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -131,6 +136,7 @@ def _check_reportlab() -> bool:
     """Return True when reportlab is importable."""
     try:
         from reportlab.pdfgen import canvas  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -246,6 +252,7 @@ def _route_extraction(pdf_path: str) -> ExtractionResult:
     if _check_pymupdf():
         try:
             import fitz
+
             doc = fitz.open(pdf_path)
             total_chars = 0
             pages = len(doc)
@@ -314,16 +321,16 @@ def _route_extraction(pdf_path: str) -> ExtractionResult:
 # ─────────────────────────────────────────────────────────────────────────────
 
 KAMI_THEME_MAP: Dict[str, Dict[str, Any]] = {
-    "midnight":     {"bg": (10, 10, 30),    "fg": (220, 220, 255), "accent": (100, 149, 237)},
-    "sakura":       {"bg": (255, 240, 245),  "fg": (80, 20, 60),    "accent": (220, 100, 140)},
-    "forest":       {"bg": (20, 40, 20),     "fg": (180, 230, 180), "accent": (80, 160, 80)},
-    "desert":       {"bg": (245, 230, 200),  "fg": (80, 50, 10),    "accent": (200, 140, 60)},
-    "ocean":        {"bg": (5, 30, 70),      "fg": (180, 220, 255), "accent": (60, 160, 220)},
-    "carbon":       {"bg": (20, 20, 20),     "fg": (200, 200, 200), "accent": (100, 180, 100)},
-    "ivory":        {"bg": (255, 255, 240),  "fg": (40, 40, 40),    "accent": (160, 120, 80)},
-    "volcano":      {"bg": (30, 10, 5),      "fg": (255, 200, 150), "accent": (220, 80, 40)},
-    "glacier":      {"bg": (230, 245, 255),  "fg": (20, 60, 100),   "accent": (80, 160, 220)},
-    "phantom":      {"bg": (15, 5, 25),      "fg": (200, 180, 255), "accent": (140, 80, 240)},
+    "midnight": {"bg": (10, 10, 30), "fg": (220, 220, 255), "accent": (100, 149, 237)},
+    "sakura": {"bg": (255, 240, 245), "fg": (80, 20, 60), "accent": (220, 100, 140)},
+    "forest": {"bg": (20, 40, 20), "fg": (180, 230, 180), "accent": (80, 160, 80)},
+    "desert": {"bg": (245, 230, 200), "fg": (80, 50, 10), "accent": (200, 140, 60)},
+    "ocean": {"bg": (5, 30, 70), "fg": (180, 220, 255), "accent": (60, 160, 220)},
+    "carbon": {"bg": (20, 20, 20), "fg": (200, 200, 200), "accent": (100, 180, 100)},
+    "ivory": {"bg": (255, 255, 240), "fg": (40, 40, 40), "accent": (160, 120, 80)},
+    "volcano": {"bg": (30, 10, 5), "fg": (255, 200, 150), "accent": (220, 80, 40)},
+    "glacier": {"bg": (230, 245, 255), "fg": (20, 60, 100), "accent": (80, 160, 220)},
+    "phantom": {"bg": (15, 5, 25), "fg": (200, 180, 255), "accent": (140, 80, 240)},
 }
 
 
@@ -353,7 +360,11 @@ def kami_export_pdf(
     """
     if not _check_reportlab():
         # Fallback: write plain-text file with .txt extension
-        txt_path = output_path.replace(".pdf", ".txt") if output_path.endswith(".pdf") else output_path + ".txt"
+        txt_path = (
+            output_path.replace(".pdf", ".txt")
+            if output_path.endswith(".pdf")
+            else output_path + ".txt"
+        )
         Path(txt_path).write_text(
             f"=== {title} ===\nAuthor: {author}\nTheme: {theme}\n\n{content}",
             encoding="utf-8",
@@ -420,6 +431,7 @@ def kami_export_pdf(
 # Test helper: create a minimal valid PDF in a temp file
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _make_temp_pdf(text: str = "Sample text for Kairo testing.", page_count: int = 1) -> str:
     """
     Create a minimal valid PDF file using PyMuPDF and return its path.
@@ -427,6 +439,7 @@ def _make_temp_pdf(text: str = "Sample text for Kairo testing.", page_count: int
     Requires fitz to be installed (skipped otherwise at test level).
     """
     import fitz
+
     fd, path = tempfile.mkstemp(suffix=".pdf")
     os.close(fd)
 
@@ -439,16 +452,18 @@ def _make_temp_pdf(text: str = "Sample text for Kairo testing.", page_count: int
     return path
 
 
-def _make_temp_pdf_with_heading(heading: str = "Executive Summary", body: str = "This is the body text.") -> str:
+def _make_temp_pdf_with_heading(
+    heading: str = "Executive Summary", body: str = "This is the body text."
+) -> str:
     """Create a PDF with a large-font heading and smaller body text."""
-    import fitz
+
     fd, path = tempfile.mkstemp(suffix=".pdf")
     os.close(fd)
 
     doc = fitz.open()
     page = doc.new_page()
-    page.insert_text((50, 72),  heading, fontsize=20)
-    page.insert_text((50, 110), body,    fontsize=10)
+    page.insert_text((50, 72), heading, fontsize=20)
+    page.insert_text((50, 110), body, fontsize=10)
     doc.save(path)
     doc.close()
     return path
@@ -456,7 +471,7 @@ def _make_temp_pdf_with_heading(heading: str = "Executive Summary", body: str = 
 
 def _make_temp_pdf_cjk(text: str = "这是一个测试文档。包含中文内容。") -> str:
     """Create a PDF whose text block contains CJK characters."""
-    import fitz
+
     fd, path = tempfile.mkstemp(suffix=".pdf")
     os.close(fd)
 
@@ -472,7 +487,7 @@ def _make_temp_pdf_cjk(text: str = "这是一个测试文档。包含中文内�
 
 def _make_empty_pdf() -> str:
     """Create a one-page PDF with no text content."""
-    import fitz
+
     fd, path = tempfile.mkstemp(suffix=".pdf")
     os.close(fd)
 
@@ -486,6 +501,7 @@ def _make_empty_pdf() -> str:
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 1 — Engine Availability & Core Unit Tests (12 tests)
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class TestEngineAvailability:
     """Section 1: Engine availability checks and core unit tests."""
@@ -516,18 +532,18 @@ class TestEngineAvailability:
 
     def test_extraction_tier_enum_values(self):
         """ExtractionTier enum must expose all four tier string values."""
-        assert ExtractionTier.PYMUPDF.value        == "pymupdf"
+        assert ExtractionTier.PYMUPDF.value == "pymupdf"
         assert ExtractionTier.OPENDATALOADER.value == "opendataloader"
-        assert ExtractionTier.OLMOCR.value         == "olmocr"
-        assert ExtractionTier.SURYA.value          == "surya"
+        assert ExtractionTier.OLMOCR.value == "olmocr"
+        assert ExtractionTier.SURYA.value == "surya"
 
     def test_engine_check_methods_return_bool(self):
         """Every _check_* helper must return a plain Python bool."""
-        assert isinstance(_check_pymupdf(),        bool)
+        assert isinstance(_check_pymupdf(), bool)
         assert isinstance(_check_opendataloader(), bool)
-        assert isinstance(_check_olmocr(),         bool)
-        assert isinstance(_check_surya(),          bool)
-        assert isinstance(_check_reportlab(),      bool)
+        assert isinstance(_check_olmocr(), bool)
+        assert isinstance(_check_surya(), bool)
+        assert isinstance(_check_reportlab(), bool)
 
     def test_pdf_engine_init_offline_mode(self):
         """ExtractionResult can be constructed without network access (offline-safe)."""
@@ -570,8 +586,16 @@ class TestEngineAvailability:
     def test_extraction_result_fields_exist(self):
         """ExtractionResult exposes all required public fields."""
         required_fields = [
-            "text", "tables", "headings", "images", "page_count",
-            "tier_used", "confidence", "extraction_time_ms", "language", "metadata",
+            "text",
+            "tables",
+            "headings",
+            "images",
+            "page_count",
+            "tier_used",
+            "confidence",
+            "extraction_time_ms",
+            "language",
+            "metadata",
         ]
         result = ExtractionResult()
         for field in required_fields:
@@ -606,6 +630,7 @@ class TestEngineAvailability:
 # SECTION 2 — PyMuPDF Tier 1 Tests (10 tests)
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class TestPyMuPDFTier1:
     """Section 2: PyMuPDF Tier 1 extraction correctness tests."""
 
@@ -635,7 +660,7 @@ class TestPyMuPDFTier1:
         """Tier 1 extraction populates headings list when large-font spans exist."""
         pdf_path = _make_temp_pdf_with_heading(
             heading="Section One — Financial Overview",
-            body="Revenue grew by 23% year-over-year in Q3."
+            body="Revenue grew by 23% year-over-year in Q3.",
         )
         try:
             result = _extract_with_pymupdf(pdf_path)
@@ -690,17 +715,17 @@ class TestPyMuPDFTier1:
         pdf_path = _make_temp_pdf("Speed benchmark test document content")
         try:
             t0 = time.perf_counter()
-            result = _extract_with_pymupdf(pdf_path)
+            _extract_with_pymupdf(pdf_path)
             elapsed_ms = (time.perf_counter() - t0) * 1000.0
-            assert elapsed_ms < 200.0, (
-                f"PyMuPDF extraction took {elapsed_ms:.1f} ms — expected < 200 ms"
-            )
+            assert (
+                elapsed_ms < 200.0
+            ), f"PyMuPDF extraction took {elapsed_ms:.1f} ms — expected < 200 ms"
         finally:
             os.unlink(pdf_path)
 
     def test_pymupdf_closes_file_handles(self):
         """Tier 1 extraction closes the fitz document handle after extraction."""
-        import fitz
+
         pdf_path = _make_temp_pdf("File handle closure test")
         try:
             # If fitz didn't close the doc, we couldn't delete on Windows
@@ -729,6 +754,7 @@ class TestPyMuPDFTier1:
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 3 — OpenDataLoader Tier 2 Tests (8 tests)
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class TestOpenDataLoaderTier2:
     """Section 3: OpenDataLoader Tier 2 availability and fallback tests."""
@@ -827,6 +853,7 @@ class TestOpenDataLoaderTier2:
 # SECTION 4 — olmOCR Tier 3 Tests (6 tests)
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class TestOlmOCRTier3:
     """Section 4: olmOCR Tier 3 availability and routing tests."""
 
@@ -880,17 +907,15 @@ class TestOlmOCRTier3:
         for bad_path in ["nonexistent.pdf", "", "/dev/null/impossible.pdf"]:
             try:
                 result = _extract_fallback(bad_path)
-                assert isinstance(result, ExtractionResult), (
-                    f"Expected ExtractionResult for path {bad_path!r}, got {type(result)}"
-                )
+                assert isinstance(
+                    result, ExtractionResult
+                ), f"Expected ExtractionResult for path {bad_path!r}, got {type(result)}"
                 # Confidence may be 0.0 (all tiers failed) or higher (PyMuPDF handled it gracefully)
-                assert 0.0 <= result.confidence <= 1.0, (
-                    f"Confidence {result.confidence} out of range [0,1] for path {bad_path!r}"
-                )
+                assert (
+                    0.0 <= result.confidence <= 1.0
+                ), f"Confidence {result.confidence} out of range [0,1] for path {bad_path!r}"
             except Exception as exc:
-                pytest.fail(
-                    f"_extract_fallback raised an exception for path {bad_path!r}: {exc}"
-                )
+                pytest.fail(f"_extract_fallback raised an exception for path {bad_path!r}: {exc}")
 
     def test_tier3_not_used_for_born_digital(self):
         """Router should NOT route to olmOCR for a high-density born-digital PDF."""
@@ -909,9 +934,9 @@ class TestOlmOCRTier3:
             result = _route_extraction(pdf_path)
             assert isinstance(result, ExtractionResult)
             # Born-digital → should pick Tier 1 (PYMUPDF), never OLMOCR
-            assert result.tier_used != ExtractionTier.OLMOCR, (
-                "Router incorrectly selected olmOCR for a high-density born-digital PDF"
-            )
+            assert (
+                result.tier_used != ExtractionTier.OLMOCR
+            ), "Router incorrectly selected olmOCR for a high-density born-digital PDF"
         finally:
             os.unlink(pdf_path)
 
@@ -919,6 +944,7 @@ class TestOlmOCRTier3:
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 5 — Surya Tier 4 Tests (6 tests)
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class TestSuryaTier4:
     """Section 5: Surya Tier 4 multilingual OCR availability and routing tests."""
@@ -990,6 +1016,7 @@ class TestSuryaTier4:
 # SECTION 6 — Extraction Chain Tests (6 tests)
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class TestExtractionChain:
     """Section 6: Extraction chain routing, timing, and resilience tests."""
 
@@ -1005,9 +1032,9 @@ class TestExtractionChain:
         pdf_path = _make_temp_pdf(high_density_text)
         try:
             result = _route_extraction(pdf_path)
-            assert result.tier_used == ExtractionTier.PYMUPDF, (
-                f"Expected PYMUPDF for high-density PDF, got {result.tier_used}"
-            )
+            assert (
+                result.tier_used == ExtractionTier.PYMUPDF
+            ), f"Expected PYMUPDF for high-density PDF, got {result.tier_used}"
         finally:
             os.unlink(pdf_path)
 
@@ -1043,9 +1070,9 @@ class TestExtractionChain:
         pdf_path = _make_temp_pdf("Confidence score range validation")
         try:
             result = _extract_with_pymupdf(pdf_path)
-            assert 0.0 <= result.confidence <= 1.0, (
-                f"Confidence {result.confidence} out of valid range [0, 1]"
-            )
+            assert (
+                0.0 <= result.confidence <= 1.0
+            ), f"Confidence {result.confidence} out of valid range [0, 1]"
         finally:
             os.unlink(pdf_path)
 
@@ -1074,6 +1101,7 @@ class TestExtractionChain:
 # SECTION 7 — Kami PDF Export Tests (8 tests)
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class TestKamiPDFExport:
     """Section 7: Kami PDF/TXT export tests — theme, content, and fallback paths."""
 
@@ -1085,12 +1113,20 @@ class TestKamiPDFExport:
 
     def test_kami_theme_map_has_ten_themes(self):
         """KAMI_THEME_MAP must contain exactly 10 named themes."""
-        assert len(KAMI_THEME_MAP) == 10, (
-            f"Expected 10 Kami themes, got {len(KAMI_THEME_MAP)}: {list(KAMI_THEME_MAP)}"
-        )
+        assert (
+            len(KAMI_THEME_MAP) == 10
+        ), f"Expected 10 Kami themes, got {len(KAMI_THEME_MAP)}: {list(KAMI_THEME_MAP)}"
         required_themes = {
-            "midnight", "sakura", "forest", "desert", "ocean",
-            "carbon", "ivory", "volcano", "glacier", "phantom",
+            "midnight",
+            "sakura",
+            "forest",
+            "desert",
+            "ocean",
+            "carbon",
+            "ivory",
+            "volcano",
+            "glacier",
+            "phantom",
         }
         assert required_themes == set(KAMI_THEME_MAP.keys())
 
@@ -1108,9 +1144,9 @@ class TestKamiPDFExport:
             created = [p for p in possible_paths if os.path.exists(p)]
             assert len(created) >= 1, "kami_export_pdf did not create any output file"
             # Must be non-trivially small
-            assert os.path.getsize(created[0]) > 100, (
-                f"Output file {created[0]} is too small ({os.path.getsize(created[0])} bytes)"
-            )
+            assert (
+                os.path.getsize(created[0]) > 100
+            ), f"Output file {created[0]} is too small ({os.path.getsize(created[0])} bytes)"
         finally:
             for p in [out_path, out_path.replace(".pdf", ".txt"), out_path + ".txt"]:
                 if os.path.exists(p):
@@ -1158,7 +1194,8 @@ class TestKamiPDFExport:
         os.unlink(out_path)
         try:
             success = kami_export_pdf(
-                content, out_path,
+                content,
+                out_path,
                 theme="ocean",
                 title="Cover Page Title",
                 author="Test Author",
@@ -1226,6 +1263,7 @@ class TestKamiPDFExport:
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 8 — Integration & Memory Stability Tests (4 tests)
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class TestMemoryAndStability:
     """Section 8: Integration, memory leak detection, and idempotency tests."""
@@ -1305,9 +1343,9 @@ class TestMemoryAndStability:
             result_a = _extract_with_pymupdf(pdf_path)
             result_b = _extract_with_pymupdf(pdf_path)
 
-            assert result_a.text == result_b.text, (
-                "Extraction is not idempotent — text differs between two calls on the same file"
-            )
+            assert (
+                result_a.text == result_b.text
+            ), "Extraction is not idempotent — text differs between two calls on the same file"
             assert result_a.page_count == result_b.page_count
             assert result_a.tier_used == result_b.tier_used
             assert result_a.language == result_b.language
@@ -1340,7 +1378,7 @@ class TestAdversarialFixtures:
     def test_encrypted_pdf_fixture_exists(self):
         """Verify encrypted.pdf fixture exists and is a valid encrypted PDF."""
         path = _fixture_path("encrypted.pdf")
-        import fitz
+
         doc = fitz.open(path)
         assert doc.is_encrypted, "encrypted.pdf should be encrypted"
         assert doc.needs_pass, "encrypted.pdf should require a password"
@@ -1361,7 +1399,7 @@ class TestAdversarialFixtures:
     def test_encrypted_pdf_extracts_with_password(self):
         """With correct password, encrypted PDF text is extracted properly."""
         path = _fixture_path("encrypted.pdf")
-        import fitz
+
         doc = fitz.open(path)
         assert doc.authenticate("test123"), "Password authentication should succeed"
         text = doc[0].get_text()
@@ -1380,7 +1418,7 @@ class TestAdversarialFixtures:
     def test_form_pdf_fixture_exists(self):
         """Verify form.pdf fixture exists and is a valid PDF."""
         path = _fixture_path("form.pdf")
-        import fitz
+
         doc = fitz.open(path)
         assert len(doc) >= 1, "form.pdf should have at least 1 page"
         doc.close()
@@ -1388,7 +1426,7 @@ class TestAdversarialFixtures:
     def test_form_pdf_extracts_form_fields(self):
         """Kairo extracts form field names and values from PDF with AcroForm fields."""
         path = _fixture_path("form.pdf")
-        import fitz
+
         doc = fitz.open(path)
         field_names = []
         field_values = {}
@@ -1403,8 +1441,12 @@ class TestAdversarialFixtures:
         assert "Email" in field_names, "Should find Email form field"
         assert "Subscribe" in field_names, "Should find Subscribe form field"
         # Verify field values are populated
-        assert field_values.get("FirstName") == "John", f"FirstName value should be 'John', got {field_values.get('FirstName')}"
-        assert field_values.get("LastName") == "Doe", f"LastName value should be 'Doe', got {field_values.get('LastName')}"
+        assert (
+            field_values.get("FirstName") == "John"
+        ), f"FirstName value should be 'John', got {field_values.get('FirstName')}"
+        assert (
+            field_values.get("LastName") == "Doe"
+        ), f"LastName value should be 'Doe', got {field_values.get('LastName')}"
 
     def test_form_pdf_text_extraction(self):
         """Standard text extraction from form.pdf still works (non-field text)."""
@@ -1416,7 +1458,7 @@ class TestAdversarialFixtures:
     def test_500page_pdf_fixture_exists(self):
         """Verify 500page.pdf fixture exists and has exactly 500 pages."""
         path = _fixture_path("500page.pdf")
-        import fitz
+
         doc = fitz.open(path)
         assert len(doc) == 500, f"500page.pdf should have 500 pages, got {len(doc)}"
         doc.close()
@@ -1440,7 +1482,9 @@ class TestAdversarialFixtures:
         t0 = time.perf_counter()
         result = _route_extraction(path)
         elapsed = time.perf_counter() - t0
-        assert elapsed < 30.0, f"500-page router extraction took {elapsed:.1f}s — exceeds 30s timeout"
+        assert (
+            elapsed < 30.0
+        ), f"500-page router extraction took {elapsed:.1f}s — exceeds 30s timeout"
         assert result.page_count == 500, f"Router should report 500 pages, got {result.page_count}"
 
     def test_500page_pdf_idempotent(self):
@@ -1462,13 +1506,13 @@ class TestPdfOxideComparison:
 
     # PDF routing table: PDF type → best parser
     ROUTING_TABLE = {
-        "born_digital_text": "pymupdf",       # Tier 1: high text yield
-        "encrypted": "pymupdf",               # PyMuPDF handles auth gracefully
-        "form_fields": "pymupdf",             # PyMuPDF extracts widget values
-        "scanned_low_yield": "olmocr",        # Tier 3: OCR for scanned pages
-        "cjk_multilingual": "surya",          # Tier 4: CJK/Arabic OCR
-        "rich_tables_layout": "opendataloader", # Tier 2: table extraction
-        "large_document": "pymupdf",          # PyMuPDF is fastest for large docs
+        "born_digital_text": "pymupdf",  # Tier 1: high text yield
+        "encrypted": "pymupdf",  # PyMuPDF handles auth gracefully
+        "form_fields": "pymupdf",  # PyMuPDF extracts widget values
+        "scanned_low_yield": "olmocr",  # Tier 3: OCR for scanned pages
+        "cjk_multilingual": "surya",  # Tier 4: CJK/Arabic OCR
+        "rich_tables_layout": "opendataloader",  # Tier 2: table extraction
+        "large_document": "pymupdf",  # PyMuPDF is fastest for large docs
     }
 
     @pytest.mark.skip(reason="pdf_oxide not installed — see INFRA_PENDING.md")
@@ -1481,6 +1525,7 @@ class TestPdfOxideComparison:
         """Compare pdf_oxide and PyMuPDF text output on encrypted.pdf."""
         path = _fixture_path("encrypted.pdf")
         import pdf_oxide
+
         # pdf_oxide extraction
         oxide_text = pdf_oxide.extract_text(path)  # hypothetical API
         pymupdf_result = _extract_with_pymupdf(path)
@@ -1493,7 +1538,8 @@ class TestPdfOxideComparison:
         """Compare pdf_oxide and PyMuPDF text output on form.pdf."""
         path = _fixture_path("form.pdf")
         import pdf_oxide
-        oxide_text = pdf_oxide.extract_text(path)
+
+        pdf_oxide.extract_text(path)
         pymupdf_result = _extract_with_pymupdf(path)
         # Both should extract the non-field text
         assert "Kairo Phantom Form Test Document" in pymupdf_result.text
@@ -1503,6 +1549,7 @@ class TestPdfOxideComparison:
         """Compare pdf_oxide and PyMuPDF text output on 500page.pdf."""
         path = _fixture_path("500page.pdf")
         import pdf_oxide
+
         t0 = time.perf_counter()
         oxide_text = pdf_oxide.extract_text(path)
         oxide_elapsed = time.perf_counter() - t0
@@ -1518,8 +1565,12 @@ class TestPdfOxideComparison:
     def test_routing_table_documented(self):
         """Verify the PDF routing table covers all expected PDF types."""
         expected_types = {
-            "born_digital_text", "encrypted", "form_fields",
-            "scanned_low_yield", "cjk_multilingual", "rich_tables_layout",
+            "born_digital_text",
+            "encrypted",
+            "form_fields",
+            "scanned_low_yield",
+            "cjk_multilingual",
+            "rich_tables_layout",
             "large_document",
         }
         assert set(self.ROUTING_TABLE.keys()) == expected_types, (
@@ -1529,9 +1580,9 @@ class TestPdfOxideComparison:
         # All values should reference a known parser
         valid_parsers = {"pymupdf", "pdf_oxide", "olmocr", "surya", "opendataloader"}
         for pdf_type, parser in self.ROUTING_TABLE.items():
-            assert parser in valid_parsers, (
-                f"Routing table entry '{pdf_type}' references unknown parser '{parser}'"
-            )
+            assert (
+                parser in valid_parsers
+            ), f"Routing table entry '{pdf_type}' references unknown parser '{parser}'"
 
     def test_routing_table_pymupdf_for_encrypted(self):
         """Routing table correctly routes encrypted PDFs to PyMuPDF."""
@@ -1563,6 +1614,7 @@ class TestLicenseGuard:
         is inside a try/except block (lazy import pattern).
         """
         import ast
+
         violations = []
         for py_file in self.SIDECAR_DIR.rglob("*.py"):
             try:

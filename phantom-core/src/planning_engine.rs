@@ -7,13 +7,13 @@
 // plan to guarantee that the system never blocks the user.
 //
 
-use std::sync::Arc;
 use serde::{Deserialize, Serialize};
-use tracing::{info, warn, error};
+use std::sync::Arc;
+use tracing::{error, info, warn};
 
 use crate::ai::AiBackend;
-use crate::intent_gate::{IntentAnalysis, IntentType, DocSpecialist};
 use crate::document_context::DocumentContext;
+use crate::intent_gate::{DocSpecialist, IntentAnalysis, IntentType};
 
 // ─── Step Status ──────────────────────────────────────────────────────────────
 
@@ -48,7 +48,7 @@ impl Plan {
     pub fn to_overlay_string(&self) -> String {
         let mut steps_text = Vec::new();
         let mut has_execution_started = false;
-        
+
         for step in &self.steps {
             match &step.status {
                 StepStatus::Pending => {
@@ -68,7 +68,7 @@ impl Plan {
                 }
             }
         }
-        
+
         if has_execution_started {
             steps_text.join(", ")
         } else {
@@ -84,7 +84,10 @@ impl Plan {
             self.doc_specialist.label().to_uppercase()
         );
         for step in &self.steps {
-            s.push_str(&format!("//   [ ] Step {}: {}\n", step.index, step.description));
+            s.push_str(&format!(
+                "//   [ ] Step {}: {}\n",
+                step.index, step.description
+            ));
         }
         s.push_str("// [Press Alt+Ctrl+M to execute this plan, Esc to cancel]");
         s
@@ -133,17 +136,23 @@ Example output:
             doc_ctx.full_text.len()
         );
 
-        // Run the LLM complete call. 
+        // Run the LLM complete call.
         // We set a hard timeout via tokio::time::timeout just in case the LLM blocks or hangs.
         let result = tokio::time::timeout(
-            std::time::Duration::from_millis(3000), 
-            backend.complete(system_prompt, &user_prompt)
-        ).await;
+            std::time::Duration::from_millis(3000),
+            backend.complete(system_prompt, &user_prompt),
+        )
+        .await;
 
         match result {
             Ok(Ok(response)) => {
-                if let Some(plan) = Self::parse_json_plan(&response, &intent.intent_type, &intent.doc_specialist) {
-                    info!("📋 [PlanningEngine] Successfully parsed LLM plan with {} steps", plan.steps.len());
+                if let Some(plan) =
+                    Self::parse_json_plan(&response, &intent.intent_type, &intent.doc_specialist)
+                {
+                    info!(
+                        "📋 [PlanningEngine] Successfully parsed LLM plan with {} steps",
+                        plan.steps.len()
+                    );
                     return plan;
                 }
                 warn!("⚠️  [PlanningEngine] LLM returned invalid JSON. Falling back to heuristic plan.");
@@ -152,7 +161,9 @@ Example output:
                 error!("❌ [PlanningEngine] LLM complete() error: {:?}. Falling back to heuristic plan.", e);
             }
             Err(_) => {
-                warn!("⚠️  [PlanningEngine] LLM planning timed out. Falling back to heuristic plan.");
+                warn!(
+                    "⚠️  [PlanningEngine] LLM planning timed out. Falling back to heuristic plan."
+                );
             }
         }
 
@@ -160,8 +171,13 @@ Example output:
     }
 
     /// Helper to clean codeblocks and parse JSON from the LLM response.
-    fn parse_json_plan(response: &str, intent_type: &IntentType, doc_specialist: &DocSpecialist) -> Option<Plan> {
-        let cleaned = response.trim()
+    fn parse_json_plan(
+        response: &str,
+        intent_type: &IntentType,
+        doc_specialist: &DocSpecialist,
+    ) -> Option<Plan> {
+        let cleaned = response
+            .trim()
             .trim_start_matches("```json")
             .trim_start_matches("```")
             .trim_end_matches("```")
@@ -210,38 +226,123 @@ Example output:
     }
 
     /// Pure Rust heuristic planning. Guaranteed < 1ms execution.
-    pub fn heuristic_plan(intent_type: &IntentType, doc_specialist: &DocSpecialist, prompt: &str) -> Plan {
-        info!("📋 [PlanningEngine] Building heuristic plan for {:?} - {:?}", intent_type, doc_specialist);
+    pub fn heuristic_plan(
+        intent_type: &IntentType,
+        doc_specialist: &DocSpecialist,
+        prompt: &str,
+    ) -> Plan {
+        info!(
+            "📋 [PlanningEngine] Building heuristic plan for {:?} - {:?}",
+            intent_type, doc_specialist
+        );
         let steps = match (intent_type, doc_specialist) {
             (IntentType::Rewrite, DocSpecialist::Word) => vec![
-                PlanStep { index: 1, description: "Extract current paragraph style and tone".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 2, description: "Rewrite content to improve flow and readability".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 3, description: "Align vocabulary and formatting with rest of document".to_string(), status: StepStatus::Pending },
+                PlanStep {
+                    index: 1,
+                    description: "Extract current paragraph style and tone".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 2,
+                    description: "Rewrite content to improve flow and readability".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 3,
+                    description: "Align vocabulary and formatting with rest of document"
+                        .to_string(),
+                    status: StepStatus::Pending,
+                },
             ],
             (IntentType::Summarise, _) => vec![
-                PlanStep { index: 1, description: "Scan active section and extract core themes".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 2, description: "Synthesize key arguments and factual claims".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 3, description: "Format summary into highly readable bullet points".to_string(), status: StepStatus::Pending },
+                PlanStep {
+                    index: 1,
+                    description: "Scan active section and extract core themes".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 2,
+                    description: "Synthesize key arguments and factual claims".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 3,
+                    description: "Format summary into highly readable bullet points".to_string(),
+                    status: StepStatus::Pending,
+                },
             ],
             (IntentType::Generate, DocSpecialist::Excel) => vec![
-                PlanStep { index: 1, description: "Locate active coordinates and active sheet name".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 2, description: "Determine formulas or clean tab-separated data layout".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 3, description: "Generate cell contents and verify mathematical syntax".to_string(), status: StepStatus::Pending },
+                PlanStep {
+                    index: 1,
+                    description: "Locate active coordinates and active sheet name".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 2,
+                    description: "Determine formulas or clean tab-separated data layout"
+                        .to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 3,
+                    description: "Generate cell contents and verify mathematical syntax"
+                        .to_string(),
+                    status: StepStatus::Pending,
+                },
             ],
             (IntentType::Generate, DocSpecialist::PowerPoint) => vec![
-                PlanStep { index: 1, description: "Analyze active slide layout and presentation context".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 2, description: "Draft punchy headlines and concise slide copy".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 3, description: "Structure content to match visual PowerPoint constraints".to_string(), status: StepStatus::Pending },
+                PlanStep {
+                    index: 1,
+                    description: "Analyze active slide layout and presentation context".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 2,
+                    description: "Draft punchy headlines and concise slide copy".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 3,
+                    description: "Structure content to match visual PowerPoint constraints"
+                        .to_string(),
+                    status: StepStatus::Pending,
+                },
             ],
             (IntentType::Explain, _) => vec![
-                PlanStep { index: 1, description: "Parse term or code segment to explain".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 2, description: "Formulate simple explanation with illustrative example".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 3, description: "Present inline annotation block for visual clarity".to_string(), status: StepStatus::Pending },
+                PlanStep {
+                    index: 1,
+                    description: "Parse term or code segment to explain".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 2,
+                    description: "Formulate simple explanation with illustrative example"
+                        .to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 3,
+                    description: "Present inline annotation block for visual clarity".to_string(),
+                    status: StepStatus::Pending,
+                },
             ],
             _ => vec![
-                PlanStep { index: 1, description: "Parse prompt syntax and analyze surrounding context".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 2, description: "Formulate layout updates in a virtual overlay".to_string(), status: StepStatus::Pending },
-                PlanStep { index: 3, description: "Verify compliance guidelines and inject clean results".to_string(), status: StepStatus::Pending },
+                PlanStep {
+                    index: 1,
+                    description: "Parse prompt syntax and analyze surrounding context".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 2,
+                    description: "Formulate layout updates in a virtual overlay".to_string(),
+                    status: StepStatus::Pending,
+                },
+                PlanStep {
+                    index: 3,
+                    description: "Verify compliance guidelines and inject clean results"
+                        .to_string(),
+                    status: StepStatus::Pending,
+                },
             ],
         };
 

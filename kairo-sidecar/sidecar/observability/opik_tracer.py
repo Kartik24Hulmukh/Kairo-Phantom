@@ -19,7 +19,6 @@ import json
 import os
 import time
 import uuid
-import hashlib
 from pathlib import Path
 from typing import Any, Dict, Optional, Callable
 from functools import wraps
@@ -59,14 +58,16 @@ class TraceContext:
         grounded: bool = False,
     ) -> None:
         """Add a span to this trace."""
-        self.spans.append({
-            "name": name,
-            "input": _redact_pii(input_data),
-            "output": _redact_pii(output_data),
-            "latency_ms": latency_ms,
-            "grounded": grounded,
-            "timestamp": time.time(),
-        })
+        self.spans.append(
+            {
+                "name": name,
+                "input": _redact_pii(input_data),
+                "output": _redact_pii(output_data),
+                "latency_ms": latency_ms,
+                "grounded": grounded,
+                "timestamp": time.time(),
+            }
+        )
 
     def set_metadata(self, key: str, value: Any) -> None:
         self.metadata[key] = value
@@ -201,6 +202,7 @@ def track(domain: str, action: str = "domain_master_call") -> Callable:
         def generate_response(self, prompt: str) -> str:
             ...
     """
+
     def decorator(fn: Callable) -> Callable:
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -224,7 +226,9 @@ def track(domain: str, action: str = "domain_master_call") -> Callable:
                         grounded=False,
                     )
                     raise
+
         return wrapper
+
     return decorator
 
 
@@ -267,6 +271,7 @@ def _redact_pii(text: str) -> str:
     if not text:
         return text
     import re
+
     result = text
     for pattern, replacement in _PII_PATTERNS:
         result = re.sub(pattern, replacement, result)
@@ -274,6 +279,7 @@ def _redact_pii(text: str) -> str:
 
 
 # ── Provenance Bridge ──────────────────────────────────────────────────────────
+
 
 def generate_trace_id() -> str:
     """Generate a unique trace ID."""
@@ -293,10 +299,13 @@ def create_provenance_context(
     This string is passed to ReceiptLog.emit_with_trace() as the `context`
     parameter, linking the Python trace to the Rust receipt.
     """
-    return json.dumps({
-        "domain": domain,
-        "action": action,
-        "document": document_path,
-        "trace_id": trace_id,
-        "trace_url": trace_url,
-    }, ensure_ascii=False)
+    return json.dumps(
+        {
+            "domain": domain,
+            "action": action,
+            "document": document_path,
+            "trace_id": trace_id,
+            "trace_url": trace_url,
+        },
+        ensure_ascii=False,
+    )

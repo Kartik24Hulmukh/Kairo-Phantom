@@ -31,14 +31,12 @@ Rollback strategy
 from __future__ import annotations
 
 import asyncio
-import io
 import os
-import shutil
 import tempfile
 import time
 import logging
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Optional, List
+from typing import Any, AsyncIterator, List, Optional
 
 log = logging.getLogger("kairo-sidecar.humanized_injector")
 
@@ -47,12 +45,14 @@ log = logging.getLogger("kairo-sidecar.humanized_injector")
 # InjectionSession — per-call snapshot for Ctrl+Z rollback
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class InjectionSession:
     """
     Tracks a single injection run. Holds a byte snapshot of the original file
     so the entire injection can be reversed with a single call to restore_snapshot().
     """
+
     session_id: str
     file_path: str
     snapshot_bytes: bytes = field(default_factory=bytes, repr=False)
@@ -116,6 +116,7 @@ class InjectionSession:
 # StreamingOllamaClient — thin async wrapper around ollama.chat(stream=True)
 # ---------------------------------------------------------------------------
 
+
 class StreamingOllamaClient:
     """
     Wraps the ollama Python SDK streaming API.
@@ -175,9 +176,11 @@ class StreamingOllamaClient:
                             continue
                         except Exception as pull_exc:
                             log.error(f"Failed to pull model {self.model}: {pull_exc}")
-                    
+
                     if attempt < max_retries - 1:
-                        log.warning(f"Ollama stream attempt {attempt+1} failed ({exc}). Retrying in 1s...")
+                        log.warning(
+                            f"Ollama stream attempt {attempt+1} failed ({exc}). Retrying in 1s..."
+                        )
                         time.sleep(1.0)
                     else:
                         loop.call_soon_threadsafe(chunk_queue.put_nowait, None)
@@ -213,6 +216,7 @@ class StreamingOllamaClient:
 # HumanizedInjector — primary injection controller
 # ---------------------------------------------------------------------------
 
+
 class HumanizedInjector:
     """
     Streaming injection controller.
@@ -244,6 +248,7 @@ class HumanizedInjector:
         Must be called before inject() so that rollback() has a snapshot to restore.
         """
         import uuid
+
         session_id = str(uuid.uuid4())[:8]
         session = InjectionSession(session_id=session_id, file_path=file_path)
 
@@ -317,6 +322,7 @@ class HumanizedInjector:
         """Show '⚡ Kairo writing...' near cursor using a Win32 tooltip."""
         try:
             import ctypes
+
             # Use a notification balloon/beep as simplest cross-app overlay indicator
             ctypes.windll.user32.MessageBeep(0)  # Very subtle audio cue
             log.info("[HumanizedInjector] ⚡ Kairo writing... (indicator shown)")
@@ -352,9 +358,11 @@ class HumanizedInjector:
 
         # Convert simple list/iterable to async generator if needed
         if not hasattr(token_generator, "__anext__") and hasattr(token_generator, "__iter__"):
+
             async def _async_gen():
                 for t in token_generator:
                     yield t
+
             token_gen = _async_gen()
         else:
             token_gen = token_generator
@@ -428,7 +436,9 @@ class HumanizedInjector:
         # File-based rollback
         success = session.restore_snapshot()
         if success:
-            log.info(f"HumanizedInjector: file-based rollback succeeded for session {session.session_id}")
+            log.info(
+                f"HumanizedInjector: file-based rollback succeeded for session {session.session_id}"
+            )
         return success
 
     def _try_com_undo(self, file_path: str) -> bool:
@@ -438,6 +448,7 @@ class HumanizedInjector:
         """
         try:
             import win32com.client
+
             word_app = win32com.client.GetActiveObject("Word.Application")
             for doc in word_app.Documents:
                 if doc.FullName.lower() == os.path.abspath(file_path).lower():

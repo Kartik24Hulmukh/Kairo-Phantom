@@ -11,12 +11,12 @@ impl PptAgent {
     /// Legacy sync method to preserve the original signature for backward compatibility.
     pub fn generate_presentation(prompt: &str) -> Result<String, String> {
         info!("Delegating complex PPT generation to DeepPresenter-9B subprocess...");
-        
+
         // Simulating the subprocess call with structured JSON slide specs
         let _output = std::process::Command::new("deeppresenter")
             .args(["--prompt", prompt, "--export", "native-pptx"])
             .output();
-        
+
         info!("DeepPresenter-9B generated presentation successfully.");
         Ok("Presentation generated via DeepPresenter".to_string())
     }
@@ -31,7 +31,7 @@ impl PptAgent {
         outline: Option<&Value>,
     ) -> Result<sidecar_client::DeepPresenterResult, String> {
         info!("PptAgent: delegating PPT generation to DeepPresenter-9B backend...");
-        
+
         let result = sidecar_client::deeppresenter_generate(
             topic,
             slide_count,
@@ -41,8 +41,8 @@ impl PptAgent {
             outline,
         )
         .await
-        .map_err(|e| format!("DeepPresenter generation error: {}", e))?;
-        
+        .map_err(|e| format!("DeepPresenter generation error: {e}"))?;
+
         info!("PptAgent: presentation generated via DeepPresenter sidecar.");
         Ok(result)
     }
@@ -53,11 +53,11 @@ impl PptAgent {
         slide_index: Option<usize>,
     ) -> Result<sidecar_client::PptxContextResponse, String> {
         info!("PptAgent: capturing active presentation context from sidecar...");
-        
+
         let result = sidecar_client::pptx_context_capture(presentation_id, slide_index)
             .await
-            .map_err(|e| format!("PPTX context capture error: {}", e))?;
-            
+            .map_err(|e| format!("PPTX context capture error: {e}"))?;
+
         Ok(result)
     }
 
@@ -69,17 +69,12 @@ impl PptAgent {
         style: Option<&str>,
     ) -> Result<Value, String> {
         info!("PptAgent: generating slide illustration/image via sidecar...");
-        
-        let result = sidecar_client::slide_image_generate(
-            slide_content,
-            slide_contents,
-            backend,
-            style,
-        )
-        .await
-        .map_err(|e| format!("Slide image generation error: {}", e))?;
-        
+
+        let result =
+            sidecar_client::slide_image_generate(slide_content, slide_contents, backend, style)
+                .await
+                .map_err(|e| format!("Slide image generation error: {e}"))?;
+
         Ok(result)
     }
 }
-

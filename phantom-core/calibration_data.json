@@ -62,6 +62,6 @@
     "slope": 0.88
   },
   "expected_calibration_error": 0.13856801390647888,
-  "generated_at": 1782304079,
+  "generated_at": 1782546713,
   "total_samples": 100
 }

@@ -26,6 +26,7 @@ log = logging.getLogger("kairo-sidecar.mem0_bridge")
 # ── Detect mem0 availability ──
 try:
     from mem0 import Memory as _Mem0Memory
+
     HAS_MEM0 = True
 except ImportError:
     HAS_MEM0 = False
@@ -34,6 +35,7 @@ except ImportError:
 
 class InjectionDetected(Exception):
     """Raised when PromptShield detects an injection attempt in memory text or query."""
+
     pass
 
 
@@ -61,9 +63,7 @@ class Mem0Bridge:
 
     def __init__(self, backend: str = "sqlite", db_path: Optional[str] = None):
         if not HAS_MEM0:
-            raise RuntimeError(
-                "mem0ai not installed. pip install mem0ai"
-            )
+            raise RuntimeError("mem0ai not installed. pip install mem0ai")
 
         self.prompt_shield = PromptShield()
         self.pii_guard = PiiGuard()
@@ -134,8 +134,7 @@ class Mem0Bridge:
                 sanitized[key] = _sanitize(self.pii_guard.redact(value))
             elif isinstance(value, list):
                 sanitized[key] = [
-                    _sanitize(self.pii_guard.redact(v)) if isinstance(v, str) else v
-                    for v in value
+                    _sanitize(self.pii_guard.redact(v)) if isinstance(v, str) else v for v in value
                 ]
             else:
                 sanitized[key] = value
@@ -179,8 +178,9 @@ class Mem0Bridge:
         if isinstance(results, list):
             return [self._sanitize_result(r) if isinstance(r, dict) else r for r in results]
         elif isinstance(results, dict) and "results" in results:
-            return [self._sanitize_result(r) if isinstance(r, dict) else r
-                    for r in results["results"]]
+            return [
+                self._sanitize_result(r) if isinstance(r, dict) else r for r in results["results"]
+            ]
         else:
             return []
 
@@ -196,8 +196,9 @@ class Mem0Bridge:
         if isinstance(results, list):
             return [self._sanitize_result(r) if isinstance(r, dict) else r for r in results]
         elif isinstance(results, dict) and "results" in results:
-            return [self._sanitize_result(r) if isinstance(r, dict) else r
-                    for r in results["results"]]
+            return [
+                self._sanitize_result(r) if isinstance(r, dict) else r for r in results["results"]
+            ]
         return []
 
     def import_memories(self, memories: List[Dict], user_id: str = "local") -> int:

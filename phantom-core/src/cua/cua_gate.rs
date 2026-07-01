@@ -18,9 +18,8 @@ use super::config::CuaConfig;
 use once_cell::sync::Lazy;
 use tokio::sync::Mutex;
 
-pub static GLOBAL_RATE_LIMITER: Lazy<Mutex<RateLimiter>> = Lazy::new(|| {
-    Mutex::new(RateLimiter::default_cua())
-});
+pub static GLOBAL_RATE_LIMITER: Lazy<Mutex<RateLimiter>> =
+    Lazy::new(|| Mutex::new(RateLimiter::default_cua()));
 
 /// Windows and applications that CUA is NEVER allowed to interact with.
 /// Case-insensitive partial matching against window title.
@@ -203,21 +202,35 @@ pub enum CuaGateError {
 impl std::fmt::Display for CuaGateError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CuaGateError::Disabled => write!(f, "CUA is disabled (set cua.enabled = true in config)"),
+            CuaGateError::Disabled => {
+                write!(f, "CUA is disabled (set cua.enabled = true in config)")
+            }
             CuaGateError::ForbiddenWindow(title) => {
-                write!(f, "CUA blocked — '{}' is a forbidden window (security policy)", title)
+                write!(
+                    f,
+                    "CUA blocked — '{title}' is a forbidden window (security policy)",
+                )
             }
             CuaGateError::OutOfBounds { x, y } => {
-                write!(f, "CUA blocked — coordinates ({}, {}) are outside the target window", x, y)
+                write!(
+                    f,
+                    "CUA blocked — coordinates ({x}, {y}) are outside the target window",
+                )
             }
             CuaGateError::RateLimited { current, max } => {
-                write!(f, "CUA rate limit reached ({}/{} actions/min) — wait and try again", current, max)
+                write!(
+                    f,
+                    "CUA rate limit reached ({current}/{max} actions/min) — wait and try again",
+                )
             }
             CuaGateError::ScreenshotFailed(msg) => {
-                write!(f, "CUA gate: before-screenshot failed: {}", msg)
+                write!(f, "CUA gate: before-screenshot failed: {msg}")
             }
             CuaGateError::VlmUnavailable => {
-                write!(f, "VLM is unavailable — visual actions are blocked (keyboard-only mode)")
+                write!(
+                    f,
+                    "VLM is unavailable — visual actions are blocked (keyboard-only mode)"
+                )
             }
         }
     }
@@ -259,7 +272,10 @@ pub async fn validate_action(
     if let Some(proc_name) = get_process_name(ctx.hwnd) {
         let proc_lower = proc_name.to_lowercase();
         for blocked in BLOCKED_EXECUTABLES {
-            if proc_lower == *blocked || proc_lower.strip_suffix(".exe") == Some(blocked.strip_suffix(".exe").unwrap_or(blocked)) {
+            if proc_lower == *blocked
+                || proc_lower.strip_suffix(".exe")
+                    == Some(blocked.strip_suffix(".exe").unwrap_or(blocked))
+            {
                 return Err(CuaGateError::ForbiddenWindow(ctx.window_title.clone()));
             }
         }
@@ -325,7 +341,7 @@ pub fn is_blocked_window(title: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cua::{CuaAction, CuaContext, MouseButton, WindowRect, TargetingSource};
+    use crate::cua::{CuaAction, CuaContext, MouseButton, TargetingSource, WindowRect};
 
     fn make_ctx(title: &str) -> CuaContext {
         CuaContext {
@@ -347,7 +363,9 @@ mod tests {
     async fn test_gate_blocks_when_disabled() {
         let mut rl = RateLimiter::default_cua();
         let ctx = make_ctx("Microsoft Word");
-        let action = CuaAction::KeyboardType { text: "hello".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "hello".to_string(),
+        };
         let result = validate_action(&action, &ctx, false, &mut rl).await;
         assert_eq!(result, Err(CuaGateError::Disabled));
     }
@@ -356,7 +374,9 @@ mod tests {
     async fn test_gate_blocks_forbidden_window() {
         let mut rl = RateLimiter::default_cua();
         let ctx = make_ctx("Task Manager");
-        let action = CuaAction::KeyboardType { text: "hello".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "hello".to_string(),
+        };
         let result = validate_action(&action, &ctx, true, &mut rl).await;
         assert!(matches!(result, Err(CuaGateError::ForbiddenWindow(_))));
     }
@@ -365,7 +385,9 @@ mod tests {
     async fn test_gate_blocks_forbidden_window_password_manager() {
         let mut rl = RateLimiter::default_cua();
         let ctx = make_ctx("1Password - Unlock");
-        let action = CuaAction::KeyboardType { text: "mypassword".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "mypassword".to_string(),
+        };
         let result = validate_action(&action, &ctx, true, &mut rl).await;
         assert!(matches!(result, Err(CuaGateError::ForbiddenWindow(_))));
     }
@@ -436,7 +458,9 @@ mod tests {
     async fn test_gate_rate_limits() {
         let mut rl = RateLimiter::default_cua();
         let ctx = make_ctx("Microsoft Word");
-        let action = CuaAction::KeyboardType { text: "hello".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "hello".to_string(),
+        };
 
         // 10 should pass
         for _ in 0..10 {
@@ -459,14 +483,24 @@ mod tests {
         let ctx = CuaContext {
             hwnd: 0,
             window_title: "Microsoft Word".to_string(),
-            window_rect: WindowRect { left: 0, top: 0, right: 0, bottom: 0 },
+            window_rect: WindowRect {
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+            },
             dpi_scale: 1.0,
             app_name: "Word".to_string(),
             before_screenshot_path: None,
         };
-        let action = CuaAction::KeyboardType { text: "hello".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "hello".to_string(),
+        };
         let result = validate_action(&action, &ctx, true, &mut rl).await;
-        assert!(result.is_ok(), "Keyboard actions should bypass bounds check");
+        assert!(
+            result.is_ok(),
+            "Keyboard actions should bypass bounds check"
+        );
     }
 
     #[tokio::test]
@@ -474,7 +508,9 @@ mod tests {
         // Test that rate limiter resets — this uses a very short window for testing
         let mut rl = RateLimiter::new(2, 1); // 2 per second
         let ctx = make_ctx("Microsoft Word");
-        let action = CuaAction::KeyboardType { text: "x".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "x".to_string(),
+        };
 
         // Use 2 — should pass
         assert!(validate_action(&action, &ctx, true, &mut rl).await.is_ok());
@@ -494,42 +530,72 @@ mod tests {
     async fn test_rate_limiter_no_burst_at_boundary() {
         let mut rl = RateLimiter::new(2, 1); // max 2 per 1s sliding window
         let ctx = make_ctx("Microsoft Word");
-        let action = CuaAction::KeyboardType { text: "x".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "x".to_string(),
+        };
 
         // Fire max at T≈0
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_ok(), "1st should pass");
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_ok(), "2nd should pass");
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_ok(),
+            "1st should pass"
+        );
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_ok(),
+            "2nd should pass"
+        );
         // Immediately after max: 3rd must fail
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_err(), "3rd must be blocked");
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_err(),
+            "3rd must be blocked"
+        );
 
         // Wait just over the window boundary (1.1s) but NOT long enough for the first
         // timestamp to be fully 1s old (the sleep started after T≈0 actions).
         std::thread::sleep(std::time::Duration::from_millis(600));
 
         // At T≈0.6s: the 2 timestamps from T≈0 are still within the 1s window.
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_err(),
-            "Sliding window: must still be blocked at T≈0.6s (timestamps from T≈0 not yet expired)");
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_err(),
+            "Sliding window: must still be blocked at T≈0.6s (timestamps from T≈0 not yet expired)"
+        );
 
         // Wait for all timestamps to expire (total: ~1.5s since T=0)
         std::thread::sleep(std::time::Duration::from_millis(1000));
 
         // Now the first 2 timestamps have aged out: should allow exactly 2 again
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_ok(), "Should pass after full expiry (1)");
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_ok(), "Should pass after full expiry (2)");
-        assert!(validate_action(&action, &ctx, true, &mut rl).await.is_err(), "Must block on 3rd again");
-     }
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_ok(),
+            "Should pass after full expiry (1)"
+        );
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_ok(),
+            "Should pass after full expiry (2)"
+        );
+        assert!(
+            validate_action(&action, &ctx, true, &mut rl).await.is_err(),
+            "Must block on 3rd again"
+        );
+    }
 
     #[tokio::test]
     async fn test_gate_blocks_forbidden_executable() {
         let mut rl = RateLimiter::default_cua();
         let mut ctx = make_ctx("Some Safe Title");
         ctx.hwnd = 9999; // Mocked to taskmgr.exe
-        let action = CuaAction::KeyboardType { text: "hello".to_string() };
+        let action = CuaAction::KeyboardType {
+            text: "hello".to_string(),
+        };
         let result = validate_action(&action, &ctx, true, &mut rl).await;
-        assert!(matches!(result, Err(CuaGateError::ForbiddenWindow(_))), "Executable taskmgr.exe should be blocked");
+        assert!(
+            matches!(result, Err(CuaGateError::ForbiddenWindow(_))),
+            "Executable taskmgr.exe should be blocked"
+        );
 
         ctx.hwnd = 9998; // Mocked to keepass.exe
         let result2 = validate_action(&action, &ctx, true, &mut rl).await;
-        assert!(matches!(result2, Err(CuaGateError::ForbiddenWindow(_))), "Executable keepass.exe should be blocked");
+        assert!(
+            matches!(result2, Err(CuaGateError::ForbiddenWindow(_))),
+            "Executable keepass.exe should be blocked"
+        );
     }
 }

@@ -7,7 +7,9 @@ pub struct StartupTimer {
 
 impl StartupTimer {
     pub fn new() -> Self {
-        Self { start: std::time::Instant::now() }
+        Self {
+            start: std::time::Instant::now(),
+        }
     }
 
     /// Log a named checkpoint with elapsed milliseconds since construction.
@@ -26,5 +28,7 @@ impl StartupTimer {
 }
 
 impl Default for StartupTimer {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

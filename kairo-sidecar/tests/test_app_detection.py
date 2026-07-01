@@ -1,5 +1,4 @@
 import sys
-import pytest
 from pathlib import Path
 
 # Add sidecar package to path
@@ -37,7 +36,6 @@ TEST_APP_CASES = [
     ("acrobat", "pdf"),
     ("outlook.exe", "word"),  # Outlook mail uses Word-like editor
     ("outlook", "word"),
-    
     # Let's add variations / extensions / unrecognized ones for robustness
     ("WINWORD2.EXE", "word"),
     ("excel_custom.exe", "excel"),
@@ -47,7 +45,6 @@ TEST_APP_CASES = [
     ("code_insiders.exe", "code"),
     ("notepad_temp.exe", "notes"),
     ("powershell_ise.exe", "terminal"),
-    
     # Unknowns -> should map to general
     ("unknown_proc.exe", "general"),
     ("spotify.exe", "general"),
@@ -62,21 +59,24 @@ TEST_APP_CASES = [
     ("cmd2.exe", "terminal"),
     ("powershell7.exe", "terminal"),
     ("notepad3.exe", "notes"),
-    ("edge.exe", "browser")
+    ("edge.exe", "browser"),
 ]
+
 
 def test_app_detection_accuracy():
     assert len(TEST_APP_CASES) == 50
-    
+
     correct_count = 0
-    
+
     for proc_name, expected_domain in TEST_APP_CASES:
         label = _label_for_process(proc_name)
         domain = _domain_for_label(label)
         if domain == expected_domain:
             correct_count += 1
-            
+
     accuracy = correct_count / len(TEST_APP_CASES)
-    
+
     # Assert 95%+ accuracy
-    assert accuracy >= 0.95, f"App detection accuracy was only {accuracy * 100:.1f}%, expected >= 95%"
+    assert (
+        accuracy >= 0.95
+    ), f"App detection accuracy was only {accuracy * 100:.1f}%, expected >= 95%"

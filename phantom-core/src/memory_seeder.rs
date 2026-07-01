@@ -2,26 +2,31 @@
 //! `kairo seed <folder>` — Scans existing documents to pre-populate MemMachine.
 //! Solves the cold-start problem by extracting style patterns from a folder of docs.
 
+use crate::memory::MemMachine;
 use anyhow::Result;
 use std::path::{Path, PathBuf};
-use crate::memory::MemMachine;
 
 pub struct MemorySeeder;
 
 impl MemorySeeder {
     /// Seed MemMachine from all documents in a folder. Returns count of seeded docs.
     pub async fn seed_from_folder(folder: &Path, mem: &MemMachine) -> Result<usize> {
-        let supported_exts = ["docx", "doc", "pptx", "ppt", "xlsx", "xls", "txt", "md", "pdf"];
+        let supported_exts = [
+            "docx", "doc", "pptx", "ppt", "xlsx", "xls", "txt", "md", "pdf",
+        ];
         let mut seeded = 0;
 
         let entries = walkdir_simple(folder);
         for path in entries {
-            let ext = path.extension()
+            let ext = path
+                .extension()
                 .and_then(|e| e.to_str())
                 .unwrap_or("")
                 .to_lowercase();
 
-            if !supported_exts.contains(&ext.as_str()) { continue; }
+            if !supported_exts.contains(&ext.as_str()) {
+                continue;
+            }
 
             // Read text (best-effort — skip unreadable files)
             let text = match std::fs::read_to_string(&path) {
@@ -30,23 +35,35 @@ impl MemorySeeder {
             };
 
             let style = extract_style_signals(&text);
-            let app_ctx = path.extension().unwrap_or_default().to_string_lossy().to_uppercase().to_string();
+            let app_ctx = path
+                .extension()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_uppercase()
+                .to_string();
 
             // Store inferred preferences as MemMachine episodes
             for (pref_key, pref_val) in &style {
-                let content = format!("Style preference from existing docs: {} = {}", pref_key, pref_val);
-                let _ = mem.remember(
-                    &content,
-                    Some(&text[..text.len().min(500)]),
-                    &app_ctx,
-                    Some(pref_key.as_str()),
-                    true, // is_ground_truth — seeded from real user docs
-                    vec!["seeded", "style-preference"],
-                ).await;
+                let content =
+                    format!("Style preference from existing docs: {pref_key} = {pref_val}");
+                let _ = mem
+                    .remember(
+                        &content,
+                        Some(&text[..text.len().min(500)]),
+                        &app_ctx,
+                        Some(pref_key.as_str()),
+                        true, // is_ground_truth — seeded from real user docs
+                        vec!["seeded", "style-preference"],
+                    )
+                    .await;
             }
 
             seeded += 1;
-            tracing::info!("🌱 Seeded: {} ({} style signals)", path.display(), style.len());
+            tracing::info!(
+                "🌱 Seeded: {} ({} style signals)",
+                path.display(),
+                style.len()
+            );
         }
 
         tracing::info!("✅ Memory seeding complete: {} documents processed", seeded);
@@ -60,33 +77,66 @@ fn extract_style_signals(text: &str) -> Vec<(String, String)> {
     let mut signals = Vec::new();
     let words: Vec<&str> = text.split_whitespace().collect();
     let word_count = words.len();
-    if word_count < 10 { return signals; }
+    if word_count < 10 {
+        return signals;
+    }
 
     // 1. Avg sentence length → concise vs detailed
-    let sentences = text.chars().filter(|&c| c == '.' || c == '!' || c == '?').count().max(1);
+    let sentences = text
+        .chars()
+        .filter(|&c| c == '.' || c == '!' || c == '?')
+        .count()
+        .max(1);
     let avg_sentence_len = word_count / sentences;
-    let length_pref = if avg_sentence_len < 12 { "concise" }
-        else if avg_sentence_len < 20 { "moderate" }
-        else { "detailed" };
+    let length_pref = if avg_sentence_len < 12 {
+        "concise"
+    } else if avg_sentence_len < 20 {
+        "moderate"
+    } else {
+        "detailed"
+    };
     signals.push(("sentence_style".to_string(), length_pref.to_string()));
 
     // 2. Bullet ratio → format preference
-    let bullet_lines = text.lines().filter(|l| {
-        let t = l.trim();
-        t.starts_with("• ") || t.starts_with("- ") || t.starts_with("* ") || t.starts_with("· ")
-    }).count();
+    let bullet_lines = text
+        .lines()
+        .filter(|l| {
+            let t = l.trim();
+            t.starts_with("• ") || t.starts_with("- ") || t.starts_with("* ") || t.starts_with("· ")
+        })
+        .count();
     let total_lines = text.lines().count().max(1);
     let bullet_ratio = bullet_lines as f32 / total_lines as f32;
-    signals.push(("format_preference".to_string(), if bullet_ratio > 0.25 { "bullet_points" } else { "prose" }.to_string()));
+    signals.push((
+        "format_preference".to_string(),
+        if bullet_ratio > 0.25 {
+            "bullet_points"
+        } else {
+            "prose"
+        }
+        .to_string(),
+    ));
 
     // 3. Contractions → formal vs casual
-    let contractions = ["don't", "can't", "won't", "it's", "i'm", "we're", "they're", "isn't", "aren't", "i'll", "you'll"];
+    let contractions = [
+        "don't", "can't", "won't", "it's", "i'm", "we're", "they're", "isn't", "aren't", "i'll",
+        "you'll",
+    ];
     let has_contractions = contractions.iter().any(|c| text.to_lowercase().contains(c));
-    signals.push(("tone".to_string(), if has_contractions { "casual" } else { "formal" }.to_string()));
+    signals.push((
+        "tone".to_string(),
+        if has_contractions { "casual" } else { "formal" }.to_string(),
+    ));
 
     // 4. Avg word length → vocabulary level
     let avg_word_len = words.iter().map(|w| w.len()).sum::<usize>() / word_count;
-    let vocab_level = if avg_word_len < 5 { "simple" } else if avg_word_len < 7 { "moderate" } else { "advanced" };
+    let vocab_level = if avg_word_len < 5 {
+        "simple"
+    } else if avg_word_len < 7 {
+        "moderate"
+    } else {
+        "advanced"
+    };
     signals.push(("vocabulary".to_string(), vocab_level.to_string()));
 
     // 5. Heading count → structured vs flowing
@@ -118,21 +168,19 @@ fn walkdir_simple(folder: &Path) -> Vec<PathBuf> {
 pub async fn run_seed_command(folder_str: &str) -> Result<()> {
     let folder = PathBuf::from(folder_str);
     if !folder.exists() {
-        anyhow::bail!("Folder not found: {}", folder_str);
+        anyhow::bail!("Folder not found: {folder_str}");
     }
 
     println!("🌱 Kairo Memory Seeding");
     println!("   Scanning: {}", folder.display());
     println!("   This extracts style patterns to pre-populate MemMachine.\n");
 
-    let mem_vault = dirs::home_dir()
-        .unwrap_or_default()
-        .join(".kairo-phantom");
+    let mem_vault = dirs::home_dir().unwrap_or_default().join(".kairo-phantom");
 
     let mem = MemMachine::new(mem_vault)?;
     let count = MemorySeeder::seed_from_folder(&folder, &mem).await?;
 
-    println!("✅ Done! Seeded {} documents into MemMachine.", count);
+    println!("✅ Done! Seeded {count} documents into MemMachine.");
     println!("   Kairo now understands your writing style from day one.");
     Ok(())
 }
@@ -156,8 +204,11 @@ mod tests {
     async fn test_seed_text_file() {
         let dir = tempdir().unwrap();
         // Create a markdown file with bullet points
-        std::fs::write(dir.path().join("sample.md"),
-            "# My Doc\n\n• Point one\n• Point two\n• Point three\nThis is formal prose.").unwrap();
+        std::fs::write(
+            dir.path().join("sample.md"),
+            "# My Doc\n\n• Point one\n• Point two\n• Point three\nThis is formal prose.",
+        )
+        .unwrap();
         let mem_dir = tempdir().unwrap();
         let mem = MemMachine::new(mem_dir.path().to_path_buf()).unwrap();
         let result = MemorySeeder::seed_from_folder(dir.path(), &mem).await;

@@ -11,62 +11,59 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(clippy::empty_line_after_doc_comments)]
-#![allow(clippy::manual_is_multiple_of)]
 
 pub mod ai;
 pub mod api;
 pub mod config;
+pub mod context;
 pub mod crdt;
 pub mod hotkey;
 pub mod injector;
-pub mod uia;
-pub mod context;
 pub mod integration;
 pub mod swarm;
+pub mod uia;
 
-pub mod platform;
-pub mod document_context;
-pub mod plugin;
-pub mod mcp_client;
-pub mod mcp_bridge;
-pub mod image_pipeline;
-pub mod ghost_session;
-pub mod intent_gate;
-pub mod planning_engine;
-pub mod governance;
-pub mod yjs_peer;
-pub mod identity;
-pub mod extractors;
-pub mod perf_engine;
-pub mod sentinel;
-pub mod persona;
-pub mod memory;
-pub mod guardrails;
-pub mod context7;
+pub mod background_worker;
+pub mod collaborative;
 pub mod command_protocol;
+pub mod context7;
+pub mod context_optimizer;
+pub mod document_context;
+pub mod embedding; // Phase 0.4: sqlite-vec + fastembed semantic search
+pub mod extractors;
+pub mod ghost_session;
+pub mod governance;
+pub mod guardrails;
+pub mod identity;
+pub mod image_pipeline;
+pub mod intent_gate;
+pub mod kami_export;
+pub mod mcp_bridge;
+pub mod mcp_client;
+pub mod memory;
+pub mod memory_store;
+pub mod memory_vault;
+pub mod pdf_context; // Domain 4: PDF SmartContextCapture structs
+pub mod perf_engine;
+pub mod persona;
+pub mod pii_guard;
+pub mod pipeline;
+pub mod planning_engine;
+pub mod platform;
+pub mod plugin;
+pub mod pro;
 /// Phase 1 Hardening: strict // protocol gate — returns None for non-command text.
 pub mod prompt_parser;
-pub mod pii_guard;
+pub mod quality_gate;
 pub mod response_validator;
 pub mod retry_policy;
-pub mod memory_store;
-pub mod embedding;              // Phase 0.4: sqlite-vec + fastembed semantic search
-pub mod quality_gate;
-pub mod writing_pipeline;
-pub mod pipeline;
-pub mod verify;
-pub mod kami_export;
-pub mod pdf_context;             // Domain 4: PDF SmartContextCapture structs
-pub mod context_optimizer;
-pub mod background_worker;
-pub mod skills;
+pub mod sentinel;
 pub mod skill_factory;
-pub mod memory_vault;
+pub mod skills;
 pub mod tolaria_bridge;
-pub mod collaborative;
-pub mod pro;
-
-
+pub mod verify;
+pub mod writing_pipeline;
+pub mod yjs_peer;
 
 /// Message bus between all threads
 #[derive(Debug, Clone)]
@@ -101,39 +98,39 @@ pub mod mcp_auth;
 pub mod waza_sdk;
 
 // ── 100x Roadmap Modules ──────────────────────────────────────────────────────
-pub mod ollama_bootstrap;       // P0-A2: Ollama auto-detection & background setup
-pub mod toast_notification;     // P0-B2: PAHF toast overlay (replaces doc injection)
-pub mod startup_timer;          // P0-A1: Startup checkpoint profiler
-pub mod memory_seeder;          // P1-A2: Seed MemMachine from existing doc folder
-pub mod kpx_export;             // P1-A4: .kpx portable memory export/import
-pub mod health_check;
-pub mod deep_presenter;
-pub mod waza_registry;
 pub mod cross_doc_consistency;
-pub mod lan_sync;
+pub mod deep_presenter;
 pub mod excel_formula;
+pub mod health_check;
+pub mod kpx_export; // P1-A4: .kpx portable memory export/import
+pub mod lan_sync;
+pub mod memory_seeder; // P1-A2: Seed MemMachine from existing doc folder
+pub mod ollama_bootstrap; // P0-A2: Ollama auto-detection & background setup
 pub mod section_summarizer;
+pub mod startup_timer; // P0-A1: Startup checkpoint profiler
+pub mod toast_notification; // P0-B2: PAHF toast overlay (replaces doc injection)
+pub mod waza_registry;
 
 // ── Phase 1: Python Sidecar + Document-Native Pipeline ────────────────────────
-pub mod sidecar_client;         // TCP client → Python sidecar (DOCX/XLSX/PPTX/PDF I/O)
-pub mod doc_prompt_builder;     // Format-specific LLM prompt builder + JSON op parser
+pub mod doc_prompt_builder;
+pub mod sidecar_client; // TCP client → Python sidecar (DOCX/XLSX/PPTX/PDF I/O) // Format-specific LLM prompt builder + JSON op parser
 
 // ── Phase 4A: Markdown Section-Aware Writer ───────────────────────────────────
-pub mod md_writer;              // pulldown-cmark AST-aware markdown insertion
 pub mod code_context;
 pub mod code_injector;
+pub mod md_writer; // pulldown-cmark AST-aware markdown insertion
 
 // ── Domain 8: Multimodal Input ──────────────────────────────────────────────
-pub mod voice_engine;
 pub mod screen_context;
 pub mod tts_engine;
+pub mod voice_engine;
 pub mod wake_word;
 
 // ── Domain 9: Enterprise Governance & Compliance ────────────────────────────
 pub mod prompt_injection_firewall; // 50-detector 6-layer prompt injection firewall
 
 // ── FarScry: Foreground App Watcher ─────────────────────────────────────────
-pub mod app_watcher;               // Win32 foreground window polling → AppChangedEvent
+pub mod app_watcher; // Win32 foreground window polling → AppChangedEvent
 
 // ── CUA: Computer Use Agent ──────────────────────────────────────────────────
 // UIA-first GUI automation (Tier 3 — only when File API + UIA SetValue + MCP all fail)
@@ -141,3 +138,5 @@ pub mod app_watcher;               // Win32 foreground window polling → AppCha
 // Implementation modules (cua_gate, cua_executor, cua_planner, config) are gated
 // behind #[cfg(feature = "cua")] — default builds have zero CUA code.
 pub mod cua;
+
+pub mod monitor;

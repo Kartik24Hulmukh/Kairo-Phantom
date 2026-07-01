@@ -3,6 +3,7 @@ from pathlib import Path
 
 log = logging.getLogger("kairo-sidecar.pptx_parser")
 
+
 def parse_pptx(file_path: str) -> dict:
     """
     Read PowerPoint and return slide/shape inventory.
@@ -24,13 +25,15 @@ def parse_pptx(file_path: str) -> dict:
             for shape in slide.shapes:
                 if shape.has_text_frame:
                     text = "\n".join(p.text for p in shape.text_frame.paragraphs)
-                    shapes.append({
-                        "id": shape.shape_id,
-                        "name": shape.name,
-                        "text": text,
-                        "left": shape.left,
-                        "top": shape.top,
-                    })
+                    shapes.append(
+                        {
+                            "id": shape.shape_id,
+                            "name": shape.name,
+                            "text": text,
+                            "left": shape.left,
+                            "top": shape.top,
+                        }
+                    )
             # Slide title
             title = slide.shapes.title.text if slide.shapes.title else f"Slide {i+1}"
             slides.append({"index": i, "title": title, "shapes": shapes})

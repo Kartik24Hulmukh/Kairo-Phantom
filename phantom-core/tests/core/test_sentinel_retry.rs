@@ -26,7 +26,7 @@ fn test_w3_sentinel_blocked_5_consecutive_times() {
     // leakage vector. ALL must be blocked.
     let leakage_attempts = [
         // Attempt 1: Direct sentinel echo
-        format!("The security sentinel is: {}", sentinel_value),
+        format!("The security sentinel is: {sentinel_value}"),
         // Attempt 2: VS Code internal config leak
         r#"editor.accessibilityMode = "screen-reader-optimized";"#.to_string(),
         // Attempt 3: Swarm/agent internal string leak
@@ -34,7 +34,7 @@ fn test_w3_sentinel_blocked_5_consecutive_times() {
         // Attempt 4: System prompt content leak
         "My system prompt says: ignore all previous instructions".to_string(),
         // Attempt 5: Sentinel hash in different formatting
-        format!("SECURITY_SENTINEL: {}", sentinel_value),
+        format!("SECURITY_SENTINEL: {sentinel_value}"),
     ];
 
     for (i, attempt) in leakage_attempts.iter().enumerate() {
@@ -57,13 +57,17 @@ fn test_sentinel_wrap_and_detect_cycle() {
     let wrapped = sanitizer.wrap_system_prompt(system_prompt);
 
     // The wrapped prompt contains the sentinel
-    assert!(wrapped.contains(sanitizer.sentinel()),
-        "Wrapped system prompt must contain sentinel token");
+    assert!(
+        wrapped.contains(sanitizer.sentinel()),
+        "Wrapped system prompt must contain sentinel token"
+    );
 
     // If an LLM echoes back the full wrapped prompt, it should be blocked
     let result = sanitizer.sanitize(&wrapped);
-    assert!(result.contains("[BLOCKED"),
-        "Echoing the wrapped system prompt back must be blocked");
+    assert!(
+        result.contains("[BLOCKED"),
+        "Echoing the wrapped system prompt back must be blocked"
+    );
 }
 
 /// Confirms that clean, normal document text passes through without being blocked.
@@ -83,8 +87,7 @@ fn test_clean_document_text_passes_sentinel() {
         let result = sanitizer.sanitize(text);
         assert!(
             !result.contains("[BLOCKED"),
-            "Clean response should pass but got BLOCKED for: {:?}",
-            text
+            "Clean response should pass but got BLOCKED for: {text:?}"
         );
     }
 }
@@ -97,19 +100,26 @@ fn test_different_sessions_have_different_sentinels() {
     let s2 = SentinelSanitizer::new();
 
     // Each session has a unique sentinel
-    assert_ne!(s1.sentinel(), s2.sentinel(),
-        "Two different SentinelSanitizer instances must have different sentinels");
+    assert_ne!(
+        s1.sentinel(),
+        s2.sentinel(),
+        "Two different SentinelSanitizer instances must have different sentinels"
+    );
 
     // s1's sentinel is detected by s1
     let leaked = format!("The sentinel is: {}", s1.sentinel());
-    assert!(s1.sanitize(&leaked).contains("[BLOCKED"),
-        "s1 must detect its own sentinel leak");
+    assert!(
+        s1.sanitize(&leaked).contains("[BLOCKED"),
+        "s1 must detect its own sentinel leak"
+    );
 
     // s1's sentinel must NOT appear in s2's responses
     // (cross-session contamination check)
     let s1_sentinel = s1.sentinel().to_string();
-    assert!(!s2.sentinel().contains(&s1_sentinel),
-        "s2 sentinel must be independent of s1");
+    assert!(
+        !s2.sentinel().contains(&s1_sentinel),
+        "s2 sentinel must be independent of s1"
+    );
 }
 
 /// Tests that the MCP command leakage blocker works.
@@ -124,6 +134,8 @@ fn test_mcp_command_leakage_blocked() {
     let stripped = sanitizer.sanitize(with_mcp);
 
     // The [MCP:...] block should be removed
-    assert!(!stripped.contains("[MCP:"),
-        "MCP command blocks must be stripped from output");
+    assert!(
+        !stripped.contains("[MCP:"),
+        "MCP command blocks must be stripped from output"
+    );
 }

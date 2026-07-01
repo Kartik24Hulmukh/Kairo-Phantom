@@ -1,8 +1,8 @@
 use anyhow::Result;
+use chrono::Utc;
 use rusqlite::{params, Connection};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use chrono::Utc;
 use tracing::{info, warn};
 
 // ─── Embedding Engine ─────────────────────────────────────────────────────────
@@ -18,9 +18,9 @@ use tracing::{info, warn};
 
 #[cfg(feature = "local-embeddings")]
 mod embed_engine {
+    use anyhow::Result;
     use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
     use once_cell::sync::OnceCell;
-    use anyhow::Result;
 
     static ENGINE: OnceCell<TextEmbedding> = OnceCell::new();
 
@@ -28,17 +28,21 @@ mod embed_engine {
         let engine = ENGINE.get_or_try_init(|| {
             tracing::info!("🧠 MemMachine: Initialising fastembed all-MiniLM-L6-v2 …");
             TextEmbedding::try_new(
-                InitOptions::new(EmbeddingModel::AllMiniLML6V2)
-                    .with_show_download_progress(false)
+                InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
             )
         })?;
         let mut results = engine.embed(vec![text], None)?;
-        let mut vec = results.into_iter().next().unwrap_or_else(|| vec![0.0f32; DIM]);
+        let mut vec = results
+            .into_iter()
+            .next()
+            .unwrap_or_else(|| vec![0.0f32; DIM]);
         if vec.len() > DIM {
             vec.truncate(DIM);
             // Re-normalise
             let norm = (vec.iter().map(|x| x * x).sum::<f32>()).sqrt().max(1e-9);
-            for x in &mut vec { *x /= norm; }
+            for x in &mut vec {
+                *x /= norm;
+            }
         }
         Ok(vec)
     }
@@ -68,7 +72,9 @@ mod embed_engine {
         }
         // L2-normalise so cosine = dot product
         let norm = (vec.iter().map(|x| x * x).sum::<f32>()).sqrt().max(1e-9);
-        for x in &mut vec { *x /= norm; }
+        for x in &mut vec {
+            *x /= norm;
+        }
         Ok(vec)
     }
 
@@ -96,7 +102,6 @@ pub struct MemMachine {
     #[allow(dead_code)]
     vault_dir: PathBuf,
 }
-
 
 impl MemMachine {
     pub fn new(vault_dir: PathBuf) -> Result<Self> {
@@ -167,7 +172,10 @@ impl MemMachine {
             [],
         )?;
 
-        Ok(Self { conn: Mutex::new(conn), vault_dir })
+        Ok(Self {
+            conn: Mutex::new(conn),
+            vault_dir,
+        })
     }
 
     /// Stores a new memory fragment with its semantic embedding and ground-truth episode.
@@ -178,7 +186,7 @@ impl MemMachine {
         app_context: &str,
         context_key: Option<&str>,
         is_ground_truth: bool,
-        tags: Vec<&str>
+        tags: Vec<&str>,
     ) -> Result<()> {
         let id = uuid::Uuid::new_v4().to_string();
         let timestamp = Utc::now().timestamp();
@@ -187,7 +195,9 @@ impl MemMachine {
         // Try querying high-quality 256-dim Model2Vec embedding from sidecar first, with self-healing fallback
         let embedding_vec = match crate::sidecar_client::embed_text(content).await {
             Ok(vec) => vec,
-            Err(_) => embed_engine::embed(content).unwrap_or_else(|_| vec![0.0f32; embed_engine::DIM]),
+            Err(_) => {
+                embed_engine::embed(content).unwrap_or_else(|_| vec![0.0f32; embed_engine::DIM])
+            }
         };
         let embedding_blob = bincode::serialize(&embedding_vec)?;
 
@@ -222,14 +232,21 @@ impl MemMachine {
     /// how strongly the preference has been reinforced by user feedback).
     /// A LIKE clause on the query provides an optional relevance boost but is
     /// NOT required — context matching is the primary retrieval axis.
-    pub async fn recall_contextualized(&self, query: &str, granularities: Vec<String>, limit: usize) -> Result<Vec<String>> {
+    pub async fn recall_contextualized(
+        &self,
+        query: &str,
+        granularities: Vec<String>,
+        limit: usize,
+    ) -> Result<Vec<String>> {
         let mut results = Vec::new();
         let mut seen_ids: Vec<String> = Vec::new();
-        let query_pattern = format!("%{}%", query);
+        let query_pattern = format!("%{query}%");
 
         // ── Stage 1: Section-level (context_key) matches ─────────────────────
         for gran in &granularities {
-            if results.len() >= limit { break; }
+            if results.len() >= limit {
+                break;
+            }
             let batch: Vec<(String, String, i64, String, String, String)> = {
                 let conn = self.conn.lock().unwrap();
                 let mut stmt = conn.prepare(
@@ -240,11 +257,27 @@ impl MemMachine {
                        CASE WHEN (content LIKE ?2 OR full_episode LIKE ?2) THEN 0 ELSE 1 END,
                        storage_strength DESC,
                        timestamp DESC
-                     LIMIT ?3"
+                     LIMIT ?3",
+                )?;
+                let mut stmt = conn.prepare(
+                    "SELECT id, content, timestamp, full_episode, app_context, context_key
+                     FROM semantic_memory
+                     WHERE context_key = ?1
+                     ORDER BY
+                       CASE WHEN (content LIKE ?2 OR full_episode LIKE ?2) THEN 0 ELSE 1 END,
+                       storage_strength DESC,
+                       timestamp DESC
+                     LIMIT ?3",
                 )?;
                 let rows = stmt.query_map(params![gran, query_pattern, limit], |row| {
-                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?,
-                        row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, String>(5)?))
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, i64>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get::<_, String>(4)?,
+                        row.get::<_, String>(5)?,
+                    ))
                 })?;
                 rows.filter_map(|r| r.ok()).collect()
             }; // conn + stmt dropped here
@@ -258,7 +291,9 @@ impl MemMachine {
 
         // ── Stage 2: App-level (app_context) matches ─────────────────────────
         for gran in &granularities {
-            if results.len() >= limit { break; }
+            if results.len() >= limit {
+                break;
+            }
             let remaining = limit - results.len();
             let batch: Vec<(String, String, i64, String, String, String)> = {
                 let conn = self.conn.lock().unwrap();
@@ -270,11 +305,17 @@ impl MemMachine {
                        CASE WHEN (content LIKE ?2 OR full_episode LIKE ?2) THEN 0 ELSE 1 END,
                        storage_strength DESC,
                        timestamp DESC
-                     LIMIT ?3"
+                     LIMIT ?3",
                 )?;
                 let rows = stmt.query_map(params![gran, query_pattern, remaining], |row| {
-                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?,
-                        row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, String>(5)?))
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, i64>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get::<_, String>(4)?,
+                        row.get::<_, String>(5)?,
+                    ))
                 })?;
                 rows.filter_map(|r| r.ok()).collect()
             }; // conn + stmt dropped here
@@ -296,11 +337,17 @@ impl MemMachine {
                      FROM semantic_memory
                      WHERE app_context = 'global'
                      ORDER BY storage_strength DESC, timestamp DESC
-                     LIMIT ?1"
+                     LIMIT ?1",
                 )?;
                 let rows = stmt.query_map(params![remaining], |row| {
-                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?,
-                        row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, String>(5)?))
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, i64>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get::<_, String>(4)?,
+                        row.get::<_, String>(5)?,
+                    ))
                 })?;
                 rows.filter_map(|r| r.ok()).collect()
             }; // conn + stmt dropped here
@@ -312,6 +359,27 @@ impl MemMachine {
             }
         }
 
+        // ── Stage 3.5: Word-level lexical re-ranking ──────────────────────────
+        // Boost results that share more words with the query.  This runs
+        // before the cosine similarity stage and provides a deterministic
+        // lexical signal that complements the embedding-based ranking.
+        if !results.is_empty() {
+            let query_words: Vec<&str> = query.split_whitespace().filter(|w| w.len() > 2).collect();
+            let mut scored: Vec<(usize, String)> = results
+                .into_iter()
+                .map(|text| {
+                    let text_lower = text.to_lowercase();
+                    let count = query_words
+                        .iter()
+                        .filter(|w| text_lower.contains(&w.to_lowercase()))
+                        .count();
+                    (count, text)
+                })
+                .collect();
+            scored.sort_by(|a, b| b.0.cmp(&a.0));
+            results = scored.into_iter().map(|(_, t)| t).collect();
+        }
+
         // ── Stage 4: Semantic re-ranking via cosine similarity ──────────────
         // Boost results that are semantically closest to the query embedding.
         // Uses the real fastembed engine (feature = "local-embeddings") or the
@@ -319,7 +387,9 @@ impl MemMachine {
         if !results.is_empty() {
             let query_vec = match crate::sidecar_client::embed_text(query).await {
                 Ok(vec) => vec,
-                Err(_) => embed_engine::embed(query).unwrap_or_else(|_| vec![0.0f32; embed_engine::DIM]),
+                Err(_) => {
+                    embed_engine::embed(query).unwrap_or_else(|_| vec![0.0f32; embed_engine::DIM])
+                }
             };
 
             let mut scored: Vec<(f32, String)> = Vec::with_capacity(results.len());
@@ -330,7 +400,8 @@ impl MemMachine {
                         "SELECT embedding FROM semantic_memory WHERE id = ?1",
                         params![id],
                         |row| row.get(0),
-                    ).ok()
+                    )
+                    .ok()
                 };
                 let sim = blob
                     .and_then(|b| bincode::deserialize::<Vec<f32>>(&b).ok())
@@ -346,21 +417,30 @@ impl MemMachine {
         Ok(results)
     }
 
-
-
     #[allow(clippy::too_many_arguments)]
-    fn format_memory(&self, id: String, content: String, ts: i64, episode: String, app: String, ctx: String, score: f64) -> Result<String> {
+    fn format_memory(
+        &self,
+        id: String,
+        content: String,
+        ts: i64,
+        episode: String,
+        app: String,
+        ctx: String,
+        score: f64,
+    ) -> Result<String> {
         let _ = self.update_strengths(&id, 0.05, 0.2);
         let neighbors = self.get_neighbors(&id, ts)?;
-        let mut full_context = format!("--- Episode (ID: {}, RoutingWeight: {:.2}, Context: {}/{}) ---\n", id, score, app, ctx);
+        let mut full_context = format!(
+            "--- Episode (ID: {id}, RoutingWeight: {score:.2}, Context: {app}/{ctx}) ---\n"
+        );
         if !episode.is_empty() {
-            full_context.push_str(&format!("RAW EPISODE: {}\n", episode));
+            full_context.push_str(&format!("RAW EPISODE: {episode}\n"));
         }
-        full_context.push_str(&format!("SUMMARY: {}\n", content));
+        full_context.push_str(&format!("SUMMARY: {content}\n"));
         if !neighbors.is_empty() {
             full_context.push_str("\nNEARBY EVENTS:\n");
             for n in neighbors {
-                full_context.push_str(&format!("- {}\n", n));
+                full_context.push_str(&format!("- {n}\n"));
             }
         }
         Ok(full_context)
@@ -372,11 +452,13 @@ impl MemMachine {
             "SELECT content FROM semantic_memory
              WHERE timestamp > ?1 - 3600 AND timestamp < ?1 + 3600
              AND id != ?2
-             ORDER BY timestamp ASC LIMIT 3"
+             ORDER BY timestamp ASC LIMIT 3",
         )?;
         let rows = stmt.query_map(params![timestamp, _id], |row| row.get(0))?;
         let mut neighbors = Vec::new();
-        for c in rows.flatten() { neighbors.push(c); }
+        for c in rows.flatten() {
+            neighbors.push(c);
+        }
         Ok(neighbors)
     }
 
@@ -413,7 +495,10 @@ impl MemMachine {
                 []
             )?;
             if deleted > 0 {
-                warn!("♻️  MemMachine: Decayed and forgot {} irrelevant memories.", deleted);
+                warn!(
+                    "♻️  MemMachine: Decayed and forgot {} irrelevant memories.",
+                    deleted
+                );
             }
         }
 
@@ -431,17 +516,28 @@ impl MemMachine {
             let mut stmt = conn.prepare(
                 "SELECT content, context_key FROM semantic_memory
                  WHERE storage_strength > 0.8 AND context_key != '' AND app_context != 'global'
-                 GROUP BY content, context_key HAVING COUNT(DISTINCT app_context) > 1"
+                 GROUP BY content, context_key HAVING COUNT(DISTINCT app_context) > 1",
             )?;
             let rows = stmt.query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?;
             let mut collected = Vec::new();
-            for val in rows.flatten() { collected.push(val); }
+            for val in rows.flatten() {
+                collected.push(val);
+            }
             collected
         };
 
         for (content, ctx) in consistent_prefs {
             info!("🧠 PRIME: Generalizing preference to global: {}", ctx);
-            let _ = self.remember(&content, None, "global", Some(&ctx), false, vec!["generalized"]).await;
+            let _ = self
+                .remember(
+                    &content,
+                    None,
+                    "global",
+                    Some(&ctx),
+                    false,
+                    vec!["generalized"],
+                )
+                .await;
         }
 
         // B. Split: If a preference has high retrieval but low storage (contradicted), isolate it.
@@ -450,7 +546,7 @@ impl MemMachine {
             conn.execute(
                 "UPDATE semantic_memory SET tags = tags || ',split_isolated'
                  WHERE storage_strength < 0.3 AND retrieval_strength > 0.5",
-                []
+                [],
             )?;
         }
 
@@ -458,7 +554,13 @@ impl MemMachine {
     }
 
     /// Forms a relationship between two memory entities (Context Graphing).
-    pub fn graph_relate(&self, source: &str, target: &str, relation: &str, weight: f64) -> Result<()> {
+    pub fn graph_relate(
+        &self,
+        source: &str,
+        target: &str,
+        relation: &str,
+        weight: f64,
+    ) -> Result<()> {
         let conn = self.conn.lock().unwrap();
         conn.execute(
             "INSERT INTO context_graph (source_id, target_id, relation_type, weight)
@@ -470,7 +572,11 @@ impl MemMachine {
     }
 
     /// Stores a list of feedback signals detected from user correction.
-    pub fn store_feedback(&self, app_name: &str, signals: Vec<crate::memory::feedback::FeedbackSignal>) -> Result<()> {
+    pub fn store_feedback(
+        &self,
+        app_name: &str,
+        signals: Vec<crate::memory::feedback::FeedbackSignal>,
+    ) -> Result<()> {
         let timestamp = Utc::now().timestamp();
         let conn = self.conn.lock().unwrap();
         for s in signals {
@@ -485,11 +591,14 @@ impl MemMachine {
     }
 
     /// Retrieves the feedback history for an app.
-    pub fn get_feedback_history(&self, app_name: &str) -> Result<Vec<crate::memory::feedback::FeedbackSignal>> {
+    pub fn get_feedback_history(
+        &self,
+        app_name: &str,
+    ) -> Result<Vec<crate::memory::feedback::FeedbackSignal>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
             "SELECT channel, orig_value, new_value, confidence FROM feedback_signals
-             WHERE app_name = ?1 ORDER BY timestamp DESC LIMIT 20"
+             WHERE app_name = ?1 ORDER BY timestamp DESC LIMIT 20",
         )?;
         let rows = stmt.query_map(params![app_name], |row| {
             Ok(crate::memory::feedback::FeedbackSignal {
@@ -500,7 +609,9 @@ impl MemMachine {
             })
         })?;
         let mut results = Vec::new();
-        for s in rows.flatten() { results.push(s); }
+        for s in rows.flatten() {
+            results.push(s);
+        }
         Ok(results)
     }
 }

@@ -16,7 +16,10 @@ async fn test_gauntlet_scenario_01_word_injection() {
 
     // Validation
     assert!(!completion.is_empty(), "Completion should not be empty");
-    assert!(completion.contains("Q1"), "Completion should reference the prompt context");
+    assert!(
+        completion.contains("Q1"),
+        "Completion should reference the prompt context"
+    );
 }
 
 #[test]
@@ -77,9 +80,12 @@ fn test_governance_tool_gate_hard_blocks() {
 #[test]
 fn test_spiffe_identity_generation() {
     let identity = SpiffeIdentity::new("ppt_agent", "descope");
-    
+
     assert_eq!(identity.trust_domain, "kairo-phantom.io");
-    assert_eq!(identity.spiffe_id, "spiffe://kairo-phantom.io/agent/ppt_agent");
+    assert_eq!(
+        identity.spiffe_id,
+        "spiffe://kairo-phantom.io/agent/ppt_agent"
+    );
     assert_eq!(identity.sso_provider, "descope");
     assert!(identity.certificate_pem.contains("BEGIN CERTIFICATE"));
 }
@@ -89,7 +95,7 @@ async fn test_chaos_monkey_resilience() {
     // Simulating chaos: random tool failure
     let allowlist = vec!["fetch_guidelines"];
     let gate = ToolGate::new();
-    
+
     // The gate must deterministically block regardless of chaos
     assert!(!gate.authorize_tool_call("random_injected_tool", &allowlist));
 }

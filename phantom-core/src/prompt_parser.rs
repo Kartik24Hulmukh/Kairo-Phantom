@@ -66,7 +66,11 @@ impl PromptParser {
             mode,
             // Normalize: strip a leading ': ' separator that users naturally write after mode keywords.
             // e.g. `// kami slides: Create a pitch` → instruction becomes `Create a pitch` not `: Create a pitch`
-            instruction: instruction.trim().trim_start_matches(':').trim().to_string(),
+            instruction: instruction
+                .trim()
+                .trim_start_matches(':')
+                .trim()
+                .to_string(),
             raw_line: trimmed.to_string(),
         })
     }
@@ -105,9 +109,7 @@ mod tests {
             let result = PromptParser::parse(text);
             assert!(
                 result.is_none(),
-                "PromptParser::parse({:?}) should return None but returned {:?}",
-                text,
-                result
+                "PromptParser::parse({text:?}) should return None but returned {result:?}"
             );
         }
     }
@@ -116,7 +118,10 @@ mod tests {
     fn test_prompt_parser_accepts_double_slash_commands() {
         // Valid // commands — must return Some
         let valid_cases = [
-            ("// rewrite this paragraph more formally", CommandMode::GhostWrite),
+            (
+                "// rewrite this paragraph more formally",
+                CommandMode::GhostWrite,
+            ),
             ("//! urgent fix the intro", CommandMode::Urgent),
             ("//? what is the word count?", CommandMode::Query),
             ("// think about this architecture", CommandMode::Think),
@@ -134,8 +139,7 @@ mod tests {
             let result = PromptParser::parse(text);
             assert!(
                 result.is_some(),
-                "PromptParser::parse({:?}) should return Some but returned None",
-                text
+                "PromptParser::parse({text:?}) should return Some but returned None"
             );
             let parsed = result.unwrap();
             assert_eq!(
@@ -163,18 +167,22 @@ mod tests {
 
     #[test]
     fn test_prompt_parser_extracts_correct_instruction() {
-        let result = PromptParser::parse("// kami slides: Create a 5-slide pitch for Kairo Phantom");
+        let result =
+            PromptParser::parse("// kami slides: Create a 5-slide pitch for Kairo Phantom");
         assert!(result.is_some());
         let parsed = result.unwrap();
         assert_eq!(parsed.mode, CommandMode::KamiSlides);
-        assert_eq!(parsed.instruction, "Create a 5-slide pitch for Kairo Phantom");
+        assert_eq!(
+            parsed.instruction,
+            "Create a 5-slide pitch for Kairo Phantom"
+        );
     }
 
     #[test]
     fn test_is_command_returns_false_for_regular_text() {
         assert!(!PromptParser::is_command("This is regular text"));
         assert!(!PromptParser::is_command("Not a command"));
-        assert!(!PromptParser::is_command("// "));  // bare // with space
+        assert!(!PromptParser::is_command("// ")); // bare // with space
         assert!(PromptParser::is_command("// rewrite this"));
         assert!(PromptParser::is_command("//! critical fix"));
     }

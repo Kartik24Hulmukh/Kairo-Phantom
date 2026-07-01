@@ -18,6 +18,7 @@ Supported oracle names
   always_pass               → built-in: deterministic PASS (for smoke tests)
   always_fail               → built-in: deterministic FAIL (for negative tests)
 """
+
 from __future__ import annotations
 
 import os
@@ -29,6 +30,7 @@ from sidecar import oracles
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
+
 def _pass(reason: str = "oracle passed") -> Dict[str, str]:
     return {"verdict": "PASS", "reason": reason}
 
@@ -38,6 +40,7 @@ def _fail(reason: str) -> Dict[str, str]:
 
 
 # ─── Built-in stubs ──────────────────────────────────────────────────────────
+
 
 def _always_pass(sandbox_path: str, scenario: Dict[str, Any]) -> Dict[str, str]:
     return _pass("always_pass oracle: deterministic PASS")
@@ -58,6 +61,7 @@ def _fixture_exists(sandbox_path: str, scenario: Dict[str, Any]) -> Dict[str, st
 
 
 # ─── Phase 3 oracle wrappers ─────────────────────────────────────────────────
+
 
 def _run_verify_docx(sandbox_path: str, scenario: Dict[str, Any]) -> Dict[str, str]:
     fixture = scenario.get("fixture", "")
@@ -137,15 +141,15 @@ def _run_network_sniffer(sandbox_path: str, scenario: Dict[str, Any]) -> Dict[st
 # ─── Dispatch table ──────────────────────────────────────────────────────────
 
 _DISPATCH = {
-    "verify_docx":            _run_verify_docx,
-    "verify_pdf":             _run_verify_pdf,
-    "verify_xlsx":            _run_verify_xlsx,
-    "verify_pptx":            _run_verify_pptx,
+    "verify_docx": _run_verify_docx,
+    "verify_pdf": _run_verify_pdf,
+    "verify_xlsx": _run_verify_xlsx,
+    "verify_pptx": _run_verify_pptx,
     "verify_screenshot_diff": _run_verify_screenshot_diff,
-    "network_sniffer":        _run_network_sniffer,
-    "fixture_exists":         _fixture_exists,
-    "always_pass":            _always_pass,
-    "always_fail":            _always_fail,
+    "network_sniffer": _run_network_sniffer,
+    "fixture_exists": _fixture_exists,
+    "always_pass": _always_pass,
+    "always_fail": _always_fail,
 }
 
 
@@ -157,8 +161,7 @@ def dispatch(sandbox_path: str, scenario: Dict[str, Any]) -> Dict[str, str]:
     oracle_name = scenario.get("oracle", "always_pass")
     handler = _DISPATCH.get(oracle_name)
     if handler is None:
-        return _fail(f"Unknown oracle: '{oracle_name}'. "
-                     f"Available: {sorted(_DISPATCH)}")
+        return _fail(f"Unknown oracle: '{oracle_name}'. " f"Available: {sorted(_DISPATCH)}")
     try:
         return handler(sandbox_path, scenario)
     except Exception:
