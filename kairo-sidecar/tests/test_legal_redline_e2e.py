@@ -10,6 +10,7 @@ Tests:
 All tests run fully offline (KAIRO_NO_NET=1). No mocks. The tracked-changes engine
 is the REAL adeu_bridge._python_docx_tracked_fallback (emits real w:ins/w:del).
 """
+
 from __future__ import annotations
 
 import json
@@ -68,6 +69,7 @@ def redline_result(tmp_path):
 
 # ======================== END-TO-END PIPELINE ========================
 
+
 def test_pipeline_produces_valid_docx(redline_result, tmp_path):
     """The pipeline produces a .docx that opens with python-docx."""
     assert os.path.exists(redline_result.output_path)
@@ -106,19 +108,22 @@ def test_pipeline_runs_offline(redline_result):
 
 # ======================== ORACLE 1: docx_tracked_changes_readback ========================
 
+
 def test_tracked_changes_readback_positive(redline_result, ground_truth):
     """The tracked-changes readback oracle passes on the real redlined output."""
     expected_changes = [
-        {"old": e["old_text"], "new": e["new_text"]}
-        for e in ground_truth["expected_edits"]
+        {"old": e["old_text"], "new": e["new_text"]} for e in ground_truth["expected_edits"]
     ]
-    assert verify_docx_tracked_changes(
-        redline_result.output_path,
-        expected_changes,
-        require_author=True,
-        require_date=True,
-        original_text=ground_truth["expected_original_text"],
-    ) is True
+    assert (
+        verify_docx_tracked_changes(
+            redline_result.output_path,
+            expected_changes,
+            require_author=True,
+            require_date=True,
+            original_text=ground_truth["expected_original_text"],
+        )
+        is True
+    )
 
 
 def test_tracked_changes_final_text_contains_expected(redline_result, ground_truth):
@@ -146,8 +151,7 @@ def test_tracked_changes_revisions_have_author_and_date(redline_result):
 def test_killproof_tracked_changes_dropped_revision(redline_result, ground_truth):
     """Kill-proof: if we claim all 5 edits but only 4 are present, oracle fails."""
     expected = [
-        {"old": e["old_text"], "new": e["new_text"]}
-        for e in ground_truth["expected_edits"]
+        {"old": e["old_text"], "new": e["new_text"]} for e in ground_truth["expected_edits"]
     ]
     # The output has 5 edits; claim 5 but the output only has 5 — so drop one expected
     # to simulate a missing revision by claiming an edit that wasn't applied
@@ -167,8 +171,7 @@ def test_killproof_tracked_changes_stripped_author(redline_result, ground_truth,
             break
     doc.save(tampered)
     expected = [
-        {"old": e["old_text"], "new": e["new_text"]}
-        for e in ground_truth["expected_edits"]
+        {"old": e["old_text"], "new": e["new_text"]} for e in ground_truth["expected_edits"]
     ]
     with pytest.raises(AssertionError, match="w:author"):
         verify_docx_tracked_changes(tampered, expected, require_author=True)
@@ -177,8 +180,7 @@ def test_killproof_tracked_changes_stripped_author(redline_result, ground_truth,
 def test_killproof_tracked_changes_original_mismatch(redline_result, ground_truth):
     """Kill-proof: wrong expected original text makes the oracle fail."""
     expected = [
-        {"old": e["old_text"], "new": e["new_text"]}
-        for e in ground_truth["expected_edits"]
+        {"old": e["old_text"], "new": e["new_text"]} for e in ground_truth["expected_edits"]
     ]
     with pytest.raises(AssertionError, match="recover the original"):
         verify_docx_tracked_changes(
@@ -187,6 +189,7 @@ def test_killproof_tracked_changes_original_mismatch(redline_result, ground_trut
 
 
 # ======================== ORACLE 2: clause_coverage ========================
+
 
 def test_clause_coverage_positive(redline_result, playbook_data):
     """Every playbook clause is addressed (edited or flagged)."""
@@ -231,11 +234,10 @@ def test_killproof_clause_coverage_empty_result(playbook_data):
 
 # ======================== ORACLE 3: no_hallucinated_citation ========================
 
+
 def test_no_hallucinated_citation_positive(redline_result, playbook_data):
     """Every citation in the result traces to a playbook source."""
-    assert verify_no_hallucinated_citation(
-        redline_result, playbook_data["clauses"]
-    ) is True
+    assert verify_no_hallucinated_citation(redline_result, playbook_data["clauses"]) is True
 
 
 def test_killproof_hallucinated_citation(playbook_data):
@@ -289,6 +291,7 @@ def test_killproof_hallucinated_citation_mixed(playbook_data):
 
 # ======================== PROMPTSHIELD: injection as data ========================
 
+
 def test_injection_in_document_treated_as_data(tmp_path):
     """Document text containing injection attempts is treated as DATA, not instructions.
 
@@ -310,19 +313,22 @@ def test_injection_in_document_treated_as_data(tmp_path):
     # Create a minimal playbook
     playbook = os.path.join(str(tmp_path), "playbook.json")
     with open(playbook, "w") as f:
-        json.dump({
-            "playbook_id": "test_injection",
-            "clauses": [
-                {
-                    "clause_id": "governing_law",
-                    "clause_label": "Governing Law",
-                    "match_text": "laws of the State of Delaware",
-                    "replacement_text": "laws of the State of New York",
-                    "citation": "Firm Standard Clause GL-001: Governing Law (New York)",
-                    "rationale": "Client is NY-based."
-                }
-            ]
-        }, f)
+        json.dump(
+            {
+                "playbook_id": "test_injection",
+                "clauses": [
+                    {
+                        "clause_id": "governing_law",
+                        "clause_label": "Governing Law",
+                        "match_text": "laws of the State of Delaware",
+                        "replacement_text": "laws of the State of New York",
+                        "citation": "Firm Standard Clause GL-001: Governing Law (New York)",
+                        "rationale": "Client is NY-based.",
+                    }
+                ],
+            },
+            f,
+        )
 
     out = os.path.join(str(tmp_path), "redlined.docx")
     result = redline_contract(contract, playbook, out, author=AUTHOR)
