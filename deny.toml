@@ -25,6 +25,11 @@
 # Currently: 1 accepted Rust advisory (unmaintained, no safe upgrade).
 ignore = [
     { id = "RUSTSEC-2025-0141", reason = "bincode 1.3.3 is unmaintained (not a vulnerability). Used for LAN sync packet serialization and embedding blob storage in MemMachine. No safe upgrade exists (crate ceased development). Replacing with postcard/rmp-serde would break backward compatibility with existing stored embeddings and LAN sync protocol. bincode 1.3.3 is feature-complete for our usage (serialize/deserialize simple structs). Reviewed 2026-06-27." },
+    # Transitive DoS in quick-xml via plist (pins ^0.39.2); no upstream fix as of 2026-07-03.
+    # Exposure: plist used only in macOS packaging, not on an untrusted-input runtime path.
+    # REMOVE when plist adopts quick-xml >= 0.41. Review by 2026-08-03.
+    { id = "RUSTSEC-2026-0194", reason = "Quadratic run time checking start tag for duplicate attribute names in quick-xml 0.39.4 (transitive via plist 1.9.0 which pins ^0.39.2). plist is used only in macOS packaging metadata, not on any untrusted-input runtime path. Patched in quick-xml >= 0.41.0 but plist has not adopted it yet. Time-boxed waiver: review by 2026-08-03; remove when plist upgrades." },
+    { id = "RUSTSEC-2026-0195", reason = "Unbounded namespace-declaration allocation in NsReader enables memory-exhaustion DoS in quick-xml 0.39.4 (transitive via plist 1.9.0 which pins ^0.39.2). plist is used only in macOS packaging metadata, not on any untrusted-input runtime path. Patched in quick-xml >= 0.41.0 but plist has not adopted it yet. Time-boxed waiver: review by 2026-08-03; remove when plist upgrades." },
 ]
 
 # ── Unfixed advisories: treat as vulnerabilities (not warnings) ──
