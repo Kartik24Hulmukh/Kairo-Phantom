@@ -1,0 +1,46 @@
+# Semgrep rules — fail CI if a mock/stub/placeholder is reachable from a prod path.
+# Usage: semgrep --config ci/semgrep_no_mock.yml --error
+# Tune paths-include/exclude to your repo. Tests dirs are excluded; prod code is not.
+rules:
+  - id: no-always-pass-assert
+    languages: [python]
+    severity: ERROR
+    message: "assert True / trivial pass-through in a non-test path is a rigged gate."
+    paths:
+      exclude: ["**/tests/**", "**/*_test.py", "**/conftest.py"]
+    patterns:
+      - pattern-either:
+          - pattern: assert True
+          - pattern: |
+              def $F(...):
+                  return True  # TODO
+  - id: no-empty-except-on-verify
+    languages: [python]
+    severity: ERROR
+    message: "Silent except on a verification/security path hides failure."
+    paths:
+      exclude: ["**/tests/**"]
+    patterns:
+      - pattern: |
+          try:
+              ...
+          except Exception:
+              pass
+  - id: no-mock-import-in-prod
+    languages: [python]
+    severity: ERROR
+    message: "unittest.mock / MagicMock imported in a production module."
+    paths:
+      exclude: ["**/tests/**", "**/*_test.py"]
+    patterns:
+      - pattern-either:
+          - pattern: from unittest.mock import $X
+          - pattern: import mock
+  - id: no-placeholder-return
+    languages: [python, rust]
+    severity: ERROR
+    message: "Placeholder/mock success value in prod (e.g. returning a canned deck/result)."
+    paths:
+      exclude: ["**/tests/**"]
+    patterns:
+      - pattern-regex: "(?i)(placeholder|mock_success|fake_|dummy_result|TODO: real)"

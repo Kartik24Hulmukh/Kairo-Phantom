@@ -1,0 +1,182 @@
+# .github/workflows/sealed_no_network.yml
+# Sealed Build — No Network Symbols gate.
+# This is the CI workflow for ci/sealed_no_network.yml (the gate definition).
+# It runs the static scan + runtime oracle + kill-proofs on every push/PR.
+#
+# Per specs/R3_AIRGAP_ENFORCEMENT.md:
+#   "sealed_no_network.yml: static-analyze the kairo-sealed artifact for ANY
+#    networking symbol (sockets, DNS, TLS, HTTP libs, telemetry). Build fails
+#    if found."
+#
+# NO continue-on-error. A gate that cannot fail is not a gate.
+
+name: Sealed No-Network Gate
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  KAIRO_OFFLINE: "1"
+  KAIRO_SEALED: "1"
+  KAIRO_NO_NET: "1"
+
+jobs:
+  sealed-no-network:
+    name: Sealed Build — No Network Symbols + Airgap Egress Oracle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install python-docx cryptography pytest openpyxl python-pptx pdfplumber Pillow imagehash psutil ruff
+
+      # 1. Static scan: grep for networking symbols in sealed source paths.
+      - name: Static scan — no networking symbols in sealed paths
+        run: |
+          PATTERNS='requests\.get|requests\.post|requests\.put|requests\.delete|requests\.Session|httpx\.get|httpx\.post|httpx\.Client|httpx\.AsyncClient|aiohttp\.ClientSession|urllib\.request\.urlopen|urllib\.request\.Request|http\.client\.HTTPConnection|http\.client\.HTTPSConnection|websocket\.create_connection|websockets\.connect|litellm\.completion|litellm\.acompletion|openai\.ChatCompletion|openai\.AsyncOpenAI|anthropic\.Anthropic|sentry_sdk\.capture|sentry_sdk\.init'
+          ALLOWLIST='airgap_egress.py:sealed_profile.py:test_airgap_egress.py:test_airgap_zero_egress.py:test_airgap_ci.py:airgap_proof.py'
+          VIOLATIONS=0
+          for dir in kairo/oracles kairo/security kairo/context kairo/docintel kairo/core kairo/graph kairo/sync; do
+            if [ -d "$dir" ]; then
+              for f in $(find "$dir" -name '*.py' -not -path '*__pycache__*'); do
+                basename=$(basename "$f")
+                if echo "$ALLOWLIST" | grep -q "$basename"; then
+                  continue
+                fi
+                if grep -nE "$PATTERNS" "$f" | grep -v '^\s*#'; then
+                  echo "::error::Networking symbol found in sealed source: $f"
+                  VIOLATIONS=$((VIOLATIONS + 1))
+                fi
+              done
+            fi
+          done
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "::error::$VIOLATIONS file(s) in sealed source paths contain networking symbols"
+            exit 1
+          fi
+          echo "✅ No networking symbols found in sealed source paths"
+
+      # 2. Sealed binary scan (Python oracle).
+      - name: Sealed binary scan (Python oracle)
+        run: |
+          python3 -c "
+          import sys, os
+          sys.path.insert(0, '.')
+          sys.path.insert(0, 'kairo-sidecar')
+          sys.path.insert(0, 'kairo-sidecar/sidecar')
+          from kairo.oracles.airgap_egress import sealed_binary_scan
+          result = sealed_binary_scan([
+              'kairo/oracles',
+              'kairo/security',
+              'kairo/context',
+              'kairo/docintel',
+              'kairo/core',
+              'kairo/graph',
+              'kairo/sync',
+          ])
+          if not result['passed']:
+              print(f'::error::sealed_binary_scan found {len(result[\"violations\"])} violation(s)')
+              for v in result['violations'][:10]:
+                  print(f'  {v[\"file\"]}:{v[\"line\"]}: {v[\"pattern\"]}')
+              sys.exit(1)
+          print(f'✅ sealed_binary_scan: {result[\"scanned_files\"]} files scanned, 0 violations')
+          "
+
+      # 3. Sealed profile integrity check.
+      - name: Sealed profile integrity check
+        run: |
+          python3 -c "
+          import sys, os
+          sys.path.insert(0, '.')
+          sys.path.insert(0, 'kairo-sidecar')
+          sys.path.insert(0, 'kairo-sidecar/sidecar')
+          from kairo.sealed_profile import (
+              activate_sealed_mode, deactivate_sealed_mode,
+              is_sealed, sealed_fallback_ladder, SealedModeViolation,
+          )
+          activate_sealed_mode(reason='CI gate check')
+          assert is_sealed(), 'Sealed mode not active after activation'
+          try:
+              deactivate_sealed_mode()
+              print('::error::Sealed mode deactivation did not raise')
+              sys.exit(1)
+          except SealedModeViolation:
+              pass
+          ladder = sealed_fallback_ladder()
+          for step in ladder:
+              if 'cloud' in step.lower() and 'no cloud' not in step.lower():
+                  print(f'::error::Sealed fallback ladder includes cloud: {step}')
+                  sys.exit(1)
+          print('✅ Sealed profile integrity verified')
+          "
+
+      # 4. Airgap egress oracle — real flow, 0 outbound.
+      - name: Airgap egress oracle (real flow, 0 outbound)
+        run: |
+          python3 -c "
+          import sys, os, tempfile
+          sys.path.insert(0, '.')
+          sys.path.insert(0, 'kairo-sidecar')
+          sys.path.insert(0, 'kairo-sidecar/sidecar')
+          os.environ['KAIRO_NO_NET'] = '1'
+          os.environ['KAIRO_SEALED'] = '1'
+          from cryptography.hazmat.primitives.asymmetric import ed25519
+          from kairo.oracles.airgap_egress import run_airgap_egress_oracle, verify_airgap_egress
+          priv = ed25519.Ed25519PrivateKey.generate()
+          with tempfile.TemporaryDirectory() as tmp:
+              out = os.path.join(tmp, 'redlined_sealed.docx')
+              report = run_airgap_egress_oracle(
+                  contract_path='fixtures/legal_redline/sample_contract.docx',
+                  playbook_path='fixtures/legal_redline/playbook.json',
+                  output_path=out,
+                  private_key=priv,
+              )
+              if not report.passed:
+                  print(f'::error::airgap_egress oracle FAILED: {report.error}')
+                  print(f'  egress_attempts={report.total_egress_attempts}')
+                  print(f'  dns_lookups={report.total_dns_lookups}')
+                  print(f'  session_completed={report.session_completed}')
+                  sys.exit(1)
+              print(f'✅ airgap_egress oracle PASSED: 0 egress, 0 DNS, flow completed')
+          "
+
+      # 5. Kill-proof — deliberate egress must fail.
+      - name: Kill-proof — deliberate egress must fail
+        run: |
+          python3 -c "
+          import sys, os
+          sys.path.insert(0, '.')
+          sys.path.insert(0, 'kairo-sidecar')
+          sys.path.insert(0, 'kairo-sidecar/sidecar')
+          from kairo.oracles.airgap_egress import run_kill_proof
+          report = run_kill_proof()
+          if report.zero_egress:
+              print('::error::KILL-PROOF FAILED: oracle did not catch deliberate egress')
+              sys.exit(1)
+          print(f'✅ Kill-proof verified: oracle caught {report.total_egress_attempts} egress + {report.total_dns_lookups} DNS')
+          "
+
+      # 6. Ruff lint check on new files.
+      - name: Ruff lint
+        run: |
+          ruff check kairo/sealed_profile.py kairo/oracles/airgap_egress.py kairo/oracles/__init__.py kairo-sidecar/tests/test_airgap_egress.py
+
+      # 7. Full test suite for airgap + sealed + existing redline/audit tests.
+      - name: Airgap + sealed + redline + audit tests
+        run: |
+          cd kairo-sidecar && python -m pytest \
+            tests/test_airgap_egress.py \
+            tests/test_legal_redline_e2e.py \
+            tests/test_audit_log_ed25519.py \
+            tests/test_air_gap_validation.py \
+            -v --tb=short

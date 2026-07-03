@@ -1,0 +1,45 @@
+# license_gate.yml — fail the build if any AGPL/GPL/no-license code can ship in the product.
+# Dev/CI-only tools (k6, xk6, grafana, semgrep) are allowed because they are NOT distributed.
+# This is the automated backstop for specs/CLEANROOM_IP_PROTOCOL.md.
+
+name: license-gate
+on: [push, pull_request]
+
+jobs:
+  scan-shipped-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Node / JS deps that ship in the product (exclude devDependencies).
+      - name: License-check production npm deps
+        run: |
+          npx --yes license-checker-rseidelsohn \
+            --production \
+            --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;Unlicense;CC0-1.0;MPL-2.0" \
+            --excludePackages "$(cat ci/allowlist_devtools.txt | tr '\n' ';')" \
+            || (echo "::error::A non-permissive license is reachable from a production dependency" && exit 1)
+
+      # 2. Python deps that ship in the product.
+      - name: License-check production pip deps
+        run: |
+          pip install pip-licenses >/dev/null
+          pip-licenses --format=csv --with-license-file --fail-on \
+            "GNU General Public License v3 (GPLv3);GNU Affero General Public License v3;AGPL-3.0;GPL-3.0" \
+            || (echo "::error::AGPL/GPL reachable from a production python dependency" && exit 1)
+
+      # 3. Rust crates that ship in the product.
+      - name: cargo-deny (bans copyleft in shipped crates)
+        run: |
+          cargo install cargo-deny --locked >/dev/null 2>&1 || true
+          cargo deny check licenses
+          # deny.toml must list allow = [MIT, Apache-2.0, BSD-*, ISC, MPL-2.0]
+          #                    and deny = [AGPL-3.0, GPL-3.0, GPL-2.0, NOASSERTION]
+
+      # 4. No vendored source from AVOID / no-license repos (belt-and-suspenders).
+      - name: Grep for forbidden upstream markers in shipped source
+        run: |
+          if grep -RInE "GNU AFFERO|AGPL-3\.0|GPL-3\.0|Skyvern|chunkr|3x-ui|GLOSSOPETRAE|PilotDeck|vibe_figma" \
+               --include=*.{ts,tsx,js,py,rs} src/ ; then
+            echo "::error::Forbidden upstream marker found in shipped source"; exit 1
+          fi

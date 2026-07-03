@@ -1,0 +1,50 @@
+# cleanroom_provenance.yml — every shipped source file must trace to an original ADR
+# (clean-room work) or a BUNDLE-lane dependency. Enforces specs/CLEANROOM_IP_PROTOCOL.md §6.
+
+name: cleanroom-provenance
+on: [push, pull_request]
+
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      # 1. Every file under src/ must carry a provenance header:
+      #    // PROVENANCE: original | ADR-<n>   OR   // PROVENANCE: vendored <pkg>@<ver> (MIT)
+      - name: Require provenance header on shipped source
+        run: |
+          missing=0
+          while IFS= read -r f; do
+            if ! head -n 5 "$f" | grep -qE "PROVENANCE: (original|ADR-[0-9]+|vendored )"; then
+              echo "::error file=$f::missing PROVENANCE header"; missing=1
+            fi
+          done < <(git ls-files 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'src/**/*.py' 'src/**/*.rs')
+          exit $missing
+
+      # 2. Any file that cites an ADR must have that ADR present.
+      - name: Verify referenced ADRs exist
+        run: |
+          for adr in $(grep -rhoE "ADR-[0-9]+" src/ | sort -u); do
+            test -f "specs/adr/${adr}"*.md || (echo "::error::${adr} referenced but not found in specs/adr/"; exit 1)
+          done
+
+      # 3. Similarity scan: shipped source must NOT closely match forbidden upstreams.
+      #    Populate ci/forbidden_snapshots/ with clones of AVOID/no-license repos in a
+      #    SEPARATE, non-shipping CI step, then diff for copied blocks (>=8 identical lines).
+      - name: Copied-block detector (jscpd against forbidden snapshots)
+        run: |
+          npx --yes jscpd --min-lines 8 --min-tokens 50 \
+            --pattern "src/**/*.{ts,tsx,js,py,rs}" \
+            --format "javascript,typescript,python,rust" \
+            --ignore "**/*.test.*" \
+            --mode strict \
+            --output ./.jscpd \
+            ci/forbidden_snapshots/ src/ \
+          && node ci/assert_no_cross_repo_clones.js ./.jscpd/jscpd-report.json
+          # assert_no_cross_repo_clones.js fails if any clone pair spans src/ <-> forbidden_snapshots/
+
+      # 4. Attribution completeness for BUNDLE deps.
+      - name: THIRD_PARTY_LICENSES completeness
+        run: node ci/check_attribution.js  # every shipped MIT/Apache dep appears with its license text

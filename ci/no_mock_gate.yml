@@ -1,0 +1,31 @@
+# GitHub Actions template — the honest gate. Wire into your matrix. SHA-pin actions in real use.
+name: verify
+on: [push, pull_request]
+jobs:
+  honest-gates:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4               # SHA-pin in production
+      - name: no-mock-in-prod (Semgrep)
+        run: semgrep --config ci/semgrep_no_mock.yml --error   # NO continue-on-error
+      - name: secret scan
+        run: gitleaks detect --no-banner --redact
+      - name: rust build + clippy (deny warnings)
+        run: cargo clippy --all-targets -- -D warnings && cargo test --all
+      - name: python tests (no-skip enforced)
+        run: pytest -q -p no:cacheprovider --strict-markers && python ci/assert_no_skips.py
+      - name: mutation (changed files only)
+        run: cargo mutants --in-diff origin/main && mutmut run --paths-to-mutate $(git diff --name-only origin/main | grep '\.py$' || true)
+      - name: canary-break honesty check
+        run: python ci/canary_break.py   # injects known breaks; THIS step must make the suite red, then restores
+      - name: air-gap egress oracle
+        run: python ci/airgap_oracle.py   # asserts zero outbound packets for air-gap flows
+      - name: SBOM + CVE
+        run: |
+          syft . -o spdx-json > sbom.json
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+# HARD RULE: no step may use `|| true` or `continue-on-error: true`. A gate that
+# cannot fail is not a gate. See prompts/01_de-rig_trust_gates.md.

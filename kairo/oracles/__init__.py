@@ -28,6 +28,15 @@ from kairo.oracles.zero_egress_report import (
     verify_zero_egress_report,
     report_from_json,
 )
+from kairo.oracles.airgap_egress import (
+    AirgapEgressReport,
+    EgressAttempt,
+    SocketEgressInterceptor,
+    run_airgap_egress_oracle,
+    verify_airgap_egress,
+    run_kill_proof,
+    sealed_binary_scan,
+)
 
 __all__ = [
     "Revision",
@@ -46,4 +55,11 @@ __all__ = [
     "generate_zero_egress_report",
     "verify_zero_egress_report",
     "report_from_json",
+    "AirgapEgressReport",
+    "EgressAttempt",
+    "SocketEgressInterceptor",
+    "run_airgap_egress_oracle",
+    "verify_airgap_egress",
+    "run_kill_proof",
+    "sealed_binary_scan",
 ]
