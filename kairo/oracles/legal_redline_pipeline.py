@@ -84,6 +84,10 @@ class RedlineResult:
     injection_score: float = 0.0
     injection_patterns: list[str] = field(default_factory=list)
     error: str = ""
+    # Audit log + zero-egress report (populated when private_key is provided)
+    audit_log_json: str = ""
+    egress_report_json: str = ""
+    doc_hash: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -112,6 +116,9 @@ class RedlineResult:
             "injection_score": self.injection_score,
             "injection_patterns": self.injection_patterns,
             "error": self.error,
+            "doc_hash": self.doc_hash,
+            "audit_log_json": self.audit_log_json,
+            "egress_report_json": self.egress_report_json,
         }
 
 
@@ -190,6 +197,7 @@ def redline_contract(
     playbook_path: str,
     output_path: str,
     author: str = "Kairo Legal",
+    private_key: Any = None,
 ) -> RedlineResult:
     """End-to-end offline legal redline pipeline.
 
@@ -198,9 +206,13 @@ def redline_contract(
         playbook_path: Path to the redline playbook JSON file.
         output_path: Path where the redlined .docx will be saved.
         author: Author name for tracked changes.
+        private_key: Optional Ed25519 private key. When provided, the pipeline
+            emits a signed, hash-chained audit log and a signed zero-egress
+            report (per prompts/06 and specs/R3_AIRGAP_ENFORCEMENT.md).
 
     Returns:
-        RedlineResult with applied edits, flagged clauses, and injection scan.
+        RedlineResult with applied edits, flagged clauses, injection scan,
+        and (if private_key provided) audit_log_json + egress_report_json.
 
     Raises:
         FileNotFoundError if contract or playbook doesn't exist.
@@ -220,6 +232,11 @@ def redline_contract(
 
     # 2. Extract contract text
     contract_text = _extract_docx_text(contract_path)
+
+    # 2a. Compute document hash for audit trail
+    import hashlib as _hashlib
+
+    doc_hash = _hashlib.sha256(contract_text.encode("utf-8")).hexdigest()
 
     # 3. PromptShield scan — document text is DATA, never instructions
     inj_detected, inj_score, inj_patterns = _scan_for_injection(contract_text)
@@ -321,6 +338,56 @@ def redline_contract(
                     )
                 )
 
+    # 7. Emit Ed25519-signed audit log + zero-egress report (if key provided)
+    audit_log_json = ""
+    egress_report_json = ""
+    if private_key is not None:
+        from kairo.oracles.ed25519_audit_log import Ed25519AuditLog
+        from kairo.oracles.zero_egress_report import generate_zero_egress_report
+
+        audit = Ed25519AuditLog(private_key)
+        playbook_id = playbook.get("playbook_id", "unknown")
+        audit.log_run_started(doc_hash=doc_hash, playbook_id=playbook_id)
+
+        for edit in applied[:applied_count]:
+            audit.log_edit(
+                doc_hash=doc_hash,
+                clause_id=edit.clause_id,
+                clause_label=edit.clause_label,
+                old_text=edit.old_text,
+                new_text=edit.new_text,
+                citation=edit.citation,
+                rationale=edit.rationale,
+            )
+
+        for flag in flagged:
+            audit.log_flag(
+                doc_hash=doc_hash,
+                clause_id=flag.clause_id,
+                clause_label=flag.clause_label,
+                reason=flag.reason,
+            )
+
+        audit.log_run_completed(
+            doc_hash=doc_hash,
+            total_edits=applied_count,
+            total_flagged=len(flagged),
+            injection_detected=inj_detected,
+        )
+
+        audit_log_json = audit.to_json()
+
+        egress_report = generate_zero_egress_report(
+            doc_hash=doc_hash,
+            playbook_id=playbook_id,
+            total_edits=applied_count,
+            total_flagged=len(flagged),
+            injection_detected=inj_detected,
+            audit_log_json=audit_log_json,
+            private_key=private_key,
+        )
+        egress_report_json = egress_report.to_json()
+
     return RedlineResult(
         ok=True,
         output_path=write_result["data"]["output_path"],
@@ -329,4 +396,7 @@ def redline_contract(
         injection_detected=inj_detected,
         injection_score=inj_score,
         injection_patterns=inj_patterns,
+        audit_log_json=audit_log_json,
+        egress_report_json=egress_report_json,
+        doc_hash=doc_hash,
     )

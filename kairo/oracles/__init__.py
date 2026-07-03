@@ -18,6 +18,16 @@ from kairo.oracles.legal_redline_pipeline import (
     RedlineResult,
     redline_contract,
 )
+from kairo.oracles.ed25519_audit_log import (
+    AuditEntry,
+    Ed25519AuditLog,
+)
+from kairo.oracles.zero_egress_report import (
+    ZeroEgressReport,
+    generate_zero_egress_report,
+    verify_zero_egress_report,
+    report_from_json,
+)
 
 __all__ = [
     "Revision",
@@ -30,4 +40,10 @@ __all__ = [
     "FlaggedClause",
     "RedlineResult",
     "redline_contract",
+    "AuditEntry",
+    "Ed25519AuditLog",
+    "ZeroEgressReport",
+    "generate_zero_egress_report",
+    "verify_zero_egress_report",
+    "report_from_json",
 ]
