@@ -10,10 +10,24 @@ from kairo.oracles.docx_tracked_changes import (
     reconstruct_original_and_final,
     verify_docx_tracked_changes,
 )
+from kairo.oracles.clause_coverage import verify_clause_coverage
+from kairo.oracles.no_hallucinated_citation import verify_no_hallucinated_citation
+from kairo.oracles.legal_redline_pipeline import (
+    AppliedEdit,
+    FlaggedClause,
+    RedlineResult,
+    redline_contract,
+)
 
 __all__ = [
     "Revision",
     "extract_revisions",
     "reconstruct_original_and_final",
     "verify_docx_tracked_changes",
+    "verify_clause_coverage",
+    "verify_no_hallucinated_citation",
+    "AppliedEdit",
+    "FlaggedClause",
+    "RedlineResult",
+    "redline_contract",
 ]

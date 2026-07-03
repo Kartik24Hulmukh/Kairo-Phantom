@@ -1,0 +1,54 @@
+{
+  "playbook_id": "firm_standard_client_v1",
+  "description": "Client-side redline playbook for software/consulting agreements. All citations trace to the firm's clause library.",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of New York",
+      "citation": "Firm Standard Clause GL-001: Governing Law (New York)",
+      "rationale": "Client is NY-based; NY law provides familiar precedent and favorable forum."
+    },
+    {
+      "clause_id": "payment_terms",
+      "clause_label": "Payment Terms",
+      "match_text": "within 30 days of invoice",
+      "replacement_text": "within 15 days of invoice",
+      "citation": "Firm Standard Clause PT-002: Payment Terms (Net 15)",
+      "rationale": "Client prefers net-15 to improve cash flow; standard for consulting engagements."
+    },
+    {
+      "clause_id": "liability_cap",
+      "clause_label": "Limitation of Liability",
+      "match_text": "Liability is unlimited for all claims.",
+      "replacement_text": "Liability shall not exceed the fees paid by Client in the twelve (12) months preceding the claim, excluding gross negligence, willful misconduct, and IP infringement.",
+      "citation": "Firm Standard Clause LC-003: Limitation of Liability (Capped with Carve-outs)",
+      "rationale": "Cap liability at prior 12 months fees with standard carve-outs for gross negligence, willful misconduct, and IP infringement."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice Period",
+      "match_text": "90 days notice",
+      "replacement_text": "30 days prior written notice",
+      "citation": "Firm Standard Clause TN-004: Termination Notice (30 Days Written)",
+      "rationale": "Reduce notice period from 90 to 30 days for flexibility; require written notice for audit trail."
+    },
+    {
+      "clause_id": "confidentiality_survival",
+      "clause_label": "Confidentiality Survival",
+      "match_text": "survive termination of this Agreement for five years",
+      "replacement_text": "survive termination of this Agreement for three years",
+      "citation": "Firm Standard Clause CS-005: Confidentiality Survival (3 Years)",
+      "rationale": "Reduce confidentiality survival from 5 to 3 years to align with industry standard for software agreements."
+    },
+    {
+      "clause_id": "indemnification_missing",
+      "clause_label": "Indemnification (Missing)",
+      "match_text": "Each party shall indemnify the other party from claims arising from that party's own breach, negligence, or willful misconduct.",
+      "replacement_text": "Each party shall indemnify the other party from claims arising from that party's own breach, negligence, or willful misconduct.",
+      "citation": "Firm Standard Clause IN-006: Mutual Indemnification",
+      "rationale": "Add mutual indemnification clause — not present in original contract."
+    }
+  ]
+}

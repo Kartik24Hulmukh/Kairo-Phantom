@@ -11,6 +11,11 @@ if _sidecar_root not in sys.path:
 if os.path.join(_sidecar_root, "sidecar") not in sys.path:
     sys.path.insert(0, os.path.join(_sidecar_root, "sidecar"))
 
+# Also add the repo root so kairo.oracles.* (root-level oracle package) is importable.
+_repo_root = os.path.dirname(_sidecar_root)
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+
 # Cross-platform: stub win32com on non-Windows so patch("win32com.client...") works.
 # The tests already mock all win32com interactions — this just makes the module importable.
 if sys.platform != "win32" and "win32com" not in sys.modules:
