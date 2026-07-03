@@ -90,12 +90,12 @@ class TestAirgapEgressOracle:
             private_key=private_key,
         )
         assert report.session_completed, f"Flow did not complete: {report.error}"
-        assert report.total_egress_attempts == 0, (
-            f"VIOLATION: {report.total_egress_attempts} egress attempts in sealed mode"
-        )
-        assert report.total_dns_lookups == 0, (
-            f"VIOLATION: {report.total_dns_lookups} DNS lookups in sealed mode"
-        )
+        assert (
+            report.total_egress_attempts == 0
+        ), f"VIOLATION: {report.total_egress_attempts} egress attempts in sealed mode"
+        assert (
+            report.total_dns_lookups == 0
+        ), f"VIOLATION: {report.total_dns_lookups} DNS lookups in sealed mode"
         assert report.zero_egress is True
         assert report.passed is True
         assert report.sealed_mode_active is True
@@ -148,22 +148,22 @@ class TestKillProofs:
         """Deliberately connecting to an external host MUST be caught."""
         report = run_kill_proof()
         # The kill-proof MUST show at least 1 egress attempt
-        assert report.total_egress_attempts > 0, (
-            "KILL-PROOF FAILED: oracle did not catch a deliberate egress attempt"
-        )
-        assert report.zero_egress is False, (
-            "KILL-PROOF FAILED: oracle reported zero_egress=True despite egress"
-        )
-        assert report.passed is False, (
-            "KILL-PROOF FAILED: oracle reported passed=True despite egress"
-        )
+        assert (
+            report.total_egress_attempts > 0
+        ), "KILL-PROOF FAILED: oracle did not catch a deliberate egress attempt"
+        assert (
+            report.zero_egress is False
+        ), "KILL-PROOF FAILED: oracle reported zero_egress=True despite egress"
+        assert (
+            report.passed is False
+        ), "KILL-PROOF FAILED: oracle reported passed=True despite egress"
 
     def test_kill_proof_dns(self):
         """Deliberately doing a DNS lookup MUST be caught."""
         report = run_kill_proof()
-        assert report.total_dns_lookups > 0, (
-            "KILL-PROOF FAILED: oracle did not catch a deliberate DNS lookup"
-        )
+        assert (
+            report.total_dns_lookups > 0
+        ), "KILL-PROOF FAILED: oracle did not catch a deliberate DNS lookup"
         assert report.zero_egress is False
 
     def test_kill_proof_socket_interceptor_catches_connect(self):
@@ -264,9 +264,9 @@ class TestSealedBinaryScan:
                 ]
             )
         ]
-        assert len(real_violations) == 0, (
-            f"sealed_binary_scan found networking symbols: {real_violations[:5]}"
-        )
+        assert (
+            len(real_violations) == 0
+        ), f"sealed_binary_scan found networking symbols: {real_violations[:5]}"
 
     def test_sealed_binary_scan_catches_violation(self, tmp_path):
         """Kill-proof: a file with networking symbols MUST be flagged."""
