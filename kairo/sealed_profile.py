@@ -27,6 +27,7 @@ attempting to call ``deactivate_sealed_mode()`` raises ``SealedModeViolation``.
 
 Dependencies: stdlib only (no network libraries — that is the point).
 """
+
 from __future__ import annotations
 
 import os
@@ -43,34 +44,38 @@ _SEALED_MARKER_FILE = ".kairo-sealed"
 
 # Network-related module names that MUST NOT be imported in sealed mode.
 # This is the runtime complement to the static symbol scan in ci/sealed_no_network.yml.
-_FORBIDDEN_NETWORK_MODULES = frozenset({
-    "requests",
-    "httpx",
-    "aiohttp",
-    "urllib.request",
-    "http.client",
-    "socket",  # socket itself is allowed for IPC/loopback, but connect() to
-               # non-loopback is blocked by the egress oracle. We do NOT block
-               # the import — we block the *use* of connect to external hosts.
-    "ssl",
-    "websocket",
-    "websockets",
-    "tornado.httpclient",
-    "httplib2",
-    "urllib3",
-    "litellm",
-    "openai",
-    "anthropic",
-    "google.generativeai",
-    "telemetry",
-    "opentelemetry.sdk.trace.export",
-    "sentry_sdk",
-})
+_FORBIDDEN_NETWORK_MODULES = frozenset(
+    {
+        "requests",
+        "httpx",
+        "aiohttp",
+        "urllib.request",
+        "http.client",
+        "socket",  # socket itself is allowed for IPC/loopback, but connect() to
+        # non-loopback is blocked by the egress oracle. We do NOT block
+        # the import — we block the *use* of connect to external hosts.
+        "ssl",
+        "websocket",
+        "websockets",
+        "tornado.httpclient",
+        "httplib2",
+        "urllib3",
+        "litellm",
+        "openai",
+        "anthropic",
+        "google.generativeai",
+        "telemetry",
+        "opentelemetry.sdk.trace.export",
+        "sentry_sdk",
+    }
+)
 
 # Modules that are allowed in sealed mode for loopback/IPC only.
-_ALLOWED_LOOPBACK_MODULES = frozenset({
-    "socket",  # IPC, loopback — connect to external hosts is blocked at runtime
-})
+_ALLOWED_LOOPBACK_MODULES = frozenset(
+    {
+        "socket",  # IPC, loopback — connect to external hosts is blocked at runtime
+    }
+)
 
 
 class SealedModeViolation(RuntimeError):
@@ -88,6 +93,7 @@ class SealedModeState:
     Once ``active`` is True, it cannot be set to False (enforced by the
     ``activate``/``deactivate`` functions, not by direct mutation).
     """
+
     active: bool = False
     activated_at: str = ""
     fallback_ladder: list[str] = field(default_factory=list)
@@ -120,6 +126,7 @@ def activate_sealed_mode(reason: str = "explicit activation") -> None:
         if _state.active:
             return  # Idempotent — already sealed
         from datetime import datetime, timezone
+
         _state.active = True
         _state.activated_at = datetime.now(timezone.utc).isoformat()
         os.environ[_SEALED_ENV_VAR] = "1"
@@ -215,6 +222,7 @@ def low_confidence_flag(confidence: float, threshold: float = 0.7) -> dict[str, 
 # ---------------------------------------------------------------------------
 # Auto-activation from environment
 # ---------------------------------------------------------------------------
+
 
 def _auto_activate() -> None:
     """Check KAIRO_SEALED env var at import time and activate if set."""

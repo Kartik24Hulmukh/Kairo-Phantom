@@ -4,6 +4,7 @@
 Each oracle asserts a REAL system outcome and ships with a kill-proof (a known-bad
 input it must reject). See specs/VERIFICATION_ORACLES.md and prompts/02.
 """
+
 from kairo.oracles.docx_tracked_changes import (
     Revision,
     extract_revisions,

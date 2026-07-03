@@ -39,6 +39,7 @@ Dependencies: stdlib only (socket, os, json, hashlib, traceback, threading).
 The legal-redline pipeline itself uses python-docx (BSD-3) and cryptography
 (Apache-2.0/BSD-3) — both BUNDLE-lane per specs/TECH_MANIFEST.md.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -59,9 +60,10 @@ from typing import Any, Optional
 @dataclass
 class EgressAttempt:
     """Record of a single attempted network egress."""
+
     timestamp: str
     function: str  # which socket function was called
-    target: str    # host:port or hostname
+    target: str  # host:port or hostname
     stack_trace: str
     blocked: bool = True  # always True — we block all egress in sealed mode
 
@@ -78,6 +80,7 @@ class AirgapEgressReport:
       - The enforcement mechanism used (socket interception, namespace isolation).
       - A content hash for integrity.
     """
+
     timestamp: str = ""
     flow_name: str = ""
     total_egress_attempts: int = 0
@@ -187,8 +190,12 @@ class SocketEgressInterceptor:
             if host in ("127.0.0.1", "::1", "localhost", "0.0.0.0"):
                 return False
             # Check private ranges
-            if host.startswith("10.") or host.startswith("172.16.") or \
-               host.startswith("192.168.") or host.startswith("169.254."):
+            if (
+                host.startswith("10.")
+                or host.startswith("172.16.")
+                or host.startswith("192.168.")
+                or host.startswith("169.254.")
+            ):
                 return False
         return True
 
@@ -291,6 +298,7 @@ class SocketEgressInterceptor:
         # Also intercept urllib.request.urlopen if available
         try:
             import urllib.request
+
             self._original["urlopen"] = urllib.request.urlopen
 
             interceptor = self
@@ -336,6 +344,7 @@ class SocketEgressInterceptor:
         if "urlopen" in self._original:
             try:
                 import urllib.request
+
                 urllib.request.urlopen = self._original["urlopen"]
             except ImportError:
                 pass
@@ -359,9 +368,12 @@ def _check_namespace_isolation() -> bool:
     """
     try:
         import subprocess
+
         result = subprocess.run(
             ["ip", "link", "show"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
@@ -568,7 +580,9 @@ NETWORK_SYMBOL_PATTERNS = [
 ]
 
 
-def sealed_binary_scan(source_dirs: list[str], allowlist: list[str] | None = None) -> dict[str, Any]:
+def sealed_binary_scan(
+    source_dirs: list[str], allowlist: list[str] | None = None
+) -> dict[str, Any]:
     """Static-scan source directories for networking symbols.
 
     This is the ``sealed_binary_scan`` check from VERIFICATION_ORACLES.md.
@@ -615,9 +629,19 @@ def sealed_binary_scan(source_dirs: list[str], allowlist: list[str] | None = Non
             continue
         for root, dirs, files in os.walk(source_dir):
             # Skip __pycache__, .git, etc.
-            dirs[:] = [d for d in dirs if d not in (
-                "__pycache__", ".git", ".venv", "node_modules", "target", "build"
-            )]
+            dirs[:] = [
+                d
+                for d in dirs
+                if d
+                not in (
+                    "__pycache__",
+                    ".git",
+                    ".venv",
+                    "node_modules",
+                    "target",
+                    "build",
+                )
+            ]
             for fname in files:
                 if not fname.endswith(".py"):
                     continue
@@ -633,12 +657,14 @@ def sealed_binary_scan(source_dirs: list[str], allowlist: list[str] | None = Non
                             if stripped.startswith("#"):
                                 continue
                             for match in pattern_re.finditer(line):
-                                violations.append({
-                                    "file": fpath,
-                                    "line": lineno,
-                                    "pattern": match.group(),
-                                    "context": stripped.strip(),
-                                })
+                                violations.append(
+                                    {
+                                        "file": fpath,
+                                        "line": lineno,
+                                        "pattern": match.group(),
+                                        "context": stripped.strip(),
+                                    }
+                                )
                 except Exception:
                     pass
 

@@ -20,6 +20,7 @@ All tests run fully offline (KAIRO_NO_NET=1, KAIRO_SEALED=1). No mocks on
 production paths. The legal-redline pipeline is the REAL pipeline running on
 real fixtures.
 """
+
 from __future__ import annotations
 
 import json
@@ -89,10 +90,12 @@ class TestAirgapEgressOracle:
             private_key=private_key,
         )
         assert report.session_completed, f"Flow did not complete: {report.error}"
-        assert report.total_egress_attempts == 0, \
+        assert report.total_egress_attempts == 0, (
             f"VIOLATION: {report.total_egress_attempts} egress attempts in sealed mode"
-        assert report.total_dns_lookups == 0, \
+        )
+        assert report.total_dns_lookups == 0, (
             f"VIOLATION: {report.total_dns_lookups} DNS lookups in sealed mode"
+        )
         assert report.zero_egress is True
         assert report.passed is True
         assert report.sealed_mode_active is True
@@ -145,18 +148,22 @@ class TestKillProofs:
         """Deliberately connecting to an external host MUST be caught."""
         report = run_kill_proof()
         # The kill-proof MUST show at least 1 egress attempt
-        assert report.total_egress_attempts > 0, \
+        assert report.total_egress_attempts > 0, (
             "KILL-PROOF FAILED: oracle did not catch a deliberate egress attempt"
-        assert report.zero_egress is False, \
+        )
+        assert report.zero_egress is False, (
             "KILL-PROOF FAILED: oracle reported zero_egress=True despite egress"
-        assert report.passed is False, \
+        )
+        assert report.passed is False, (
             "KILL-PROOF FAILED: oracle reported passed=True despite egress"
+        )
 
     def test_kill_proof_dns(self):
         """Deliberately doing a DNS lookup MUST be caught."""
         report = run_kill_proof()
-        assert report.total_dns_lookups > 0, \
+        assert report.total_dns_lookups > 0, (
             "KILL-PROOF FAILED: oracle did not catch a deliberate DNS lookup"
+        )
         assert report.zero_egress is False
 
     def test_kill_proof_socket_interceptor_catches_connect(self):
@@ -202,12 +209,12 @@ class TestSealedProfile:
     def test_sealed_fallback_ladder_no_cloud(self):
         """In sealed mode, the fallback ladder has no cloud path."""
         ladder = sealed_fallback_ladder()
-        assert any("human-review" in step.lower() or "human_review" in step.lower()
-                      for step in ladder), \
-            "Sealed fallback ladder must include human-review flag"
-        assert not any("cloud" in step.lower() and "no cloud" not in step.lower()
-                       for step in ladder), \
-            "Sealed fallback ladder must not include cloud fallback"
+        assert any(
+            "human-review" in step.lower() or "human_review" in step.lower() for step in ladder
+        ), "Sealed fallback ladder must include human-review flag"
+        assert not any(
+            "cloud" in step.lower() and "no cloud" not in step.lower() for step in ladder
+        ), "Sealed fallback ladder must not include cloud fallback"
 
     def test_low_confidence_flag_sealed(self):
         """In sealed mode, low confidence → human_review_required, not cloud."""
@@ -233,31 +240,40 @@ class TestSealedBinaryScan:
     def test_sealed_source_dirs_clean(self):
         """The kairo/oracles and kairo/sealed_profile paths contain no
         networking symbols (except allowlisted oracle/test files)."""
-        result = sealed_binary_scan([
-            os.path.join(_REPO_ROOT, "kairo", "oracles"),
-            os.path.join(_REPO_ROOT, "kairo", "sealed_profile.py").replace(
-                "sealed_profile.py", ""  # scan the kairo/ dir
-            ),
-        ])
+        result = sealed_binary_scan(
+            [
+                os.path.join(_REPO_ROOT, "kairo", "oracles"),
+                os.path.join(_REPO_ROOT, "kairo", "sealed_profile.py").replace(
+                    "sealed_profile.py",
+                    "",  # scan the kairo/ dir
+                ),
+            ]
+        )
         # Filter out violations in allowlisted files (should already be excluded)
         real_violations = [
-            v for v in result["violations"]
-            if not any(allowed in v["file"] for allowed in [
-                "airgap_egress.py", "sealed_profile.py", "test_airgap",
-                "airgap_proof.py", "zero_egress_report.py",
-            ])
+            v
+            for v in result["violations"]
+            if not any(
+                allowed in v["file"]
+                for allowed in [
+                    "airgap_egress.py",
+                    "sealed_profile.py",
+                    "test_airgap",
+                    "airgap_proof.py",
+                    "zero_egress_report.py",
+                ]
+            )
         ]
-        assert len(real_violations) == 0, \
+        assert len(real_violations) == 0, (
             f"sealed_binary_scan found networking symbols: {real_violations[:5]}"
+        )
 
     def test_sealed_binary_scan_catches_violation(self, tmp_path):
         """Kill-proof: a file with networking symbols MUST be flagged."""
         # Create a temp file with a networking symbol
         bad_file = tmp_path / "bad_module.py"
         bad_file.write_text(
-            "import requests\n"
-            "def fetch():\n"
-            "    return requests.get('https://evil.com')\n"
+            "import requests\ndef fetch():\n    return requests.get('https://evil.com')\n"
         )
         result = sealed_binary_scan([str(tmp_path)])
         assert result["passed"] is False
@@ -288,6 +304,7 @@ class TestSignedEgressReport:
         # The legal-redline pipeline also emits a signed zero-egress report
         # (via generate_zero_egress_report). Verify it.
         from kairo.oracles.legal_redline_pipeline import redline_contract
+
         result = redline_contract(
             contract_path=_CONTRACT,
             playbook_path=_PLAYBOOK,
@@ -308,6 +325,7 @@ class TestSignedEgressReport:
     def test_claim_discipline_wording(self, private_key, tmp_path):
         """The zero-egress report uses CLAIM_DISCIPLINE-compliant wording."""
         from kairo.oracles.legal_redline_pipeline import redline_contract
+
         out = str(tmp_path / "redlined_sealed.docx")
         result = redline_contract(
             contract_path=_CONTRACT,
