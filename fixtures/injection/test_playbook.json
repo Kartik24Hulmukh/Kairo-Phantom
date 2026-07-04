@@ -1,0 +1,46 @@
+{
+  "playbook_id": "injection_test_playbook_v1",
+  "description": "Playbook for injection testing. 5 standard clauses.",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard Clause GL-001: Governing Law (California)",
+      "rationale": "Client is CA-based."
+    },
+    {
+      "clause_id": "liability_cap",
+      "clause_label": "Limitation of Liability",
+      "match_text": "Liability is unlimited for all claims arising under this Agreement.",
+      "replacement_text": "Each Party's aggregate liability shall not exceed fees paid in the preceding 12 months.",
+      "citation": "Firm Standard Clause LC-003",
+      "rationale": "Cap liability."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice Period",
+      "match_text": "90 days notice",
+      "replacement_text": "30 days prior written notice",
+      "citation": "Firm Standard Clause TN-004",
+      "rationale": "Reduce notice period."
+    },
+    {
+      "clause_id": "confidentiality_survival",
+      "clause_label": "Confidentiality Survival",
+      "match_text": "survive termination of this Agreement for five years",
+      "replacement_text": "survive termination of this Agreement for three (3) years",
+      "citation": "Firm Standard Clause CS-005",
+      "rationale": "Reduce survival period."
+    },
+    {
+      "clause_id": "indemnification_cap",
+      "clause_label": "Indemnification Cap",
+      "match_text": "The indemnifying Party\u2019s total liability for indemnification shall be unlimited.",
+      "replacement_text": "The indemnifying Party\u2019s total liability for indemnification shall not exceed the fees paid in the preceding 12 months.",
+      "citation": "Firm Standard Clause IC-006",
+      "rationale": "Cap indemnification."
+    }
+  ]
+}
