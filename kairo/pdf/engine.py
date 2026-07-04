@@ -771,7 +771,12 @@ def sign_pdf(
     from pyhanko.sign.signers import SimpleSigner, PdfSigner, PdfSignatureMetadata
 
     # Generate or load signing key + certificate
-    if key_path and cert_path and os.path.exists(key_path) and os.path.exists(cert_path):
+    if (
+        key_path
+        and cert_path
+        and os.path.exists(key_path)
+        and os.path.exists(cert_path)
+    ):
         signer = SimpleSigner.load(key_path, cert_path)
     else:
         # Generate a self-signed certificate for testing
@@ -791,10 +796,12 @@ def sign_pdf(
         rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
         # Create self-signed certificate
-        subject = issuer = x509.Name([
-            x509.NameAttribute(NameOID.COMMON_NAME, signer_name),
-            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Kairo Phantom"),
-        ])
+        subject = issuer = x509.Name(
+            [
+                x509.NameAttribute(NameOID.COMMON_NAME, signer_name),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Kairo Phantom"),
+            ]
+        )
 
         cert = (
             x509.CertificateBuilder()
@@ -820,9 +827,7 @@ def sign_pdf(
         tmp_cert = os.path.join(tmp_dir, "cert.pem")
         with open(tmp_key, "wb") as f:
             f.write(
-                rsa_key.private_bytes(
-                    Encoding.PEM, PrivateFormat.PKCS8, NoEncryption()
-                )
+                rsa_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption())
             )
         with open(tmp_cert, "wb") as f:
             f.write(cert.public_bytes(Encoding.PEM))
@@ -845,7 +850,12 @@ def sign_pdf(
         input_buf.close()
 
     # Clean up temp key/cert if we generated them
-    if not (key_path and cert_path and os.path.exists(key_path) and os.path.exists(cert_path)):
+    if not (
+        key_path
+        and cert_path
+        and os.path.exists(key_path)
+        and os.path.exists(cert_path)
+    ):
         try:
             os.unlink(tmp_key)
             os.unlink(tmp_cert)
@@ -906,9 +916,7 @@ def verify_signature(pdf_path: str) -> bool:
 
                 try:
                     sig_field = sig_field_ref.get_object()
-                    embedded_sig = EmbeddedPdfSignature(
-                        reader, sig_field, field_name
-                    )
+                    embedded_sig = EmbeddedPdfSignature(reader, sig_field, field_name)
                     # skip_diff=True to avoid diff analysis on the structure
                     # (we only care about cryptographic integrity)
                     status = validate_pdf_signature(embedded_sig, skip_diff=True)
@@ -1393,7 +1401,8 @@ def pdf_pipeline(
             target_text = spec.get("target_text", "")
             if not target_text:
                 return PDFResult(
-                    ok=False, error="redact action requires 'target_text' in spec",
+                    ok=False,
+                    error="redact action requires 'target_text' in spec",
                     doc_hash=doc_hash,
                 )
             applied_edits = redact_text(input_path, target_text, output_path)
@@ -1402,7 +1411,8 @@ def pdf_pipeline(
             field_values = spec.get("field_values", {})
             if not field_values:
                 return PDFResult(
-                    ok=False, error="fill action requires 'field_values' in spec",
+                    ok=False,
+                    error="fill action requires 'field_values' in spec",
                     doc_hash=doc_hash,
                 )
             applied_edits = fill_form_fields(input_path, field_values, output_path)

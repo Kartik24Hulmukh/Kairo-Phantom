@@ -606,14 +606,18 @@ def main(argv: list[str] | None = None) -> int:
     pdf_subparsers = pdf_parser.add_subparsers(dest="action", help="PDF action")
 
     # pdf extract
-    pdf_extract = pdf_subparsers.add_parser("extract", help="Extract text + coordinates")
+    pdf_extract = pdf_subparsers.add_parser(
+        "extract", help="Extract text + coordinates"
+    )
     pdf_extract.add_argument("input", help="Path to the input .pdf file")
     pdf_extract.add_argument(
         "--out", default="pdf_output", help="Output directory (default: pdf_output)"
     )
 
     # pdf redact
-    pdf_redact = pdf_subparsers.add_parser("redact", help="True redaction of target text")
+    pdf_redact = pdf_subparsers.add_parser(
+        "redact", help="True redaction of target text"
+    )
     pdf_redact.add_argument("input", help="Path to the input .pdf file")
     pdf_redact.add_argument("spec", help="Path to the spec .json file (target_text)")
     pdf_redact.add_argument(

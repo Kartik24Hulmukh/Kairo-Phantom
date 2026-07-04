@@ -259,9 +259,7 @@ class TestPdfFormReadback:
         }
 
         passed, readback = pdf_form_readback(_S02, field_values)
-        assert passed, (
-            f"pdf_form_readback FAILED: values don't match. Readback: {readback}"
-        )
+        assert passed, f"pdf_form_readback FAILED: values don't match. Readback: {readback}"
         assert readback.get("full_name", "").lstrip("/") == "Jane Marie Smith"
         assert "123 Main Street" in readback.get("address", "")
         assert "(555) 123-4567" in readback.get("phone", "")
