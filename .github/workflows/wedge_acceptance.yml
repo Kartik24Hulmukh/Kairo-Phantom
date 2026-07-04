@@ -63,6 +63,12 @@ jobs:
 
       - name: Verify zero skips
         run: |
-          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py --tb=short -q 2>&1 | grep -v "skipped" || true
-          # Assert no skips in the wedge gauntlet
-          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py -q 2>&1 | tail -3
+          # Run the wedge gauntlet and check that the summary line shows 0 skips
+          OUTPUT=$(cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py -q 2>&1)
+          echo "$OUTPUT" | tail -5
+          # Extract the summary line and check for skips
+          if echo "$OUTPUT" | grep -E "^[0-9]+ passed.*[1-9]+ skipped"; then
+            echo "::error::Skipped tests detected in wedge gauntlet"
+            exit 1
+          fi
+          echo "✅ Zero skips confirmed"
