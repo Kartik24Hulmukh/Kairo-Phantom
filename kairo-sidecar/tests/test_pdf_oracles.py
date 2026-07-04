@@ -355,17 +355,20 @@ class TestHonestDegradation:
 
     def test_ocr_unavailable_fails_loud(self):
         """If olmocr is not installed, the OCR path must raise OCREngineUnavailableError."""
-        if _HAS_OLMOCR:
-            pytest.skip("olmocr is installed — cannot test unavailable path")
-
         from kairo.pdf.engine import ocr_scanned_pdf
 
-        with pytest.raises(OCREngineUnavailableError) as exc_info:
-            ocr_scanned_pdf(_S03)
+        if _HAS_OLMOCR:
+            # If olmocr IS installed, verify it produces real text (not a skip)
+            ocr_text = ocr_scanned_pdf(_S03)
+            assert len(ocr_text.strip()) > 0, "OCR should produce text from scanned PDF"
+        else:
+            # If olmocr is NOT installed, must FAIL LOUD
+            with pytest.raises(OCREngineUnavailableError) as exc_info:
+                ocr_scanned_pdf(_S03)
 
-        msg = str(exc_info.value)
-        assert "OCR engine unavailable" in msg or "olmocr" in msg.lower()
-        assert "install" in msg.lower(), "Error message should mention installation"
+            msg = str(exc_info.value)
+            assert "OCR engine unavailable" in msg or "olmocr" in msg.lower()
+            assert "install" in msg.lower(), "Error message should mention installation"
 
     def test_scanned_pdf_classified_correctly(self):
         """The scanned contract fixture is classified as scanned (no text layer)."""
@@ -385,18 +388,22 @@ class TestHonestDegradation:
 
     def test_pipeline_scanned_ocr_unavailable_fails_loud(self):
         """pdf_pipeline on scanned PDF without OCR → ok=False, error mentions OCR."""
-        if _HAS_OLMOCR:
-            pytest.skip("olmocr is installed — cannot test unavailable path")
-
         with tempfile.TemporaryDirectory() as tmp:
             result = pdf_pipeline(
                 input_path=_S03,
                 output_path=os.path.join(tmp, "out.pdf"),
                 action="extract",
             )
-            assert not result.ok, "Pipeline should fail when OCR is unavailable"
-            assert result.is_scanned, "Pipeline should detect scanned PDF"
-            assert "OCR" in result.error or "olmocr" in result.error.lower()
+            if _HAS_OLMOCR:
+                # If olmocr IS installed, pipeline should succeed with OCR text
+                assert result.ok, "Pipeline should succeed when OCR is available"
+                assert result.ocr_used, "Pipeline should use OCR for scanned PDF"
+                assert len(result.extracted_text.strip()) > 0, "OCR should produce text"
+            else:
+                # If olmocr is NOT installed, must FAIL LOUD
+                assert not result.ok, "Pipeline should fail when OCR is unavailable"
+                assert result.is_scanned, "Pipeline should detect scanned PDF"
+                assert "OCR" in result.error or "olmocr" in result.error.lower()
 
 
 # ---------------------------------------------------------------------------
