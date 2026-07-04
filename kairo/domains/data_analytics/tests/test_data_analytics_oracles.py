@@ -84,9 +84,7 @@ class TestQueryResult:
         load_file(conn, _SALES_CSV, "sales")
 
         sql = "SELECT product, SUM(quantity) AS total_quantity FROM sales GROUP BY product ORDER BY product"
-        expected_cols, expected_rows = independent_group_by_sum(
-            _SALES_CSV, "product", "quantity"
-        )
+        expected_cols, expected_rows = independent_group_by_sum(_SALES_CSV, "product", "quantity")
 
         passed = query_result(conn, sql, expected_rows, expected_cols)
         assert passed, "query_result oracle failed for GROUP BY aggregation"
@@ -137,9 +135,7 @@ class TestQueryResult:
         load_file(conn, _SALES_CSV, "sales")
 
         sql = "SELECT product, SUM(quantity) AS total_quantity FROM sales GROUP BY product ORDER BY product"
-        expected_cols, expected_rows = independent_group_by_sum(
-            _SALES_CSV, "product", "quantity"
-        )
+        expected_cols, expected_rows = independent_group_by_sum(_SALES_CSV, "product", "quantity")
 
         # Drop the last expected row
         wrong_rows = expected_rows[:-1]
@@ -261,7 +257,7 @@ class TestHonestDegradation:
 
 
 class TestGauntletScenarios:
-    """>=3 end-to-end gauntlet scenarios."""
+    ">=3 end-to-end gauntlet scenarios."""
 
     def test_scenario_a_group_by_aggregation(self):
         """Scenario (a): GROUP BY aggregation over CSV, verified vs pandas."""
@@ -290,9 +286,9 @@ class TestGauntletScenarios:
 
         for i, (actual, exp) in enumerate(zip(result.rows, expected.values.tolist())):
             assert actual[0] == exp[0], f"Product mismatch at row {i}"
-            assert (
-                abs(float(actual[1]) - float(exp[1])) < 1e-6
-            ), f"Revenue mismatch at row {i}: {actual[1]} vs {exp[1]}"
+            assert abs(float(actual[1]) - float(exp[1])) < 1e-6, (
+                f"Revenue mismatch at row {i}: {actual[1]} vs {exp[1]}"
+            )
         conn.close()
 
     def test_scenario_b_two_file_join(self):
@@ -340,9 +336,7 @@ class TestGauntletScenarios:
 
         # The oracle must catch that wrong_count != actual
         assert actual == correct_count, "DuckDB result should match pandas"
-        assert (
-            actual != wrong_count
-        ), "Kill-proof: wrong expected result should not match actual"
+        assert actual != wrong_count, "Kill-proof: wrong expected result should not match actual"
         conn.close()
 
 

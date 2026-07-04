@@ -76,9 +76,7 @@ def _run(args: argparse.Namespace) -> int:
 
         # Write audit + egress
         if result.audit_log_json:
-            (out_dir / "audit_log.json").write_text(
-                result.audit_log_json, encoding="utf-8"
-            )
+            (out_dir / "audit_log.json").write_text(result.audit_log_json, encoding="utf-8")
         if result.egress_report_json:
             (out_dir / "zero_egress_report.json").write_text(
                 result.egress_report_json, encoding="utf-8"
