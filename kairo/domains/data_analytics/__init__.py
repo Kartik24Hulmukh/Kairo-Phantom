@@ -26,16 +26,12 @@ def _register_cli(subparsers: argparse._SubParsersAction) -> None:
     dq = data_sub.add_parser("query", help="Run a SQL query over a data file")
     dq.add_argument("input", help="Path to the data file (.csv, .parquet, .xlsx)")
     dq.add_argument("sql", help="SQL query to execute")
-    dq.add_argument(
-        "--out", default="data_output", help="Output directory (default: data_output)"
-    )
+    dq.add_argument("--out", default="data_output", help="Output directory (default: data_output)")
 
     # data schema
     ds = data_sub.add_parser("schema", help="Show table schema after loading a file")
     ds.add_argument("input", help="Path to the data file")
-    ds.add_argument(
-        "--out", default="data_output", help="Output directory (default: data_output)"
-    )
+    ds.add_argument("--out", default="data_output", help="Output directory (default: data_output)")
 
 
 def _run(args: argparse.Namespace) -> int:

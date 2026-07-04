@@ -153,13 +153,9 @@ def load_file(
     ext = Path(file_path).suffix.lower()
 
     if ext == ".csv":
-        conn.execute(
-            f"CREATE TABLE {table_name} AS SELECT * FROM read_csv_auto('{file_path}')"
-        )
+        conn.execute(f"CREATE TABLE {table_name} AS SELECT * FROM read_csv_auto('{file_path}')")
     elif ext == ".parquet":
-        conn.execute(
-            f"CREATE TABLE {table_name} AS SELECT * FROM read_parquet('{file_path}')"
-        )
+        conn.execute(f"CREATE TABLE {table_name} AS SELECT * FROM read_parquet('{file_path}')")
     elif ext == ".xlsx":
         # Use pandas to read xlsx, then register with DuckDB
         import pandas as pd

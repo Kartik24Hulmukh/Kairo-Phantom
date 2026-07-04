@@ -24,9 +24,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 _REPO_ROOT = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    )
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 )
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
@@ -257,7 +255,7 @@ class TestHonestDegradation:
 
 
 class TestGauntletScenarios:
-    ">=3 end-to-end gauntlet scenarios."""
+    ">=3 end-to-end gauntlet scenarios." ""
 
     def test_scenario_a_group_by_aggregation(self):
         """Scenario (a): GROUP BY aggregation over CSV, verified vs pandas."""
@@ -286,9 +284,9 @@ class TestGauntletScenarios:
 
         for i, (actual, exp) in enumerate(zip(result.rows, expected.values.tolist())):
             assert actual[0] == exp[0], f"Product mismatch at row {i}"
-            assert abs(float(actual[1]) - float(exp[1])) < 1e-6, (
-                f"Revenue mismatch at row {i}: {actual[1]} vs {exp[1]}"
-            )
+            assert (
+                abs(float(actual[1]) - float(exp[1])) < 1e-6
+            ), f"Revenue mismatch at row {i}: {actual[1]} vs {exp[1]}"
         conn.close()
 
     def test_scenario_b_two_file_join(self):
