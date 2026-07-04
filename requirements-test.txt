@@ -18,7 +18,18 @@ python-pptx>=1.0.0
 pydantic>=2.0.0
 cryptography>=42.0.0
 beautifulsoup4>=4.12.0
-PyMuPDF>=1.23.0
+# PDF domain engines (permissive only — PyMuPDF/AGPL BANNED)
+# pdfplumber (MIT) — text + word/char coordinates (read-back oracle)
+pdfplumber>=0.11.0
+# pypdfium2 (BSD-3-Clause, Google PDFium) — render/rasterize, image extraction
+pypdfium2>=4.0.0
+# pikepdf (MPL-2.0, unmodified dep) — content-stream edit, redaction, forms, encryption
+pikepdf>=9.0.0
+# pypdf (BSD-3-Clause) — merge/split/rotate/metadata
+pypdf>=4.0.0
+# pyhanko (MIT) — PAdES digital signatures (sign + verify)
+pyhanko>=0.20.0
+# reportlab (BSD-3-Clause) — fixture generation
 reportlab>=4.0.0
 numpy>=1.24.0
 docx2python>=2.0.0

@@ -1,0 +1,14 @@
+{
+  "scenario": "form_heavy_government",
+  "description": "Government permit application form with AcroForm text fields and checkbox",
+  "input": "s02_form_heavy_gov.pdf",
+  "fields": {
+    "full_name": "Jane Marie Smith",
+    "address": "123 Main Street, Springfield, IL 62701",
+    "phone": "(555) 123-4567",
+    "email": "jane.smith@example.com",
+    "certify_checkbox": "/Yes"
+  },
+  "expected_field_count": 5,
+  "verify_readback": true
+}

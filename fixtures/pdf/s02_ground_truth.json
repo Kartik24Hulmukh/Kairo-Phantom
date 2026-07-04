@@ -1,0 +1,12 @@
+{
+  "scenario": "form_heavy_government",
+  "expected_fields": {
+    "full_name": "Jane Marie Smith",
+    "address": "123 Main Street, Springfield, IL 62701",
+    "phone": "(555) 123-4567",
+    "email": "jane.smith@example.com",
+    "certify_checkbox": "/Yes"
+  },
+  "expected_field_count": 5,
+  "has_acroform": true
+}

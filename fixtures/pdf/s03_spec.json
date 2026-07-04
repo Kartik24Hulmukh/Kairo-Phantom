@@ -1,0 +1,16 @@
+{
+  "scenario": "scanned_contract",
+  "description": "Image-only scanned contract with no text layer — requires OCR path",
+  "input": "s03_scanned_contract.pdf",
+  "expected_text_fragments": [
+    "SERVICE CONTRACT",
+    "Alpha Industries",
+    "SCOPE OF SERVICES",
+    "COMPENSATION",
+    "CONFIDENTIALITY",
+    "TERMINATION"
+  ],
+  "is_scanned": true,
+  "ocr_required": true,
+  "honest_degradation": true
+}

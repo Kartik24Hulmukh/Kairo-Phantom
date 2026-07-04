@@ -1,0 +1,15 @@
+{
+  "scenario": "scanned_contract",
+  "expected_text_fragments": [
+    "SERVICE CONTRACT",
+    "Alpha Industries",
+    "SCOPE OF SERVICES",
+    "COMPENSATION",
+    "CONFIDENTIALITY",
+    "TERMINATION"
+  ],
+  "has_text_layer": false,
+  "is_scanned": true,
+  "ocr_required": true,
+  "honest_degradation_note": "OCR engine (olmocr) is a heavy VLM that may not run on CPU CI. If unavailable, the OCR path must fail loud — never emit empty success."
+}

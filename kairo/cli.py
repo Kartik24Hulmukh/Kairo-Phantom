@@ -423,6 +423,128 @@ def cmd_excel(args: argparse.Namespace) -> int:
     return 0 if (audit_ok and egress_ok and result.recompute_verified) else 1
 
 
+# pdf subcommand
+def cmd_pdf(args: argparse.Namespace) -> int:
+    """Run the PDF pipeline: extract/redact/fill/sign/verify per spec → audit."""
+    input_path = str(Path(args.input).resolve())
+    out_dir = Path(args.out).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if not os.path.exists(input_path):
+        print(f"ERROR: Input file not found: {input_path}", file=sys.stderr)
+        return 1
+
+    action = args.action
+
+    # Load spec if provided
+    spec = {}
+    if hasattr(args, "spec") and args.spec:
+        spec_path = str(Path(args.spec).resolve())
+        if not os.path.exists(spec_path):
+            print(f"ERROR: Spec file not found: {spec_path}", file=sys.stderr)
+            return 1
+        import json
+
+        with open(spec_path, encoding="utf-8") as f:
+            spec = json.load(f)
+
+    # Get or create Ed25519 keypair
+    key_dir = out_dir / ".keys"
+    private_key, public_key, pub_pem = _get_or_create_keypair(key_dir)
+    (out_dir / "public_key.pem").write_bytes(pub_pem)
+
+    # Determine output path
+    if action == "redact":
+        output_pdf = str(out_dir / "redacted.pdf")
+        spec.setdefault("target_text", spec.get("redact", {}).get("target_text", ""))
+    elif action == "fill":
+        output_pdf = str(out_dir / "filled.pdf")
+        spec.setdefault("field_values", spec.get("fields", {}))
+    elif action == "sign":
+        output_pdf = str(out_dir / "signed.pdf")
+    elif action == "verify":
+        output_pdf = input_path
+    else:
+        output_pdf = str(out_dir / "output.pdf")
+
+    from kairo.pdf.engine import pdf_pipeline
+
+    print(f"Running PDF pipeline: {action} (offline)...")
+    result = pdf_pipeline(
+        input_path=input_path,
+        output_path=output_pdf,
+        action=action,
+        spec=spec,
+        private_key=private_key,
+        author="Kairo PDF",
+    )
+
+    if not result.ok:
+        print(f"ERROR: PDF pipeline failed: {result.error}", file=sys.stderr)
+        return 1
+
+    # Write audit log + egress report
+    if result.audit_log_json:
+        (out_dir / "audit_log.json").write_text(result.audit_log_json, encoding="utf-8")
+    if result.egress_report_json:
+        (out_dir / "zero_egress_report.json").write_text(
+            result.egress_report_json, encoding="utf-8"
+        )
+
+    # Verify audit log
+    audit_ok = True
+    if result.audit_log_json:
+        from kairo.oracles.ed25519_audit_log import Ed25519AuditLog
+
+        entries = Ed25519AuditLog.entries_from_json(result.audit_log_json)
+        audit_ok = Ed25519AuditLog.verify_chain(entries, public_key)
+
+    egress_ok = True
+    if result.egress_report_json:
+        from kairo.oracles.zero_egress_report import (
+            report_from_json,
+            verify_zero_egress_report,
+        )
+
+        egress_report = report_from_json(result.egress_report_json)
+        egress_ok = verify_zero_egress_report(egress_report, public_key)
+
+    print()
+    print("=" * 60)
+    print("  KAIRO PHANTOM — PDF PIPELINE COMPLETE")
+    print("=" * 60)
+    print(f"  Input:       {Path(input_path).name}")
+    print(f"  Action:      {action}")
+    print(f"  Output:      {out_dir}")
+    print(f"  Scanned:     {'yes' if result.is_scanned else 'no'}")
+    print(f"  OCR used:    {'yes' if result.ocr_used else 'no'}")
+    if action == "extract":
+        print(f"  Words found: {len(result.word_boxes)}")
+    if action == "fill":
+        print(f"  Fields filled: {len(result.applied_edits)}")
+    if action == "sign":
+        print(f"  Signature valid: {'✅' if result.signature_valid else '❌'}")
+    if action == "verify":
+        print(f"  Signature valid: {'✅' if result.signature_valid else '❌'}")
+    print()
+    print(f"  Audit log verified: {'✅' if audit_ok else '❌'}")
+    print(f"  Zero-egress report verified: {'✅' if egress_ok else '❌'}")
+    print()
+    print(f"  Artifacts in {out_dir}/:")
+    if action == "redact":
+        print("    redacted.pdf")
+    elif action == "fill":
+        print("    filled.pdf")
+    elif action == "sign":
+        print("    signed.pdf")
+    print("    audit_log.json")
+    print("    zero_egress_report.json")
+    print("    public_key.pem")
+    print("=" * 60)
+
+    return 0 if (audit_ok and egress_ok and result.ok) else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -476,6 +598,50 @@ def main(argv: list[str] | None = None) -> int:
         help="Output directory for artifacts (default: excel_output)",
     )
 
+    # pdf subcommand
+    pdf_parser = subparsers.add_parser(
+        "pdf",
+        help="Run the PDF pipeline: extract/redact/fill/sign/verify",
+    )
+    pdf_subparsers = pdf_parser.add_subparsers(dest="action", help="PDF action")
+
+    # pdf extract
+    pdf_extract = pdf_subparsers.add_parser("extract", help="Extract text + coordinates")
+    pdf_extract.add_argument("input", help="Path to the input .pdf file")
+    pdf_extract.add_argument(
+        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
+    )
+
+    # pdf redact
+    pdf_redact = pdf_subparsers.add_parser("redact", help="True redaction of target text")
+    pdf_redact.add_argument("input", help="Path to the input .pdf file")
+    pdf_redact.add_argument("spec", help="Path to the spec .json file (target_text)")
+    pdf_redact.add_argument(
+        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
+    )
+
+    # pdf fill
+    pdf_fill = pdf_subparsers.add_parser("fill", help="Fill AcroForm fields")
+    pdf_fill.add_argument("input", help="Path to the input .pdf file")
+    pdf_fill.add_argument("spec", help="Path to the spec .json file (field values)")
+    pdf_fill.add_argument(
+        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
+    )
+
+    # pdf sign
+    pdf_sign = pdf_subparsers.add_parser("sign", help="Apply PAdES digital signature")
+    pdf_sign.add_argument("input", help="Path to the input .pdf file")
+    pdf_sign.add_argument(
+        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
+    )
+
+    # pdf verify
+    pdf_verify = pdf_subparsers.add_parser("verify", help="Verify digital signatures")
+    pdf_verify.add_argument("input", help="Path to the signed .pdf file")
+    pdf_verify.add_argument(
+        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
+    )
+
     args = parser.parse_args(argv)
 
     if args.command is None:
@@ -488,6 +654,11 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_verify(args)
     elif args.command == "excel":
         return cmd_excel(args)
+    elif args.command == "pdf":
+        if not hasattr(args, "action") or args.action is None:
+            pdf_parser.print_help()
+            return 1
+        return cmd_pdf(args)
 
     return 1
 

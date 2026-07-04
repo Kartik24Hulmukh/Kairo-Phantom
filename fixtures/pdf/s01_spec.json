@@ -1,0 +1,19 @@
+{
+  "scenario": "born_digital_report",
+  "description": "Clean born-digital PDF report with text, headings, and a table",
+  "input": "s01_born_digital_report.pdf",
+  "expected_text_fragments": [
+    "Quarterly Financial Report Q3 2025",
+    "Executive Summary",
+    "Total revenue reached $12.5 million",
+    "Revenue Breakdown",
+    "Product Sales",
+    "Risk Factors",
+    "contingency reserve of $2.5 million"
+  ],
+  "expected_word_count_min": 80,
+  "redact": {
+    "target_text": "contingency reserve of $2.5 million",
+    "verify_text_absent": true
+  }
+}

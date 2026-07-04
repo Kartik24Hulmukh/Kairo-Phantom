@@ -84,6 +84,18 @@ All licenses listed are compatible with the MIT license under which Kairo Phanto
 | **toml** | 0.8 | MIT / Apache-2.0 | https://github.com/toml-rs/toml |
 | **hex** | 0.4 | MIT / Apache-2.0 | https://github.com/KokaKiwi/rust-hex |
 
+## PDF Domain (permissive-only stack — PyMuPDF/AGPL BANNED)
+
+| Component | Version | License | Upstream | Attribution Notes |
+|:---|:---|:---|:---|:---|
+| **pdfplumber** | 0.11+ | MIT | https://github.com/jsvine/pdfplumber | Text + word/char coordinates — the read-back oracle. Built on pdfminer.six (MIT). |
+| **pypdfium2** | 4.x+ | BSD-3-Clause | https://github.com/pypdfium2-team/pypdfium2 | Python binding to Google PDFium (BSD-3-Clause). Render/rasterize pages, extract images, inspect vector objects. Replaces PyMuPDF's `get_pixmap()`. |
+| **pikepdf** | 9.x+ | MPL-2.0 | https://github.com/pikepdf/pikepdf | MPL-2.0 (file-level copyleft) — used as an **unmodified dependency**; not forked into our tree. Content-stream edit, TRUE redaction (bytes removed, not black boxes), AcroForm fill/flatten, encryption, repair. Wraps qpdf (Apache-2.0). |
+| **pypdf** | 4.x+ | BSD-3-Clause | https://github.com/py-pdf/pypdf | Merge/split/rotate/metadata — lightweight PDF manipulation. |
+| **pyHanko** | 0.20+ | MIT | https://github.com/MatthiasValvekens/pyHanko | PAdES digital signatures — sign + verify. Used for regulated legal/finance signature workflows. |
+| **pdfminer.six** | latest | MIT | https://github.com/pdfminer/pdfminer.six | Low-level PDF text extraction engine (transitive dep of pdfplumber). |
+| **reportlab** | 4.x+ | BSD-3-Clause | https://github.com/MrBitBucket/reportlab-mirror | PDF generation for test fixtures (not shipped in production paths). |
+
 ## Cryptography & Security
 
 | Component | Version | License | Upstream |

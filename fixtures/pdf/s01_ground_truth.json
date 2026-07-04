@@ -1,0 +1,16 @@
+{
+  "scenario": "born_digital_report",
+  "expected_text_fragments": [
+    "Quarterly Financial Report Q3 2025",
+    "Executive Summary",
+    "Total revenue reached $12.5 million",
+    "Revenue Breakdown",
+    "Product Sales",
+    "Risk Factors",
+    "contingency reserve of $2.5 million"
+  ],
+  "expected_word_count_min": 80,
+  "expected_pages": 1,
+  "has_text_layer": true,
+  "is_scanned": false
+}

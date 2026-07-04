@@ -17,7 +17,7 @@
 | 1 | Word (DOCX) | prompt-only / not shipped | No passing read-back oracle for general Word editing |
 | 2 | Excel (XLSX) | **Real** | xlsx_recompute + xlsx_structure_readback — LibreOffice headless recompute, values verified vs independent Python calc, kill-proven, honest-degradation |
 | 3 | PowerPoint (PPTX) | prompt-only / not shipped | No passing read-back oracle |
-| 4 | PDF | prompt-only / not shipped | No passing round-trip oracle |
+| 4 | PDF | **Real** (born-digital core) | pdf_text_roundtrip + pdf_render_diff + pdf_form_readback + pdf_signature_verify — pdfplumber coords, pikepdf true redaction (bytes removed), AcroForm fill+readback, pyHanko PAdES sign+verify, kill-proven, honest-degradation. OCR sub-capability: **Experimental** (olmocr heavy VLM — fails loud when unavailable, never fakes output). Permissive-only stack: pdfplumber/pypdfium2/pikepdf/pypdf/pyhanko (MIT/BSD/MPL). PyMuPDF/AGPL BANNED. |
 | 5 | Legal Redline | **Real (wedge)** | docx_tracked_changes_readback + clause_coverage + no_hallucinated_citation + injection_block + airgap_egress + audit_log_integrity — all passing |
 | 6 | Design (Canva) | prompt-only / not shipped | No CUA verifier oracle |
 | 7 | Code | prompt-only / not shipped | No oracle |
