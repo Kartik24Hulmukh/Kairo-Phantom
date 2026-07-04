@@ -1,0 +1,46 @@
+{
+  "playbook_id": "client_firm_nda_v1",
+  "description": "Client-side redline playbook for mutual NDAs. All citations trace to the firm's clause library.",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard Clause GL-001: Governing Law (California)",
+      "rationale": "Client is CA-based; CA law provides familiar precedent and convenient forum."
+    },
+    {
+      "clause_id": "liability_cap",
+      "clause_label": "Limitation of Liability",
+      "match_text": "Liability is unlimited for all claims arising under this Agreement.",
+      "replacement_text": "Each Party's aggregate liability under this Agreement shall not exceed the total amount of fees paid or payable by the receiving Party in the twelve (12) months preceding the claim, excluding liability for gross negligence, willful misconduct, and breach of confidentiality obligations.",
+      "citation": "Firm Standard Clause LC-003: Limitation of Liability (Capped with Carve-outs)",
+      "rationale": "Cap liability at prior 12 months fees with standard carve-outs for gross negligence, willful misconduct, and confidentiality breaches."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice Period",
+      "match_text": "90 days notice",
+      "replacement_text": "30 days prior written notice",
+      "citation": "Firm Standard Clause TN-004: Termination Notice (30 Days Written)",
+      "rationale": "Reduce notice period from 90 to 30 days for flexibility; require written notice for audit trail."
+    },
+    {
+      "clause_id": "confidentiality_survival",
+      "clause_label": "Confidentiality Survival",
+      "match_text": "survive termination of this Agreement for five years",
+      "replacement_text": "survive termination of this Agreement for three (3) years",
+      "citation": "Firm Standard Clause CS-005: Confidentiality Survival (3 Years)",
+      "rationale": "Reduce survival period from 5 to 3 years; industry standard for technology NDAs."
+    },
+    {
+      "clause_id": "indemnification_cap",
+      "clause_label": "Indemnification Cap",
+      "match_text": "The indemnifying Party\u2019s total liability for indemnification shall be unlimited.",
+      "replacement_text": "The indemnifying Party\u2019s total liability for indemnification shall not exceed the fees paid by the indemnifying Party in the twelve (12) months preceding the claim, except for indemnification obligations arising from third-party IP infringement claims.",
+      "citation": "Firm Standard Clause IC-006: Indemnification Cap (12-Month Fees with IP Carve-out)",
+      "rationale": "Cap indemnification at 12 months fees with carve-out for IP infringement claims, which are typically uncapped."
+    }
+  ]
+}
