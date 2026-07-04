@@ -1,0 +1,10 @@
+{
+  "spec_id": "excel_s03_wrong_formula",
+  "description": "Deliberately wrong formula \u2014 oracle must catch B4 mismatch",
+  "edits": [],
+  "expected_sheets": [
+    "Calculation"
+  ],
+  "expected_named_ranges": [],
+  "expect_failure": true
+}

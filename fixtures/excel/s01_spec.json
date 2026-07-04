@@ -1,0 +1,25 @@
+{
+  "spec_id": "excel_s01_financial_model",
+  "description": "Financial model with cross-sheet dependencies and named ranges",
+  "edits": [
+    {
+      "sheet": "Financial Model",
+      "cell": "B1",
+      "value": 120000,
+      "rationale": "Update revenue to 120k"
+    },
+    {
+      "sheet": "Financial Model",
+      "cell": "B2",
+      "value": 70000,
+      "rationale": "Update costs to 70k"
+    }
+  ],
+  "expected_sheets": [
+    "Financial Model",
+    "Summary"
+  ],
+  "expected_named_ranges": [
+    "TotalRevenue"
+  ]
+}

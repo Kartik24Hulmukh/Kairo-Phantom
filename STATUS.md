@@ -15,7 +15,7 @@
 | # | Domain | Status | Notes |
 |---|---|---|---|
 | 1 | Word (DOCX) | prompt-only / not shipped | No passing read-back oracle for general Word editing |
-| 2 | Excel (XLSX) | prompt-only / not shipped | No LibreOffice recompute oracle in CI |
+| 2 | Excel (XLSX) | **Real** | xlsx_recompute + xlsx_structure_readback — LibreOffice headless recompute, values verified vs independent Python calc, kill-proven, honest-degradation |
 | 3 | PowerPoint (PPTX) | prompt-only / not shipped | No passing read-back oracle |
 | 4 | PDF | prompt-only / not shipped | No passing round-trip oracle |
 | 5 | Legal Redline | **Real (wedge)** | docx_tracked_changes_readback + clause_coverage + no_hallucinated_citation + injection_block + airgap_egress + audit_log_integrity — all passing |

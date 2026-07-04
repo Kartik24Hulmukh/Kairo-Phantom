@@ -1,0 +1,10 @@
+{
+  "spec_id": "excel_s02_pivot",
+  "description": "Pivot-style aggregation with SUMIF/AVERAGEIF",
+  "edits": [],
+  "expected_sheets": [
+    "Data",
+    "Pivot"
+  ],
+  "expected_named_ranges": []
+}

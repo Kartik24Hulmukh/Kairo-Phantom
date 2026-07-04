@@ -334,11 +334,100 @@ def cmd_verify(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 
+def cmd_excel(args: argparse.Namespace) -> int:
+    """Run the Excel pipeline: edit → recompute → verify → audit."""
+    input_path = str(Path(args.input).resolve())
+    spec_path = str(Path(args.spec).resolve())
+    out_dir = Path(args.out).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if not os.path.exists(input_path):
+        print(f"ERROR: Input file not found: {input_path}", file=sys.stderr)
+        return 1
+    if not os.path.exists(spec_path):
+        print(f"ERROR: Spec file not found: {spec_path}", file=sys.stderr)
+        return 1
+
+    import json
+
+    with open(spec_path, encoding="utf-8") as f:
+        spec = json.load(f)
+
+    # Get or create Ed25519 keypair
+    key_dir = out_dir / ".keys"
+    private_key, public_key, pub_pem = _get_or_create_keypair(key_dir)
+    (out_dir / "public_key.pem").write_bytes(pub_pem)
+
+    output_xlsx = str(out_dir / "recomputed.xlsx")
+
+    from kairo.excel.engine import excel_pipeline
+
+    print("Running Excel pipeline (offline, LibreOffice recompute)...")
+    result = excel_pipeline(
+        input_path=input_path,
+        output_path=output_xlsx,
+        edits=spec.get("edits", []),
+        expected_values={
+            k: float(v) for k, v in spec.get("expected_values", {}).items()
+        },
+        expected_sheets=spec.get("expected_sheets"),
+        expected_named_ranges=spec.get("expected_named_ranges"),
+        private_key=private_key,
+        author="Kairo Excel",
+    )
+
+    if not result.ok:
+        print(f"ERROR: Excel pipeline failed: {result.error}", file=sys.stderr)
+        return 1
+
+    # Write audit log + egress report
+    (out_dir / "audit_log.json").write_text(result.audit_log_json, encoding="utf-8")
+    (out_dir / "zero_egress_report.json").write_text(
+        result.egress_report_json, encoding="utf-8"
+    )
+
+    # Verify audit log
+    from kairo.oracles.ed25519_audit_log import Ed25519AuditLog
+
+    entries = Ed25519AuditLog.entries_from_json(result.audit_log_json)
+    audit_ok = Ed25519AuditLog.verify_chain(entries, public_key)
+
+    from kairo.oracles.zero_egress_report import (
+        report_from_json,
+        verify_zero_egress_report,
+    )
+
+    egress_report = report_from_json(result.egress_report_json)
+    egress_ok = verify_zero_egress_report(egress_report, public_key)
+
+    print()
+    print("=" * 60)
+    print("  KAIRO PHANTOM — EXCEL PIPELINE COMPLETE")
+    print("=" * 60)
+    print(f"  Input:       {Path(input_path).name}")
+    print(f"  Spec:        {Path(spec_path).name}")
+    print(f"  Output:      {out_dir}")
+    print(f"  Edits applied:  {len(result.applied_edits)}")
+    print(f"  Recompute verified: {'✅' if result.recompute_verified else '❌'}")
+    print()
+    print(f"  Audit log verified: {'✅' if audit_ok else '❌'}")
+    print(f"  Zero-egress report verified: {'✅' if egress_ok else '❌'}")
+    print()
+    print(f"  Artifacts in {out_dir}/:")
+    print("    recomputed.xlsx")
+    print("    audit_log.json")
+    print("    zero_egress_report.json")
+    print("    public_key.pem")
+    print("=" * 60)
+
+    return 0 if (audit_ok and egress_ok and result.recompute_verified) else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(
         prog="kairo",
-        description="Kairo Phantom — Legal-redline wedge CLI (offline, signed, verifiable)",
+        description="Kairo Phantom — offline document-intelligence CLI (signed, verifiable)",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -372,6 +461,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     verify_parser.add_argument("public_key", help="Path to the public key .pem file")
 
+    # excel subcommand
+    excel_parser = subparsers.add_parser(
+        "excel",
+        help="Run the Excel pipeline: edit → recompute → verify",
+    )
+    excel_parser.add_argument("input", help="Path to the input .xlsx file")
+    excel_parser.add_argument(
+        "spec", help="Path to the spec .json file (edits + expected values)"
+    )
+    excel_parser.add_argument(
+        "--out",
+        default="excel_output",
+        help="Output directory for artifacts (default: excel_output)",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command is None:
@@ -382,6 +486,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_redline(args)
     elif args.command == "verify":
         return cmd_verify(args)
+    elif args.command == "excel":
+        return cmd_excel(args)
 
     return 1
 

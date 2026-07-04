@@ -251,3 +251,46 @@ class TestVerifyTamperKillProof:
         r2 = _run_cli("verify", out, os.path.join(out, "public_key.pem"))
         assert r2.returncode == 1, "Verify should FAIL on broken chain"
         assert "FAIL ❌" in r2.stdout
+
+
+# ======================== EXCEL CLI TESTS ========================
+
+
+class TestExcelCLI:
+    """Tests for the `excel` CLI subcommand."""
+
+    def test_excel_happy_path(self, tmp_path):
+        """The excel CLI runs the pipeline and produces artifacts."""
+        out = str(tmp_path / "excel_output")
+        spec = os.path.join(_REPO_ROOT, "fixtures", "excel", "s01_spec.json")
+        # Add expected_values to the spec for the CLI
+        import json as _json
+
+        with open(os.path.join(_REPO_ROOT, "fixtures", "excel", "s01_ground_truth.json")) as f:
+            gt = _json.load(f)
+        # Create a combined spec with expected_values
+        combined_spec = os.path.join(str(tmp_path), "combined_spec.json")
+        with open(spec) as f:
+            spec_data = _json.load(f)
+        spec_data["expected_values"] = gt
+        with open(combined_spec, "w") as f:
+            _json.dump(spec_data, f)
+
+        contract = os.path.join(_REPO_ROOT, "fixtures", "excel", "s01_financial_model.xlsx")
+        result = _run_cli("excel", contract, combined_spec, "--out", out)
+
+        assert result.returncode == 0, f"Excel CLI failed: {result.stderr}"
+        assert "EXCEL PIPELINE COMPLETE" in result.stdout
+        assert "Recompute verified: ✅" in result.stdout
+        assert "Audit log verified: ✅" in result.stdout
+        assert os.path.exists(os.path.join(out, "recomputed.xlsx"))
+        assert os.path.exists(os.path.join(out, "audit_log.json"))
+        assert os.path.exists(os.path.join(out, "zero_egress_report.json"))
+
+    def test_excel_missing_input(self, tmp_path):
+        """Excel CLI returns error for missing input file."""
+        out = str(tmp_path / "output")
+        spec = os.path.join(_REPO_ROOT, "fixtures", "excel", "s01_spec.json")
+        result = _run_cli("excel", "nonexistent.xlsx", spec, "--out", out)
+        assert result.returncode == 1
+        assert "not found" in result.stderr.lower()
