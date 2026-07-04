@@ -1,0 +1,38 @@
+{
+  "playbook_id": "wedge_s02_msa",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "payment_terms",
+      "clause_label": "Payment Terms",
+      "match_text": "within 60 days of receipt",
+      "replacement_text": "within 30 days of receipt",
+      "citation": "Firm Standard PT-002: Net 30",
+      "rationale": "Client prefers net-30."
+    },
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Washington",
+      "replacement_text": "laws of the State of Oregon",
+      "citation": "Firm Standard GL-007: Governing Law (OR)",
+      "rationale": "Client is OR-based."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice",
+      "match_text": "120 days written notice",
+      "replacement_text": "60 days prior written notice",
+      "citation": "Firm Standard TN-008: 60-Day Notice",
+      "rationale": "Reduce notice period."
+    },
+    {
+      "clause_id": "confidentiality_survival",
+      "clause_label": "Confidentiality Survival",
+      "match_text": "survive for two years after termination",
+      "replacement_text": "survive for three (3) years after termination",
+      "citation": "Firm Standard CS-009: 3-Year Survival",
+      "rationale": "Extend survival period."
+    }
+  ]
+}

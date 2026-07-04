@@ -1,0 +1,38 @@
+{
+  "playbook_id": "wedge_s03_employment",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice",
+      "match_text": "14 days notice",
+      "replacement_text": "30 days prior written notice",
+      "citation": "Firm Standard TN-010: 30-Day Notice",
+      "rationale": "Standard notice period."
+    },
+    {
+      "clause_id": "non_compete_duration",
+      "clause_label": "Non-Compete Duration",
+      "match_text": "period of two years following termination",
+      "replacement_text": "period of one (1) year following termination",
+      "citation": "Firm Standard NC-011: 1-Year Non-Compete",
+      "rationale": "Reduce non-compete to 1 year."
+    },
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of New York",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard GL-001: Governing Law (CA)",
+      "rationale": "Employee is CA-based."
+    },
+    {
+      "clause_id": "indemnification_cap",
+      "clause_label": "Indemnification Cap",
+      "match_text": "The Company\u2019s indemnification obligation shall be unlimited.",
+      "replacement_text": "The Company\u2019s indemnification obligation shall not exceed the Employee\u2019s annual base salary.",
+      "citation": "Firm Standard IC-012: Indemnification Cap",
+      "rationale": "Cap indemnification."
+    }
+  ]
+}

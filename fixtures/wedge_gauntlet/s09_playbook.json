@@ -1,0 +1,46 @@
+{
+  "playbook_id": "wedge_s09_adaptive",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard GL-001: Governing Law (CA)",
+      "rationale": "Client is CA-based."
+    },
+    {
+      "clause_id": "liability_cap",
+      "clause_label": "Limitation of Liability",
+      "match_text": "Liability is unlimited for all claims arising under this Agreement.",
+      "replacement_text": "Each Party\u2019s aggregate liability shall not exceed fees paid in the preceding 12 months.",
+      "citation": "Firm Standard LC-003: Liability Cap",
+      "rationale": "Cap liability."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice",
+      "match_text": "90 days notice",
+      "replacement_text": "30 days prior written notice",
+      "citation": "Firm Standard TN-004: 30-Day Notice",
+      "rationale": "Reduce notice period."
+    },
+    {
+      "clause_id": "confidentiality_survival",
+      "clause_label": "Confidentiality Survival",
+      "match_text": "survive termination of this Agreement for five years",
+      "replacement_text": "survive termination of this Agreement for three (3) years",
+      "citation": "Firm Standard CS-005: 3-Year Survival",
+      "rationale": "Reduce survival."
+    },
+    {
+      "clause_id": "indemnification_cap",
+      "clause_label": "Indemnification Cap",
+      "match_text": "The indemnifying Party\u2019s total liability for indemnification shall be unlimited.",
+      "replacement_text": "The indemnifying Party\u2019s total liability for indemnification shall not exceed the fees paid in the preceding 12 months.",
+      "citation": "Firm Standard IC-006: Indemnification Cap",
+      "rationale": "Cap indemnification."
+    }
+  ]
+}

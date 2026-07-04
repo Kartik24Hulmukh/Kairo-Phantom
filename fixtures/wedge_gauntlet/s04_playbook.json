@@ -1,0 +1,30 @@
+{
+  "playbook_id": "wedge_s04_lease",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Texas",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard GL-001: Governing Law (CA)",
+      "rationale": "Tenant is CA-based."
+    },
+    {
+      "clause_id": "liability_cap",
+      "clause_label": "Limitation of Liability",
+      "match_text": "Tenant\u2019s liability for any breach of this Lease shall be unlimited.",
+      "replacement_text": "Tenant\u2019s liability for any breach of this Lease shall not exceed six months of rent.",
+      "citation": "Firm Standard LC-013: Lease Liability Cap",
+      "rationale": "Cap lease liability."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice",
+      "match_text": "180 days notice",
+      "replacement_text": "90 days prior written notice",
+      "citation": "Firm Standard TN-014: 90-Day Notice",
+      "rationale": "Standard commercial lease notice."
+    }
+  ]
+}

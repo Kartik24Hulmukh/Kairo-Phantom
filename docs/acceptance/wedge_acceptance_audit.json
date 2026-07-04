@@ -1,0 +1,56 @@
+{
+  "wedge": "legal-redline",
+  "timestamp": "2026-07-04T12:51:19.719092+00:00",
+  "sha": "ac14d4445b01030e0f2664d49735898f6b98c291",
+  "status": "Real (wedge)",
+  "claims": [
+    "Legal-redline wedge: production-ready (offline, cited, injection-safe, signed, air-gapped)"
+  ],
+  "non_claims": [
+    "The 12-domain product is NOT declared ready.",
+    "All other domains are prompt-only / not shipped."
+  ],
+  "oracles_verified": [
+    "docx_tracked_changes_readback",
+    "clause_coverage",
+    "no_hallucinated_citation",
+    "injection_block (reference monitor)",
+    "airgap_egress",
+    "audit_log_integrity (Ed25519 chain)",
+    "zero_egress_report (Ed25519 signed)"
+  ],
+  "gauntlet_scenarios": 14,
+  "categories": [
+    "happy_path",
+    "air_gap",
+    "injection",
+    "false_refusal",
+    "ungrounded_prevention",
+    "missing_clause"
+  ],
+  "canary_breaks": [
+    "audit_log_tamper \u2192 verify_chain FAILS",
+    "egress_report_tamper \u2192 verify_zero_egress_report FAILS",
+    "wrong_public_key \u2192 verify_chain FAILS",
+    "monitor_disabled \u2192 unauthorized edit granted (proves load-bearing)",
+    "sealed_mode_deactivation \u2192 SealedModeViolation raised"
+  ],
+  "mutation_testing": {
+    "tool": "mutmut",
+    "modules_tested": [
+      "kairo/oracles/legal_redline_pipeline.py",
+      "kairo/oracles/ed25519_audit_log.py",
+      "kairo/oracles/zero_egress_report.py",
+      "kairo/security/reference_monitor.py"
+    ],
+    "survivors": "See mutation summary \u2014 mutmut not available in CI; manual review performed"
+  },
+  "residual_risks": [
+    "The reference monitor is deterministic and blocks all privileged actions from tainted-only input on the current corpus. Future LLM-assisted edit generation would need the monitor extended to cover new action types.",
+    "The airgap egress oracle uses socket-level interception (not NIC capture). This is stated honestly in the report.",
+    "Mutation testing was performed via manual review (mutmut not installed in CI). See mutation summary for details."
+  ],
+  "claim_discipline": "We declare ONLY: 'Legal-redline wedge: production-ready (offline, cited, injection-safe, signed, air-gapped)'. We do NOT declare the 12-domain product ready. All other domains are prompt-only / not shipped.",
+  "signature": "2adcff3f1071f4a50eb2625e93afe6c783ebf8f9ba74c66d57b16026d7556ed91530992477c0ef1ecdcb1dd78c351cc95d633853af10feb08944262915faaa02",
+  "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA3qm9T0YShotkmkd3eZQNlgb11sI4u8oFjtjtUMctL5k=\n-----END PUBLIC KEY-----\n"
+}

@@ -1,0 +1,14 @@
+{
+  "playbook_id": "wedge_s12_ungrounded",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of California",
+      "citation": "FABRICATED CITATION: This citation does not exist in any firm clause library and is a test of the no_hallucinated_citation oracle.",
+      "rationale": "Client is CA-based."
+    }
+  ]
+}

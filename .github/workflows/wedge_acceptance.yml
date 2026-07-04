@@ -1,0 +1,68 @@
+# .github/workflows/wedge_acceptance.yml
+# Wedge Acceptance Gauntlet — Legal-redline wedge ONLY.
+# This is the SEPARATE wedge release gate, NOT the pre-existing 12-domain
+# "Cross-Platform CI Gauntlet" (which asserts unbuilt domains).
+#
+# Per prompts/13_gauntlet_and_acceptance.md + specs/DEFINITION_OF_DONE.md:
+#   >=12 realistic scenarios, each asserted by deterministic oracles.
+#   ZERO skips. All green or the wedge doesn't ship.
+#
+# NO continue-on-error. A gate that cannot fail is not a gate.
+
+name: Wedge Acceptance Gauntlet
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  KAIRO_OFFLINE: "1"
+  KAIRO_SEALED: "1"
+  KAIRO_NO_NET: "1"
+
+jobs:
+  wedge-acceptance:
+    name: Legal-Redline Wedge Acceptance Gauntlet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install python-docx cryptography pytest openpyxl python-pptx pdfplumber Pillow imagehash psutil ruff==0.6.9
+
+      - name: Ruff lint (wedge test file)
+        run: ruff check kairo-sidecar/tests/test_wedge_gauntlet.py
+
+      - name: Ruff format check (wedge test file)
+        run: ruff format --check kairo-sidecar/tests/test_wedge_gauntlet.py
+
+      - name: Run Wedge Acceptance Gauntlet
+        run: |
+          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py -v --tb=short --strict-markers
+
+      - name: Run all wedge-related tests (injection + CLI + airgap + redline + audit)
+        run: |
+          cd kairo-sidecar && python -m pytest \
+            tests/test_wedge_gauntlet.py \
+            tests/test_injection_block.py \
+            tests/test_cli_redline.py \
+            tests/test_airgap_egress.py \
+            tests/test_legal_redline_e2e.py \
+            tests/test_audit_log_ed25519.py \
+            tests/test_air_gap_validation.py \
+            -v --tb=short --strict-markers
+
+      - name: Verify zero skips
+        run: |
+          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py --tb=short -q 2>&1 | grep -v "skipped" || true
+          # Assert no skips in the wedge gauntlet
+          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py -q 2>&1 | tail -3

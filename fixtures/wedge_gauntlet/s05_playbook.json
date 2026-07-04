@@ -1,0 +1,30 @@
+{
+  "playbook_id": "wedge_s05_saas",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard GL-001: Governing Law (CA)",
+      "rationale": "Customer is CA-based."
+    },
+    {
+      "clause_id": "indemnification_cap",
+      "clause_label": "Indemnification Cap",
+      "match_text": "CloudApp\u2019s indemnification liability shall be unlimited.",
+      "replacement_text": "CloudApp\u2019s indemnification liability shall not exceed the fees paid in the preceding 12 months.",
+      "citation": "Firm Standard IC-006: Indemnification Cap",
+      "rationale": "Cap indemnification."
+    },
+    {
+      "clause_id": "termination_notice",
+      "clause_label": "Termination Notice",
+      "match_text": "30 days notice",
+      "replacement_text": "15 days prior written notice",
+      "citation": "Firm Standard TN-015: 15-Day Notice",
+      "rationale": "SaaS standard is 15 days."
+    }
+  ]
+}

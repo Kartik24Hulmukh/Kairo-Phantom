@@ -1,0 +1,22 @@
+{
+  "playbook_id": "wedge_s13_missing",
+  "description": "Wedge gauntlet playbook",
+  "clauses": [
+    {
+      "clause_id": "governing_law",
+      "clause_label": "Governing Law",
+      "match_text": "laws of the State of Delaware",
+      "replacement_text": "laws of the State of California",
+      "citation": "Firm Standard GL-001: Governing Law (CA)",
+      "rationale": "Client is CA-based."
+    },
+    {
+      "clause_id": "liability_cap",
+      "clause_label": "Limitation of Liability",
+      "match_text": "Liability is unlimited for all claims arising under this Agreement.",
+      "replacement_text": "Liability shall be capped.",
+      "citation": "Firm Standard LC-003: Liability Cap",
+      "rationale": "Cap liability."
+    }
+  ]
+}
