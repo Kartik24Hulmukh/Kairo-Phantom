@@ -546,34 +546,18 @@ def cmd_pdf(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """CLI entry point."""
+    """CLI entry point — builds parser from the domain plugin registry.
+
+    Shared commands (verify) are added directly.  Domain commands
+    (redline, excel, pdf, data) are added via kairo.domains.registry.discover().
+    """
     parser = argparse.ArgumentParser(
         prog="kairo",
         description="Kairo Phantom — offline document-intelligence CLI (signed, verifiable)",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # redline subcommand
-    redline_parser = subparsers.add_parser(
-        "redline",
-        help="Run the real redline pipeline on a contract",
-    )
-    redline_parser.add_argument("contract", help="Path to the contract .docx file")
-    redline_parser.add_argument(
-        "playbook", help="Path to the redline playbook .json file"
-    )
-    redline_parser.add_argument(
-        "--sealed",
-        action="store_true",
-        help="Run in sealed mode with live air-gap egress capture",
-    )
-    redline_parser.add_argument(
-        "--out",
-        default="redline_output",
-        help="Output directory for artifacts (default: redline_output)",
-    )
-
-    # verify subcommand
+    # Shared verify command (not domain-specific)
     verify_parser = subparsers.add_parser(
         "verify",
         help="Independently verify audit log + zero-egress report",
@@ -583,68 +567,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     verify_parser.add_argument("public_key", help="Path to the public key .pem file")
 
-    # excel subcommand
-    excel_parser = subparsers.add_parser(
-        "excel",
-        help="Run the Excel pipeline: edit → recompute → verify",
-    )
-    excel_parser.add_argument("input", help="Path to the input .xlsx file")
-    excel_parser.add_argument(
-        "spec", help="Path to the spec .json file (edits + expected values)"
-    )
-    excel_parser.add_argument(
-        "--out",
-        default="excel_output",
-        help="Output directory for artifacts (default: excel_output)",
-    )
+    # Domain commands via the plugin registry
+    from kairo.domains.registry import discover
 
-    # pdf subcommand
-    pdf_parser = subparsers.add_parser(
-        "pdf",
-        help="Run the PDF pipeline: extract/redact/fill/sign/verify",
-    )
-    pdf_subparsers = pdf_parser.add_subparsers(dest="action", help="PDF action")
-
-    # pdf extract
-    pdf_extract = pdf_subparsers.add_parser(
-        "extract", help="Extract text + coordinates"
-    )
-    pdf_extract.add_argument("input", help="Path to the input .pdf file")
-    pdf_extract.add_argument(
-        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
-    )
-
-    # pdf redact
-    pdf_redact = pdf_subparsers.add_parser(
-        "redact", help="True redaction of target text"
-    )
-    pdf_redact.add_argument("input", help="Path to the input .pdf file")
-    pdf_redact.add_argument("spec", help="Path to the spec .json file (target_text)")
-    pdf_redact.add_argument(
-        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
-    )
-
-    # pdf fill
-    pdf_fill = pdf_subparsers.add_parser("fill", help="Fill AcroForm fields")
-    pdf_fill.add_argument("input", help="Path to the input .pdf file")
-    pdf_fill.add_argument("spec", help="Path to the spec .json file (field values)")
-    pdf_fill.add_argument(
-        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
-    )
-
-    # pdf sign
-    pdf_sign = pdf_subparsers.add_parser("sign", help="Apply PAdES digital signature")
-    pdf_sign.add_argument("input", help="Path to the input .pdf file")
-    pdf_sign.add_argument(
-        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
-    )
-
-    # pdf verify
-    pdf_verify = pdf_subparsers.add_parser("verify", help="Verify digital signatures")
-    pdf_verify.add_argument("input", help="Path to the signed .pdf file")
-    pdf_verify.add_argument(
-        "--out", default="pdf_output", help="Output directory (default: pdf_output)"
-    )
+    domains = discover()
+    domain_by_cli: dict[str, object] = {}
+    for domain in domains:
+        domain.register_cli(subparsers)
+        domain_by_cli[domain.cli_name] = domain
 
     args = parser.parse_args(argv)
 
@@ -652,15 +582,22 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 1
 
+    # Shared verify command
+    if args.command == "verify":
+        return cmd_verify(args)
+
+    # Domain commands via registry
+    if args.command in domain_by_cli:
+        return domain_by_cli[args.command].run(args)
+
+    # Fallback for backward compat (should not reach here if registry is working)
     if args.command == "redline":
         return cmd_redline(args)
-    elif args.command == "verify":
-        return cmd_verify(args)
     elif args.command == "excel":
         return cmd_excel(args)
     elif args.command == "pdf":
         if not hasattr(args, "action") or args.action is None:
-            pdf_parser.print_help()
+            parser.print_help()
             return 1
         return cmd_pdf(args)
 
