@@ -157,9 +157,9 @@ class TestPdfTextRoundtrip:
 
         # The shifted box must NOT match the original within tolerance
         drift = abs(shifted.x0 - first[0].x0)
-        assert drift > 1.0, (
-            f"Kill-proof FAILED: shifted box drift {drift} should exceed tolerance 1.0"
-        )
+        assert (
+            drift > 1.0
+        ), f"Kill-proof FAILED: shifted box drift {drift} should exceed tolerance 1.0"
 
     def test_text_contains_expected_fragments(self):
         """Extracted text contains expected content from the born-digital fixture."""
@@ -222,9 +222,9 @@ class TestPdfRenderDiff:
 
         # Compare the PDF against itself — text is present, so text_absent=False
         passed, _, _, text_absent = pdf_render_diff(_S01, _S01, target)
-        assert not passed, (
-            "Kill-proof FAILED: oracle passed when text is still present (black box only)"
-        )
+        assert (
+            not passed
+        ), "Kill-proof FAILED: oracle passed when text is still present (black box only)"
         assert not text_absent, "Text should be present in the un-redacted PDF"
 
     def test_render_hash_deterministic(self):
@@ -279,9 +279,9 @@ class TestPdfFormReadback:
 
         # Now verify that a wrong expected value would fail
         actual = readback.get("full_name", "")
-        assert actual != "Wrong Name", (
-            "Kill-proof FAILED: readback returned wrong value that should not match"
-        )
+        assert (
+            actual != "Wrong Name"
+        ), "Kill-proof FAILED: readback returned wrong value that should not match"
 
     def test_form_field_count(self):
         """The form PDF has the expected number of fields."""
@@ -338,9 +338,9 @@ class TestPdfSignatureVerify:
 
             # The tampered PDF should fail verification
             valid_after = verify_signature(tampered_path)
-            assert not valid_after, (
-                "Kill-proof FAILED: tampered PDF signature still verified as valid"
-            )
+            assert (
+                not valid_after
+            ), "Kill-proof FAILED: tampered PDF signature still verified as valid"
 
 
 # ---------------------------------------------------------------------------
@@ -529,9 +529,9 @@ class TestTrustStackIntegration:
             public_key = private_key.public_key()
             entries = Ed25519AuditLog.entries_from_json(result.audit_log_json)
             assert len(entries) > 0, "Audit log should have entries"
-            assert Ed25519AuditLog.verify_chain(entries, public_key), (
-                "Audit log chain verification failed"
-            )
+            assert Ed25519AuditLog.verify_chain(
+                entries, public_key
+            ), "Audit log chain verification failed"
 
             # Verify egress report
             from kairo.oracles.zero_egress_report import (
@@ -540,9 +540,9 @@ class TestTrustStackIntegration:
             )
 
             report = report_from_json(result.egress_report_json)
-            assert verify_zero_egress_report(report, public_key), (
-                "Zero-egress report verification failed"
-            )
+            assert verify_zero_egress_report(
+                report, public_key
+            ), "Zero-egress report verification failed"
 
     def test_pipeline_redact_with_audit(self):
         """Redaction pipeline emits audit log with redaction edits."""
