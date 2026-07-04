@@ -157,6 +157,9 @@ jobs:
         working-directory: kairo-sidecar
         run: ruff format --check . --config pyproject.toml
 
+      - name: STATUS.md freshness check (blocking)
+        run: python scripts/gen_status.py --check
+
       - name: Mypy type check (blocking, ratcheted — see pyproject.toml)
         working-directory: kairo-sidecar
         run: mypy sidecar --config-file pyproject.toml
