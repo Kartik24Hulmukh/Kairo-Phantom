@@ -188,7 +188,7 @@ jobs:
       - name: Install Linux system deps (for CUA / clipboard tests)
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y xdotool xclip at-spi2-core libx11-dev libxtst-dev libxi-dev libxrandr-dev libxinerama-dev libxcursor-dev libxkbcommon-dev libxdo-dev pkg-config xvfb
+          sudo apt-get install -y xdotool xclip at-spi2-core libx11-dev libxtst-dev libxi-dev libxrandr-dev libxinerama-dev libxcursor-dev libxkbcommon-dev libxdo-dev pkg-config xvfb libreoffice-calc
 
       - name: Run no-skip static gate (BLOCKING — forbidden patterns scan)
         run: python scripts/ci/no_skip_gates.py

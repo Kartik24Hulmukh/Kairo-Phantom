@@ -36,6 +36,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update -q
+          sudo apt-get install -y libreoffice-calc
           pip install --upgrade pip
           pip install python-docx cryptography pytest openpyxl python-pptx pdfplumber Pillow imagehash psutil ruff==0.6.9
 
@@ -47,14 +49,15 @@ jobs:
 
       - name: Run Wedge Acceptance Gauntlet
         run: |
-          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py -v --tb=short --strict-markers
+          cd kairo-sidecar && python -m pytest tests/test_wedge_gauntlet.py tests/test_excel_oracles.py -v --tb=short --strict-markers
 
-      - name: Run all wedge-related tests (injection + CLI + airgap + redline + audit)
+      - name: Run all wedge-related tests (injection + CLI + airgap + redline + audit + Excel)
         run: |
           cd kairo-sidecar && python -m pytest \
             tests/test_wedge_gauntlet.py \
             tests/test_injection_block.py \
             tests/test_cli_redline.py \
+            tests/test_excel_oracles.py \
             tests/test_airgap_egress.py \
             tests/test_legal_redline_e2e.py \
             tests/test_audit_log_ed25519.py \
