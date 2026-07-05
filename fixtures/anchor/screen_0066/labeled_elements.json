@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Cut",
+      "expected_element_id": "elem_66_4"
+    },
+    {
+      "query": "Accept",
+      "expected_element_id": "elem_66_8"
+    },
+    {
+      "query": "Maybe",
+      "expected_element_id": "elem_66_7"
+    },
+    {
+      "query": "Settings",
+      "expected_element_id": "elem_66_5"
+    },
+    {
+      "query": "Reload",
+      "expected_element_id": "elem_66_9"
+    }
+  ]
+}

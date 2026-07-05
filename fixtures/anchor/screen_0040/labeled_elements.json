@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_40_13"
+    },
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_40_3"
+    },
+    {
+      "query": "Preferences 1",
+      "expected_element_id": "elem_40_6"
+    },
+    {
+      "query": "Help 1",
+      "expected_element_id": "elem_40_17"
+    },
+    {
+      "query": "Import 1",
+      "expected_element_id": "elem_40_20"
+    }
+  ]
+}

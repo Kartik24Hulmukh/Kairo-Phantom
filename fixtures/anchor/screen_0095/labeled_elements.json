@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Filter",
+      "expected_element_id": "elem_95_16"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_95_6"
+    },
+    {
+      "query": "Send",
+      "expected_element_id": "elem_95_10"
+    },
+    {
+      "query": "Name",
+      "expected_element_id": "elem_95_12"
+    },
+    {
+      "query": "Address",
+      "expected_element_id": "elem_95_11"
+    }
+  ]
+}

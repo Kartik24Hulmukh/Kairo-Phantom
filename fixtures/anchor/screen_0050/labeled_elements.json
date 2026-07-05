@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "View 1",
+      "expected_element_id": "elem_50_19"
+    },
+    {
+      "query": "Description",
+      "expected_element_id": "elem_50_10"
+    },
+    {
+      "query": "Edit",
+      "expected_element_id": "elem_50_14"
+    },
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_50_17"
+    },
+    {
+      "query": "Email",
+      "expected_element_id": "elem_50_4"
+    }
+  ]
+}

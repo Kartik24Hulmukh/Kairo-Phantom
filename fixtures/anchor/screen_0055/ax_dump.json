@@ -1,0 +1,203 @@
+{
+  "app_name": "Task Manager",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_55_0",
+      "role": "combo",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 1275,
+        "y": 573,
+        "width": 181,
+        "height": 33
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_1",
+      "role": "label",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 555,
+        "y": 144,
+        "width": 291,
+        "height": 56
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_2",
+      "role": "menu_item",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 637,
+        "y": 627,
+        "width": 278,
+        "height": 63
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_3",
+      "role": "text",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 59,
+        "y": 482,
+        "width": 281,
+        "height": 26
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_4",
+      "role": "text",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 873,
+        "y": 401,
+        "width": 95,
+        "height": 96
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_5",
+      "role": "table",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 639,
+        "y": 340,
+        "width": 259,
+        "height": 45
+      },
+      "affordance": "read",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_6",
+      "role": "edit",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 1162,
+        "y": 134,
+        "width": 73,
+        "height": 79
+      },
+      "affordance": "type",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_7",
+      "role": "scroll_bar",
+      "name": "Bookmark 1",
+      "value": "",
+      "bounds": {
+        "x": 963,
+        "y": 237,
+        "width": 292,
+        "height": 48
+      },
+      "affordance": "scroll",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_8",
+      "role": "radio",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 802,
+        "y": 187,
+        "width": 229,
+        "height": 62
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_9",
+      "role": "tab",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 998,
+        "y": 30,
+        "width": 66,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_10",
+      "role": "toolbar",
+      "name": "Bookmark 2",
+      "value": "",
+      "bounds": {
+        "x": 1732,
+        "y": 174,
+        "width": 122,
+        "height": 64
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_11",
+      "role": "list",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 210,
+        "y": 415,
+        "width": 259,
+        "height": 33
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_55_12",
+      "role": "edit",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1091,
+        "y": 472,
+        "width": 152,
+        "height": 95
+      },
+      "affordance": "type",
+      "confidence": 0.91,
+      "is_canvas": false
+    }
+  ]
+}

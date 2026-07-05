@@ -1,0 +1,233 @@
+{
+  "app_name": "Scrollable List",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "frame_elem_0",
+      "role": "label",
+      "name": "Item 0",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 20,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_1",
+      "role": "combo",
+      "name": "Item 1",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 80,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_2",
+      "role": "toolbar",
+      "name": "Item 2",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 140,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_3",
+      "role": "panel",
+      "name": "Item 3",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 200,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_4",
+      "role": "link",
+      "name": "Item 4",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 260,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_5",
+      "role": "toolbar",
+      "name": "Item 5",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 320,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_6",
+      "role": "panel",
+      "name": "Item 6",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 380,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_7",
+      "role": "table",
+      "name": "Item 7",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 440,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_8",
+      "role": "checkbox",
+      "name": "Item 8",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 500,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_9",
+      "role": "combo",
+      "name": "Item 9",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 560,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_10",
+      "role": "panel",
+      "name": "Item 10",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 620,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_11",
+      "role": "list",
+      "name": "Item 11",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 680,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_12",
+      "role": "tab",
+      "name": "Item 12",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 740,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_13",
+      "role": "list",
+      "name": "Item 13",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 800,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "frame_elem_14",
+      "role": "panel",
+      "name": "Item 14",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 860,
+        "width": 200,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    }
+  ]
+}

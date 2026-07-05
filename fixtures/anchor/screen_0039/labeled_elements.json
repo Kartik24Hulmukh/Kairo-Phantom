@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_39_5"
+    },
+    {
+      "query": "Amount",
+      "expected_element_id": "elem_39_8"
+    },
+    {
+      "query": "Fullscreen 1",
+      "expected_element_id": "elem_39_7"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "elem_39_6"
+    },
+    {
+      "query": "File",
+      "expected_element_id": "elem_39_4"
+    }
+  ]
+}

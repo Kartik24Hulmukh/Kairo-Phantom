@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_32_5"
+    },
+    {
+      "query": "Notes",
+      "expected_element_id": "elem_32_4"
+    },
+    {
+      "query": "Edit Item",
+      "expected_element_id": "elem_32_1"
+    },
+    {
+      "query": "File",
+      "expected_element_id": "elem_32_11"
+    },
+    {
+      "query": "Preferences 1",
+      "expected_element_id": "elem_32_13"
+    }
+  ]
+}

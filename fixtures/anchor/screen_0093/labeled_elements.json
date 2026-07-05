@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Search",
+      "expected_element_id": "elem_93_7"
+    },
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_93_14"
+    },
+    {
+      "query": "Edit",
+      "expected_element_id": "elem_93_10"
+    },
+    {
+      "query": "OK",
+      "expected_element_id": "elem_93_6"
+    },
+    {
+      "query": "Add",
+      "expected_element_id": "elem_93_13"
+    }
+  ]
+}

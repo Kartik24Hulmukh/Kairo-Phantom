@@ -1,0 +1,143 @@
+{
+  "app_name": "Email Client",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_69_0",
+      "role": "table",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 6,
+        "y": 410,
+        "width": 101,
+        "height": 100
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_1",
+      "role": "edit",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 323,
+        "y": 255,
+        "width": 182,
+        "height": 36
+      },
+      "affordance": "type",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_2",
+      "role": "tree_item",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 924,
+        "y": 489,
+        "width": 273,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_3",
+      "role": "tab",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 406,
+        "y": 86,
+        "width": 156,
+        "height": 67
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_4",
+      "role": "panel",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 42,
+        "y": 23,
+        "width": 286,
+        "height": 91
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_5",
+      "role": "checkbox",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 947,
+        "y": 203,
+        "width": 117,
+        "height": 41
+      },
+      "affordance": "toggle",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_6",
+      "role": "tree_item",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 305,
+        "y": 91,
+        "width": 295,
+        "height": 67
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_7",
+      "role": "combo",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 1471,
+        "y": 538,
+        "width": 161,
+        "height": 78
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_69_8",
+      "role": "toolbar",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 459,
+        "y": 730,
+        "width": 102,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    }
+  ]
+}

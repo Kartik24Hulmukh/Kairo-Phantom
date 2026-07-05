@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Edit Item 1",
+      "expected_element_id": "elem_41_8"
+    },
+    {
+      "query": "Pause",
+      "expected_element_id": "elem_41_2"
+    },
+    {
+      "query": "Description",
+      "expected_element_id": "elem_41_9"
+    },
+    {
+      "query": "Phone",
+      "expected_element_id": "elem_41_1"
+    },
+    {
+      "query": "Share",
+      "expected_element_id": "elem_41_6"
+    }
+  ]
+}

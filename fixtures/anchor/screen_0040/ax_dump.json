@@ -1,0 +1,323 @@
+{
+  "app_name": "File Explorer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_40_0",
+      "role": "combo",
+      "name": "Help",
+      "value": "",
+      "bounds": {
+        "x": 780,
+        "y": 148,
+        "width": 63,
+        "height": 27
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_1",
+      "role": "menu_item",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 1399,
+        "y": 256,
+        "width": 87,
+        "height": 27
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_2",
+      "role": "scroll_bar",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 1543,
+        "y": 554,
+        "width": 58,
+        "height": 65
+      },
+      "affordance": "scroll",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_3",
+      "role": "combo",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 1520,
+        "y": 662,
+        "width": 193,
+        "height": 69
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_4",
+      "role": "scroll_bar",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 781,
+        "y": 396,
+        "width": 156,
+        "height": 60
+      },
+      "affordance": "scroll",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_5",
+      "role": "text",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 1523,
+        "y": 257,
+        "width": 101,
+        "height": 99
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_6",
+      "role": "table",
+      "name": "Preferences 1",
+      "value": "",
+      "bounds": {
+        "x": 1297,
+        "y": 721,
+        "width": 231,
+        "height": 67
+      },
+      "affordance": "read",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_7",
+      "role": "link",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 602,
+        "y": 459,
+        "width": 95,
+        "height": 29
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_8",
+      "role": "menu_item",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 244,
+        "y": 386,
+        "width": 60,
+        "height": 74
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_9",
+      "role": "radio",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 329,
+        "y": 598,
+        "width": 266,
+        "height": 52
+      },
+      "affordance": "select",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_10",
+      "role": "table",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 81,
+        "y": 157,
+        "width": 287,
+        "height": 61
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_11",
+      "role": "scroll_bar",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 1617,
+        "y": 586,
+        "width": 190,
+        "height": 65
+      },
+      "affordance": "scroll",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_12",
+      "role": "tab",
+      "name": "Preferences 2",
+      "value": "",
+      "bounds": {
+        "x": 376,
+        "y": 533,
+        "width": 67,
+        "height": 84
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_13",
+      "role": "panel",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 715,
+        "y": 226,
+        "width": 276,
+        "height": 47
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_14",
+      "role": "tab",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 601,
+        "y": 223,
+        "width": 293,
+        "height": 99
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_15",
+      "role": "button",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 1369,
+        "y": 354,
+        "width": 164,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_16",
+      "role": "checkbox",
+      "name": "Save",
+      "value": "",
+      "bounds": {
+        "x": 1397,
+        "y": 328,
+        "width": 147,
+        "height": 34
+      },
+      "affordance": "toggle",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_17",
+      "role": "scroll_bar",
+      "name": "Help 1",
+      "value": "",
+      "bounds": {
+        "x": 1058,
+        "y": 841,
+        "width": 247,
+        "height": 67
+      },
+      "affordance": "scroll",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_18",
+      "role": "table",
+      "name": "Upload 1",
+      "value": "",
+      "bounds": {
+        "x": 89,
+        "y": 303,
+        "width": 279,
+        "height": 44
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_19",
+      "role": "edit",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 342,
+        "y": 791,
+        "width": 187,
+        "height": 88
+      },
+      "affordance": "type",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_40_20",
+      "role": "edit",
+      "name": "Import 1",
+      "value": "",
+      "bounds": {
+        "x": 1372,
+        "y": 644,
+        "width": 248,
+        "height": 47
+      },
+      "affordance": "type",
+      "confidence": 0.98,
+      "is_canvas": false
+    }
+  ]
+}

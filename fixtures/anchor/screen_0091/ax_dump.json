@@ -1,0 +1,143 @@
+{
+  "app_name": "Maps",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_91_0",
+      "role": "tree_item",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 623,
+        "y": 112,
+        "width": 118,
+        "height": 66
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_1",
+      "role": "label",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 505,
+        "y": 327,
+        "width": 279,
+        "height": 26
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_2",
+      "role": "button",
+      "name": "Close 1",
+      "value": "",
+      "bounds": {
+        "x": 1352,
+        "y": 762,
+        "width": 132,
+        "height": 47
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_3",
+      "role": "radio",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 882,
+        "y": 189,
+        "width": 114,
+        "height": 82
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_4",
+      "role": "scroll_bar",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 198,
+        "y": 685,
+        "width": 53,
+        "height": 90
+      },
+      "affordance": "scroll",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_5",
+      "role": "list",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 738,
+        "y": 759,
+        "width": 257,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_6",
+      "role": "label",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 1331,
+        "y": 282,
+        "width": 103,
+        "height": 94
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_7",
+      "role": "combo",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 1289,
+        "y": 760,
+        "width": 204,
+        "height": 35
+      },
+      "affordance": "select",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_91_8",
+      "role": "link",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1443,
+        "y": 456,
+        "width": 286,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "app_name": "Calendar",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_72_0",
+      "role": "menu_item",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 1726,
+        "y": 402,
+        "width": 61,
+        "height": 30
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_1",
+      "role": "scroll_bar",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 1202,
+        "y": 741,
+        "width": 166,
+        "height": 77
+      },
+      "affordance": "scroll",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_2",
+      "role": "radio",
+      "name": "Maybe",
+      "value": "",
+      "bounds": {
+        "x": 1784,
+        "y": 829,
+        "width": 97,
+        "height": 47
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_3",
+      "role": "radio",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 888,
+        "y": 547,
+        "width": 54,
+        "height": 20
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_4",
+      "role": "button",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1343,
+        "y": 488,
+        "width": 167,
+        "height": 71
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_5",
+      "role": "toolbar",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1266,
+        "y": 832,
+        "width": 299,
+        "height": 98
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_6",
+      "role": "panel",
+      "name": "Quantity 1",
+      "value": "",
+      "bounds": {
+        "x": 179,
+        "y": 128,
+        "width": 84,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_7",
+      "role": "button",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1759,
+        "y": 27,
+        "width": 103,
+        "height": 81
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_8",
+      "role": "checkbox",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 1724,
+        "y": 641,
+        "width": 269,
+        "height": 88
+      },
+      "affordance": "toggle",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_9",
+      "role": "scroll_bar",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 303,
+        "y": 485,
+        "width": 158,
+        "height": 22
+      },
+      "affordance": "scroll",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_72_10",
+      "role": "list",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 993,
+        "y": 482,
+        "width": 55,
+        "height": 77
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    }
+  ]
+}

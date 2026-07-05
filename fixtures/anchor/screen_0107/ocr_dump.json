@@ -1,0 +1,112 @@
+{
+  "elements": [
+    {
+      "id": "ocr_107_0",
+      "text": "Sort",
+      "bounds": {
+        "x": 867,
+        "y": 683,
+        "width": 54,
+        "height": 32
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_1",
+      "text": "Maybe",
+      "bounds": {
+        "x": 588,
+        "y": 718,
+        "width": 47,
+        "height": 16
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_2",
+      "text": "Import",
+      "bounds": {
+        "x": 460,
+        "y": 392,
+        "width": 55,
+        "height": 19
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_3",
+      "text": "Attach",
+      "bounds": {
+        "x": 1552,
+        "y": 387,
+        "width": 55,
+        "height": 22
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_4",
+      "text": "Submit",
+      "bounds": {
+        "x": 1204,
+        "y": 674,
+        "width": 49,
+        "height": 26
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_5",
+      "text": "Download",
+      "bounds": {
+        "x": 1275,
+        "y": 807,
+        "width": 196,
+        "height": 17
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_6",
+      "text": "Open",
+      "bounds": {
+        "x": 604,
+        "y": 790,
+        "width": 50,
+        "height": 18
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_7",
+      "text": "Download 1",
+      "bounds": {
+        "x": 511,
+        "y": 715,
+        "width": 129,
+        "height": 28
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_107_8",
+      "text": "Help",
+      "bounds": {
+        "x": 1790,
+        "y": 283,
+        "width": 45,
+        "height": 16
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "app_name": "Illustrator",
+  "is_canvas": true,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_116_0",
+      "role": "panel",
+      "name": "Canvas",
+      "value": "",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Address",
+      "expected_element_id": "elem_75_11"
+    },
+    {
+      "query": "Volume",
+      "expected_element_id": "elem_75_3"
+    },
+    {
+      "query": "Fullscreen",
+      "expected_element_id": "elem_75_19"
+    },
+    {
+      "query": "Username",
+      "expected_element_id": "elem_75_13"
+    },
+    {
+      "query": "Address 1",
+      "expected_element_id": "elem_75_18"
+    }
+  ]
+}

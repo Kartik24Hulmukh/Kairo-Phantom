@@ -1,0 +1,188 @@
+{
+  "app_name": "Settings",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_34_0",
+      "role": "table",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 342,
+        "y": 216,
+        "width": 256,
+        "height": 44
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_1",
+      "role": "tree_item",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1399,
+        "y": 445,
+        "width": 101,
+        "height": 100
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_2",
+      "role": "radio",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 1489,
+        "y": 826,
+        "width": 67,
+        "height": 31
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_3",
+      "role": "panel",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 1754,
+        "y": 282,
+        "width": 183,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_4",
+      "role": "button",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 230,
+        "y": 424,
+        "width": 88,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_5",
+      "role": "combo",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 1152,
+        "y": 798,
+        "width": 75,
+        "height": 56
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_6",
+      "role": "label",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 540,
+        "y": 392,
+        "width": 217,
+        "height": 82
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_7",
+      "role": "toolbar",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 352,
+        "y": 282,
+        "width": 153,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_8",
+      "role": "panel",
+      "name": "Open 1",
+      "value": "",
+      "bounds": {
+        "x": 810,
+        "y": 900,
+        "width": 134,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_9",
+      "role": "toolbar",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 762,
+        "y": 20,
+        "width": 136,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_10",
+      "role": "toolbar",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 1779,
+        "y": 233,
+        "width": 84,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_34_11",
+      "role": "table",
+      "name": "Yes 1",
+      "value": "",
+      "bounds": {
+        "x": 551,
+        "y": 746,
+        "width": 156,
+        "height": 97
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    }
+  ]
+}

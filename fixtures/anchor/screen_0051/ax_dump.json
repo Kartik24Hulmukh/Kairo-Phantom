@@ -1,0 +1,218 @@
+{
+  "app_name": "Browser",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_51_0",
+      "role": "link",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 632,
+        "y": 705,
+        "width": 230,
+        "height": 87
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_1",
+      "role": "tree_item",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 1343,
+        "y": 578,
+        "width": 284,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_2",
+      "role": "combo",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 650,
+        "y": 859,
+        "width": 275,
+        "height": 38
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_3",
+      "role": "tab",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 842,
+        "y": 310,
+        "width": 163,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_4",
+      "role": "link",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 269,
+        "y": 189,
+        "width": 56,
+        "height": 98
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_5",
+      "role": "checkbox",
+      "name": "Username",
+      "value": "",
+      "bounds": {
+        "x": 472,
+        "y": 703,
+        "width": 56,
+        "height": 65
+      },
+      "affordance": "toggle",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_6",
+      "role": "toolbar",
+      "name": "Delete 1",
+      "value": "",
+      "bounds": {
+        "x": 1028,
+        "y": 866,
+        "width": 204,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_7",
+      "role": "label",
+      "name": "Redo 1",
+      "value": "",
+      "bounds": {
+        "x": 1745,
+        "y": 396,
+        "width": 175,
+        "height": 80
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_8",
+      "role": "link",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 66,
+        "y": 418,
+        "width": 245,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_9",
+      "role": "tree_item",
+      "name": "Preferences 1",
+      "value": "",
+      "bounds": {
+        "x": 1520,
+        "y": 687,
+        "width": 101,
+        "height": 46
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_10",
+      "role": "table",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 1408,
+        "y": 332,
+        "width": 271,
+        "height": 78
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_11",
+      "role": "tree_item",
+      "name": "Volume",
+      "value": "",
+      "bounds": {
+        "x": 1589,
+        "y": 42,
+        "width": 205,
+        "height": 68
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_12",
+      "role": "panel",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 1066,
+        "y": 111,
+        "width": 165,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_51_13",
+      "role": "text",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 1062,
+        "y": 550,
+        "width": 151,
+        "height": 25
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    }
+  ]
+}

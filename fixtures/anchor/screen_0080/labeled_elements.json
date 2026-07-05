@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Play 1",
+      "expected_element_id": "elem_80_16"
+    },
+    {
+      "query": "Address",
+      "expected_element_id": "elem_80_14"
+    },
+    {
+      "query": "Edit Item 1",
+      "expected_element_id": "elem_80_5"
+    },
+    {
+      "query": "Bookmark",
+      "expected_element_id": "elem_80_10"
+    },
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_80_22"
+    }
+  ]
+}

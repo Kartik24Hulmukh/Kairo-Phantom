@@ -1,0 +1,60 @@
+{
+  "elements": [
+    {
+      "id": "vis_110_0",
+      "role": "slider",
+      "name": "Share",
+      "bounds": {
+        "x": 1785,
+        "y": 590,
+        "width": 71,
+        "height": 23
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_110_1",
+      "role": "handle",
+      "name": "Amount",
+      "bounds": {
+        "x": 699,
+        "y": 325,
+        "width": 32,
+        "height": 73
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_110_2",
+      "role": "shape",
+      "name": "Forward",
+      "bounds": {
+        "x": 1686,
+        "y": 836,
+        "width": 43,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_110_3",
+      "role": "shape",
+      "name": "Mute",
+      "bounds": {
+        "x": 286,
+        "y": 759,
+        "width": 35,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    }
+  ]
+}

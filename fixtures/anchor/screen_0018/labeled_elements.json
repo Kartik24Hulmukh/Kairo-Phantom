@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Address",
+      "expected_element_id": "elem_18_3"
+    },
+    {
+      "query": "Username",
+      "expected_element_id": "elem_18_10"
+    },
+    {
+      "query": "Notes",
+      "expected_element_id": "elem_18_5"
+    },
+    {
+      "query": "Delete",
+      "expected_element_id": "elem_18_11"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_18_7"
+    }
+  ]
+}

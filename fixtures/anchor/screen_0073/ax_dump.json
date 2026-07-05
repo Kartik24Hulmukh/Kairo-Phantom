@@ -1,0 +1,128 @@
+{
+  "app_name": "Settings",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_73_0",
+      "role": "tree_item",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 1737,
+        "y": 507,
+        "width": 238,
+        "height": 94
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_1",
+      "role": "scroll_bar",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 998,
+        "y": 409,
+        "width": 174,
+        "height": 85
+      },
+      "affordance": "scroll",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_2",
+      "role": "toolbar",
+      "name": "Username",
+      "value": "",
+      "bounds": {
+        "x": 1462,
+        "y": 62,
+        "width": 185,
+        "height": 22
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_3",
+      "role": "tab",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 548,
+        "y": 663,
+        "width": 156,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_4",
+      "role": "label",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1428,
+        "y": 446,
+        "width": 55,
+        "height": 40
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_5",
+      "role": "link",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 704,
+        "y": 448,
+        "width": 109,
+        "height": 84
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_6",
+      "role": "tab",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 268,
+        "y": 300,
+        "width": 235,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_73_7",
+      "role": "label",
+      "name": "Share 1",
+      "value": "",
+      "bounds": {
+        "x": 1637,
+        "y": 864,
+        "width": 91,
+        "height": 99
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

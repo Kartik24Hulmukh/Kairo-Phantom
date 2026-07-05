@@ -1,0 +1,173 @@
+{
+  "app_name": "File Explorer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_24_0",
+      "role": "tab",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 1386,
+        "y": 819,
+        "width": 92,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_1",
+      "role": "menu_item",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 1146,
+        "y": 436,
+        "width": 295,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_2",
+      "role": "panel",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 381,
+        "y": 655,
+        "width": 218,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_3",
+      "role": "link",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1212,
+        "y": 439,
+        "width": 149,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_4",
+      "role": "link",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1540,
+        "y": 720,
+        "width": 257,
+        "height": 28
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_5",
+      "role": "menu_item",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 667,
+        "y": 201,
+        "width": 167,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_6",
+      "role": "toolbar",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 1222,
+        "y": 397,
+        "width": 206,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_7",
+      "role": "label",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 1731,
+        "y": 468,
+        "width": 208,
+        "height": 42
+      },
+      "affordance": "read",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_8",
+      "role": "scroll_bar",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1376,
+        "y": 137,
+        "width": 130,
+        "height": 35
+      },
+      "affordance": "scroll",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_9",
+      "role": "combo",
+      "name": "Redo 1",
+      "value": "",
+      "bounds": {
+        "x": 764,
+        "y": 710,
+        "width": 86,
+        "height": 85
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_24_10",
+      "role": "list",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 866,
+        "y": 190,
+        "width": 174,
+        "height": 88
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Phone",
+      "expected_element_id": "elem_45_3"
+    },
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_45_9"
+    },
+    {
+      "query": "Submit 1",
+      "expected_element_id": "elem_45_8"
+    },
+    {
+      "query": "Username",
+      "expected_element_id": "elem_45_6"
+    },
+    {
+      "query": "Submit",
+      "expected_element_id": "elem_45_2"
+    }
+  ]
+}

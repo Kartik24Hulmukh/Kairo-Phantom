@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Open",
+      "expected_element_id": "elem_73_1"
+    },
+    {
+      "query": "Share",
+      "expected_element_id": "elem_73_5"
+    },
+    {
+      "query": "OK",
+      "expected_element_id": "elem_73_3"
+    },
+    {
+      "query": "Share 1",
+      "expected_element_id": "elem_73_7"
+    },
+    {
+      "query": "Back",
+      "expected_element_id": "elem_73_4"
+    }
+  ]
+}

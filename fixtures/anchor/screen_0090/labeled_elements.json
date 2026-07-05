@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Reload",
+      "expected_element_id": "elem_90_7"
+    },
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_90_19"
+    },
+    {
+      "query": "Remove",
+      "expected_element_id": "elem_90_10"
+    },
+    {
+      "query": "Refresh",
+      "expected_element_id": "elem_90_13"
+    },
+    {
+      "query": "Email",
+      "expected_element_id": "elem_90_15"
+    }
+  ]
+}

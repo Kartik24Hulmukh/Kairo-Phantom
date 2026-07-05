@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Add",
+      "expected_element_id": "elem_16_2"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_16_12"
+    },
+    {
+      "query": "Edit Item",
+      "expected_element_id": "elem_16_16"
+    },
+    {
+      "query": "Quantity 1",
+      "expected_element_id": "elem_16_14"
+    },
+    {
+      "query": "Remove 1",
+      "expected_element_id": "elem_16_7"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "elements": [
+    {
+      "id": "ocr_112_0",
+      "text": "Notes",
+      "bounds": {
+        "x": 1113,
+        "y": 334,
+        "width": 187,
+        "height": 34
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_1",
+      "text": "Date",
+      "bounds": {
+        "x": 633,
+        "y": 219,
+        "width": 70,
+        "height": 24
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_2",
+      "text": "Filter",
+      "bounds": {
+        "x": 508,
+        "y": 223,
+        "width": 113,
+        "height": 23
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_3",
+      "text": "Import",
+      "bounds": {
+        "x": 1414,
+        "y": 335,
+        "width": 76,
+        "height": 18
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_4",
+      "text": "Save",
+      "bounds": {
+        "x": 1091,
+        "y": 822,
+        "width": 83,
+        "height": 15
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_5",
+      "text": "Upload",
+      "bounds": {
+        "x": 1155,
+        "y": 600,
+        "width": 89,
+        "height": 15
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_6",
+      "text": "Refresh",
+      "bounds": {
+        "x": 102,
+        "y": 428,
+        "width": 92,
+        "height": 24
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_7",
+      "text": "Sort",
+      "bounds": {
+        "x": 1116,
+        "y": 179,
+        "width": 156,
+        "height": 24
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_8",
+      "text": "Attach",
+      "bounds": {
+        "x": 1780,
+        "y": 172,
+        "width": 153,
+        "height": 28
+      },
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_9",
+      "text": "Apply",
+      "bounds": {
+        "x": 330,
+        "y": 335,
+        "width": 69,
+        "height": 26
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_112_10",
+      "text": "Paste",
+      "bounds": {
+        "x": 505,
+        "y": 794,
+        "width": 59,
+        "height": 25
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    }
+  ]
+}

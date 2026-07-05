@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Help",
+      "expected_element_id": "elem_64_11"
+    },
+    {
+      "query": "Add",
+      "expected_element_id": "elem_64_9"
+    },
+    {
+      "query": "Mute",
+      "expected_element_id": "elem_64_1"
+    },
+    {
+      "query": "Print",
+      "expected_element_id": "elem_64_2"
+    },
+    {
+      "query": "Undo",
+      "expected_element_id": "elem_64_5"
+    }
+  ]
+}

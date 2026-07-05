@@ -1,0 +1,74 @@
+{
+  "elements": [
+    {
+      "id": "vis_118_0",
+      "role": "button",
+      "name": "Import",
+      "bounds": {
+        "x": 125,
+        "y": 649,
+        "width": 44,
+        "height": 29
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_118_1",
+      "role": "shape",
+      "name": "Import 1",
+      "bounds": {
+        "x": 1710,
+        "y": 748,
+        "width": 70,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_118_2",
+      "role": "icon",
+      "name": "Name",
+      "bounds": {
+        "x": 1081,
+        "y": 614,
+        "width": 73,
+        "height": 67
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_118_3",
+      "role": "icon",
+      "name": "Address",
+      "bounds": {
+        "x": 481,
+        "y": 314,
+        "width": 33,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_118_4",
+      "role": "handle",
+      "name": "Share",
+      "bounds": {
+        "x": 1108,
+        "y": 724,
+        "width": 60,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    }
+  ]
+}

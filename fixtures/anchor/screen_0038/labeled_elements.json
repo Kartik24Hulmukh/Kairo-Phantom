@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Close",
+      "expected_element_id": "elem_38_11"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "elem_38_3"
+    },
+    {
+      "query": "Forward",
+      "expected_element_id": "elem_38_1"
+    },
+    {
+      "query": "Download",
+      "expected_element_id": "elem_38_5"
+    },
+    {
+      "query": "Maybe",
+      "expected_element_id": "elem_38_7"
+    }
+  ]
+}

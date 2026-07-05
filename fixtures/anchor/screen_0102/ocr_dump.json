@@ -1,0 +1,184 @@
+{
+  "elements": [
+    {
+      "id": "ocr_102_0",
+      "text": "Amount",
+      "bounds": {
+        "x": 833,
+        "y": 799,
+        "width": 148,
+        "height": 21
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_1",
+      "text": "Attach",
+      "bounds": {
+        "x": 411,
+        "y": 658,
+        "width": 110,
+        "height": 31
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_2",
+      "text": "Email",
+      "bounds": {
+        "x": 273,
+        "y": 747,
+        "width": 52,
+        "height": 35
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_3",
+      "text": "Name",
+      "bounds": {
+        "x": 499,
+        "y": 167,
+        "width": 53,
+        "height": 16
+      },
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_4",
+      "text": "Volume",
+      "bounds": {
+        "x": 1139,
+        "y": 153,
+        "width": 110,
+        "height": 22
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_5",
+      "text": "Import",
+      "bounds": {
+        "x": 257,
+        "y": 275,
+        "width": 108,
+        "height": 30
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_6",
+      "text": "Time",
+      "bounds": {
+        "x": 466,
+        "y": 405,
+        "width": 113,
+        "height": 37
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_7",
+      "text": "Download",
+      "bounds": {
+        "x": 243,
+        "y": 239,
+        "width": 168,
+        "height": 37
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_8",
+      "text": "Notes",
+      "bounds": {
+        "x": 1796,
+        "y": 754,
+        "width": 101,
+        "height": 20
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_9",
+      "text": "Edit Item",
+      "bounds": {
+        "x": 391,
+        "y": 241,
+        "width": 125,
+        "height": 29
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_10",
+      "text": "View",
+      "bounds": {
+        "x": 1414,
+        "y": 535,
+        "width": 149,
+        "height": 25
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_11",
+      "text": "Edit",
+      "bounds": {
+        "x": 590,
+        "y": 128,
+        "width": 83,
+        "height": 36
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_12",
+      "text": "Email 1",
+      "bounds": {
+        "x": 1020,
+        "y": 647,
+        "width": 40,
+        "height": 30
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_13",
+      "text": "Amount 1",
+      "bounds": {
+        "x": 142,
+        "y": 888,
+        "width": 44,
+        "height": 33
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_102_14",
+      "text": "Edit Item 1",
+      "bounds": {
+        "x": 1125,
+        "y": 565,
+        "width": 82,
+        "height": 39
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    }
+  ]
+}

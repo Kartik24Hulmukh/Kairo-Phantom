@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Delete",
+      "expected_element_id": "elem_31_0"
+    },
+    {
+      "query": "Print",
+      "expected_element_id": "elem_31_8"
+    },
+    {
+      "query": "Decline 1",
+      "expected_element_id": "elem_31_7"
+    },
+    {
+      "query": "Upload",
+      "expected_element_id": "elem_31_9"
+    },
+    {
+      "query": "Accept",
+      "expected_element_id": "elem_31_2"
+    }
+  ]
+}

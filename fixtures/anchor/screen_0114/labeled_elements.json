@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Email",
+      "expected_element_id": "ocr_114_0"
+    },
+    {
+      "query": "Send",
+      "expected_element_id": "ocr_114_1"
+    },
+    {
+      "query": "Quantity",
+      "expected_element_id": "ocr_114_2"
+    },
+    {
+      "query": "Name",
+      "expected_element_id": "ocr_114_3"
+    },
+    {
+      "query": "Volume",
+      "expected_element_id": "ocr_114_4"
+    }
+  ]
+}

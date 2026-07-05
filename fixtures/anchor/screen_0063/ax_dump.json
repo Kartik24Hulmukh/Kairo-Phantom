@@ -1,0 +1,128 @@
+{
+  "app_name": "Browser",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_63_0",
+      "role": "radio",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1311,
+        "y": 854,
+        "width": 212,
+        "height": 80
+      },
+      "affordance": "select",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_1",
+      "role": "scroll_bar",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 367,
+        "y": 503,
+        "width": 282,
+        "height": 51
+      },
+      "affordance": "scroll",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_2",
+      "role": "radio",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 136,
+        "y": 613,
+        "width": 240,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_3",
+      "role": "tree_item",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1286,
+        "y": 702,
+        "width": 171,
+        "height": 35
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_4",
+      "role": "button",
+      "name": "Address 1",
+      "value": "",
+      "bounds": {
+        "x": 333,
+        "y": 595,
+        "width": 64,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_5",
+      "role": "list",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 334,
+        "y": 54,
+        "width": 119,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_6",
+      "role": "label",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 593,
+        "y": 298,
+        "width": 185,
+        "height": 29
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_63_7",
+      "role": "menu_item",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 1226,
+        "y": 770,
+        "width": 92,
+        "height": 89
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    }
+  ]
+}

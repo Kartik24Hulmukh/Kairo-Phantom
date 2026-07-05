@@ -1,0 +1,46 @@
+{
+  "elements": [
+    {
+      "id": "vis_113_0",
+      "role": "shape",
+      "name": "No",
+      "bounds": {
+        "x": 1693,
+        "y": 438,
+        "width": 25,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_113_1",
+      "role": "shape",
+      "name": "Import",
+      "bounds": {
+        "x": 1182,
+        "y": 114,
+        "width": 61,
+        "height": 23
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_113_2",
+      "role": "shape",
+      "name": "Username",
+      "bounds": {
+        "x": 371,
+        "y": 598,
+        "width": 45,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    }
+  ]
+}

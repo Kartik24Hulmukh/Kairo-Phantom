@@ -1,0 +1,130 @@
+{
+  "elements": [
+    {
+      "id": "vis_108_0",
+      "role": "button",
+      "name": "Import",
+      "bounds": {
+        "x": 837,
+        "y": 504,
+        "width": 22,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_1",
+      "role": "icon",
+      "name": "Description",
+      "bounds": {
+        "x": 932,
+        "y": 595,
+        "width": 23,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_2",
+      "role": "shape",
+      "name": "Maybe",
+      "bounds": {
+        "x": 762,
+        "y": 76,
+        "width": 78,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_3",
+      "role": "slider",
+      "name": "Maybe 1",
+      "bounds": {
+        "x": 1260,
+        "y": 271,
+        "width": 68,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_4",
+      "role": "icon",
+      "name": "Cancel",
+      "bounds": {
+        "x": 925,
+        "y": 851,
+        "width": 66,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_5",
+      "role": "button",
+      "name": "Bookmark",
+      "bounds": {
+        "x": 1527,
+        "y": 744,
+        "width": 38,
+        "height": 74
+      },
+      "affordance": "click",
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_6",
+      "role": "button",
+      "name": "Paste",
+      "bounds": {
+        "x": 1213,
+        "y": 837,
+        "width": 53,
+        "height": 36
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_7",
+      "role": "shape",
+      "name": "Date",
+      "bounds": {
+        "x": 537,
+        "y": 185,
+        "width": 78,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_108_8",
+      "role": "slider",
+      "name": "Maybe 2",
+      "bounds": {
+        "x": 561,
+        "y": 839,
+        "width": 54,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Attach",
+      "expected_element_id": "ocr_103_0"
+    },
+    {
+      "query": "Import",
+      "expected_element_id": "ocr_103_1"
+    },
+    {
+      "query": "Back",
+      "expected_element_id": "ocr_103_2"
+    },
+    {
+      "query": "Accept",
+      "expected_element_id": "ocr_103_3"
+    },
+    {
+      "query": "Description",
+      "expected_element_id": "ocr_103_4"
+    }
+  ]
+}

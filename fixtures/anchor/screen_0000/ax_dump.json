@@ -1,0 +1,173 @@
+{
+  "app_name": "File Explorer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_0_0",
+      "role": "radio",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 457,
+        "y": 142,
+        "width": 238,
+        "height": 33
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_1",
+      "role": "edit",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 65,
+        "y": 30,
+        "width": 73,
+        "height": 47
+      },
+      "affordance": "type",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_2",
+      "role": "button",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 1466,
+        "y": 665,
+        "width": 229,
+        "height": 89
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_3",
+      "role": "table",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1657,
+        "y": 890,
+        "width": 51,
+        "height": 40
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_4",
+      "role": "tab",
+      "name": "Date 1",
+      "value": "",
+      "bounds": {
+        "x": 318,
+        "y": 220,
+        "width": 295,
+        "height": 63
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_5",
+      "role": "panel",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 735,
+        "y": 867,
+        "width": 138,
+        "height": 97
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_6",
+      "role": "text",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 1098,
+        "y": 127,
+        "width": 299,
+        "height": 68
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_7",
+      "role": "scroll_bar",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 1182,
+        "y": 196,
+        "width": 230,
+        "height": 28
+      },
+      "affordance": "scroll",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_8",
+      "role": "checkbox",
+      "name": "Amount",
+      "value": "",
+      "bounds": {
+        "x": 163,
+        "y": 875,
+        "width": 109,
+        "height": 32
+      },
+      "affordance": "toggle",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_9",
+      "role": "table",
+      "name": "Next 1",
+      "value": "",
+      "bounds": {
+        "x": 333,
+        "y": 379,
+        "width": 140,
+        "height": 46
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_0_10",
+      "role": "edit",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1093,
+        "y": 746,
+        "width": 112,
+        "height": 40
+      },
+      "affordance": "type",
+      "confidence": 0.92,
+      "is_canvas": false
+    }
+  ]
+}

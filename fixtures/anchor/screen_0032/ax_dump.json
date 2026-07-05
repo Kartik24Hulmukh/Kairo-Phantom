@@ -1,0 +1,218 @@
+{
+  "app_name": "Browser",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_32_0",
+      "role": "tab",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1643,
+        "y": 864,
+        "width": 272,
+        "height": 61
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_1",
+      "role": "list",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 1585,
+        "y": 113,
+        "width": 266,
+        "height": 87
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_2",
+      "role": "edit",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 1442,
+        "y": 678,
+        "width": 151,
+        "height": 95
+      },
+      "affordance": "type",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_3",
+      "role": "scroll_bar",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 279,
+        "y": 161,
+        "width": 237,
+        "height": 75
+      },
+      "affordance": "scroll",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_4",
+      "role": "toolbar",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 356,
+        "y": 724,
+        "width": 297,
+        "height": 91
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_5",
+      "role": "label",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 1363,
+        "y": 603,
+        "width": 258,
+        "height": 42
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_6",
+      "role": "scroll_bar",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 363,
+        "y": 746,
+        "width": 50,
+        "height": 93
+      },
+      "affordance": "scroll",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_7",
+      "role": "text",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 1233,
+        "y": 325,
+        "width": 285,
+        "height": 98
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_8",
+      "role": "combo",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 288,
+        "y": 339,
+        "width": 240,
+        "height": 29
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_9",
+      "role": "tab",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1302,
+        "y": 90,
+        "width": 260,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_10",
+      "role": "radio",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 511,
+        "y": 709,
+        "width": 67,
+        "height": 64
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_11",
+      "role": "combo",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 98,
+        "y": 395,
+        "width": 162,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_12",
+      "role": "tree_item",
+      "name": "Attach 1",
+      "value": "",
+      "bounds": {
+        "x": 775,
+        "y": 359,
+        "width": 189,
+        "height": 68
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_32_13",
+      "role": "toolbar",
+      "name": "Preferences 1",
+      "value": "",
+      "bounds": {
+        "x": 333,
+        "y": 462,
+        "width": 68,
+        "height": 24
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    }
+  ]
+}

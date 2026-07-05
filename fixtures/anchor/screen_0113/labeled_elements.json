@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Accept",
+      "expected_element_id": "ocr_113_0"
+    },
+    {
+      "query": "Amount",
+      "expected_element_id": "ocr_113_1"
+    },
+    {
+      "query": "Decline",
+      "expected_element_id": "ocr_113_2"
+    },
+    {
+      "query": "Time",
+      "expected_element_id": "ocr_113_3"
+    },
+    {
+      "query": "Refresh",
+      "expected_element_id": "ocr_113_4"
+    }
+  ]
+}

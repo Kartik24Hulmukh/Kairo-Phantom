@@ -1,0 +1,173 @@
+{
+  "app_name": "File Explorer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_86_0",
+      "role": "table",
+      "name": "Volume",
+      "value": "",
+      "bounds": {
+        "x": 1485,
+        "y": 855,
+        "width": 277,
+        "height": 37
+      },
+      "affordance": "read",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_1",
+      "role": "combo",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1432,
+        "y": 769,
+        "width": 258,
+        "height": 51
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_2",
+      "role": "toolbar",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 846,
+        "y": 676,
+        "width": 98,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_3",
+      "role": "tab",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 1297,
+        "y": 368,
+        "width": 273,
+        "height": 25
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_4",
+      "role": "tab",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 478,
+        "y": 621,
+        "width": 174,
+        "height": 71
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_5",
+      "role": "edit",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 876,
+        "y": 487,
+        "width": 218,
+        "height": 32
+      },
+      "affordance": "type",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_6",
+      "role": "scroll_bar",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1458,
+        "y": 146,
+        "width": 272,
+        "height": 86
+      },
+      "affordance": "scroll",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_7",
+      "role": "text",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 1019,
+        "y": 815,
+        "width": 72,
+        "height": 58
+      },
+      "affordance": "read",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_8",
+      "role": "table",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 913,
+        "y": 118,
+        "width": 173,
+        "height": 89
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_9",
+      "role": "link",
+      "name": "Cut 1",
+      "value": "",
+      "bounds": {
+        "x": 1542,
+        "y": 675,
+        "width": 229,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_86_10",
+      "role": "button",
+      "name": "Paste",
+      "value": "",
+      "bounds": {
+        "x": 668,
+        "y": 392,
+        "width": 246,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

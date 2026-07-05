@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Edit",
+      "expected_element_id": "elem_78_2"
+    },
+    {
+      "query": "Stop",
+      "expected_element_id": "elem_78_3"
+    },
+    {
+      "query": "Name",
+      "expected_element_id": "elem_78_0"
+    },
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_78_7"
+    },
+    {
+      "query": "View 1",
+      "expected_element_id": "elem_78_6"
+    }
+  ]
+}

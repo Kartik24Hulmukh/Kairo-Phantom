@@ -1,0 +1,323 @@
+{
+  "app_name": "Chat App",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_98_0",
+      "role": "menu_item",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 442,
+        "y": 356,
+        "width": 103,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_1",
+      "role": "button",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 1666,
+        "y": 372,
+        "width": 54,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_2",
+      "role": "combo",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1328,
+        "y": 466,
+        "width": 155,
+        "height": 72
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_3",
+      "role": "tree_item",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 232,
+        "y": 180,
+        "width": 167,
+        "height": 74
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_4",
+      "role": "menu_item",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 781,
+        "y": 291,
+        "width": 266,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_5",
+      "role": "combo",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 1650,
+        "y": 857,
+        "width": 76,
+        "height": 31
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_6",
+      "role": "tree_item",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 1016,
+        "y": 767,
+        "width": 242,
+        "height": 99
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_7",
+      "role": "combo",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 1030,
+        "y": 595,
+        "width": 256,
+        "height": 24
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_8",
+      "role": "tree_item",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 456,
+        "y": 795,
+        "width": 166,
+        "height": 90
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_9",
+      "role": "link",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 254,
+        "y": 359,
+        "width": 297,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_10",
+      "role": "panel",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 767,
+        "y": 800,
+        "width": 107,
+        "height": 84
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_11",
+      "role": "radio",
+      "name": "Description",
+      "value": "",
+      "bounds": {
+        "x": 1717,
+        "y": 814,
+        "width": 282,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_12",
+      "role": "button",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 66,
+        "y": 15,
+        "width": 56,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_13",
+      "role": "tab",
+      "name": "No 1",
+      "value": "",
+      "bounds": {
+        "x": 349,
+        "y": 585,
+        "width": 160,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_14",
+      "role": "panel",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1262,
+        "y": 659,
+        "width": 150,
+        "height": 26
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_15",
+      "role": "tree_item",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 1303,
+        "y": 399,
+        "width": 300,
+        "height": 42
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_16",
+      "role": "tab",
+      "name": "Paste",
+      "value": "",
+      "bounds": {
+        "x": 895,
+        "y": 236,
+        "width": 75,
+        "height": 36
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_17",
+      "role": "panel",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1714,
+        "y": 566,
+        "width": 90,
+        "height": 61
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_18",
+      "role": "edit",
+      "name": "Help",
+      "value": "",
+      "bounds": {
+        "x": 895,
+        "y": 11,
+        "width": 210,
+        "height": 95
+      },
+      "affordance": "type",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_19",
+      "role": "edit",
+      "name": "Play 1",
+      "value": "",
+      "bounds": {
+        "x": 51,
+        "y": 760,
+        "width": 237,
+        "height": 36
+      },
+      "affordance": "type",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_98_20",
+      "role": "label",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 490,
+        "y": 668,
+        "width": 279,
+        "height": 48
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    }
+  ]
+}

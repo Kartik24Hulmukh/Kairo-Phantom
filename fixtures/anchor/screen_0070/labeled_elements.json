@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "File",
+      "expected_element_id": "elem_70_6"
+    },
+    {
+      "query": "Email",
+      "expected_element_id": "elem_70_2"
+    },
+    {
+      "query": "Close",
+      "expected_element_id": "elem_70_5"
+    },
+    {
+      "query": "Previous",
+      "expected_element_id": "elem_70_7"
+    },
+    {
+      "query": "Attach",
+      "expected_element_id": "elem_70_10"
+    }
+  ]
+}

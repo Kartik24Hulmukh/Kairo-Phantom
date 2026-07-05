@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Password",
+      "expected_element_id": "ocr_115_0"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "ocr_115_1"
+    },
+    {
+      "query": "Remove",
+      "expected_element_id": "ocr_115_2"
+    },
+    {
+      "query": "Export",
+      "expected_element_id": "ocr_115_3"
+    },
+    {
+      "query": "Cut",
+      "expected_element_id": "ocr_115_4"
+    }
+  ]
+}

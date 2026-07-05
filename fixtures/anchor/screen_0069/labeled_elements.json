@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_69_4"
+    },
+    {
+      "query": "Add",
+      "expected_element_id": "elem_69_8"
+    },
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_69_5"
+    },
+    {
+      "query": "Time",
+      "expected_element_id": "elem_69_3"
+    },
+    {
+      "query": "Address",
+      "expected_element_id": "elem_69_6"
+    }
+  ]
+}

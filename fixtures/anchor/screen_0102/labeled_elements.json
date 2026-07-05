@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Amount",
+      "expected_element_id": "ocr_102_0"
+    },
+    {
+      "query": "Attach",
+      "expected_element_id": "ocr_102_1"
+    },
+    {
+      "query": "Email",
+      "expected_element_id": "ocr_102_2"
+    },
+    {
+      "query": "Name",
+      "expected_element_id": "ocr_102_3"
+    },
+    {
+      "query": "Volume",
+      "expected_element_id": "ocr_102_4"
+    }
+  ]
+}

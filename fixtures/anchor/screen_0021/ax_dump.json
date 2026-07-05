@@ -1,0 +1,383 @@
+{
+  "app_name": "Code Editor",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_21_0",
+      "role": "toolbar",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 1780,
+        "y": 340,
+        "width": 127,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_1",
+      "role": "link",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 1529,
+        "y": 772,
+        "width": 172,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_2",
+      "role": "link",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 490,
+        "y": 565,
+        "width": 132,
+        "height": 56
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_3",
+      "role": "label",
+      "name": "Description",
+      "value": "",
+      "bounds": {
+        "x": 535,
+        "y": 368,
+        "width": 181,
+        "height": 83
+      },
+      "affordance": "read",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_4",
+      "role": "toolbar",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 416,
+        "y": 379,
+        "width": 130,
+        "height": 72
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_5",
+      "role": "checkbox",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 33,
+        "y": 267,
+        "width": 191,
+        "height": 94
+      },
+      "affordance": "toggle",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_6",
+      "role": "tree_item",
+      "name": "Amount",
+      "value": "",
+      "bounds": {
+        "x": 312,
+        "y": 200,
+        "width": 134,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_7",
+      "role": "checkbox",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1127,
+        "y": 670,
+        "width": 291,
+        "height": 63
+      },
+      "affordance": "toggle",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_8",
+      "role": "toolbar",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 943,
+        "y": 172,
+        "width": 237,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_9",
+      "role": "toolbar",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 1110,
+        "y": 657,
+        "width": 295,
+        "height": 27
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_10",
+      "role": "edit",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 1565,
+        "y": 6,
+        "width": 155,
+        "height": 37
+      },
+      "affordance": "type",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_11",
+      "role": "checkbox",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 1448,
+        "y": 154,
+        "width": 52,
+        "height": 47
+      },
+      "affordance": "toggle",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_12",
+      "role": "label",
+      "name": "Cancel",
+      "value": "",
+      "bounds": {
+        "x": 1265,
+        "y": 653,
+        "width": 220,
+        "height": 98
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_13",
+      "role": "toolbar",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 13,
+        "y": 544,
+        "width": 191,
+        "height": 72
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_14",
+      "role": "radio",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 35,
+        "y": 514,
+        "width": 258,
+        "height": 75
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_15",
+      "role": "menu_item",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 197,
+        "y": 536,
+        "width": 88,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_16",
+      "role": "radio",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 547,
+        "y": 814,
+        "width": 151,
+        "height": 30
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_17",
+      "role": "panel",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 1157,
+        "y": 249,
+        "width": 228,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_18",
+      "role": "edit",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 191,
+        "y": 415,
+        "width": 147,
+        "height": 68
+      },
+      "affordance": "type",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_19",
+      "role": "text",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 1439,
+        "y": 175,
+        "width": 71,
+        "height": 83
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_20",
+      "role": "tab",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 1081,
+        "y": 43,
+        "width": 108,
+        "height": 47
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_21",
+      "role": "toolbar",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 95,
+        "y": 76,
+        "width": 225,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_22",
+      "role": "text",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1741,
+        "y": 322,
+        "width": 54,
+        "height": 46
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_23",
+      "role": "panel",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 612,
+        "y": 166,
+        "width": 194,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_21_24",
+      "role": "panel",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 786,
+        "y": 773,
+        "width": 239,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    }
+  ]
+}

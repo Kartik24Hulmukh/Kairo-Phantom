@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Reload",
+      "expected_element_id": "elem_11_9"
+    },
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_11_1"
+    },
+    {
+      "query": "Play",
+      "expected_element_id": "elem_11_7"
+    },
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_11_12"
+    },
+    {
+      "query": "Edit Item",
+      "expected_element_id": "elem_11_19"
+    }
+  ]
+}

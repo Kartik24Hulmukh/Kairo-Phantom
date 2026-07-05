@@ -1,0 +1,128 @@
+{
+  "app_name": "Word Processor",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_27_0",
+      "role": "combo",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 1421,
+        "y": 135,
+        "width": 172,
+        "height": 29
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_1",
+      "role": "edit",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 211,
+        "y": 320,
+        "width": 144,
+        "height": 58
+      },
+      "affordance": "type",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_2",
+      "role": "list",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 140,
+        "y": 543,
+        "width": 194,
+        "height": 21
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_3",
+      "role": "menu_item",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 719,
+        "y": 739,
+        "width": 104,
+        "height": 100
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_4",
+      "role": "tree_item",
+      "name": "Home 1",
+      "value": "",
+      "bounds": {
+        "x": 1761,
+        "y": 222,
+        "width": 72,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_5",
+      "role": "combo",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 719,
+        "y": 439,
+        "width": 130,
+        "height": 37
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_6",
+      "role": "edit",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 1133,
+        "y": 615,
+        "width": 203,
+        "height": 97
+      },
+      "affordance": "type",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_27_7",
+      "role": "button",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 420,
+        "y": 530,
+        "width": 205,
+        "height": 85
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

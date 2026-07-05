@@ -1,0 +1,172 @@
+{
+  "elements": [
+    {
+      "id": "ocr_113_0",
+      "text": "Accept",
+      "bounds": {
+        "x": 828,
+        "y": 696,
+        "width": 189,
+        "height": 22
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_1",
+      "text": "Amount",
+      "bounds": {
+        "x": 1395,
+        "y": 234,
+        "width": 116,
+        "height": 22
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_2",
+      "text": "Decline",
+      "bounds": {
+        "x": 1053,
+        "y": 865,
+        "width": 140,
+        "height": 34
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_3",
+      "text": "Time",
+      "bounds": {
+        "x": 655,
+        "y": 148,
+        "width": 96,
+        "height": 18
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_4",
+      "text": "Refresh",
+      "bounds": {
+        "x": 965,
+        "y": 383,
+        "width": 103,
+        "height": 36
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_5",
+      "text": "Stop",
+      "bounds": {
+        "x": 1001,
+        "y": 376,
+        "width": 69,
+        "height": 26
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_6",
+      "text": "Mute",
+      "bounds": {
+        "x": 1634,
+        "y": 545,
+        "width": 165,
+        "height": 34
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_7",
+      "text": "Settings",
+      "bounds": {
+        "x": 109,
+        "y": 347,
+        "width": 108,
+        "height": 31
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_8",
+      "text": "Yes",
+      "bounds": {
+        "x": 1653,
+        "y": 468,
+        "width": 55,
+        "height": 32
+      },
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_9",
+      "text": "Home",
+      "bounds": {
+        "x": 700,
+        "y": 471,
+        "width": 140,
+        "height": 40
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_10",
+      "text": "Preferences",
+      "bounds": {
+        "x": 583,
+        "y": 105,
+        "width": 108,
+        "height": 30
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_11",
+      "text": "Mute 1",
+      "bounds": {
+        "x": 1726,
+        "y": 96,
+        "width": 118,
+        "height": 29
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_12",
+      "text": "Sort",
+      "bounds": {
+        "x": 391,
+        "y": 598,
+        "width": 92,
+        "height": 39
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_113_13",
+      "text": "View",
+      "bounds": {
+        "x": 1306,
+        "y": 675,
+        "width": 124,
+        "height": 19
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    }
+  ]
+}

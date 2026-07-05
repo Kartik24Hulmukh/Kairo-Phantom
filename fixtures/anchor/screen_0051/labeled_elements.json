@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_51_8"
+    },
+    {
+      "query": "Open",
+      "expected_element_id": "elem_51_12"
+    },
+    {
+      "query": "Upload",
+      "expected_element_id": "elem_51_10"
+    },
+    {
+      "query": "Delete",
+      "expected_element_id": "elem_51_0"
+    },
+    {
+      "query": "Mute",
+      "expected_element_id": "elem_51_3"
+    }
+  ]
+}

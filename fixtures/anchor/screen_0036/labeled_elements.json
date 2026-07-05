@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "File",
+      "expected_element_id": "elem_36_3"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_36_2"
+    },
+    {
+      "query": "Export",
+      "expected_element_id": "elem_36_6"
+    },
+    {
+      "query": "Mute",
+      "expected_element_id": "elem_36_0"
+    },
+    {
+      "query": "Maybe",
+      "expected_element_id": "elem_36_1"
+    }
+  ]
+}

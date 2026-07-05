@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Date 1",
+      "expected_element_id": "elem_0_4"
+    },
+    {
+      "query": "Amount",
+      "expected_element_id": "elem_0_8"
+    },
+    {
+      "query": "Date",
+      "expected_element_id": "elem_0_3"
+    },
+    {
+      "query": "Search",
+      "expected_element_id": "elem_0_5"
+    },
+    {
+      "query": "Forward",
+      "expected_element_id": "elem_0_6"
+    }
+  ]
+}

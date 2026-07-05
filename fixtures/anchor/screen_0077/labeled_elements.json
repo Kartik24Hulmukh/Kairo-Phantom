@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Email",
+      "expected_element_id": "elem_77_4"
+    },
+    {
+      "query": "Previous",
+      "expected_element_id": "elem_77_6"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_77_3"
+    },
+    {
+      "query": "Cut",
+      "expected_element_id": "elem_77_8"
+    },
+    {
+      "query": "Back",
+      "expected_element_id": "elem_77_5"
+    }
+  ]
+}

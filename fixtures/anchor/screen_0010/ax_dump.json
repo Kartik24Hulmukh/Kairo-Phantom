@@ -1,0 +1,143 @@
+{
+  "app_name": "Control Panel",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_10_0",
+      "role": "toolbar",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 199,
+        "y": 240,
+        "width": 277,
+        "height": 88
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_1",
+      "role": "table",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 1373,
+        "y": 760,
+        "width": 228,
+        "height": 89
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_2",
+      "role": "list",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 1341,
+        "y": 101,
+        "width": 263,
+        "height": 82
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_3",
+      "role": "radio",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 1413,
+        "y": 379,
+        "width": 105,
+        "height": 76
+      },
+      "affordance": "select",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_4",
+      "role": "checkbox",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 203,
+        "y": 702,
+        "width": 144,
+        "height": 89
+      },
+      "affordance": "toggle",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_5",
+      "role": "label",
+      "name": "Cancel",
+      "value": "",
+      "bounds": {
+        "x": 815,
+        "y": 282,
+        "width": 98,
+        "height": 35
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_6",
+      "role": "table",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 1357,
+        "y": 217,
+        "width": 214,
+        "height": 96
+      },
+      "affordance": "read",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_7",
+      "role": "text",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 498,
+        "y": 128,
+        "width": 251,
+        "height": 92
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_10_8",
+      "role": "link",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 1665,
+        "y": 890,
+        "width": 109,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    }
+  ]
+}

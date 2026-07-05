@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Bookmark",
+      "expected_element_id": "elem_13_6"
+    },
+    {
+      "query": "Next",
+      "expected_element_id": "elem_13_10"
+    },
+    {
+      "query": "Phone 1",
+      "expected_element_id": "elem_13_12"
+    },
+    {
+      "query": "Time",
+      "expected_element_id": "elem_13_5"
+    },
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_13_2"
+    }
+  ]
+}

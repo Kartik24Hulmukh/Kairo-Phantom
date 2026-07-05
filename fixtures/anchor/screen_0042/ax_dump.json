@@ -1,0 +1,248 @@
+{
+  "app_name": "Code Editor",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_42_0",
+      "role": "combo",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 1374,
+        "y": 818,
+        "width": 195,
+        "height": 26
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_1",
+      "role": "table",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 595,
+        "y": 687,
+        "width": 67,
+        "height": 52
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_2",
+      "role": "toolbar",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 731,
+        "y": 131,
+        "width": 221,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_3",
+      "role": "edit",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 650,
+        "y": 497,
+        "width": 165,
+        "height": 62
+      },
+      "affordance": "type",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_4",
+      "role": "scroll_bar",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 1158,
+        "y": 580,
+        "width": 143,
+        "height": 60
+      },
+      "affordance": "scroll",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_5",
+      "role": "menu_item",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 641,
+        "y": 252,
+        "width": 251,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_6",
+      "role": "tree_item",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1720,
+        "y": 368,
+        "width": 84,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_7",
+      "role": "table",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 734,
+        "y": 793,
+        "width": 128,
+        "height": 82
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_8",
+      "role": "menu_item",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1723,
+        "y": 287,
+        "width": 269,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_9",
+      "role": "link",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1502,
+        "y": 641,
+        "width": 69,
+        "height": 29
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_10",
+      "role": "button",
+      "name": "Volume",
+      "value": "",
+      "bounds": {
+        "x": 1575,
+        "y": 604,
+        "width": 104,
+        "height": 24
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_11",
+      "role": "toolbar",
+      "name": "Copy 1",
+      "value": "",
+      "bounds": {
+        "x": 749,
+        "y": 401,
+        "width": 107,
+        "height": 95
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_12",
+      "role": "scroll_bar",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 951,
+        "y": 513,
+        "width": 180,
+        "height": 31
+      },
+      "affordance": "scroll",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_13",
+      "role": "button",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 1736,
+        "y": 825,
+        "width": 207,
+        "height": 41
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_14",
+      "role": "list",
+      "name": "Back 1",
+      "value": "",
+      "bounds": {
+        "x": 326,
+        "y": 183,
+        "width": 194,
+        "height": 92
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_42_15",
+      "role": "list",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 734,
+        "y": 41,
+        "width": 106,
+        "height": 82
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

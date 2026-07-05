@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Notes",
+      "expected_element_id": "elem_20_12"
+    },
+    {
+      "query": "Back",
+      "expected_element_id": "elem_20_1"
+    },
+    {
+      "query": "Share",
+      "expected_element_id": "elem_20_13"
+    },
+    {
+      "query": "Pause",
+      "expected_element_id": "elem_20_15"
+    },
+    {
+      "query": "File",
+      "expected_element_id": "elem_20_3"
+    }
+  ]
+}

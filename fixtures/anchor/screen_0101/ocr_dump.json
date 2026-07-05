@@ -1,0 +1,172 @@
+{
+  "elements": [
+    {
+      "id": "ocr_101_0",
+      "text": "Edit Item",
+      "bounds": {
+        "x": 993,
+        "y": 172,
+        "width": 72,
+        "height": 25
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_1",
+      "text": "Add",
+      "bounds": {
+        "x": 1791,
+        "y": 473,
+        "width": 154,
+        "height": 36
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_2",
+      "text": "Upload",
+      "bounds": {
+        "x": 542,
+        "y": 641,
+        "width": 162,
+        "height": 36
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_3",
+      "text": "Reset",
+      "bounds": {
+        "x": 709,
+        "y": 841,
+        "width": 163,
+        "height": 22
+      },
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_4",
+      "text": "Email",
+      "bounds": {
+        "x": 656,
+        "y": 778,
+        "width": 61,
+        "height": 26
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_5",
+      "text": "Attach",
+      "bounds": {
+        "x": 1555,
+        "y": 260,
+        "width": 59,
+        "height": 17
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_6",
+      "text": "Pause",
+      "bounds": {
+        "x": 76,
+        "y": 736,
+        "width": 95,
+        "height": 29
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_7",
+      "text": "Reply",
+      "bounds": {
+        "x": 264,
+        "y": 398,
+        "width": 93,
+        "height": 33
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_8",
+      "text": "Copy",
+      "bounds": {
+        "x": 1607,
+        "y": 369,
+        "width": 156,
+        "height": 35
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_9",
+      "text": "Pause 1",
+      "bounds": {
+        "x": 266,
+        "y": 183,
+        "width": 96,
+        "height": 26
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_10",
+      "text": "Volume",
+      "bounds": {
+        "x": 1320,
+        "y": 575,
+        "width": 91,
+        "height": 39
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_11",
+      "text": "Description",
+      "bounds": {
+        "x": 619,
+        "y": 483,
+        "width": 82,
+        "height": 36
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_12",
+      "text": "Bookmark",
+      "bounds": {
+        "x": 1232,
+        "y": 713,
+        "width": 66,
+        "height": 19
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_101_13",
+      "text": "Forward",
+      "bounds": {
+        "x": 1575,
+        "y": 162,
+        "width": 101,
+        "height": 15
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    }
+  ]
+}

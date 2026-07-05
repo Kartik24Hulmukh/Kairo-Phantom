@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Cancel",
+      "expected_element_id": "elem_79_5"
+    },
+    {
+      "query": "Bookmark",
+      "expected_element_id": "elem_79_7"
+    },
+    {
+      "query": "Username",
+      "expected_element_id": "elem_79_6"
+    },
+    {
+      "query": "Phone",
+      "expected_element_id": "elem_79_0"
+    },
+    {
+      "query": "Open",
+      "expected_element_id": "elem_79_3"
+    }
+  ]
+}

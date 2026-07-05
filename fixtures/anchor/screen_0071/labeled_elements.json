@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Refresh",
+      "expected_element_id": "elem_71_18"
+    },
+    {
+      "query": "Save",
+      "expected_element_id": "elem_71_2"
+    },
+    {
+      "query": "Bookmark",
+      "expected_element_id": "elem_71_24"
+    },
+    {
+      "query": "Decline",
+      "expected_element_id": "elem_71_16"
+    },
+    {
+      "query": "Print",
+      "expected_element_id": "elem_71_0"
+    }
+  ]
+}

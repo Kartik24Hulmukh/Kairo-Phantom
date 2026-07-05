@@ -1,0 +1,124 @@
+{
+  "elements": [
+    {
+      "id": "ocr_114_0",
+      "text": "Email",
+      "bounds": {
+        "x": 896,
+        "y": 270,
+        "width": 181,
+        "height": 38
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_1",
+      "text": "Send",
+      "bounds": {
+        "x": 123,
+        "y": 70,
+        "width": 174,
+        "height": 18
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_2",
+      "text": "Quantity",
+      "bounds": {
+        "x": 1043,
+        "y": 93,
+        "width": 80,
+        "height": 24
+      },
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_3",
+      "text": "Name",
+      "bounds": {
+        "x": 1343,
+        "y": 840,
+        "width": 103,
+        "height": 16
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_4",
+      "text": "Volume",
+      "bounds": {
+        "x": 1715,
+        "y": 852,
+        "width": 136,
+        "height": 35
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_5",
+      "text": "Submit",
+      "bounds": {
+        "x": 1566,
+        "y": 326,
+        "width": 61,
+        "height": 17
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_6",
+      "text": "Edit",
+      "bounds": {
+        "x": 1490,
+        "y": 830,
+        "width": 146,
+        "height": 15
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_7",
+      "text": "Stop",
+      "bounds": {
+        "x": 1159,
+        "y": 669,
+        "width": 78,
+        "height": 18
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_8",
+      "text": "Reply",
+      "bounds": {
+        "x": 1290,
+        "y": 369,
+        "width": 122,
+        "height": 28
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_114_9",
+      "text": "Search",
+      "bounds": {
+        "x": 668,
+        "y": 330,
+        "width": 157,
+        "height": 21
+      },
+      "confidence": 0.84,
+      "is_canvas": true
+    }
+  ]
+}

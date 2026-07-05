@@ -1,0 +1,144 @@
+{
+  "elements": [
+    {
+      "id": "vis_103_0",
+      "role": "slider",
+      "name": "Copy",
+      "bounds": {
+        "x": 1453,
+        "y": 200,
+        "width": 49,
+        "height": 63
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_1",
+      "role": "button",
+      "name": "Quantity",
+      "bounds": {
+        "x": 1327,
+        "y": 621,
+        "width": 62,
+        "height": 30
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_2",
+      "role": "handle",
+      "name": "Save",
+      "bounds": {
+        "x": 1687,
+        "y": 351,
+        "width": 20,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_3",
+      "role": "icon",
+      "name": "Description",
+      "bounds": {
+        "x": 1264,
+        "y": 176,
+        "width": 23,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_4",
+      "role": "shape",
+      "name": "Delete",
+      "bounds": {
+        "x": 1402,
+        "y": 50,
+        "width": 23,
+        "height": 36
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_5",
+      "role": "icon",
+      "name": "Copy 1",
+      "bounds": {
+        "x": 1658,
+        "y": 564,
+        "width": 62,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_6",
+      "role": "shape",
+      "name": "Apply",
+      "bounds": {
+        "x": 342,
+        "y": 800,
+        "width": 32,
+        "height": 47
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_7",
+      "role": "button",
+      "name": "Pause",
+      "bounds": {
+        "x": 1019,
+        "y": 413,
+        "width": 35,
+        "height": 71
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_8",
+      "role": "handle",
+      "name": "Description 1",
+      "bounds": {
+        "x": 250,
+        "y": 317,
+        "width": 78,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_103_9",
+      "role": "handle",
+      "name": "Delete 1",
+      "bounds": {
+        "x": 1440,
+        "y": 380,
+        "width": 71,
+        "height": 57
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    }
+  ]
+}

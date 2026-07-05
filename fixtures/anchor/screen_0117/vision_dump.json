@@ -1,0 +1,74 @@
+{
+  "elements": [
+    {
+      "id": "vis_117_0",
+      "role": "icon",
+      "name": "Home",
+      "bounds": {
+        "x": 1542,
+        "y": 323,
+        "width": 25,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_117_1",
+      "role": "icon",
+      "name": "Undo",
+      "bounds": {
+        "x": 456,
+        "y": 755,
+        "width": 52,
+        "height": 46
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_117_2",
+      "role": "slider",
+      "name": "Bookmark",
+      "bounds": {
+        "x": 1198,
+        "y": 409,
+        "width": 27,
+        "height": 41
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_117_3",
+      "role": "icon",
+      "name": "Reset",
+      "bounds": {
+        "x": 226,
+        "y": 629,
+        "width": 79,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_117_4",
+      "role": "slider",
+      "name": "Notes",
+      "bounds": {
+        "x": 423,
+        "y": 797,
+        "width": 25,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.84,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_42_8"
+    },
+    {
+      "query": "File",
+      "expected_element_id": "elem_42_5"
+    },
+    {
+      "query": "Print",
+      "expected_element_id": "elem_42_3"
+    },
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_42_0"
+    },
+    {
+      "query": "Volume",
+      "expected_element_id": "elem_42_10"
+    }
+  ]
+}

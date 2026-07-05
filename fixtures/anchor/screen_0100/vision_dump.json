@@ -1,0 +1,102 @@
+{
+  "elements": [
+    {
+      "id": "vis_100_0",
+      "role": "slider",
+      "name": "Apply",
+      "bounds": {
+        "x": 699,
+        "y": 821,
+        "width": 42,
+        "height": 45
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_100_1",
+      "role": "button",
+      "name": "Quantity",
+      "bounds": {
+        "x": 1061,
+        "y": 677,
+        "width": 23,
+        "height": 45
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_100_2",
+      "role": "icon",
+      "name": "Filter",
+      "bounds": {
+        "x": 1362,
+        "y": 174,
+        "width": 73,
+        "height": 43
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_100_3",
+      "role": "button",
+      "name": "Yes",
+      "bounds": {
+        "x": 1740,
+        "y": 60,
+        "width": 28,
+        "height": 26
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_100_4",
+      "role": "slider",
+      "name": "Previous",
+      "bounds": {
+        "x": 230,
+        "y": 245,
+        "width": 66,
+        "height": 77
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_100_5",
+      "role": "icon",
+      "name": "Save",
+      "bounds": {
+        "x": 1459,
+        "y": 103,
+        "width": 36,
+        "height": 76
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_100_6",
+      "role": "shape",
+      "name": "Play",
+      "bounds": {
+        "x": 673,
+        "y": 126,
+        "width": 36,
+        "height": 41
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,308 @@
+{
+  "app_name": "Terminal",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_5_0",
+      "role": "list",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 1537,
+        "y": 881,
+        "width": 247,
+        "height": 33
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_1",
+      "role": "checkbox",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1646,
+        "y": 712,
+        "width": 182,
+        "height": 79
+      },
+      "affordance": "toggle",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_2",
+      "role": "checkbox",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 934,
+        "y": 136,
+        "width": 255,
+        "height": 79
+      },
+      "affordance": "toggle",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_3",
+      "role": "tab",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 1254,
+        "y": 834,
+        "width": 234,
+        "height": 84
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_4",
+      "role": "table",
+      "name": "Paste",
+      "value": "",
+      "bounds": {
+        "x": 1523,
+        "y": 882,
+        "width": 171,
+        "height": 77
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_5",
+      "role": "checkbox",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1568,
+        "y": 796,
+        "width": 183,
+        "height": 82
+      },
+      "affordance": "toggle",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_6",
+      "role": "radio",
+      "name": "Home 1",
+      "value": "",
+      "bounds": {
+        "x": 158,
+        "y": 730,
+        "width": 123,
+        "height": 50
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_7",
+      "role": "tab",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 283,
+        "y": 154,
+        "width": 109,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_8",
+      "role": "link",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 849,
+        "y": 417,
+        "width": 134,
+        "height": 89
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_9",
+      "role": "text",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 1705,
+        "y": 430,
+        "width": 149,
+        "height": 94
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_10",
+      "role": "button",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 976,
+        "y": 6,
+        "width": 291,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_11",
+      "role": "panel",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 1102,
+        "y": 765,
+        "width": 238,
+        "height": 89
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_12",
+      "role": "checkbox",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 449,
+        "y": 279,
+        "width": 161,
+        "height": 82
+      },
+      "affordance": "toggle",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_13",
+      "role": "tab",
+      "name": "Volume",
+      "value": "",
+      "bounds": {
+        "x": 1483,
+        "y": 169,
+        "width": 265,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_14",
+      "role": "button",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 1212,
+        "y": 577,
+        "width": 219,
+        "height": 23
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_15",
+      "role": "tree_item",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 1775,
+        "y": 472,
+        "width": 96,
+        "height": 26
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_16",
+      "role": "tab",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 931,
+        "y": 334,
+        "width": 136,
+        "height": 68
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_17",
+      "role": "tree_item",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 1709,
+        "y": 83,
+        "width": 170,
+        "height": 22
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_18",
+      "role": "text",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 459,
+        "y": 665,
+        "width": 67,
+        "height": 25
+      },
+      "affordance": "read",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_5_19",
+      "role": "checkbox",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 1718,
+        "y": 20,
+        "width": 209,
+        "height": 39
+      },
+      "affordance": "toggle",
+      "confidence": 0.89,
+      "is_canvas": false
+    }
+  ]
+}

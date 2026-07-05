@@ -1,0 +1,383 @@
+{
+  "app_name": "Terminal",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_83_0",
+      "role": "table",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 964,
+        "y": 840,
+        "width": 121,
+        "height": 40
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_1",
+      "role": "button",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 362,
+        "y": 301,
+        "width": 81,
+        "height": 88
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_2",
+      "role": "menu_item",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 1375,
+        "y": 781,
+        "width": 52,
+        "height": 54
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_3",
+      "role": "label",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 443,
+        "y": 731,
+        "width": 58,
+        "height": 88
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_4",
+      "role": "text",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 799,
+        "y": 706,
+        "width": 128,
+        "height": 76
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_5",
+      "role": "button",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 1581,
+        "y": 386,
+        "width": 246,
+        "height": 45
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_6",
+      "role": "label",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 409,
+        "y": 93,
+        "width": 54,
+        "height": 73
+      },
+      "affordance": "read",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_7",
+      "role": "button",
+      "name": "Maybe",
+      "value": "",
+      "bounds": {
+        "x": 1680,
+        "y": 196,
+        "width": 224,
+        "height": 28
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_8",
+      "role": "combo",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1482,
+        "y": 171,
+        "width": 61,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_9",
+      "role": "tab",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 1151,
+        "y": 641,
+        "width": 98,
+        "height": 99
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_10",
+      "role": "panel",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 247,
+        "y": 237,
+        "width": 104,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_11",
+      "role": "menu_item",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 823,
+        "y": 669,
+        "width": 130,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_12",
+      "role": "table",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 135,
+        "y": 673,
+        "width": 258,
+        "height": 55
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_13",
+      "role": "label",
+      "name": "Save",
+      "value": "",
+      "bounds": {
+        "x": 137,
+        "y": 223,
+        "width": 155,
+        "height": 58
+      },
+      "affordance": "read",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_14",
+      "role": "toolbar",
+      "name": "Filter 1",
+      "value": "",
+      "bounds": {
+        "x": 1459,
+        "y": 549,
+        "width": 252,
+        "height": 92
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_15",
+      "role": "combo",
+      "name": "Yes 1",
+      "value": "",
+      "bounds": {
+        "x": 1292,
+        "y": 713,
+        "width": 149,
+        "height": 37
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_16",
+      "role": "tab",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 138,
+        "y": 343,
+        "width": 54,
+        "height": 97
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_17",
+      "role": "table",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 1046,
+        "y": 655,
+        "width": 239,
+        "height": 49
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_18",
+      "role": "button",
+      "name": "Username",
+      "value": "",
+      "bounds": {
+        "x": 43,
+        "y": 631,
+        "width": 244,
+        "height": 35
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_19",
+      "role": "tree_item",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 1269,
+        "y": 81,
+        "width": 65,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_20",
+      "role": "scroll_bar",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 310,
+        "y": 384,
+        "width": 102,
+        "height": 24
+      },
+      "affordance": "scroll",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_21",
+      "role": "table",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 274,
+        "y": 284,
+        "width": 131,
+        "height": 25
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_22",
+      "role": "tree_item",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 1537,
+        "y": 24,
+        "width": 108,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_23",
+      "role": "link",
+      "name": "Close 1",
+      "value": "",
+      "bounds": {
+        "x": 1361,
+        "y": 254,
+        "width": 255,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_83_24",
+      "role": "panel",
+      "name": "Yes 2",
+      "value": "",
+      "bounds": {
+        "x": 375,
+        "y": 452,
+        "width": 211,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    }
+  ]
+}

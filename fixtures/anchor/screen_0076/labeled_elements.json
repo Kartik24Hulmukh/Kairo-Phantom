@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Edit Item",
+      "expected_element_id": "elem_76_1"
+    },
+    {
+      "query": "Add 1",
+      "expected_element_id": "elem_76_9"
+    },
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_76_6"
+    },
+    {
+      "query": "Cut 1",
+      "expected_element_id": "elem_76_16"
+    },
+    {
+      "query": "Send",
+      "expected_element_id": "elem_76_5"
+    }
+  ]
+}

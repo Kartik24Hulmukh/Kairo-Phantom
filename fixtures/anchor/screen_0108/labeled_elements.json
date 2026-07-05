@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Accept",
+      "expected_element_id": "ocr_108_0"
+    },
+    {
+      "query": "Stop",
+      "expected_element_id": "ocr_108_1"
+    },
+    {
+      "query": "Phone",
+      "expected_element_id": "ocr_108_2"
+    },
+    {
+      "query": "Home",
+      "expected_element_id": "ocr_108_3"
+    },
+    {
+      "query": "Email",
+      "expected_element_id": "ocr_108_4"
+    }
+  ]
+}

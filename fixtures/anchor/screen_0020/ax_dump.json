@@ -1,0 +1,263 @@
+{
+  "app_name": "Media Player",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_20_0",
+      "role": "menu_item",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 1568,
+        "y": 656,
+        "width": 300,
+        "height": 73
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_1",
+      "role": "panel",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1780,
+        "y": 386,
+        "width": 146,
+        "height": 30
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_2",
+      "role": "list",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 242,
+        "y": 182,
+        "width": 187,
+        "height": 70
+      },
+      "affordance": "select",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_3",
+      "role": "checkbox",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 1548,
+        "y": 23,
+        "width": 300,
+        "height": 58
+      },
+      "affordance": "toggle",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_4",
+      "role": "tree_item",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 1686,
+        "y": 235,
+        "width": 113,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_5",
+      "role": "radio",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1792,
+        "y": 742,
+        "width": 245,
+        "height": 34
+      },
+      "affordance": "select",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_6",
+      "role": "tree_item",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 492,
+        "y": 211,
+        "width": 67,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_7",
+      "role": "table",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 501,
+        "y": 758,
+        "width": 61,
+        "height": 71
+      },
+      "affordance": "read",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_8",
+      "role": "link",
+      "name": "Cancel",
+      "value": "",
+      "bounds": {
+        "x": 286,
+        "y": 515,
+        "width": 124,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_9",
+      "role": "tab",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 485,
+        "y": 309,
+        "width": 274,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_10",
+      "role": "checkbox",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 615,
+        "y": 281,
+        "width": 65,
+        "height": 91
+      },
+      "affordance": "toggle",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_11",
+      "role": "menu_item",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 1138,
+        "y": 507,
+        "width": 62,
+        "height": 64
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_12",
+      "role": "panel",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 1426,
+        "y": 426,
+        "width": 154,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_13",
+      "role": "menu_item",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 493,
+        "y": 869,
+        "width": 107,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_14",
+      "role": "list",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 118,
+        "y": 575,
+        "width": 155,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_15",
+      "role": "list",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 497,
+        "y": 261,
+        "width": 102,
+        "height": 62
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_20_16",
+      "role": "table",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 189,
+        "y": 548,
+        "width": 235,
+        "height": 44
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    }
+  ]
+}

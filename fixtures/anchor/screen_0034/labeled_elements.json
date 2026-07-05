@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_34_3"
+    },
+    {
+      "query": "Open",
+      "expected_element_id": "elem_34_7"
+    },
+    {
+      "query": "Yes 1",
+      "expected_element_id": "elem_34_11"
+    },
+    {
+      "query": "Mute",
+      "expected_element_id": "elem_34_6"
+    },
+    {
+      "query": "Search",
+      "expected_element_id": "elem_34_10"
+    }
+  ]
+}

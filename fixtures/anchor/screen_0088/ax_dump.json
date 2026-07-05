@@ -1,0 +1,203 @@
+{
+  "app_name": "Image Viewer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_88_0",
+      "role": "edit",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 1771,
+        "y": 837,
+        "width": 216,
+        "height": 68
+      },
+      "affordance": "type",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_1",
+      "role": "table",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 23,
+        "y": 122,
+        "width": 79,
+        "height": 30
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_2",
+      "role": "checkbox",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 1201,
+        "y": 586,
+        "width": 196,
+        "height": 81
+      },
+      "affordance": "toggle",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_3",
+      "role": "combo",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 786,
+        "y": 495,
+        "width": 215,
+        "height": 75
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_4",
+      "role": "list",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 666,
+        "y": 65,
+        "width": 232,
+        "height": 88
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_5",
+      "role": "button",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 1138,
+        "y": 837,
+        "width": 187,
+        "height": 87
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_6",
+      "role": "combo",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 1348,
+        "y": 120,
+        "width": 96,
+        "height": 96
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_7",
+      "role": "button",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1639,
+        "y": 321,
+        "width": 81,
+        "height": 25
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_8",
+      "role": "link",
+      "name": "Paste",
+      "value": "",
+      "bounds": {
+        "x": 179,
+        "y": 575,
+        "width": 115,
+        "height": 24
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_9",
+      "role": "combo",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 611,
+        "y": 372,
+        "width": 297,
+        "height": 89
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_10",
+      "role": "button",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 615,
+        "y": 47,
+        "width": 292,
+        "height": 86
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_11",
+      "role": "scroll_bar",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 286,
+        "y": 590,
+        "width": 175,
+        "height": 60
+      },
+      "affordance": "scroll",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_88_12",
+      "role": "label",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 429,
+        "y": 704,
+        "width": 75,
+        "height": 25
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    }
+  ]
+}

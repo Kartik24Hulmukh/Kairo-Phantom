@@ -1,0 +1,218 @@
+{
+  "app_name": "Image Viewer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_4_0",
+      "role": "tab",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1770,
+        "y": 71,
+        "width": 297,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_1",
+      "role": "panel",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 56,
+        "y": 118,
+        "width": 274,
+        "height": 53
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_2",
+      "role": "radio",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 222,
+        "y": 610,
+        "width": 161,
+        "height": 64
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_3",
+      "role": "tab",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 1241,
+        "y": 523,
+        "width": 79,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_4",
+      "role": "link",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 90,
+        "y": 725,
+        "width": 161,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_5",
+      "role": "link",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 883,
+        "y": 71,
+        "width": 292,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_6",
+      "role": "combo",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1038,
+        "y": 316,
+        "width": 220,
+        "height": 72
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_7",
+      "role": "scroll_bar",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 392,
+        "y": 430,
+        "width": 220,
+        "height": 68
+      },
+      "affordance": "scroll",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_8",
+      "role": "menu_item",
+      "name": "Quantity 1",
+      "value": "",
+      "bounds": {
+        "x": 831,
+        "y": 561,
+        "width": 263,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_9",
+      "role": "link",
+      "name": "Reload 1",
+      "value": "",
+      "bounds": {
+        "x": 1609,
+        "y": 593,
+        "width": 205,
+        "height": 61
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_10",
+      "role": "table",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 1046,
+        "y": 484,
+        "width": 253,
+        "height": 41
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_11",
+      "role": "scroll_bar",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 1359,
+        "y": 648,
+        "width": 208,
+        "height": 62
+      },
+      "affordance": "scroll",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_12",
+      "role": "checkbox",
+      "name": "Description",
+      "value": "",
+      "bounds": {
+        "x": 460,
+        "y": 825,
+        "width": 100,
+        "height": 38
+      },
+      "affordance": "toggle",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_4_13",
+      "role": "checkbox",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 1251,
+        "y": 870,
+        "width": 246,
+        "height": 29
+      },
+      "affordance": "toggle",
+      "confidence": 0.92,
+      "is_canvas": false
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "app_name": "Task Manager",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_78_0",
+      "role": "table",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 503,
+        "y": 678,
+        "width": 132,
+        "height": 63
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_1",
+      "role": "tab",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 1416,
+        "y": 136,
+        "width": 215,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_2",
+      "role": "button",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 1377,
+        "y": 177,
+        "width": 155,
+        "height": 91
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_3",
+      "role": "toolbar",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 1102,
+        "y": 83,
+        "width": 251,
+        "height": 29
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_4",
+      "role": "table",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 722,
+        "y": 832,
+        "width": 146,
+        "height": 96
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_5",
+      "role": "menu_item",
+      "name": "Edit 1",
+      "value": "",
+      "bounds": {
+        "x": 255,
+        "y": 473,
+        "width": 144,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_6",
+      "role": "checkbox",
+      "name": "View 1",
+      "value": "",
+      "bounds": {
+        "x": 1553,
+        "y": 287,
+        "width": 224,
+        "height": 65
+      },
+      "affordance": "toggle",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_7",
+      "role": "scroll_bar",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 479,
+        "y": 505,
+        "width": 297,
+        "height": 66
+      },
+      "affordance": "scroll",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_8",
+      "role": "toolbar",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 14,
+        "y": 200,
+        "width": 260,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_9",
+      "role": "radio",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 1011,
+        "y": 174,
+        "width": 191,
+        "height": 44
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_10",
+      "role": "menu_item",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 1204,
+        "y": 131,
+        "width": 240,
+        "height": 28
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_11",
+      "role": "checkbox",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 392,
+        "y": 868,
+        "width": 223,
+        "height": 22
+      },
+      "affordance": "toggle",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_12",
+      "role": "radio",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 4,
+        "y": 437,
+        "width": 214,
+        "height": 26
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_13",
+      "role": "tab",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 1729,
+        "y": 416,
+        "width": 120,
+        "height": 35
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_14",
+      "role": "table",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 740,
+        "y": 529,
+        "width": 244,
+        "height": 25
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_15",
+      "role": "checkbox",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 569,
+        "y": 430,
+        "width": 186,
+        "height": 77
+      },
+      "affordance": "toggle",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_16",
+      "role": "panel",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 685,
+        "y": 83,
+        "width": 275,
+        "height": 93
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_78_17",
+      "role": "checkbox",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 152,
+        "y": 255,
+        "width": 100,
+        "height": 41
+      },
+      "affordance": "toggle",
+      "confidence": 0.9,
+      "is_canvas": false
+    }
+  ]
+}

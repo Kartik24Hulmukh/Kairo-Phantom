@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Settings",
+      "expected_element_id": "elem_4_10"
+    },
+    {
+      "query": "Reload 1",
+      "expected_element_id": "elem_4_9"
+    },
+    {
+      "query": "Reload",
+      "expected_element_id": "elem_4_3"
+    },
+    {
+      "query": "Quantity",
+      "expected_element_id": "elem_4_6"
+    },
+    {
+      "query": "Remove",
+      "expected_element_id": "elem_4_7"
+    }
+  ]
+}

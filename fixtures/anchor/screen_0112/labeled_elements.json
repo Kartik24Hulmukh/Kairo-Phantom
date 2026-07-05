@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Notes",
+      "expected_element_id": "ocr_112_0"
+    },
+    {
+      "query": "Date",
+      "expected_element_id": "ocr_112_1"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "ocr_112_2"
+    },
+    {
+      "query": "Import",
+      "expected_element_id": "ocr_112_3"
+    },
+    {
+      "query": "Save",
+      "expected_element_id": "ocr_112_4"
+    }
+  ]
+}

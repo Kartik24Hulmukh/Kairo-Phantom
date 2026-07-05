@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Delete",
+      "expected_element_id": "elem_5_15"
+    },
+    {
+      "query": "Home",
+      "expected_element_id": "elem_5_3"
+    },
+    {
+      "query": "Home 1",
+      "expected_element_id": "elem_5_6"
+    },
+    {
+      "query": "Stop",
+      "expected_element_id": "elem_5_14"
+    },
+    {
+      "query": "OK",
+      "expected_element_id": "elem_5_8"
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "app_name": "Image Viewer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_36_0",
+      "role": "scroll_bar",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 110,
+        "y": 891,
+        "width": 268,
+        "height": 39
+      },
+      "affordance": "scroll",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_1",
+      "role": "link",
+      "name": "Maybe",
+      "value": "",
+      "bounds": {
+        "x": 838,
+        "y": 583,
+        "width": 278,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_2",
+      "role": "menu_item",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 998,
+        "y": 340,
+        "width": 211,
+        "height": 42
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_3",
+      "role": "text",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 925,
+        "y": 280,
+        "width": 103,
+        "height": 41
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_4",
+      "role": "menu_item",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 1608,
+        "y": 781,
+        "width": 249,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_5",
+      "role": "tree_item",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 826,
+        "y": 439,
+        "width": 297,
+        "height": 81
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_6",
+      "role": "text",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 1496,
+        "y": 382,
+        "width": 293,
+        "height": 21
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_7",
+      "role": "link",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 1385,
+        "y": 4,
+        "width": 210,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_8",
+      "role": "label",
+      "name": "Description",
+      "value": "",
+      "bounds": {
+        "x": 264,
+        "y": 105,
+        "width": 148,
+        "height": 84
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_9",
+      "role": "menu_item",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 1687,
+        "y": 46,
+        "width": 126,
+        "height": 57
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_36_10",
+      "role": "tab",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 1406,
+        "y": 137,
+        "width": 137,
+        "height": 82
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    }
+  ]
+}

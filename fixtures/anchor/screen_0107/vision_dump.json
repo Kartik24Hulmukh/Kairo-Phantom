@@ -1,0 +1,88 @@
+{
+  "elements": [
+    {
+      "id": "vis_107_0",
+      "role": "slider",
+      "name": "View",
+      "bounds": {
+        "x": 1144,
+        "y": 672,
+        "width": 75,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_107_1",
+      "role": "button",
+      "name": "Remove",
+      "bounds": {
+        "x": 842,
+        "y": 834,
+        "width": 44,
+        "height": 64
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_107_2",
+      "role": "slider",
+      "name": "Add",
+      "bounds": {
+        "x": 1175,
+        "y": 191,
+        "width": 27,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_107_3",
+      "role": "icon",
+      "name": "Reload",
+      "bounds": {
+        "x": 803,
+        "y": 410,
+        "width": 32,
+        "height": 41
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_107_4",
+      "role": "slider",
+      "name": "Mute",
+      "bounds": {
+        "x": 238,
+        "y": 652,
+        "width": 20,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_107_5",
+      "role": "icon",
+      "name": "Email",
+      "bounds": {
+        "x": 1692,
+        "y": 65,
+        "width": 75,
+        "height": 66
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    }
+  ]
+}

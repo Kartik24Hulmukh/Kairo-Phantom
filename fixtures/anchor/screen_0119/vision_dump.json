@@ -1,0 +1,74 @@
+{
+  "elements": [
+    {
+      "id": "vis_119_0",
+      "role": "icon",
+      "name": "Close",
+      "bounds": {
+        "x": 316,
+        "y": 729,
+        "width": 41,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_119_1",
+      "role": "button",
+      "name": "Forward",
+      "bounds": {
+        "x": 1618,
+        "y": 194,
+        "width": 71,
+        "height": 42
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_119_2",
+      "role": "shape",
+      "name": "Undo",
+      "bounds": {
+        "x": 51,
+        "y": 724,
+        "width": 29,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_119_3",
+      "role": "icon",
+      "name": "Reload",
+      "bounds": {
+        "x": 428,
+        "y": 291,
+        "width": 74,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_119_4",
+      "role": "icon",
+      "name": "Previous",
+      "bounds": {
+        "x": 365,
+        "y": 751,
+        "width": 55,
+        "height": 74
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    }
+  ]
+}

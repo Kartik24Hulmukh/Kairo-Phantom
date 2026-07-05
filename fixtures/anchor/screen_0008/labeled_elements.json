@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Remove",
+      "expected_element_id": "elem_8_10"
+    },
+    {
+      "query": "Upload",
+      "expected_element_id": "elem_8_14"
+    },
+    {
+      "query": "OK",
+      "expected_element_id": "elem_8_4"
+    },
+    {
+      "query": "Forward",
+      "expected_element_id": "elem_8_3"
+    },
+    {
+      "query": "Bookmark",
+      "expected_element_id": "elem_8_1"
+    }
+  ]
+}

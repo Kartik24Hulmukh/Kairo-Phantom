@@ -1,0 +1,60 @@
+{
+  "elements": [
+    {
+      "id": "vis_102_0",
+      "role": "button",
+      "name": "Back",
+      "bounds": {
+        "x": 673,
+        "y": 873,
+        "width": 67,
+        "height": 41
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_102_1",
+      "role": "shape",
+      "name": "Phone",
+      "bounds": {
+        "x": 1167,
+        "y": 313,
+        "width": 62,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_102_2",
+      "role": "slider",
+      "name": "No",
+      "bounds": {
+        "x": 1745,
+        "y": 411,
+        "width": 39,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_102_3",
+      "role": "slider",
+      "name": "Name",
+      "bounds": {
+        "x": 1777,
+        "y": 660,
+        "width": 50,
+        "height": 27
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    }
+  ]
+}

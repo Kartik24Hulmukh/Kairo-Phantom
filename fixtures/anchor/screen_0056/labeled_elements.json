@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Decline",
+      "expected_element_id": "elem_56_18"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_56_11"
+    },
+    {
+      "query": "Maybe",
+      "expected_element_id": "elem_56_1"
+    },
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_56_17"
+    },
+    {
+      "query": "View",
+      "expected_element_id": "elem_56_15"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Previous",
+      "expected_element_id": "ocr_118_0"
+    },
+    {
+      "query": "Print",
+      "expected_element_id": "ocr_118_1"
+    },
+    {
+      "query": "Play",
+      "expected_element_id": "ocr_118_2"
+    },
+    {
+      "query": "Notes",
+      "expected_element_id": "ocr_118_3"
+    },
+    {
+      "query": "Undo",
+      "expected_element_id": "ocr_118_4"
+    }
+  ]
+}

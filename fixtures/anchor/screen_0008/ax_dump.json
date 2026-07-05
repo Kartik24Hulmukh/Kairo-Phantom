@@ -1,0 +1,233 @@
+{
+  "app_name": "Email Client",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_8_0",
+      "role": "scroll_bar",
+      "name": "Edit",
+      "value": "",
+      "bounds": {
+        "x": 1131,
+        "y": 417,
+        "width": 73,
+        "height": 48
+      },
+      "affordance": "scroll",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_1",
+      "role": "combo",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 240,
+        "y": 663,
+        "width": 263,
+        "height": 39
+      },
+      "affordance": "select",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_2",
+      "role": "scroll_bar",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 1444,
+        "y": 279,
+        "width": 156,
+        "height": 81
+      },
+      "affordance": "scroll",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_3",
+      "role": "checkbox",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 1128,
+        "y": 148,
+        "width": 148,
+        "height": 44
+      },
+      "affordance": "toggle",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_4",
+      "role": "list",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 565,
+        "y": 791,
+        "width": 252,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_5",
+      "role": "radio",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 579,
+        "y": 743,
+        "width": 126,
+        "height": 95
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_6",
+      "role": "toolbar",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 914,
+        "y": 551,
+        "width": 173,
+        "height": 64
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_7",
+      "role": "panel",
+      "name": "Forward 1",
+      "value": "",
+      "bounds": {
+        "x": 659,
+        "y": 890,
+        "width": 98,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_8",
+      "role": "checkbox",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 89,
+        "y": 325,
+        "width": 240,
+        "height": 80
+      },
+      "affordance": "toggle",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_9",
+      "role": "panel",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 1359,
+        "y": 811,
+        "width": 260,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_10",
+      "role": "text",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 1028,
+        "y": 604,
+        "width": 134,
+        "height": 32
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_11",
+      "role": "table",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 1077,
+        "y": 467,
+        "width": 53,
+        "height": 38
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_12",
+      "role": "list",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 961,
+        "y": 800,
+        "width": 298,
+        "height": 53
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_13",
+      "role": "panel",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1744,
+        "y": 336,
+        "width": 268,
+        "height": 88
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_8_14",
+      "role": "tab",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 1786,
+        "y": 554,
+        "width": 59,
+        "height": 99
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    }
+  ]
+}

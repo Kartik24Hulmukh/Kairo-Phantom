@@ -1,0 +1,353 @@
+{
+  "app_name": "Settings",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_65_0",
+      "role": "panel",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 935,
+        "y": 614,
+        "width": 238,
+        "height": 59
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_1",
+      "role": "table",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 1134,
+        "y": 417,
+        "width": 124,
+        "height": 74
+      },
+      "affordance": "read",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_2",
+      "role": "edit",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 1390,
+        "y": 376,
+        "width": 95,
+        "height": 21
+      },
+      "affordance": "type",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_3",
+      "role": "toolbar",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 811,
+        "y": 448,
+        "width": 183,
+        "height": 30
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_4",
+      "role": "panel",
+      "name": "Volume",
+      "value": "",
+      "bounds": {
+        "x": 1423,
+        "y": 604,
+        "width": 300,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_5",
+      "role": "menu_item",
+      "name": "OK",
+      "value": "",
+      "bounds": {
+        "x": 744,
+        "y": 203,
+        "width": 136,
+        "height": 45
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_6",
+      "role": "panel",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 476,
+        "y": 858,
+        "width": 158,
+        "height": 83
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_7",
+      "role": "radio",
+      "name": "Volume 1",
+      "value": "",
+      "bounds": {
+        "x": 729,
+        "y": 487,
+        "width": 220,
+        "height": 97
+      },
+      "affordance": "select",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_8",
+      "role": "toolbar",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 571,
+        "y": 150,
+        "width": 246,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_9",
+      "role": "radio",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 1018,
+        "y": 236,
+        "width": 210,
+        "height": 37
+      },
+      "affordance": "select",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_10",
+      "role": "text",
+      "name": "OK 1",
+      "value": "",
+      "bounds": {
+        "x": 1020,
+        "y": 694,
+        "width": 56,
+        "height": 42
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_11",
+      "role": "tab",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 620,
+        "y": 636,
+        "width": 209,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_12",
+      "role": "toolbar",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 413,
+        "y": 300,
+        "width": 219,
+        "height": 83
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_13",
+      "role": "radio",
+      "name": "Maybe",
+      "value": "",
+      "bounds": {
+        "x": 1657,
+        "y": 880,
+        "width": 188,
+        "height": 89
+      },
+      "affordance": "select",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_14",
+      "role": "text",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 243,
+        "y": 392,
+        "width": 165,
+        "height": 60
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_15",
+      "role": "table",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 73,
+        "y": 33,
+        "width": 95,
+        "height": 91
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_16",
+      "role": "scroll_bar",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1006,
+        "y": 441,
+        "width": 84,
+        "height": 59
+      },
+      "affordance": "scroll",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_17",
+      "role": "toolbar",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 1165,
+        "y": 691,
+        "width": 175,
+        "height": 90
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_18",
+      "role": "toolbar",
+      "name": "Share 1",
+      "value": "",
+      "bounds": {
+        "x": 1151,
+        "y": 874,
+        "width": 90,
+        "height": 84
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_19",
+      "role": "radio",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1210,
+        "y": 386,
+        "width": 207,
+        "height": 65
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_20",
+      "role": "scroll_bar",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 125,
+        "y": 28,
+        "width": 201,
+        "height": 25
+      },
+      "affordance": "scroll",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_21",
+      "role": "label",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 1657,
+        "y": 759,
+        "width": 199,
+        "height": 23
+      },
+      "affordance": "read",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_65_22",
+      "role": "tab",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 199,
+        "y": 438,
+        "width": 138,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "app_name": "Email Client",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_68_0",
+      "role": "link",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 900,
+        "y": 418,
+        "width": 115,
+        "height": 95
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_1",
+      "role": "label",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 648,
+        "y": 558,
+        "width": 158,
+        "height": 80
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_2",
+      "role": "radio",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 743,
+        "y": 486,
+        "width": 233,
+        "height": 67
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_3",
+      "role": "button",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 1723,
+        "y": 757,
+        "width": 219,
+        "height": 26
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_4",
+      "role": "checkbox",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 1131,
+        "y": 393,
+        "width": 129,
+        "height": 66
+      },
+      "affordance": "toggle",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_5",
+      "role": "combo",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 1756,
+        "y": 453,
+        "width": 149,
+        "height": 21
+      },
+      "affordance": "select",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_6",
+      "role": "panel",
+      "name": "Phone 1",
+      "value": "",
+      "bounds": {
+        "x": 616,
+        "y": 92,
+        "width": 289,
+        "height": 50
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_7",
+      "role": "menu_item",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 1293,
+        "y": 324,
+        "width": 275,
+        "height": 72
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_8",
+      "role": "radio",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1685,
+        "y": 798,
+        "width": 290,
+        "height": 82
+      },
+      "affordance": "select",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_9",
+      "role": "tree_item",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 1469,
+        "y": 432,
+        "width": 274,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_68_10",
+      "role": "radio",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 135,
+        "y": 360,
+        "width": 157,
+        "height": 97
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    }
+  ]
+}

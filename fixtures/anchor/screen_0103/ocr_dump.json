@@ -1,0 +1,88 @@
+{
+  "elements": [
+    {
+      "id": "ocr_103_0",
+      "text": "Attach",
+      "bounds": {
+        "x": 890,
+        "y": 275,
+        "width": 76,
+        "height": 26
+      },
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_103_1",
+      "text": "Import",
+      "bounds": {
+        "x": 1232,
+        "y": 808,
+        "width": 150,
+        "height": 26
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_103_2",
+      "text": "Back",
+      "bounds": {
+        "x": 446,
+        "y": 436,
+        "width": 67,
+        "height": 23
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_103_3",
+      "text": "Accept",
+      "bounds": {
+        "x": 1129,
+        "y": 229,
+        "width": 107,
+        "height": 36
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_103_4",
+      "text": "Description",
+      "bounds": {
+        "x": 850,
+        "y": 653,
+        "width": 146,
+        "height": 23
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_103_5",
+      "text": "Add",
+      "bounds": {
+        "x": 1236,
+        "y": 582,
+        "width": 127,
+        "height": 34
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_103_6",
+      "text": "Sort",
+      "bounds": {
+        "x": 981,
+        "y": 630,
+        "width": 128,
+        "height": 24
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,323 @@
+{
+  "app_name": "Settings",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_9_0",
+      "role": "combo",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 340,
+        "y": 710,
+        "width": 126,
+        "height": 23
+      },
+      "affordance": "select",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_1",
+      "role": "text",
+      "name": "Amount",
+      "value": "",
+      "bounds": {
+        "x": 734,
+        "y": 383,
+        "width": 160,
+        "height": 38
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_2",
+      "role": "tree_item",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 348,
+        "y": 179,
+        "width": 70,
+        "height": 98
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_3",
+      "role": "checkbox",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1194,
+        "y": 146,
+        "width": 109,
+        "height": 79
+      },
+      "affordance": "toggle",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_4",
+      "role": "table",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 1365,
+        "y": 9,
+        "width": 280,
+        "height": 79
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_5",
+      "role": "menu_item",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 904,
+        "y": 353,
+        "width": 200,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_6",
+      "role": "tree_item",
+      "name": "Phone 1",
+      "value": "",
+      "bounds": {
+        "x": 935,
+        "y": 865,
+        "width": 127,
+        "height": 45
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_7",
+      "role": "toolbar",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 485,
+        "y": 390,
+        "width": 196,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_8",
+      "role": "scroll_bar",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 1699,
+        "y": 674,
+        "width": 151,
+        "height": 55
+      },
+      "affordance": "scroll",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_9",
+      "role": "text",
+      "name": "Attach 1",
+      "value": "",
+      "bounds": {
+        "x": 1705,
+        "y": 293,
+        "width": 248,
+        "height": 49
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_10",
+      "role": "label",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 1303,
+        "y": 194,
+        "width": 208,
+        "height": 52
+      },
+      "affordance": "read",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_11",
+      "role": "list",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 1285,
+        "y": 661,
+        "width": 60,
+        "height": 59
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_12",
+      "role": "text",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 1499,
+        "y": 134,
+        "width": 73,
+        "height": 57
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_13",
+      "role": "tree_item",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 411,
+        "y": 135,
+        "width": 251,
+        "height": 89
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_14",
+      "role": "label",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 558,
+        "y": 850,
+        "width": 92,
+        "height": 52
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_15",
+      "role": "toolbar",
+      "name": "Amount 1",
+      "value": "",
+      "bounds": {
+        "x": 1528,
+        "y": 891,
+        "width": 136,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_16",
+      "role": "edit",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 1544,
+        "y": 231,
+        "width": 270,
+        "height": 70
+      },
+      "affordance": "type",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_17",
+      "role": "label",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 1619,
+        "y": 404,
+        "width": 53,
+        "height": 53
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_18",
+      "role": "table",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 1377,
+        "y": 766,
+        "width": 222,
+        "height": 53
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_19",
+      "role": "label",
+      "name": "Filter 1",
+      "value": "",
+      "bounds": {
+        "x": 1382,
+        "y": 239,
+        "width": 170,
+        "height": 23
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_9_20",
+      "role": "tab",
+      "name": "Preferences 1",
+      "value": "",
+      "bounds": {
+        "x": 1326,
+        "y": 64,
+        "width": 212,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    }
+  ]
+}

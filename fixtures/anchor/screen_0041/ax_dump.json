@@ -1,0 +1,158 @@
+{
+  "app_name": "Browser",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_41_0",
+      "role": "button",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 1468,
+        "y": 339,
+        "width": 59,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_1",
+      "role": "menu_item",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 1142,
+        "y": 72,
+        "width": 197,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_2",
+      "role": "tree_item",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 923,
+        "y": 645,
+        "width": 153,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_3",
+      "role": "panel",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 1095,
+        "y": 6,
+        "width": 214,
+        "height": 99
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_4",
+      "role": "text",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 732,
+        "y": 514,
+        "width": 77,
+        "height": 57
+      },
+      "affordance": "read",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_5",
+      "role": "scroll_bar",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 576,
+        "y": 783,
+        "width": 287,
+        "height": 76
+      },
+      "affordance": "scroll",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_6",
+      "role": "button",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 320,
+        "y": 546,
+        "width": 106,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_7",
+      "role": "scroll_bar",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 610,
+        "y": 693,
+        "width": 277,
+        "height": 67
+      },
+      "affordance": "scroll",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_8",
+      "role": "button",
+      "name": "Edit Item 1",
+      "value": "",
+      "bounds": {
+        "x": 252,
+        "y": 42,
+        "width": 51,
+        "height": 93
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_41_9",
+      "role": "edit",
+      "name": "Description",
+      "value": "",
+      "bounds": {
+        "x": 430,
+        "y": 766,
+        "width": 239,
+        "height": 64
+      },
+      "affordance": "type",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

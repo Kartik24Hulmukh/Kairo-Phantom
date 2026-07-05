@@ -1,0 +1,293 @@
+{
+  "app_name": "Terminal",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_15_0",
+      "role": "combo",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 273,
+        "y": 45,
+        "width": 140,
+        "height": 89
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_1",
+      "role": "menu_item",
+      "name": "Bookmark",
+      "value": "",
+      "bounds": {
+        "x": 1424,
+        "y": 490,
+        "width": 211,
+        "height": 43
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_2",
+      "role": "edit",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 75,
+        "y": 300,
+        "width": 101,
+        "height": 25
+      },
+      "affordance": "type",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_3",
+      "role": "text",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 635,
+        "y": 527,
+        "width": 151,
+        "height": 89
+      },
+      "affordance": "read",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_4",
+      "role": "text",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 585,
+        "y": 365,
+        "width": 270,
+        "height": 26
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_5",
+      "role": "tab",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 254,
+        "y": 818,
+        "width": 144,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_6",
+      "role": "table",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 694,
+        "y": 191,
+        "width": 177,
+        "height": 83
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_7",
+      "role": "radio",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1489,
+        "y": 434,
+        "width": 70,
+        "height": 75
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_8",
+      "role": "menu_item",
+      "name": "Amount",
+      "value": "",
+      "bounds": {
+        "x": 657,
+        "y": 105,
+        "width": 70,
+        "height": 61
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_9",
+      "role": "scroll_bar",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1234,
+        "y": 734,
+        "width": 159,
+        "height": 41
+      },
+      "affordance": "scroll",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_10",
+      "role": "label",
+      "name": "Back 1",
+      "value": "",
+      "bounds": {
+        "x": 86,
+        "y": 744,
+        "width": 272,
+        "height": 65
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_11",
+      "role": "tree_item",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1309,
+        "y": 810,
+        "width": 292,
+        "height": 27
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_12",
+      "role": "panel",
+      "name": "Next",
+      "value": "",
+      "bounds": {
+        "x": 1050,
+        "y": 820,
+        "width": 241,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_13",
+      "role": "list",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 71,
+        "y": 129,
+        "width": 67,
+        "height": 50
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_14",
+      "role": "label",
+      "name": "Next 1",
+      "value": "",
+      "bounds": {
+        "x": 784,
+        "y": 580,
+        "width": 58,
+        "height": 97
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_15",
+      "role": "table",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 761,
+        "y": 454,
+        "width": 245,
+        "height": 29
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_16",
+      "role": "label",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 643,
+        "y": 665,
+        "width": 121,
+        "height": 51
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_17",
+      "role": "button",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 1022,
+        "y": 530,
+        "width": 149,
+        "height": 91
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_15_18",
+      "role": "radio",
+      "name": "Back 2",
+      "value": "",
+      "bounds": {
+        "x": 439,
+        "y": 626,
+        "width": 123,
+        "height": 82
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

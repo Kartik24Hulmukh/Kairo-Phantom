@@ -1,0 +1,88 @@
+{
+  "elements": [
+    {
+      "id": "vis_116_0",
+      "role": "button",
+      "name": "Print",
+      "bounds": {
+        "x": 1313,
+        "y": 623,
+        "width": 76,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_116_1",
+      "role": "slider",
+      "name": "Next",
+      "bounds": {
+        "x": 1581,
+        "y": 60,
+        "width": 32,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_116_2",
+      "role": "shape",
+      "name": "Previous",
+      "bounds": {
+        "x": 1250,
+        "y": 367,
+        "width": 41,
+        "height": 26
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_116_3",
+      "role": "button",
+      "name": "Date",
+      "bounds": {
+        "x": 76,
+        "y": 671,
+        "width": 37,
+        "height": 22
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_116_4",
+      "role": "slider",
+      "name": "Cancel",
+      "bounds": {
+        "x": 1474,
+        "y": 771,
+        "width": 36,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_116_5",
+      "role": "button",
+      "name": "Forward",
+      "bounds": {
+        "x": 1520,
+        "y": 532,
+        "width": 58,
+        "height": 60
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    }
+  ]
+}

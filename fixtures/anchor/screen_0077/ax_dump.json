@@ -1,0 +1,188 @@
+{
+  "app_name": "Media Player",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_77_0",
+      "role": "tab",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 769,
+        "y": 847,
+        "width": 280,
+        "height": 35
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_1",
+      "role": "checkbox",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 1009,
+        "y": 520,
+        "width": 242,
+        "height": 84
+      },
+      "affordance": "toggle",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_2",
+      "role": "combo",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 124,
+        "y": 325,
+        "width": 168,
+        "height": 90
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_3",
+      "role": "toolbar",
+      "name": "Help",
+      "value": "",
+      "bounds": {
+        "x": 834,
+        "y": 648,
+        "width": 109,
+        "height": 22
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_4",
+      "role": "combo",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 1562,
+        "y": 568,
+        "width": 216,
+        "height": 36
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_5",
+      "role": "tree_item",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 171,
+        "y": 866,
+        "width": 212,
+        "height": 84
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_6",
+      "role": "list",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 1106,
+        "y": 172,
+        "width": 250,
+        "height": 51
+      },
+      "affordance": "select",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_7",
+      "role": "tree_item",
+      "name": "Back 1",
+      "value": "",
+      "bounds": {
+        "x": 85,
+        "y": 1,
+        "width": 258,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_8",
+      "role": "scroll_bar",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1,
+        "y": 61,
+        "width": 288,
+        "height": 81
+      },
+      "affordance": "scroll",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_9",
+      "role": "radio",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 719,
+        "y": 862,
+        "width": 211,
+        "height": 47
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_10",
+      "role": "scroll_bar",
+      "name": "Save",
+      "value": "",
+      "bounds": {
+        "x": 330,
+        "y": 756,
+        "width": 186,
+        "height": 92
+      },
+      "affordance": "scroll",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_77_11",
+      "role": "edit",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 1430,
+        "y": 125,
+        "width": 262,
+        "height": 37
+      },
+      "affordance": "type",
+      "confidence": 0.96,
+      "is_canvas": false
+    }
+  ]
+}

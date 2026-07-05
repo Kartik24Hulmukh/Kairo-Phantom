@@ -1,0 +1,160 @@
+{
+  "elements": [
+    {
+      "id": "ocr_104_0",
+      "text": "Quantity",
+      "bounds": {
+        "x": 458,
+        "y": 358,
+        "width": 118,
+        "height": 17
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_1",
+      "text": "Play",
+      "bounds": {
+        "x": 1336,
+        "y": 522,
+        "width": 179,
+        "height": 20
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_2",
+      "text": "Home",
+      "bounds": {
+        "x": 1757,
+        "y": 497,
+        "width": 64,
+        "height": 19
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_3",
+      "text": "Decline",
+      "bounds": {
+        "x": 1081,
+        "y": 751,
+        "width": 131,
+        "height": 29
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_4",
+      "text": "Help",
+      "bounds": {
+        "x": 911,
+        "y": 470,
+        "width": 158,
+        "height": 15
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_5",
+      "text": "Quantity 1",
+      "bounds": {
+        "x": 912,
+        "y": 140,
+        "width": 75,
+        "height": 34
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_6",
+      "text": "Amount",
+      "bounds": {
+        "x": 1238,
+        "y": 574,
+        "width": 135,
+        "height": 19
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_7",
+      "text": "File",
+      "bounds": {
+        "x": 1780,
+        "y": 452,
+        "width": 72,
+        "height": 27
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_8",
+      "text": "Apply",
+      "bounds": {
+        "x": 1612,
+        "y": 580,
+        "width": 157,
+        "height": 16
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_9",
+      "text": "Search",
+      "bounds": {
+        "x": 1749,
+        "y": 715,
+        "width": 67,
+        "height": 25
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_10",
+      "text": "Add",
+      "bounds": {
+        "x": 1208,
+        "y": 543,
+        "width": 124,
+        "height": 16
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_11",
+      "text": "Import",
+      "bounds": {
+        "x": 1431,
+        "y": 573,
+        "width": 53,
+        "height": 37
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_104_12",
+      "text": "Preferences",
+      "bounds": {
+        "x": 1201,
+        "y": 808,
+        "width": 166,
+        "height": 19
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    }
+  ]
+}

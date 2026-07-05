@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_65_1"
+    },
+    {
+      "query": "Accept",
+      "expected_element_id": "elem_65_21"
+    },
+    {
+      "query": "Volume 1",
+      "expected_element_id": "elem_65_7"
+    },
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_65_20"
+    },
+    {
+      "query": "Upload",
+      "expected_element_id": "elem_65_9"
+    }
+  ]
+}

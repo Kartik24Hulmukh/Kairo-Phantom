@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Settings",
+      "expected_element_id": "elem_62_17"
+    },
+    {
+      "query": "Save 1",
+      "expected_element_id": "elem_62_23"
+    },
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_62_14"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_62_7"
+    },
+    {
+      "query": "Forward",
+      "expected_element_id": "elem_62_0"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Decline",
+      "expected_element_id": "elem_63_5"
+    },
+    {
+      "query": "Close",
+      "expected_element_id": "elem_63_6"
+    },
+    {
+      "query": "Search",
+      "expected_element_id": "elem_63_7"
+    },
+    {
+      "query": "Attach",
+      "expected_element_id": "elem_63_2"
+    },
+    {
+      "query": "Address 1",
+      "expected_element_id": "elem_63_4"
+    }
+  ]
+}

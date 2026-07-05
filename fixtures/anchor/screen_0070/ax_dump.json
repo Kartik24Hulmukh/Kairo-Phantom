@@ -1,0 +1,188 @@
+{
+  "app_name": "Media Player",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_70_0",
+      "role": "link",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 1687,
+        "y": 289,
+        "width": 236,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_1",
+      "role": "tree_item",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 58,
+        "y": 297,
+        "width": 299,
+        "height": 53
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_2",
+      "role": "table",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 757,
+        "y": 596,
+        "width": 225,
+        "height": 78
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_3",
+      "role": "toolbar",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 1784,
+        "y": 331,
+        "width": 299,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_4",
+      "role": "panel",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 1507,
+        "y": 611,
+        "width": 115,
+        "height": 29
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_5",
+      "role": "text",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 681,
+        "y": 240,
+        "width": 170,
+        "height": 65
+      },
+      "affordance": "read",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_6",
+      "role": "text",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 519,
+        "y": 516,
+        "width": 208,
+        "height": 68
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_7",
+      "role": "panel",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 270,
+        "y": 572,
+        "width": 60,
+        "height": 94
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_8",
+      "role": "menu_item",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 1009,
+        "y": 347,
+        "width": 274,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_9",
+      "role": "tab",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 290,
+        "y": 266,
+        "width": 79,
+        "height": 60
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_10",
+      "role": "list",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1785,
+        "y": 854,
+        "width": 121,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_70_11",
+      "role": "scroll_bar",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1255,
+        "y": 849,
+        "width": 244,
+        "height": 53
+      },
+      "affordance": "scroll",
+      "confidence": 0.93,
+      "is_canvas": false
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Mute",
+      "expected_element_id": "elem_47_19"
+    },
+    {
+      "query": "File",
+      "expected_element_id": "elem_47_22"
+    },
+    {
+      "query": "Download 1",
+      "expected_element_id": "elem_47_21"
+    },
+    {
+      "query": "Name",
+      "expected_element_id": "elem_47_8"
+    },
+    {
+      "query": "Back",
+      "expected_element_id": "elem_47_9"
+    }
+  ]
+}

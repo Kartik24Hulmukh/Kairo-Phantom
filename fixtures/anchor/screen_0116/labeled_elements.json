@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Volume",
+      "expected_element_id": "ocr_116_0"
+    },
+    {
+      "query": "Copy",
+      "expected_element_id": "ocr_116_1"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "ocr_116_2"
+    },
+    {
+      "query": "Date",
+      "expected_element_id": "ocr_116_3"
+    },
+    {
+      "query": "Cut",
+      "expected_element_id": "ocr_116_4"
+    }
+  ]
+}

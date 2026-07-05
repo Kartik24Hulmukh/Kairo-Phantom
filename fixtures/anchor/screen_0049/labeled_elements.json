@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Close 1",
+      "expected_element_id": "elem_49_23"
+    },
+    {
+      "query": "Yes 1",
+      "expected_element_id": "elem_49_12"
+    },
+    {
+      "query": "Time",
+      "expected_element_id": "elem_49_14"
+    },
+    {
+      "query": "Yes 2",
+      "expected_element_id": "elem_49_24"
+    },
+    {
+      "query": "Submit 1",
+      "expected_element_id": "elem_49_19"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Cancel",
+      "expected_element_id": "elem_33_11"
+    },
+    {
+      "query": "Submit",
+      "expected_element_id": "elem_33_0"
+    },
+    {
+      "query": "Previous",
+      "expected_element_id": "elem_33_8"
+    },
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_33_9"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_33_10"
+    }
+  ]
+}

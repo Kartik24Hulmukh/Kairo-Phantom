@@ -1,0 +1,173 @@
+{
+  "app_name": "Contacts",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_94_0",
+      "role": "menu_item",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 459,
+        "y": 104,
+        "width": 294,
+        "height": 56
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_1",
+      "role": "tab",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 738,
+        "y": 86,
+        "width": 279,
+        "height": 25
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_2",
+      "role": "menu_item",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 1086,
+        "y": 342,
+        "width": 203,
+        "height": 43
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_3",
+      "role": "list",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1279,
+        "y": 837,
+        "width": 123,
+        "height": 64
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_4",
+      "role": "radio",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1355,
+        "y": 377,
+        "width": 288,
+        "height": 53
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_5",
+      "role": "edit",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 1764,
+        "y": 152,
+        "width": 249,
+        "height": 38
+      },
+      "affordance": "type",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_6",
+      "role": "panel",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1477,
+        "y": 815,
+        "width": 251,
+        "height": 81
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_7",
+      "role": "combo",
+      "name": "Refresh 1",
+      "value": "",
+      "bounds": {
+        "x": 1488,
+        "y": 285,
+        "width": 87,
+        "height": 31
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_8",
+      "role": "list",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 1571,
+        "y": 394,
+        "width": 140,
+        "height": 60
+      },
+      "affordance": "select",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_9",
+      "role": "toolbar",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 1232,
+        "y": 812,
+        "width": 212,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_94_10",
+      "role": "checkbox",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 857,
+        "y": 562,
+        "width": 177,
+        "height": 88
+      },
+      "affordance": "toggle",
+      "confidence": 0.93,
+      "is_canvas": false
+    }
+  ]
+}

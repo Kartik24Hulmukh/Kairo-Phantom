@@ -1,0 +1,136 @@
+{
+  "elements": [
+    {
+      "id": "ocr_106_0",
+      "text": "Phone",
+      "bounds": {
+        "x": 1597,
+        "y": 480,
+        "width": 56,
+        "height": 16
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_1",
+      "text": "Previous",
+      "bounds": {
+        "x": 1784,
+        "y": 817,
+        "width": 58,
+        "height": 29
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_2",
+      "text": "Filter",
+      "bounds": {
+        "x": 1771,
+        "y": 80,
+        "width": 84,
+        "height": 25
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_3",
+      "text": "Export",
+      "bounds": {
+        "x": 823,
+        "y": 186,
+        "width": 186,
+        "height": 32
+      },
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_4",
+      "text": "Export 1",
+      "bounds": {
+        "x": 1055,
+        "y": 498,
+        "width": 113,
+        "height": 22
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_5",
+      "text": "Print",
+      "bounds": {
+        "x": 938,
+        "y": 883,
+        "width": 175,
+        "height": 40
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_6",
+      "text": "Open",
+      "bounds": {
+        "x": 99,
+        "y": 694,
+        "width": 64,
+        "height": 21
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_7",
+      "text": "Submit",
+      "bounds": {
+        "x": 60,
+        "y": 418,
+        "width": 144,
+        "height": 33
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_8",
+      "text": "Print 1",
+      "bounds": {
+        "x": 1447,
+        "y": 797,
+        "width": 175,
+        "height": 30
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_9",
+      "text": "Decline",
+      "bounds": {
+        "x": 1218,
+        "y": 897,
+        "width": 161,
+        "height": 31
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_106_10",
+      "text": "Refresh",
+      "bounds": {
+        "x": 1194,
+        "y": 191,
+        "width": 57,
+        "height": 29
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    }
+  ]
+}

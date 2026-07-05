@@ -1,0 +1,148 @@
+{
+  "elements": [
+    {
+      "id": "ocr_115_0",
+      "text": "Password",
+      "bounds": {
+        "x": 1167,
+        "y": 561,
+        "width": 120,
+        "height": 35
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_1",
+      "text": "Apply",
+      "bounds": {
+        "x": 1501,
+        "y": 544,
+        "width": 171,
+        "height": 32
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_2",
+      "text": "Remove",
+      "bounds": {
+        "x": 921,
+        "y": 766,
+        "width": 59,
+        "height": 27
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_3",
+      "text": "Export",
+      "bounds": {
+        "x": 381,
+        "y": 582,
+        "width": 71,
+        "height": 20
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_4",
+      "text": "Cut",
+      "bounds": {
+        "x": 282,
+        "y": 89,
+        "width": 148,
+        "height": 30
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_5",
+      "text": "Fullscreen",
+      "bounds": {
+        "x": 1124,
+        "y": 548,
+        "width": 75,
+        "height": 38
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_6",
+      "text": "Name",
+      "bounds": {
+        "x": 657,
+        "y": 170,
+        "width": 151,
+        "height": 24
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_7",
+      "text": "Cut 1",
+      "bounds": {
+        "x": 1309,
+        "y": 430,
+        "width": 184,
+        "height": 35
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_8",
+      "text": "Previous",
+      "bounds": {
+        "x": 1121,
+        "y": 751,
+        "width": 92,
+        "height": 40
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_9",
+      "text": "No",
+      "bounds": {
+        "x": 564,
+        "y": 533,
+        "width": 158,
+        "height": 21
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_10",
+      "text": "Share",
+      "bounds": {
+        "x": 1524,
+        "y": 188,
+        "width": 82,
+        "height": 31
+      },
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_115_11",
+      "text": "OK",
+      "bounds": {
+        "x": 902,
+        "y": 233,
+        "width": 78,
+        "height": 30
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    }
+  ]
+}

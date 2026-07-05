@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Attach 1",
+      "expected_element_id": "elem_67_11"
+    },
+    {
+      "query": "Import",
+      "expected_element_id": "elem_67_3"
+    },
+    {
+      "query": "Export",
+      "expected_element_id": "elem_67_6"
+    },
+    {
+      "query": "No",
+      "expected_element_id": "elem_67_12"
+    },
+    {
+      "query": "Quantity",
+      "expected_element_id": "elem_67_2"
+    }
+  ]
+}

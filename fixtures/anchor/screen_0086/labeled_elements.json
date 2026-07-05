@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Home",
+      "expected_element_id": "elem_86_4"
+    },
+    {
+      "query": "Remove",
+      "expected_element_id": "elem_86_7"
+    },
+    {
+      "query": "Date",
+      "expected_element_id": "elem_86_1"
+    },
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_86_2"
+    },
+    {
+      "query": "Paste",
+      "expected_element_id": "elem_86_10"
+    }
+  ]
+}

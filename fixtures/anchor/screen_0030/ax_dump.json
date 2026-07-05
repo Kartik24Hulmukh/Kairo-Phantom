@@ -1,0 +1,173 @@
+{
+  "app_name": "Chat App",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_30_0",
+      "role": "label",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 925,
+        "y": 315,
+        "width": 168,
+        "height": 53
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_1",
+      "role": "edit",
+      "name": "Paste",
+      "value": "",
+      "bounds": {
+        "x": 1653,
+        "y": 702,
+        "width": 127,
+        "height": 97
+      },
+      "affordance": "type",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_2",
+      "role": "tab",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 186,
+        "y": 728,
+        "width": 113,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_3",
+      "role": "text",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 532,
+        "y": 839,
+        "width": 94,
+        "height": 23
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_4",
+      "role": "table",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 193,
+        "y": 473,
+        "width": 76,
+        "height": 37
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_5",
+      "role": "text",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 267,
+        "y": 202,
+        "width": 260,
+        "height": 71
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_6",
+      "role": "edit",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1664,
+        "y": 76,
+        "width": 55,
+        "height": 28
+      },
+      "affordance": "type",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_7",
+      "role": "table",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 188,
+        "y": 867,
+        "width": 262,
+        "height": 62
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_8",
+      "role": "table",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 344,
+        "y": 587,
+        "width": 160,
+        "height": 70
+      },
+      "affordance": "read",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_9",
+      "role": "panel",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 353,
+        "y": 362,
+        "width": 104,
+        "height": 43
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_30_10",
+      "role": "table",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 70,
+        "y": 628,
+        "width": 208,
+        "height": 98
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "elements": [
+    {
+      "id": "vis_104_0",
+      "role": "button",
+      "name": "File",
+      "bounds": {
+        "x": 666,
+        "y": 693,
+        "width": 39,
+        "height": 66
+      },
+      "affordance": "click",
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_104_1",
+      "role": "slider",
+      "name": "Copy",
+      "bounds": {
+        "x": 461,
+        "y": 167,
+        "width": 24,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_104_2",
+      "role": "button",
+      "name": "Filter",
+      "bounds": {
+        "x": 1114,
+        "y": 149,
+        "width": 35,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.75,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_104_3",
+      "role": "shape",
+      "name": "Add",
+      "bounds": {
+        "x": 1085,
+        "y": 504,
+        "width": 45,
+        "height": 23
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_104_4",
+      "role": "slider",
+      "name": "Address",
+      "bounds": {
+        "x": 426,
+        "y": 889,
+        "width": 35,
+        "height": 73
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    }
+  ]
+}

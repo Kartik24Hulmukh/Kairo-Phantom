@@ -1,0 +1,143 @@
+{
+  "app_name": "Settings",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_60_0",
+      "role": "text",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 323,
+        "y": 804,
+        "width": 57,
+        "height": 82
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_1",
+      "role": "edit",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 1477,
+        "y": 455,
+        "width": 201,
+        "height": 94
+      },
+      "affordance": "type",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_2",
+      "role": "link",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 471,
+        "y": 797,
+        "width": 78,
+        "height": 61
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_3",
+      "role": "checkbox",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 1781,
+        "y": 204,
+        "width": 146,
+        "height": 48
+      },
+      "affordance": "toggle",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_4",
+      "role": "toolbar",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 892,
+        "y": 148,
+        "width": 105,
+        "height": 98
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_5",
+      "role": "panel",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 279,
+        "y": 468,
+        "width": 234,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_6",
+      "role": "radio",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 687,
+        "y": 130,
+        "width": 58,
+        "height": 92
+      },
+      "affordance": "select",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_7",
+      "role": "list",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 1744,
+        "y": 476,
+        "width": 167,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_60_8",
+      "role": "tab",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 604,
+        "y": 618,
+        "width": 90,
+        "height": 98
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    }
+  ]
+}

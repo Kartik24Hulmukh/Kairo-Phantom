@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Refresh",
+      "expected_element_id": "elem_19_1"
+    },
+    {
+      "query": "View",
+      "expected_element_id": "elem_19_14"
+    },
+    {
+      "query": "Save",
+      "expected_element_id": "elem_19_15"
+    },
+    {
+      "query": "Download",
+      "expected_element_id": "elem_19_7"
+    },
+    {
+      "query": "Maybe",
+      "expected_element_id": "elem_19_0"
+    }
+  ]
+}

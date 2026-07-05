@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Decline",
+      "expected_element_id": "elem_35_19"
+    },
+    {
+      "query": "Export",
+      "expected_element_id": "elem_35_2"
+    },
+    {
+      "query": "Cancel",
+      "expected_element_id": "elem_35_15"
+    },
+    {
+      "query": "Time",
+      "expected_element_id": "elem_35_6"
+    },
+    {
+      "query": "Delete 1",
+      "expected_element_id": "elem_35_16"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Sort",
+      "expected_element_id": "elem_10_0"
+    },
+    {
+      "query": "Next",
+      "expected_element_id": "elem_10_4"
+    },
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_10_6"
+    },
+    {
+      "query": "Previous",
+      "expected_element_id": "elem_10_1"
+    },
+    {
+      "query": "Cancel",
+      "expected_element_id": "elem_10_5"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "elements": [
+    {
+      "id": "vis_109_0",
+      "role": "shape",
+      "name": "View",
+      "bounds": {
+        "x": 174,
+        "y": 781,
+        "width": 36,
+        "height": 36
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_109_1",
+      "role": "icon",
+      "name": "Filter",
+      "bounds": {
+        "x": 141,
+        "y": 664,
+        "width": 35,
+        "height": 42
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_109_2",
+      "role": "shape",
+      "name": "Import",
+      "bounds": {
+        "x": 281,
+        "y": 573,
+        "width": 24,
+        "height": 35
+      },
+      "affordance": "click",
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_109_3",
+      "role": "button",
+      "name": "Submit",
+      "bounds": {
+        "x": 1748,
+        "y": 892,
+        "width": 63,
+        "height": 46
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_109_4",
+      "role": "shape",
+      "name": "Next",
+      "bounds": {
+        "x": 343,
+        "y": 75,
+        "width": 40,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_109_5",
+      "role": "slider",
+      "name": "Amount",
+      "bounds": {
+        "x": 1385,
+        "y": 433,
+        "width": 50,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.75,
+      "is_canvas": true
+    }
+  ]
+}

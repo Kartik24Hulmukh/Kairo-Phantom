@@ -1,0 +1,128 @@
+{
+  "app_name": "Word Processor",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_29_0",
+      "role": "button",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 1738,
+        "y": 755,
+        "width": 236,
+        "height": 59
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_1",
+      "role": "checkbox",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 1007,
+        "y": 61,
+        "width": 298,
+        "height": 38
+      },
+      "affordance": "toggle",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_2",
+      "role": "edit",
+      "name": "Save",
+      "value": "",
+      "bounds": {
+        "x": 474,
+        "y": 865,
+        "width": 183,
+        "height": 72
+      },
+      "affordance": "type",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_3",
+      "role": "label",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 1531,
+        "y": 86,
+        "width": 198,
+        "height": 32
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_4",
+      "role": "panel",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 1212,
+        "y": 581,
+        "width": 65,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_5",
+      "role": "list",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 597,
+        "y": 267,
+        "width": 267,
+        "height": 60
+      },
+      "affordance": "select",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_6",
+      "role": "panel",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 651,
+        "y": 463,
+        "width": 119,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_29_7",
+      "role": "link",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 1597,
+        "y": 788,
+        "width": 199,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    }
+  ]
+}

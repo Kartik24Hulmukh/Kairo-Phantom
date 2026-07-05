@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Amount",
+      "expected_element_id": "elem_53_1"
+    },
+    {
+      "query": "Address",
+      "expected_element_id": "elem_53_4"
+    },
+    {
+      "query": "Import",
+      "expected_element_id": "elem_53_2"
+    },
+    {
+      "query": "Import 1",
+      "expected_element_id": "elem_53_7"
+    },
+    {
+      "query": "Attach",
+      "expected_element_id": "elem_53_5"
+    }
+  ]
+}

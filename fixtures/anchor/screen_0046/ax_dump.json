@@ -1,0 +1,218 @@
+{
+  "app_name": "Terminal",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_46_0",
+      "role": "link",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 1712,
+        "y": 633,
+        "width": 141,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_1",
+      "role": "combo",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1384,
+        "y": 679,
+        "width": 176,
+        "height": 98
+      },
+      "affordance": "select",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_2",
+      "role": "text",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 760,
+        "y": 635,
+        "width": 130,
+        "height": 83
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_3",
+      "role": "radio",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 374,
+        "y": 782,
+        "width": 284,
+        "height": 85
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_4",
+      "role": "checkbox",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 110,
+        "y": 538,
+        "width": 254,
+        "height": 74
+      },
+      "affordance": "toggle",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_5",
+      "role": "text",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 711,
+        "y": 403,
+        "width": 270,
+        "height": 42
+      },
+      "affordance": "read",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_6",
+      "role": "combo",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 646,
+        "y": 705,
+        "width": 52,
+        "height": 21
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_7",
+      "role": "panel",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 666,
+        "y": 370,
+        "width": 206,
+        "height": 53
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_8",
+      "role": "radio",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 551,
+        "y": 482,
+        "width": 295,
+        "height": 98
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_9",
+      "role": "menu_item",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 868,
+        "y": 215,
+        "width": 157,
+        "height": 67
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_10",
+      "role": "panel",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 923,
+        "y": 184,
+        "width": 196,
+        "height": 36
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_11",
+      "role": "checkbox",
+      "name": "Search 1",
+      "value": "",
+      "bounds": {
+        "x": 1476,
+        "y": 276,
+        "width": 255,
+        "height": 50
+      },
+      "affordance": "toggle",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_12",
+      "role": "panel",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 298,
+        "y": 819,
+        "width": 295,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_46_13",
+      "role": "button",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 863,
+        "y": 511,
+        "width": 84,
+        "height": 100
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    }
+  ]
+}

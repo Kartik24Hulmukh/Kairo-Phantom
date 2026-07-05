@@ -1,0 +1,124 @@
+{
+  "elements": [
+    {
+      "id": "ocr_119_0",
+      "text": "Yes",
+      "bounds": {
+        "x": 1204,
+        "y": 436,
+        "width": 190,
+        "height": 16
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_1",
+      "text": "Fullscreen",
+      "bounds": {
+        "x": 1339,
+        "y": 417,
+        "width": 42,
+        "height": 20
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_2",
+      "text": "Decline",
+      "bounds": {
+        "x": 739,
+        "y": 713,
+        "width": 65,
+        "height": 20
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_3",
+      "text": "View",
+      "bounds": {
+        "x": 1006,
+        "y": 609,
+        "width": 87,
+        "height": 39
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_4",
+      "text": "Reload",
+      "bounds": {
+        "x": 1312,
+        "y": 517,
+        "width": 191,
+        "height": 33
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_5",
+      "text": "Previous",
+      "bounds": {
+        "x": 1019,
+        "y": 299,
+        "width": 104,
+        "height": 38
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_6",
+      "text": "Save",
+      "bounds": {
+        "x": 1038,
+        "y": 744,
+        "width": 142,
+        "height": 24
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_7",
+      "text": "Fullscreen 1",
+      "bounds": {
+        "x": 529,
+        "y": 831,
+        "width": 169,
+        "height": 18
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_8",
+      "text": "Help",
+      "bounds": {
+        "x": 601,
+        "y": 641,
+        "width": 142,
+        "height": 33
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_119_9",
+      "text": "Export",
+      "bounds": {
+        "x": 390,
+        "y": 357,
+        "width": 192,
+        "height": 37
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    }
+  ]
+}

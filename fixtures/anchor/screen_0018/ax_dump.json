@@ -1,0 +1,278 @@
+{
+  "app_name": "Media Player",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_18_0",
+      "role": "list",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 1414,
+        "y": 208,
+        "width": 155,
+        "height": 84
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_1",
+      "role": "toolbar",
+      "name": "Cancel",
+      "value": "",
+      "bounds": {
+        "x": 1445,
+        "y": 141,
+        "width": 182,
+        "height": 46
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_2",
+      "role": "toolbar",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 642,
+        "y": 177,
+        "width": 167,
+        "height": 88
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_3",
+      "role": "label",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1249,
+        "y": 495,
+        "width": 99,
+        "height": 51
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_4",
+      "role": "scroll_bar",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 609,
+        "y": 789,
+        "width": 123,
+        "height": 46
+      },
+      "affordance": "scroll",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_5",
+      "role": "toolbar",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 982,
+        "y": 357,
+        "width": 193,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_6",
+      "role": "panel",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 1676,
+        "y": 353,
+        "width": 294,
+        "height": 38
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_7",
+      "role": "scroll_bar",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 709,
+        "y": 452,
+        "width": 217,
+        "height": 52
+      },
+      "affordance": "scroll",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_8",
+      "role": "link",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 1695,
+        "y": 551,
+        "width": 119,
+        "height": 91
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_9",
+      "role": "list",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 1260,
+        "y": 758,
+        "width": 200,
+        "height": 50
+      },
+      "affordance": "select",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_10",
+      "role": "checkbox",
+      "name": "Username",
+      "value": "",
+      "bounds": {
+        "x": 107,
+        "y": 102,
+        "width": 155,
+        "height": 62
+      },
+      "affordance": "toggle",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_11",
+      "role": "combo",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 10,
+        "y": 563,
+        "width": 300,
+        "height": 40
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_12",
+      "role": "toolbar",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 1332,
+        "y": 204,
+        "width": 243,
+        "height": 56
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_13",
+      "role": "text",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 1335,
+        "y": 587,
+        "width": 109,
+        "height": 88
+      },
+      "affordance": "read",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_14",
+      "role": "text",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 855,
+        "y": 857,
+        "width": 95,
+        "height": 24
+      },
+      "affordance": "read",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_15",
+      "role": "panel",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 381,
+        "y": 766,
+        "width": 296,
+        "height": 57
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_16",
+      "role": "button",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1163,
+        "y": 617,
+        "width": 77,
+        "height": 62
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_18_17",
+      "role": "toolbar",
+      "name": "Delete 1",
+      "value": "",
+      "bounds": {
+        "x": 1742,
+        "y": 516,
+        "width": 169,
+        "height": 54
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    }
+  ]
+}

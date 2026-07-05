@@ -1,0 +1,46 @@
+{
+  "elements": [
+    {
+      "id": "vis_115_0",
+      "role": "slider",
+      "name": "Search",
+      "bounds": {
+        "x": 688,
+        "y": 768,
+        "width": 32,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_115_1",
+      "role": "icon",
+      "name": "Paste",
+      "bounds": {
+        "x": 243,
+        "y": 112,
+        "width": 59,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_115_2",
+      "role": "handle",
+      "name": "Edit",
+      "bounds": {
+        "x": 1195,
+        "y": 281,
+        "width": 42,
+        "height": 60
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    }
+  ]
+}

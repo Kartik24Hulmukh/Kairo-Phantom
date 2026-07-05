@@ -1,0 +1,158 @@
+{
+  "app_name": "Task Manager",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_31_0",
+      "role": "panel",
+      "name": "Delete",
+      "value": "",
+      "bounds": {
+        "x": 858,
+        "y": 204,
+        "width": 214,
+        "height": 87
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_1",
+      "role": "button",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 1601,
+        "y": 730,
+        "width": 141,
+        "height": 81
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_2",
+      "role": "toolbar",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 1158,
+        "y": 514,
+        "width": 132,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_3",
+      "role": "button",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 1222,
+        "y": 224,
+        "width": 57,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_4",
+      "role": "toolbar",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 1570,
+        "y": 598,
+        "width": 109,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_5",
+      "role": "checkbox",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 1092,
+        "y": 835,
+        "width": 252,
+        "height": 27
+      },
+      "affordance": "toggle",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_6",
+      "role": "checkbox",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 726,
+        "y": 859,
+        "width": 266,
+        "height": 42
+      },
+      "affordance": "toggle",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_7",
+      "role": "tab",
+      "name": "Decline 1",
+      "value": "",
+      "bounds": {
+        "x": 1211,
+        "y": 28,
+        "width": 230,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_8",
+      "role": "list",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1713,
+        "y": 829,
+        "width": 275,
+        "height": 83
+      },
+      "affordance": "select",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_31_9",
+      "role": "menu_item",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 77,
+        "y": 92,
+        "width": 64,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    }
+  ]
+}

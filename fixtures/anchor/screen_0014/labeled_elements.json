@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Time",
+      "expected_element_id": "elem_14_8"
+    },
+    {
+      "query": "Pause",
+      "expected_element_id": "elem_14_23"
+    },
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_14_0"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_14_11"
+    },
+    {
+      "query": "Submit",
+      "expected_element_id": "elem_14_2"
+    }
+  ]
+}

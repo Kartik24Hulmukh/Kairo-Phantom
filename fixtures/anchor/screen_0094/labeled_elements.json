@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_94_8"
+    },
+    {
+      "query": "Pause",
+      "expected_element_id": "elem_94_10"
+    },
+    {
+      "query": "Quantity",
+      "expected_element_id": "elem_94_3"
+    },
+    {
+      "query": "Back",
+      "expected_element_id": "elem_94_6"
+    },
+    {
+      "query": "Sort",
+      "expected_element_id": "elem_94_0"
+    }
+  ]
+}

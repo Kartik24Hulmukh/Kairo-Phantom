@@ -1,0 +1,143 @@
+{
+  "app_name": "Calculator",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_53_0",
+      "role": "scroll_bar",
+      "name": "Yes",
+      "value": "",
+      "bounds": {
+        "x": 754,
+        "y": 388,
+        "width": 259,
+        "height": 28
+      },
+      "affordance": "scroll",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_1",
+      "role": "edit",
+      "name": "Amount",
+      "value": "",
+      "bounds": {
+        "x": 964,
+        "y": 137,
+        "width": 81,
+        "height": 55
+      },
+      "affordance": "type",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_2",
+      "role": "tree_item",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 1425,
+        "y": 214,
+        "width": 206,
+        "height": 27
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_3",
+      "role": "edit",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 1482,
+        "y": 705,
+        "width": 204,
+        "height": 56
+      },
+      "affordance": "type",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_4",
+      "role": "tab",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1076,
+        "y": 588,
+        "width": 209,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_5",
+      "role": "toolbar",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 1008,
+        "y": 827,
+        "width": 96,
+        "height": 98
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_6",
+      "role": "scroll_bar",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 3,
+        "y": 121,
+        "width": 56,
+        "height": 79
+      },
+      "affordance": "scroll",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_7",
+      "role": "combo",
+      "name": "Import 1",
+      "value": "",
+      "bounds": {
+        "x": 1637,
+        "y": 630,
+        "width": 156,
+        "height": 72
+      },
+      "affordance": "select",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_53_8",
+      "role": "label",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 23,
+        "y": 655,
+        "width": 101,
+        "height": 56
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    }
+  ]
+}

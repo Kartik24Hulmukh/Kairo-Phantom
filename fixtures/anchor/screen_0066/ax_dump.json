@@ -1,0 +1,158 @@
+{
+  "app_name": "Calculator",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_66_0",
+      "role": "scroll_bar",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 691,
+        "y": 173,
+        "width": 55,
+        "height": 88
+      },
+      "affordance": "scroll",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_1",
+      "role": "table",
+      "name": "Refresh",
+      "value": "",
+      "bounds": {
+        "x": 1163,
+        "y": 527,
+        "width": 280,
+        "height": 73
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_2",
+      "role": "toolbar",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 648,
+        "y": 386,
+        "width": 196,
+        "height": 69
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_3",
+      "role": "combo",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 204,
+        "y": 707,
+        "width": 222,
+        "height": 46
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_4",
+      "role": "tab",
+      "name": "Cut",
+      "value": "",
+      "bounds": {
+        "x": 1259,
+        "y": 306,
+        "width": 143,
+        "height": 75
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_5",
+      "role": "edit",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 588,
+        "y": 271,
+        "width": 62,
+        "height": 58
+      },
+      "affordance": "type",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_6",
+      "role": "panel",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 1279,
+        "y": 760,
+        "width": 295,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_7",
+      "role": "combo",
+      "name": "Maybe",
+      "value": "",
+      "bounds": {
+        "x": 559,
+        "y": 68,
+        "width": 195,
+        "height": 87
+      },
+      "affordance": "select",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_8",
+      "role": "link",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 1629,
+        "y": 78,
+        "width": 216,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_66_9",
+      "role": "scroll_bar",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 1358,
+        "y": 552,
+        "width": 130,
+        "height": 45
+      },
+      "affordance": "scroll",
+      "confidence": 0.91,
+      "is_canvas": false
+    }
+  ]
+}

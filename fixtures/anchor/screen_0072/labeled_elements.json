@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Filter",
+      "expected_element_id": "elem_72_3"
+    },
+    {
+      "query": "Cut",
+      "expected_element_id": "elem_72_4"
+    },
+    {
+      "query": "Quantity 1",
+      "expected_element_id": "elem_72_6"
+    },
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_72_0"
+    },
+    {
+      "query": "Maybe",
+      "expected_element_id": "elem_72_2"
+    }
+  ]
+}

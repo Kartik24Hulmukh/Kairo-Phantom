@@ -1,0 +1,74 @@
+{
+  "elements": [
+    {
+      "id": "vis_111_0",
+      "role": "icon",
+      "name": "Reply",
+      "bounds": {
+        "x": 1532,
+        "y": 834,
+        "width": 57,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_111_1",
+      "role": "button",
+      "name": "Forward",
+      "bounds": {
+        "x": 65,
+        "y": 657,
+        "width": 57,
+        "height": 43
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_111_2",
+      "role": "icon",
+      "name": "Date",
+      "bounds": {
+        "x": 411,
+        "y": 570,
+        "width": 66,
+        "height": 57
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_111_3",
+      "role": "button",
+      "name": "Reply 1",
+      "bounds": {
+        "x": 1060,
+        "y": 399,
+        "width": 23,
+        "height": 56
+      },
+      "affordance": "click",
+      "confidence": 0.79,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_111_4",
+      "role": "icon",
+      "name": "Edit Item",
+      "bounds": {
+        "x": 836,
+        "y": 376,
+        "width": 68,
+        "height": 31
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    }
+  ]
+}

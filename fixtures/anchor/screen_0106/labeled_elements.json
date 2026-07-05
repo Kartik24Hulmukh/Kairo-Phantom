@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Phone",
+      "expected_element_id": "ocr_106_0"
+    },
+    {
+      "query": "Previous",
+      "expected_element_id": "ocr_106_1"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "ocr_106_2"
+    },
+    {
+      "query": "Export",
+      "expected_element_id": "ocr_106_3"
+    },
+    {
+      "query": "Export 1",
+      "expected_element_id": "ocr_106_4"
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "app_name": "Media Player",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_39_0",
+      "role": "combo",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 1251,
+        "y": 200,
+        "width": 98,
+        "height": 35
+      },
+      "affordance": "select",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_1",
+      "role": "panel",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 936,
+        "y": 844,
+        "width": 250,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_2",
+      "role": "combo",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 95,
+        "y": 648,
+        "width": 264,
+        "height": 95
+      },
+      "affordance": "select",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_3",
+      "role": "table",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 1348,
+        "y": 603,
+        "width": 294,
+        "height": 84
+      },
+      "affordance": "read",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_4",
+      "role": "toolbar",
+      "name": "File",
+      "value": "",
+      "bounds": {
+        "x": 1086,
+        "y": 753,
+        "width": 62,
+        "height": 90
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_5",
+      "role": "toolbar",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 1599,
+        "y": 181,
+        "width": 227,
+        "height": 94
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_6",
+      "role": "list",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 793,
+        "y": 673,
+        "width": 203,
+        "height": 97
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_7",
+      "role": "panel",
+      "name": "Fullscreen 1",
+      "value": "",
+      "bounds": {
+        "x": 1247,
+        "y": 709,
+        "width": 245,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_8",
+      "role": "tab",
+      "name": "Amount",
+      "value": "",
+      "bounds": {
+        "x": 927,
+        "y": 824,
+        "width": 84,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_9",
+      "role": "scroll_bar",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 1457,
+        "y": 754,
+        "width": 289,
+        "height": 90
+      },
+      "affordance": "scroll",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_10",
+      "role": "link",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 1278,
+        "y": 731,
+        "width": 124,
+        "height": 64
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_39_11",
+      "role": "list",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1031,
+        "y": 555,
+        "width": 227,
+        "height": 61
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    }
+  ]
+}

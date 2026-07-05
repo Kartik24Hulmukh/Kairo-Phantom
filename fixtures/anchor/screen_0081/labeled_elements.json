@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Save",
+      "expected_element_id": "elem_81_4"
+    },
+    {
+      "query": "Print",
+      "expected_element_id": "elem_81_10"
+    },
+    {
+      "query": "Share",
+      "expected_element_id": "elem_81_12"
+    },
+    {
+      "query": "Remove",
+      "expected_element_id": "elem_81_16"
+    },
+    {
+      "query": "Delete",
+      "expected_element_id": "elem_81_3"
+    }
+  ]
+}

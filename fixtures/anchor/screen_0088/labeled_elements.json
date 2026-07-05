@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Redo",
+      "expected_element_id": "elem_88_3"
+    },
+    {
+      "query": "View",
+      "expected_element_id": "elem_88_2"
+    },
+    {
+      "query": "Search",
+      "expected_element_id": "elem_88_4"
+    },
+    {
+      "query": "Reply",
+      "expected_element_id": "elem_88_12"
+    },
+    {
+      "query": "Home",
+      "expected_element_id": "elem_88_11"
+    }
+  ]
+}

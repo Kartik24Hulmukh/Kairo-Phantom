@@ -1,0 +1,144 @@
+{
+  "elements": [
+    {
+      "id": "vis_114_0",
+      "role": "button",
+      "name": "Preferences",
+      "bounds": {
+        "x": 821,
+        "y": 348,
+        "width": 47,
+        "height": 25
+      },
+      "affordance": "click",
+      "confidence": 0.83,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_1",
+      "role": "handle",
+      "name": "Send",
+      "bounds": {
+        "x": 1039,
+        "y": 341,
+        "width": 78,
+        "height": 64
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_2",
+      "role": "slider",
+      "name": "Previous",
+      "bounds": {
+        "x": 1067,
+        "y": 795,
+        "width": 45,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_3",
+      "role": "handle",
+      "name": "Stop",
+      "bounds": {
+        "x": 976,
+        "y": 279,
+        "width": 56,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_4",
+      "role": "shape",
+      "name": "Description",
+      "bounds": {
+        "x": 1026,
+        "y": 626,
+        "width": 26,
+        "height": 61
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_5",
+      "role": "handle",
+      "name": "Cut",
+      "bounds": {
+        "x": 1340,
+        "y": 135,
+        "width": 26,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_6",
+      "role": "button",
+      "name": "Edit Item",
+      "bounds": {
+        "x": 1053,
+        "y": 657,
+        "width": 35,
+        "height": 25
+      },
+      "affordance": "click",
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_7",
+      "role": "icon",
+      "name": "Username",
+      "bounds": {
+        "x": 1019,
+        "y": 585,
+        "width": 66,
+        "height": 73
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_8",
+      "role": "handle",
+      "name": "Maybe",
+      "bounds": {
+        "x": 566,
+        "y": 471,
+        "width": 39,
+        "height": 67
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_114_9",
+      "role": "shape",
+      "name": "File",
+      "bounds": {
+        "x": 1461,
+        "y": 628,
+        "width": 58,
+        "height": 46
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    }
+  ]
+}

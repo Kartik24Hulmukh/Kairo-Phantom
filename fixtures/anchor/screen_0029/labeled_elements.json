@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Save",
+      "expected_element_id": "elem_29_2"
+    },
+    {
+      "query": "Forward",
+      "expected_element_id": "elem_29_3"
+    },
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_29_6"
+    },
+    {
+      "query": "Delete",
+      "expected_element_id": "elem_29_7"
+    },
+    {
+      "query": "Password",
+      "expected_element_id": "elem_29_5"
+    }
+  ]
+}

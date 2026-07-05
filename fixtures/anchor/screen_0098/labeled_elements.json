@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Address",
+      "expected_element_id": "elem_98_17"
+    },
+    {
+      "query": "Home",
+      "expected_element_id": "elem_98_7"
+    },
+    {
+      "query": "Fullscreen",
+      "expected_element_id": "elem_98_12"
+    },
+    {
+      "query": "Settings",
+      "expected_element_id": "elem_98_8"
+    },
+    {
+      "query": "Previous",
+      "expected_element_id": "elem_98_1"
+    }
+  ]
+}

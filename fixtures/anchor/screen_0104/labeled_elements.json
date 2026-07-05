@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Quantity",
+      "expected_element_id": "ocr_104_0"
+    },
+    {
+      "query": "Play",
+      "expected_element_id": "ocr_104_1"
+    },
+    {
+      "query": "Home",
+      "expected_element_id": "ocr_104_2"
+    },
+    {
+      "query": "Decline",
+      "expected_element_id": "ocr_104_3"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "ocr_104_4"
+    }
+  ]
+}

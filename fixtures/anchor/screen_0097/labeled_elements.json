@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Sort",
+      "expected_element_id": "elem_97_18"
+    },
+    {
+      "query": "Amount",
+      "expected_element_id": "elem_97_3"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_97_1"
+    },
+    {
+      "query": "Reload",
+      "expected_element_id": "elem_97_6"
+    },
+    {
+      "query": "Submit",
+      "expected_element_id": "elem_97_16"
+    }
+  ]
+}

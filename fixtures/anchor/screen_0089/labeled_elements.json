@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Description",
+      "expected_element_id": "elem_89_15"
+    },
+    {
+      "query": "Upload",
+      "expected_element_id": "elem_89_9"
+    },
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_89_8"
+    },
+    {
+      "query": "OK",
+      "expected_element_id": "elem_89_6"
+    },
+    {
+      "query": "Date",
+      "expected_element_id": "elem_89_0"
+    }
+  ]
+}

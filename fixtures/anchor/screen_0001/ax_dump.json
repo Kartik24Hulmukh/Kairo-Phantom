@@ -1,0 +1,143 @@
+{
+  "app_name": "Terminal",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_1_0",
+      "role": "text",
+      "name": "Notes",
+      "value": "",
+      "bounds": {
+        "x": 821,
+        "y": 274,
+        "width": 66,
+        "height": 47
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_1",
+      "role": "tab",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 1342,
+        "y": 511,
+        "width": 151,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_2",
+      "role": "list",
+      "name": "Email",
+      "value": "",
+      "bounds": {
+        "x": 1525,
+        "y": 574,
+        "width": 187,
+        "height": 53
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_3",
+      "role": "tree_item",
+      "name": "Volume",
+      "value": "",
+      "bounds": {
+        "x": 741,
+        "y": 224,
+        "width": 85,
+        "height": 85
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_4",
+      "role": "text",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 313,
+        "y": 642,
+        "width": 90,
+        "height": 74
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_5",
+      "role": "panel",
+      "name": "Play",
+      "value": "",
+      "bounds": {
+        "x": 1220,
+        "y": 479,
+        "width": 185,
+        "height": 52
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_6",
+      "role": "button",
+      "name": "Sort 1",
+      "value": "",
+      "bounds": {
+        "x": 1396,
+        "y": 549,
+        "width": 242,
+        "height": 54
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_7",
+      "role": "tab",
+      "name": "Sort 2",
+      "value": "",
+      "bounds": {
+        "x": 601,
+        "y": 445,
+        "width": 90,
+        "height": 78
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_1_8",
+      "role": "radio",
+      "name": "Send",
+      "value": "",
+      "bounds": {
+        "x": 1560,
+        "y": 182,
+        "width": 179,
+        "height": 33
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    }
+  ]
+}

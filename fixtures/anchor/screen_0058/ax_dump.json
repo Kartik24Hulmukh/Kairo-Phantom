@@ -1,0 +1,218 @@
+{
+  "app_name": "Maps",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_58_0",
+      "role": "tab",
+      "name": "Redo",
+      "value": "",
+      "bounds": {
+        "x": 641,
+        "y": 560,
+        "width": 52,
+        "height": 21
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_1",
+      "role": "button",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 200,
+        "y": 537,
+        "width": 76,
+        "height": 77
+      },
+      "affordance": "click",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_2",
+      "role": "scroll_bar",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 395,
+        "y": 34,
+        "width": 56,
+        "height": 99
+      },
+      "affordance": "scroll",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_3",
+      "role": "link",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 1450,
+        "y": 122,
+        "width": 72,
+        "height": 97
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_4",
+      "role": "menu_item",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 1424,
+        "y": 188,
+        "width": 114,
+        "height": 57
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_5",
+      "role": "edit",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 566,
+        "y": 787,
+        "width": 159,
+        "height": 61
+      },
+      "affordance": "type",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_6",
+      "role": "edit",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 1591,
+        "y": 63,
+        "width": 147,
+        "height": 69
+      },
+      "affordance": "type",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_7",
+      "role": "text",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1664,
+        "y": 271,
+        "width": 95,
+        "height": 76
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_8",
+      "role": "link",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 365,
+        "y": 660,
+        "width": 175,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_9",
+      "role": "tree_item",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 1257,
+        "y": 658,
+        "width": 77,
+        "height": 76
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_10",
+      "role": "combo",
+      "name": "Open",
+      "value": "",
+      "bounds": {
+        "x": 149,
+        "y": 72,
+        "width": 196,
+        "height": 52
+      },
+      "affordance": "select",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_11",
+      "role": "button",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 304,
+        "y": 668,
+        "width": 213,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_12",
+      "role": "panel",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 310,
+        "y": 716,
+        "width": 134,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_58_13",
+      "role": "toolbar",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 893,
+        "y": 413,
+        "width": 266,
+        "height": 28
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    }
+  ]
+}

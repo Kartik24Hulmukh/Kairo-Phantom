@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_12_5"
+    },
+    {
+      "query": "Submit",
+      "expected_element_id": "elem_12_8"
+    },
+    {
+      "query": "Apply",
+      "expected_element_id": "elem_12_7"
+    },
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_12_6"
+    },
+    {
+      "query": "File",
+      "expected_element_id": "elem_12_1"
+    }
+  ]
+}

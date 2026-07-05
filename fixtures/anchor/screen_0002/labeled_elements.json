@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Notes",
+      "expected_element_id": "elem_2_19"
+    },
+    {
+      "query": "Copy",
+      "expected_element_id": "elem_2_18"
+    },
+    {
+      "query": "Share",
+      "expected_element_id": "elem_2_3"
+    },
+    {
+      "query": "Upload",
+      "expected_element_id": "elem_2_2"
+    },
+    {
+      "query": "Time",
+      "expected_element_id": "elem_2_17"
+    }
+  ]
+}

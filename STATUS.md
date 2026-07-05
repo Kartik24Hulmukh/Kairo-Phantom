@@ -31,6 +31,7 @@
 | 12 | Security | **Real (wedge)** | injection_block oracle — reference monitor + 15-case injection corpus, 0% attack-success |
 | 13 | Data/analytics | **Real** | query_result + schema_readback — DuckDB SQL over local CSV/Parquet/xlsx, results verified vs independent pandas/numpy calc, kill-proven, honest-degradation |
 | 14 | Email/comms | **Real** | draft_readback + mailbox_structure_readback — RFC-5322 email draft composition with Maildir storage, attachments, replies (In-Reply-To/References threading), kill-proven read-back, honest-degradation; MAPI/IMAP Experimental (fail-loud offline) |
+| 15 | Anchor Perception | **Real (wedge)** | grounding_accuracy + stable_id + token_reduction — local AX-tree + OCR + vision fusion, bbox-overlap dedup (UFO²), >=90% grounding on 120-screen corpus (incl. 20 canvas), stable IDs across frames, >=70% token reduction; live capture/OCR/vision = Experimental |
 
 ## Trust Infrastructure
 

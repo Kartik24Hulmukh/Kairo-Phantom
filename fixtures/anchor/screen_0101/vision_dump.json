@@ -1,0 +1,46 @@
+{
+  "elements": [
+    {
+      "id": "vis_101_0",
+      "role": "shape",
+      "name": "Decline",
+      "bounds": {
+        "x": 1025,
+        "y": 727,
+        "width": 53,
+        "height": 48
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_101_1",
+      "role": "handle",
+      "name": "Settings",
+      "bounds": {
+        "x": 1177,
+        "y": 136,
+        "width": 42,
+        "height": 47
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_101_2",
+      "role": "shape",
+      "name": "Home",
+      "bounds": {
+        "x": 932,
+        "y": 570,
+        "width": 41,
+        "height": 23
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    }
+  ]
+}

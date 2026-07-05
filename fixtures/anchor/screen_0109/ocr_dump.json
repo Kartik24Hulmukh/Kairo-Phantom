@@ -1,0 +1,112 @@
+{
+  "elements": [
+    {
+      "id": "ocr_109_0",
+      "text": "Edit",
+      "bounds": {
+        "x": 790,
+        "y": 325,
+        "width": 104,
+        "height": 40
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_1",
+      "text": "Undo",
+      "bounds": {
+        "x": 1214,
+        "y": 726,
+        "width": 122,
+        "height": 23
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_2",
+      "text": "Open",
+      "bounds": {
+        "x": 85,
+        "y": 500,
+        "width": 42,
+        "height": 29
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_3",
+      "text": "Mute",
+      "bounds": {
+        "x": 1033,
+        "y": 703,
+        "width": 182,
+        "height": 21
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_4",
+      "text": "Notes",
+      "bounds": {
+        "x": 212,
+        "y": 333,
+        "width": 196,
+        "height": 32
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_5",
+      "text": "Date",
+      "bounds": {
+        "x": 952,
+        "y": 234,
+        "width": 106,
+        "height": 39
+      },
+      "confidence": 0.84,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_6",
+      "text": "Undo 1",
+      "bounds": {
+        "x": 1063,
+        "y": 180,
+        "width": 98,
+        "height": 35
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_7",
+      "text": "Sort",
+      "bounds": {
+        "x": 1315,
+        "y": 721,
+        "width": 52,
+        "height": 22
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_109_8",
+      "text": "Notes 1",
+      "bounds": {
+        "x": 427,
+        "y": 750,
+        "width": 169,
+        "height": 29
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    }
+  ]
+}

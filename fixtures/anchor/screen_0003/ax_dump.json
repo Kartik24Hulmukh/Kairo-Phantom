@@ -1,0 +1,218 @@
+{
+  "app_name": "Maps",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_3_0",
+      "role": "radio",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 714,
+        "y": 70,
+        "width": 275,
+        "height": 51
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_1",
+      "role": "menu_item",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 1707,
+        "y": 556,
+        "width": 230,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_2",
+      "role": "button",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1358,
+        "y": 106,
+        "width": 290,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_3",
+      "role": "combo",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 557,
+        "y": 288,
+        "width": 204,
+        "height": 46
+      },
+      "affordance": "select",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_4",
+      "role": "link",
+      "name": "Address",
+      "value": "",
+      "bounds": {
+        "x": 1035,
+        "y": 500,
+        "width": 114,
+        "height": 26
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_5",
+      "role": "tree_item",
+      "name": "Date",
+      "value": "",
+      "bounds": {
+        "x": 90,
+        "y": 3,
+        "width": 135,
+        "height": 36
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_6",
+      "role": "radio",
+      "name": "Paste",
+      "value": "",
+      "bounds": {
+        "x": 1518,
+        "y": 452,
+        "width": 191,
+        "height": 74
+      },
+      "affordance": "select",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_7",
+      "role": "combo",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 1415,
+        "y": 152,
+        "width": 189,
+        "height": 24
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_8",
+      "role": "list",
+      "name": "Reload",
+      "value": "",
+      "bounds": {
+        "x": 261,
+        "y": 42,
+        "width": 128,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_9",
+      "role": "text",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 430,
+        "y": 698,
+        "width": 113,
+        "height": 33
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_10",
+      "role": "tree_item",
+      "name": "Copy 1",
+      "value": "",
+      "bounds": {
+        "x": 484,
+        "y": 885,
+        "width": 91,
+        "height": 42
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_11",
+      "role": "button",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1508,
+        "y": 340,
+        "width": 250,
+        "height": 72
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_12",
+      "role": "checkbox",
+      "name": "Name",
+      "value": "",
+      "bounds": {
+        "x": 326,
+        "y": 806,
+        "width": 229,
+        "height": 33
+      },
+      "affordance": "toggle",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_3_13",
+      "role": "text",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 455,
+        "y": 204,
+        "width": 259,
+        "height": 78
+      },
+      "affordance": "read",
+      "confidence": 0.9,
+      "is_canvas": false
+    }
+  ]
+}

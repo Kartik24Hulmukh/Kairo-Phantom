@@ -1,0 +1,76 @@
+{
+  "elements": [
+    {
+      "id": "ocr_117_0",
+      "text": "Copy",
+      "bounds": {
+        "x": 128,
+        "y": 428,
+        "width": 47,
+        "height": 34
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_117_1",
+      "text": "Add",
+      "bounds": {
+        "x": 412,
+        "y": 184,
+        "width": 61,
+        "height": 28
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_117_2",
+      "text": "Search",
+      "bounds": {
+        "x": 1355,
+        "y": 777,
+        "width": 55,
+        "height": 25
+      },
+      "confidence": 0.93,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_117_3",
+      "text": "View",
+      "bounds": {
+        "x": 618,
+        "y": 248,
+        "width": 197,
+        "height": 38
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_117_4",
+      "text": "Next",
+      "bounds": {
+        "x": 1426,
+        "y": 374,
+        "width": 83,
+        "height": 33
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_117_5",
+      "text": "Cancel",
+      "bounds": {
+        "x": 1410,
+        "y": 462,
+        "width": 146,
+        "height": 36
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    }
+  ]
+}

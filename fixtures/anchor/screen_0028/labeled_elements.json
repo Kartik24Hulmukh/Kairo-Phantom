@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Previous",
+      "expected_element_id": "elem_28_13"
+    },
+    {
+      "query": "Password",
+      "expected_element_id": "elem_28_0"
+    },
+    {
+      "query": "Password 1",
+      "expected_element_id": "elem_28_7"
+    },
+    {
+      "query": "Fullscreen",
+      "expected_element_id": "elem_28_17"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_28_11"
+    }
+  ]
+}

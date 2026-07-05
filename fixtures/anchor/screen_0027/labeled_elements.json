@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Email",
+      "expected_element_id": "elem_27_6"
+    },
+    {
+      "query": "Edit Item",
+      "expected_element_id": "elem_27_2"
+    },
+    {
+      "query": "Pause",
+      "expected_element_id": "elem_27_5"
+    },
+    {
+      "query": "Refresh",
+      "expected_element_id": "elem_27_0"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "elem_27_1"
+    }
+  ]
+}

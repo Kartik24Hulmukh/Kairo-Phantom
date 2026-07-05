@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Yes",
+      "expected_element_id": "ocr_119_0"
+    },
+    {
+      "query": "Fullscreen",
+      "expected_element_id": "ocr_119_1"
+    },
+    {
+      "query": "Decline",
+      "expected_element_id": "ocr_119_2"
+    },
+    {
+      "query": "View",
+      "expected_element_id": "ocr_119_3"
+    },
+    {
+      "query": "Reload",
+      "expected_element_id": "ocr_119_4"
+    }
+  ]
+}

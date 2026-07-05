@@ -1,0 +1,144 @@
+{
+  "elements": [
+    {
+      "id": "vis_105_0",
+      "role": "shape",
+      "name": "Forward",
+      "bounds": {
+        "x": 137,
+        "y": 413,
+        "width": 28,
+        "height": 49
+      },
+      "affordance": "click",
+      "confidence": 0.75,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_1",
+      "role": "handle",
+      "name": "Send",
+      "bounds": {
+        "x": 374,
+        "y": 416,
+        "width": 52,
+        "height": 74
+      },
+      "affordance": "click",
+      "confidence": 0.8,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_2",
+      "role": "handle",
+      "name": "OK",
+      "bounds": {
+        "x": 1496,
+        "y": 587,
+        "width": 44,
+        "height": 52
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_3",
+      "role": "button",
+      "name": "Maybe",
+      "bounds": {
+        "x": 770,
+        "y": 721,
+        "width": 66,
+        "height": 56
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_4",
+      "role": "button",
+      "name": "Quantity",
+      "bounds": {
+        "x": 1661,
+        "y": 193,
+        "width": 37,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_5",
+      "role": "slider",
+      "name": "Share",
+      "bounds": {
+        "x": 1768,
+        "y": 710,
+        "width": 50,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_6",
+      "role": "handle",
+      "name": "Address",
+      "bounds": {
+        "x": 1229,
+        "y": 775,
+        "width": 79,
+        "height": 52
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_7",
+      "role": "icon",
+      "name": "Volume",
+      "bounds": {
+        "x": 1255,
+        "y": 644,
+        "width": 42,
+        "height": 57
+      },
+      "affordance": "click",
+      "confidence": 0.76,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_8",
+      "role": "icon",
+      "name": "Search",
+      "bounds": {
+        "x": 1794,
+        "y": 800,
+        "width": 30,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_105_9",
+      "role": "handle",
+      "name": "Username",
+      "bounds": {
+        "x": 1441,
+        "y": 537,
+        "width": 40,
+        "height": 68
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    }
+  ]
+}

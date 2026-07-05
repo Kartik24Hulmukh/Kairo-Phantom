@@ -1,0 +1,102 @@
+{
+  "elements": [
+    {
+      "id": "vis_112_0",
+      "role": "shape",
+      "name": "Submit",
+      "bounds": {
+        "x": 978,
+        "y": 695,
+        "width": 67,
+        "height": 52
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_112_1",
+      "role": "handle",
+      "name": "Notes",
+      "bounds": {
+        "x": 128,
+        "y": 493,
+        "width": 26,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_112_2",
+      "role": "handle",
+      "name": "Edit",
+      "bounds": {
+        "x": 1403,
+        "y": 691,
+        "width": 22,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_112_3",
+      "role": "button",
+      "name": "Address",
+      "bounds": {
+        "x": 820,
+        "y": 275,
+        "width": 63,
+        "height": 32
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_112_4",
+      "role": "handle",
+      "name": "Time",
+      "bounds": {
+        "x": 1716,
+        "y": 241,
+        "width": 66,
+        "height": 51
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_112_5",
+      "role": "icon",
+      "name": "Settings",
+      "bounds": {
+        "x": 231,
+        "y": 578,
+        "width": 74,
+        "height": 66
+      },
+      "affordance": "click",
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_112_6",
+      "role": "icon",
+      "name": "Undo",
+      "bounds": {
+        "x": 1054,
+        "y": 621,
+        "width": 59,
+        "height": 33
+      },
+      "affordance": "click",
+      "confidence": 0.81,
+      "is_canvas": true
+    }
+  ]
+}

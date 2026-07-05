@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "View",
+      "expected_element_id": "elem_26_3"
+    },
+    {
+      "query": "Export",
+      "expected_element_id": "elem_26_4"
+    },
+    {
+      "query": "Reset",
+      "expected_element_id": "elem_26_5"
+    },
+    {
+      "query": "Search",
+      "expected_element_id": "elem_26_7"
+    },
+    {
+      "query": "Decline",
+      "expected_element_id": "elem_26_0"
+    }
+  ]
+}

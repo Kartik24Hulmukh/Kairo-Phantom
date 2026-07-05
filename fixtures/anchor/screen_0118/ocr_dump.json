@@ -1,0 +1,88 @@
+{
+  "elements": [
+    {
+      "id": "ocr_118_0",
+      "text": "Previous",
+      "bounds": {
+        "x": 1665,
+        "y": 60,
+        "width": 95,
+        "height": 35
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_118_1",
+      "text": "Print",
+      "bounds": {
+        "x": 1533,
+        "y": 302,
+        "width": 118,
+        "height": 36
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_118_2",
+      "text": "Play",
+      "bounds": {
+        "x": 1561,
+        "y": 185,
+        "width": 119,
+        "height": 16
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_118_3",
+      "text": "Notes",
+      "bounds": {
+        "x": 414,
+        "y": 335,
+        "width": 75,
+        "height": 33
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_118_4",
+      "text": "Undo",
+      "bounds": {
+        "x": 1760,
+        "y": 242,
+        "width": 109,
+        "height": 21
+      },
+      "confidence": 0.95,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_118_5",
+      "text": "Reset",
+      "bounds": {
+        "x": 581,
+        "y": 764,
+        "width": 152,
+        "height": 23
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_118_6",
+      "text": "Back",
+      "bounds": {
+        "x": 1235,
+        "y": 422,
+        "width": 129,
+        "height": 39
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    }
+  ]
+}

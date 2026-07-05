@@ -1,0 +1,293 @@
+{
+  "app_name": "Settings",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_64_0",
+      "role": "label",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 26,
+        "y": 140,
+        "width": 182,
+        "height": 56
+      },
+      "affordance": "read",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_1",
+      "role": "toolbar",
+      "name": "Mute",
+      "value": "",
+      "bounds": {
+        "x": 696,
+        "y": 166,
+        "width": 76,
+        "height": 47
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_2",
+      "role": "checkbox",
+      "name": "Print",
+      "value": "",
+      "bounds": {
+        "x": 1628,
+        "y": 572,
+        "width": 207,
+        "height": 87
+      },
+      "affordance": "toggle",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_3",
+      "role": "combo",
+      "name": "Fullscreen",
+      "value": "",
+      "bounds": {
+        "x": 943,
+        "y": 78,
+        "width": 79,
+        "height": 36
+      },
+      "affordance": "select",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_4",
+      "role": "toolbar",
+      "name": "Accept",
+      "value": "",
+      "bounds": {
+        "x": 638,
+        "y": 707,
+        "width": 142,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_5",
+      "role": "tab",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1453,
+        "y": 311,
+        "width": 57,
+        "height": 35
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_6",
+      "role": "list",
+      "name": "Username",
+      "value": "",
+      "bounds": {
+        "x": 629,
+        "y": 128,
+        "width": 103,
+        "height": 36
+      },
+      "affordance": "select",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_7",
+      "role": "tree_item",
+      "name": "Sort",
+      "value": "",
+      "bounds": {
+        "x": 159,
+        "y": 19,
+        "width": 248,
+        "height": 81
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_8",
+      "role": "text",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 220,
+        "y": 33,
+        "width": 253,
+        "height": 85
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_9",
+      "role": "toolbar",
+      "name": "Add",
+      "value": "",
+      "bounds": {
+        "x": 518,
+        "y": 44,
+        "width": 66,
+        "height": 58
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_10",
+      "role": "combo",
+      "name": "Add 1",
+      "value": "",
+      "bounds": {
+        "x": 1232,
+        "y": 210,
+        "width": 200,
+        "height": 45
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_11",
+      "role": "label",
+      "name": "Help",
+      "value": "",
+      "bounds": {
+        "x": 185,
+        "y": 149,
+        "width": 266,
+        "height": 55
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_12",
+      "role": "label",
+      "name": "Decline",
+      "value": "",
+      "bounds": {
+        "x": 328,
+        "y": 875,
+        "width": 178,
+        "height": 98
+      },
+      "affordance": "read",
+      "confidence": 0.89,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_13",
+      "role": "edit",
+      "name": "Search",
+      "value": "",
+      "bounds": {
+        "x": 1678,
+        "y": 592,
+        "width": 245,
+        "height": 21
+      },
+      "affordance": "type",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_14",
+      "role": "link",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 351,
+        "y": 772,
+        "width": 187,
+        "height": 20
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_15",
+      "role": "combo",
+      "name": "Settings",
+      "value": "",
+      "bounds": {
+        "x": 1032,
+        "y": 871,
+        "width": 231,
+        "height": 80
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_16",
+      "role": "menu_item",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 1379,
+        "y": 109,
+        "width": 96,
+        "height": 65
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_17",
+      "role": "tree_item",
+      "name": "Settings 1",
+      "value": "",
+      "bounds": {
+        "x": 1053,
+        "y": 233,
+        "width": 154,
+        "height": 34
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_64_18",
+      "role": "tab",
+      "name": "Add 2",
+      "value": "",
+      "bounds": {
+        "x": 954,
+        "y": 112,
+        "width": 183,
+        "height": 37
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    }
+  ]
+}

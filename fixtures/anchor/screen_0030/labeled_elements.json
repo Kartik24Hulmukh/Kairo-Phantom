@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Email",
+      "expected_element_id": "elem_30_4"
+    },
+    {
+      "query": "Remove",
+      "expected_element_id": "elem_30_7"
+    },
+    {
+      "query": "Address",
+      "expected_element_id": "elem_30_6"
+    },
+    {
+      "query": "Refresh",
+      "expected_element_id": "elem_30_9"
+    },
+    {
+      "query": "Import",
+      "expected_element_id": "elem_30_0"
+    }
+  ]
+}

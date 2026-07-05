@@ -1,0 +1,76 @@
+{
+  "elements": [
+    {
+      "id": "ocr_105_0",
+      "text": "Edit Item",
+      "bounds": {
+        "x": 935,
+        "y": 199,
+        "width": 45,
+        "height": 20
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_105_1",
+      "text": "Export",
+      "bounds": {
+        "x": 1396,
+        "y": 296,
+        "width": 83,
+        "height": 31
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_105_2",
+      "text": "Attach",
+      "bounds": {
+        "x": 643,
+        "y": 346,
+        "width": 65,
+        "height": 33
+      },
+      "confidence": 0.86,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_105_3",
+      "text": "Filter",
+      "bounds": {
+        "x": 613,
+        "y": 450,
+        "width": 138,
+        "height": 37
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_105_4",
+      "text": "Time",
+      "bounds": {
+        "x": 1716,
+        "y": 485,
+        "width": 77,
+        "height": 15
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_105_5",
+      "text": "Quantity",
+      "bounds": {
+        "x": 1205,
+        "y": 448,
+        "width": 42,
+        "height": 33
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Next",
+      "expected_element_id": "elem_99_2"
+    },
+    {
+      "query": "Paste",
+      "expected_element_id": "elem_99_7"
+    },
+    {
+      "query": "Refresh 1",
+      "expected_element_id": "elem_99_15"
+    },
+    {
+      "query": "View",
+      "expected_element_id": "elem_99_0"
+    },
+    {
+      "query": "View 1",
+      "expected_element_id": "elem_99_8"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "elements": [
+    {
+      "id": "ocr_108_0",
+      "text": "Accept",
+      "bounds": {
+        "x": 419,
+        "y": 339,
+        "width": 51,
+        "height": 25
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_1",
+      "text": "Stop",
+      "bounds": {
+        "x": 550,
+        "y": 349,
+        "width": 73,
+        "height": 34
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_2",
+      "text": "Phone",
+      "bounds": {
+        "x": 300,
+        "y": 722,
+        "width": 59,
+        "height": 17
+      },
+      "confidence": 0.94,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_3",
+      "text": "Home",
+      "bounds": {
+        "x": 471,
+        "y": 556,
+        "width": 131,
+        "height": 22
+      },
+      "confidence": 0.91,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_4",
+      "text": "Email",
+      "bounds": {
+        "x": 801,
+        "y": 848,
+        "width": 181,
+        "height": 24
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_5",
+      "text": "Filter",
+      "bounds": {
+        "x": 597,
+        "y": 376,
+        "width": 178,
+        "height": 31
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_6",
+      "text": "Date",
+      "bounds": {
+        "x": 891,
+        "y": 772,
+        "width": 199,
+        "height": 30
+      },
+      "confidence": 0.81,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_7",
+      "text": "Import",
+      "bounds": {
+        "x": 330,
+        "y": 583,
+        "width": 99,
+        "height": 24
+      },
+      "confidence": 0.82,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_8",
+      "text": "Password",
+      "bounds": {
+        "x": 1534,
+        "y": 885,
+        "width": 76,
+        "height": 16
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_9",
+      "text": "View",
+      "bounds": {
+        "x": 1381,
+        "y": 832,
+        "width": 156,
+        "height": 18
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_10",
+      "text": "Pause",
+      "bounds": {
+        "x": 119,
+        "y": 326,
+        "width": 111,
+        "height": 33
+      },
+      "confidence": 0.85,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_108_11",
+      "text": "Pause 1",
+      "bounds": {
+        "x": 223,
+        "y": 111,
+        "width": 111,
+        "height": 34
+      },
+      "confidence": 0.87,
+      "is_canvas": true
+    }
+  ]
+}

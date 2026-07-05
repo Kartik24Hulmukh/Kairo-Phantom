@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Password",
+      "expected_element_id": "elem_82_14"
+    },
+    {
+      "query": "Settings",
+      "expected_element_id": "elem_82_15"
+    },
+    {
+      "query": "Phone 1",
+      "expected_element_id": "elem_82_19"
+    },
+    {
+      "query": "Help",
+      "expected_element_id": "elem_82_2"
+    },
+    {
+      "query": "Submit",
+      "expected_element_id": "elem_82_16"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "elements": [
+    {
+      "id": "ocr_110_0",
+      "text": "Filter",
+      "bounds": {
+        "x": 645,
+        "y": 203,
+        "width": 191,
+        "height": 15
+      },
+      "confidence": 0.89,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_110_1",
+      "text": "Reply",
+      "bounds": {
+        "x": 1704,
+        "y": 370,
+        "width": 170,
+        "height": 37
+      },
+      "confidence": 0.92,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_110_2",
+      "text": "Open",
+      "bounds": {
+        "x": 1509,
+        "y": 402,
+        "width": 95,
+        "height": 27
+      },
+      "confidence": 0.9,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_110_3",
+      "text": "Preferences",
+      "bounds": {
+        "x": 357,
+        "y": 440,
+        "width": 60,
+        "height": 17
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "ocr_110_4",
+      "text": "Fullscreen",
+      "bounds": {
+        "x": 1226,
+        "y": 695,
+        "width": 180,
+        "height": 38
+      },
+      "confidence": 0.88,
+      "is_canvas": true
+    }
+  ]
+}

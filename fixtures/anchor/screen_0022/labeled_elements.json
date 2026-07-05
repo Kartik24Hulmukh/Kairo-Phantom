@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Pause",
+      "expected_element_id": "elem_22_8"
+    },
+    {
+      "query": "Amount",
+      "expected_element_id": "elem_22_3"
+    },
+    {
+      "query": "Play 1",
+      "expected_element_id": "elem_22_4"
+    },
+    {
+      "query": "Filter",
+      "expected_element_id": "elem_22_6"
+    },
+    {
+      "query": "Yes",
+      "expected_element_id": "elem_22_1"
+    }
+  ]
+}

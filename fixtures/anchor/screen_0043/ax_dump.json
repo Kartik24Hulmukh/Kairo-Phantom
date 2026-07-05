@@ -1,0 +1,218 @@
+{
+  "app_name": "Maps",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_43_0",
+      "role": "label",
+      "name": "Pause",
+      "value": "",
+      "bounds": {
+        "x": 961,
+        "y": 465,
+        "width": 275,
+        "height": 25
+      },
+      "affordance": "read",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_1",
+      "role": "tab",
+      "name": "Filter",
+      "value": "",
+      "bounds": {
+        "x": 1441,
+        "y": 533,
+        "width": 212,
+        "height": 55
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_2",
+      "role": "radio",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 771,
+        "y": 669,
+        "width": 146,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_3",
+      "role": "edit",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 770,
+        "y": 228,
+        "width": 182,
+        "height": 71
+      },
+      "affordance": "type",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_4",
+      "role": "label",
+      "name": "Upload",
+      "value": "",
+      "bounds": {
+        "x": 1623,
+        "y": 493,
+        "width": 277,
+        "height": 97
+      },
+      "affordance": "read",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_5",
+      "role": "list",
+      "name": "Home",
+      "value": "",
+      "bounds": {
+        "x": 339,
+        "y": 235,
+        "width": 69,
+        "height": 85
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_6",
+      "role": "link",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 382,
+        "y": 161,
+        "width": 142,
+        "height": 97
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_7",
+      "role": "combo",
+      "name": "Username",
+      "value": "",
+      "bounds": {
+        "x": 849,
+        "y": 830,
+        "width": 134,
+        "height": 34
+      },
+      "affordance": "select",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_8",
+      "role": "toolbar",
+      "name": "Download",
+      "value": "",
+      "bounds": {
+        "x": 431,
+        "y": 604,
+        "width": 91,
+        "height": 72
+      },
+      "affordance": "click",
+      "confidence": 0.85,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_9",
+      "role": "text",
+      "name": "Remove",
+      "value": "",
+      "bounds": {
+        "x": 1174,
+        "y": 606,
+        "width": 91,
+        "height": 37
+      },
+      "affordance": "read",
+      "confidence": 0.94,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_10",
+      "role": "text",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 114,
+        "y": 170,
+        "width": 116,
+        "height": 43
+      },
+      "affordance": "read",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_11",
+      "role": "panel",
+      "name": "View",
+      "value": "",
+      "bounds": {
+        "x": 1799,
+        "y": 736,
+        "width": 236,
+        "height": 56
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_12",
+      "role": "link",
+      "name": "Back",
+      "value": "",
+      "bounds": {
+        "x": 1242,
+        "y": 482,
+        "width": 272,
+        "height": 81
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_43_13",
+      "role": "tree_item",
+      "name": "Edit Item 1",
+      "value": "",
+      "bounds": {
+        "x": 1627,
+        "y": 596,
+        "width": 260,
+        "height": 43
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    }
+  ]
+}

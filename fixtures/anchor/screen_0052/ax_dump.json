@@ -1,0 +1,263 @@
+{
+  "app_name": "Calendar",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_52_0",
+      "role": "panel",
+      "name": "Quantity",
+      "value": "",
+      "bounds": {
+        "x": 1584,
+        "y": 847,
+        "width": 123,
+        "height": 79
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_1",
+      "role": "scroll_bar",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 1413,
+        "y": 529,
+        "width": 281,
+        "height": 38
+      },
+      "affordance": "scroll",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_2",
+      "role": "table",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 1479,
+        "y": 512,
+        "width": 78,
+        "height": 43
+      },
+      "affordance": "read",
+      "confidence": 0.97,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_3",
+      "role": "list",
+      "name": "Stop",
+      "value": "",
+      "bounds": {
+        "x": 846,
+        "y": 331,
+        "width": 165,
+        "height": 23
+      },
+      "affordance": "select",
+      "confidence": 0.88,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_4",
+      "role": "link",
+      "name": "Forward",
+      "value": "",
+      "bounds": {
+        "x": 184,
+        "y": 256,
+        "width": 132,
+        "height": 40
+      },
+      "affordance": "click",
+      "confidence": 0.96,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_5",
+      "role": "combo",
+      "name": "Reset 1",
+      "value": "",
+      "bounds": {
+        "x": 233,
+        "y": 723,
+        "width": 165,
+        "height": 66
+      },
+      "affordance": "select",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_6",
+      "role": "panel",
+      "name": "Reply",
+      "value": "",
+      "bounds": {
+        "x": 1253,
+        "y": 163,
+        "width": 146,
+        "height": 90
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_7",
+      "role": "menu_item",
+      "name": "No",
+      "value": "",
+      "bounds": {
+        "x": 1158,
+        "y": 892,
+        "width": 218,
+        "height": 39
+      },
+      "affordance": "click",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_8",
+      "role": "list",
+      "name": "Undo",
+      "value": "",
+      "bounds": {
+        "x": 1575,
+        "y": 729,
+        "width": 63,
+        "height": 73
+      },
+      "affordance": "select",
+      "confidence": 0.9,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_9",
+      "role": "table",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 1282,
+        "y": 185,
+        "width": 80,
+        "height": 36
+      },
+      "affordance": "read",
+      "confidence": 0.99,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_10",
+      "role": "button",
+      "name": "Phone",
+      "value": "",
+      "bounds": {
+        "x": 25,
+        "y": 469,
+        "width": 177,
+        "height": 83
+      },
+      "affordance": "click",
+      "confidence": 0.93,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_11",
+      "role": "button",
+      "name": "Attach",
+      "value": "",
+      "bounds": {
+        "x": 487,
+        "y": 222,
+        "width": 200,
+        "height": 80
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_12",
+      "role": "table",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1231,
+        "y": 614,
+        "width": 51,
+        "height": 51
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_13",
+      "role": "radio",
+      "name": "Import",
+      "value": "",
+      "bounds": {
+        "x": 100,
+        "y": 189,
+        "width": 87,
+        "height": 27
+      },
+      "affordance": "select",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_14",
+      "role": "text",
+      "name": "Edit Item",
+      "value": "",
+      "bounds": {
+        "x": 1748,
+        "y": 33,
+        "width": 220,
+        "height": 93
+      },
+      "affordance": "read",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_15",
+      "role": "scroll_bar",
+      "name": "No 1",
+      "value": "",
+      "bounds": {
+        "x": 179,
+        "y": 50,
+        "width": 77,
+        "height": 73
+      },
+      "affordance": "scroll",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_52_16",
+      "role": "menu_item",
+      "name": "Time 1",
+      "value": "",
+      "bounds": {
+        "x": 1251,
+        "y": 676,
+        "width": 227,
+        "height": 96
+      },
+      "affordance": "click",
+      "confidence": 0.94,
+      "is_canvas": false
+    }
+  ]
+}

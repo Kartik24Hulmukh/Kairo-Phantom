@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Cancel",
+      "expected_element_id": "elem_48_6"
+    },
+    {
+      "query": "Cancel 1",
+      "expected_element_id": "elem_48_16"
+    },
+    {
+      "query": "Date",
+      "expected_element_id": "elem_48_21"
+    },
+    {
+      "query": "Previous 1",
+      "expected_element_id": "elem_48_15"
+    },
+    {
+      "query": "Password",
+      "expected_element_id": "elem_48_24"
+    }
+  ]
+}

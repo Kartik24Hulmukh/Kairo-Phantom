@@ -1,0 +1,60 @@
+{
+  "elements": [
+    {
+      "id": "vis_106_0",
+      "role": "icon",
+      "name": "Quantity",
+      "bounds": {
+        "x": 1215,
+        "y": 130,
+        "width": 28,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.77,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_106_1",
+      "role": "icon",
+      "name": "No",
+      "bounds": {
+        "x": 522,
+        "y": 102,
+        "width": 58,
+        "height": 54
+      },
+      "affordance": "click",
+      "confidence": 0.78,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_106_2",
+      "role": "icon",
+      "name": "Decline",
+      "bounds": {
+        "x": 643,
+        "y": 898,
+        "width": 36,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.88,
+      "is_canvas": true
+    },
+    {
+      "id": "vis_106_3",
+      "role": "slider",
+      "name": "Password",
+      "bounds": {
+        "x": 373,
+        "y": 344,
+        "width": 24,
+        "height": 54
+      },
+      "affordance": "click",
+      "confidence": 0.89,
+      "is_canvas": true
+    }
+  ]
+}

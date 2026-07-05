@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Preferences",
+      "expected_element_id": "elem_60_8"
+    },
+    {
+      "query": "Mute",
+      "expected_element_id": "elem_60_3"
+    },
+    {
+      "query": "Undo",
+      "expected_element_id": "elem_60_0"
+    },
+    {
+      "query": "Sort",
+      "expected_element_id": "elem_60_7"
+    },
+    {
+      "query": "Close",
+      "expected_element_id": "elem_60_4"
+    }
+  ]
+}

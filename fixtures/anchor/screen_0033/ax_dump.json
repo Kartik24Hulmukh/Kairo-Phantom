@@ -1,0 +1,203 @@
+{
+  "app_name": "Image Viewer",
+  "is_canvas": false,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "elements": [
+    {
+      "id": "elem_33_0",
+      "role": "menu_item",
+      "name": "Submit",
+      "value": "",
+      "bounds": {
+        "x": 1120,
+        "y": 95,
+        "width": 136,
+        "height": 96
+      },
+      "affordance": "click",
+      "confidence": 1.0,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_1",
+      "role": "toolbar",
+      "name": "Help",
+      "value": "",
+      "bounds": {
+        "x": 883,
+        "y": 669,
+        "width": 92,
+        "height": 97
+      },
+      "affordance": "click",
+      "confidence": 0.98,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_2",
+      "role": "menu_item",
+      "name": "Close",
+      "value": "",
+      "bounds": {
+        "x": 207,
+        "y": 339,
+        "width": 102,
+        "height": 44
+      },
+      "affordance": "click",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_3",
+      "role": "radio",
+      "name": "Time",
+      "value": "",
+      "bounds": {
+        "x": 609,
+        "y": 243,
+        "width": 74,
+        "height": 26
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_4",
+      "role": "toolbar",
+      "name": "Copy",
+      "value": "",
+      "bounds": {
+        "x": 111,
+        "y": 369,
+        "width": 50,
+        "height": 74
+      },
+      "affordance": "click",
+      "confidence": 0.86,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_5",
+      "role": "toolbar",
+      "name": "Export",
+      "value": "",
+      "bounds": {
+        "x": 198,
+        "y": 26,
+        "width": 102,
+        "height": 41
+      },
+      "affordance": "click",
+      "confidence": 0.95,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_6",
+      "role": "edit",
+      "name": "Share",
+      "value": "",
+      "bounds": {
+        "x": 1728,
+        "y": 118,
+        "width": 128,
+        "height": 70
+      },
+      "affordance": "type",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_7",
+      "role": "radio",
+      "name": "Reset",
+      "value": "",
+      "bounds": {
+        "x": 1314,
+        "y": 557,
+        "width": 149,
+        "height": 43
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_8",
+      "role": "panel",
+      "name": "Previous",
+      "value": "",
+      "bounds": {
+        "x": 382,
+        "y": 456,
+        "width": 61,
+        "height": 53
+      },
+      "affordance": "click",
+      "confidence": 0.92,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_9",
+      "role": "radio",
+      "name": "Preferences",
+      "value": "",
+      "bounds": {
+        "x": 1714,
+        "y": 275,
+        "width": 194,
+        "height": 27
+      },
+      "affordance": "select",
+      "confidence": 0.87,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_10",
+      "role": "combo",
+      "name": "Apply",
+      "value": "",
+      "bounds": {
+        "x": 1368,
+        "y": 352,
+        "width": 256,
+        "height": 89
+      },
+      "affordance": "select",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_11",
+      "role": "checkbox",
+      "name": "Cancel",
+      "value": "",
+      "bounds": {
+        "x": 1721,
+        "y": 396,
+        "width": 259,
+        "height": 86
+      },
+      "affordance": "toggle",
+      "confidence": 0.91,
+      "is_canvas": false
+    },
+    {
+      "id": "elem_33_12",
+      "role": "toolbar",
+      "name": "Password",
+      "value": "",
+      "bounds": {
+        "x": 975,
+        "y": 306,
+        "width": 70,
+        "height": 70
+      },
+      "affordance": "click",
+      "confidence": 0.99,
+      "is_canvas": false
+    }
+  ]
+}

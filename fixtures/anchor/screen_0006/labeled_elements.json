@@ -1,0 +1,24 @@
+{
+  "queries": [
+    {
+      "query": "Stop",
+      "expected_element_id": "elem_6_1"
+    },
+    {
+      "query": "Search",
+      "expected_element_id": "elem_6_17"
+    },
+    {
+      "query": "Decline",
+      "expected_element_id": "elem_6_9"
+    },
+    {
+      "query": "Edit",
+      "expected_element_id": "elem_6_4"
+    },
+    {
+      "query": "Edit 1",
+      "expected_element_id": "elem_6_10"
+    }
+  ]
+}
