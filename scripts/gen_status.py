@@ -28,7 +28,6 @@ STATIC_PROMPT_ONLY: list[tuple[int, str, str]] = [
     (6, "Design (Canva)", "No CUA verifier oracle"),
     (8, "Multimodal", "No oracle"),
     (9, "Media", "No oracle"),
-    (10, "Memory", "No oracle"),
     (11, "Cross-Platform", "No cross-platform E2E oracle"),
 ]
 
@@ -48,6 +47,7 @@ REGISTRY_DOMAIN_MAP: dict[str, tuple[int, str]] = {
     "pdf": (4, "PDF"),
     "legal_redline": (5, "Legal Redline"),
     "code": (7, "Code"),
+    "notes": (10, "Research/notes"),
     "data_analytics": (13, "Data/analytics"),
 }
 
