@@ -25,7 +25,6 @@ if _REPO_ROOT not in sys.path:
 # (number, display_name, status, notes)
 STATIC_PROMPT_ONLY: list[tuple[int, str, str]] = [
     (1, "Word (DOCX)", "No passing read-back oracle for general Word editing"),
-    (3, "PowerPoint (PPTX)", "No passing read-back oracle"),
     (6, "Design (Canva)", "No CUA verifier oracle"),
     (7, "Code", "No oracle"),
     (8, "Multimodal", "No oracle"),
@@ -46,6 +45,7 @@ STATIC_REAL: list[tuple[int, str, str]] = [
 # Map registry domain names to (number, display_name)
 REGISTRY_DOMAIN_MAP: dict[str, tuple[int, str]] = {
     "excel": (2, "Excel (XLSX)"),
+    "powerpoint": (3, "PowerPoint (PPTX)"),
     "pdf": (4, "PDF"),
     "legal_redline": (5, "Legal Redline"),
     "data_analytics": (13, "Data/analytics"),
