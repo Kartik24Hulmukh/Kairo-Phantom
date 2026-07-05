@@ -1,0 +1,65 @@
+{
+  "trajectory_id": "success_click_submit",
+  "steps": [
+    {
+      "step_index": 0,
+      "screen_map": {},
+      "action": {
+        "action_type": "click",
+        "target_element_id": "btn_submit",
+        "target_query": "Submit button",
+        "value": "",
+        "description": "Click Submit button"
+      },
+      "predicted_state": {
+        "state_type": "modal_dialog",
+        "element_count": 13,
+        "modal_present": true,
+        "dropdown_open": false,
+        "focused_element": "btn_submit",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "modal_dialog",
+        "element_count": 14,
+        "modal_present": true,
+        "dropdown_open": false,
+        "focused_element": "btn_ok",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    },
+    {
+      "step_index": 1,
+      "screen_map": {},
+      "action": {
+        "action_type": "click",
+        "target_element_id": "btn_ok",
+        "target_query": "OK button",
+        "value": "",
+        "description": "Click OK to confirm"
+      },
+      "predicted_state": {
+        "state_type": "main_window",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "main_window",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    }
+  ]
+}

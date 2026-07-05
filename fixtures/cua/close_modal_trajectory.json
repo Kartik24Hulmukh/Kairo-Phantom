@@ -1,0 +1,35 @@
+{
+  "trajectory_id": "success_close_modal",
+  "steps": [
+    {
+      "step_index": 0,
+      "screen_map": {},
+      "action": {
+        "action_type": "close",
+        "target_element_id": "btn_cancel",
+        "target_query": "Cancel button",
+        "value": "",
+        "description": "Close dialog"
+      },
+      "predicted_state": {
+        "state_type": "main_window",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "main_window",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    }
+  ]
+}

@@ -44,6 +44,14 @@ STATIC_REAL: list[tuple[int, str, str]] = [
         "bbox-overlap dedup (UFO²), >=90% grounding on 120-screen corpus (incl. 20 canvas), "
         "stable IDs across frames, >=70% token reduction; live capture/OCR/vision = Experimental",
     ),
+    (
+        16,
+        "CUA World Model + Verifier",
+        "uistate_transition + verifier_agreement + loop_detection + no_receipt_without_verification — "
+        "CUWM-style structural prediction, Universal Verifier (process+outcome rubric), "
+        "stagnation/loop hard-stop, Ed25519 receipt gating (no receipt on verify-fail); "
+        "live observe→act = Experimental",
+    ),
 ]
 
 # Map registry domain names to (number, display_name)

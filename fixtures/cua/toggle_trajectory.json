@@ -1,0 +1,35 @@
+{
+  "trajectory_id": "success_toggle",
+  "steps": [
+    {
+      "step_index": 0,
+      "screen_map": {},
+      "action": {
+        "action_type": "toggle",
+        "target_element_id": "chk_agree",
+        "target_query": "I agree checkbox",
+        "value": "",
+        "description": "Toggle agree checkbox"
+      },
+      "predicted_state": {
+        "state_type": "checkbox_toggled",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "chk_agree",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "checkbox_toggled",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "chk_agree",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    }
+  ]
+}

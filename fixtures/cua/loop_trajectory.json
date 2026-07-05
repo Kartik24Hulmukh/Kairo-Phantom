@@ -1,0 +1,155 @@
+{
+  "trajectory_id": "stagnation_loop",
+  "steps": [
+    {
+      "step_index": 0,
+      "screen_map": {},
+      "action": {
+        "action_type": "scroll",
+        "target_element_id": "",
+        "target_query": "",
+        "value": "",
+        "description": "Scroll down"
+      },
+      "predicted_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "fail"
+    },
+    {
+      "step_index": 1,
+      "screen_map": {},
+      "action": {
+        "action_type": "scroll",
+        "target_element_id": "",
+        "target_query": "",
+        "value": "",
+        "description": "Scroll down"
+      },
+      "predicted_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "fail"
+    },
+    {
+      "step_index": 2,
+      "screen_map": {},
+      "action": {
+        "action_type": "scroll",
+        "target_element_id": "",
+        "target_query": "",
+        "value": "",
+        "description": "Scroll down"
+      },
+      "predicted_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "fail"
+    },
+    {
+      "step_index": 3,
+      "screen_map": {},
+      "action": {
+        "action_type": "scroll",
+        "target_element_id": "",
+        "target_query": "",
+        "value": "",
+        "description": "Scroll down"
+      },
+      "predicted_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "fail"
+    },
+    {
+      "step_index": 4,
+      "screen_map": {},
+      "action": {
+        "action_type": "scroll",
+        "target_element_id": "",
+        "target_query": "",
+        "value": "",
+        "description": "Scroll down"
+      },
+      "predicted_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "unchanged",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "fail"
+    }
+  ]
+}

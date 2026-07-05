@@ -1,0 +1,69 @@
+{
+  "trajectory_id": "success_type_text",
+  "steps": [
+    {
+      "step_index": 0,
+      "screen_map": {},
+      "action": {
+        "action_type": "type",
+        "target_element_id": "field_email",
+        "target_query": "Email field",
+        "value": "user@example.com",
+        "description": "Type email address"
+      },
+      "predicted_state": {
+        "state_type": "text_entered",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "field_email",
+        "text_values": {
+          "field_email": "user@example.com"
+        },
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "text_entered",
+        "element_count": 10,
+        "modal_present": false,
+        "dropdown_open": false,
+        "focused_element": "field_email",
+        "text_values": {
+          "field_email": "user@example.com"
+        },
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    },
+    {
+      "step_index": 1,
+      "screen_map": {},
+      "action": {
+        "action_type": "click",
+        "target_element_id": "btn_save",
+        "target_query": "Save button",
+        "value": "",
+        "description": "Click Save"
+      },
+      "predicted_state": {
+        "state_type": "modal_dialog",
+        "element_count": 13,
+        "modal_present": true,
+        "dropdown_open": false,
+        "focused_element": "btn_save",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "modal_dialog",
+        "element_count": 13,
+        "modal_present": true,
+        "dropdown_open": false,
+        "focused_element": "btn_confirm_save",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    }
+  ]
+}

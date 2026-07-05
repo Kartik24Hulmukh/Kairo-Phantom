@@ -1,0 +1,35 @@
+{
+  "trajectory_id": "success_dropdown",
+  "steps": [
+    {
+      "step_index": 0,
+      "screen_map": {},
+      "action": {
+        "action_type": "select",
+        "target_element_id": "dd_country",
+        "target_query": "Country dropdown",
+        "value": "USA",
+        "description": "Select country from dropdown"
+      },
+      "predicted_state": {
+        "state_type": "dropdown_open",
+        "element_count": 15,
+        "modal_present": false,
+        "dropdown_open": true,
+        "focused_element": "dd_country",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "actual_state": {
+        "state_type": "dropdown_open",
+        "element_count": 16,
+        "modal_present": false,
+        "dropdown_open": true,
+        "focused_element": "dd_country",
+        "text_values": {},
+        "error_indicators": []
+      },
+      "human_label": "pass"
+    }
+  ]
+}
