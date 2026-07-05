@@ -1,0 +1,4 @@
+# No external dependencies required — pure stdlib email engine.
+# Uses Python stdlib `email` (RFC-5322 composition) + `mailbox` (Maildir storage).
+# MAPI (Outlook COM via pywin32) is OPTIONAL/Experimental — not required for
+# the Real Maildir draft path. IMAP-send is Experimental (requires network).

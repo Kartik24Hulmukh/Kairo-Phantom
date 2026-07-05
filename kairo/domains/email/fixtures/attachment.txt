@@ -1,0 +1,7 @@
+This is a test attachment for the Kairo-Phantom Email/comms domain.
+
+It contains multiple lines of text to verify that the full content
+is preserved through the compose → save → read-back cycle.
+
+Line 4: The quick brown fox jumps over the lazy dog.
+Line 5: 0123456789ABCDEF

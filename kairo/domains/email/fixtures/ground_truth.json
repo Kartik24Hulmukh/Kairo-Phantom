@@ -1,0 +1,37 @@
+{
+  "scenarios": {
+    "a_plain_draft": {
+      "to": "alice@example.com",
+      "from": "bob@example.com",
+      "subject": "Project Update — Q3 Roadmap",
+      "body": "Hi Alice,\n\nHere is the Q3 roadmap update we discussed.\nKey milestones:\n1. API v2 launch (July)\n2. Migration tooling (August)\n3. GA release (September)\n\nLet me know if you have questions.\n\nBest,\nBob",
+      "cc": "",
+      "attachments": []
+    },
+    "b_attachment_draft": {
+      "to": "team@example.com",
+      "from": "lead@example.com",
+      "subject": "Q3 Budget Proposal — Please Review",
+      "body": "Team,\n\nAttached is the Q3 budget proposal with detailed line items.\nPlease review before our meeting on Friday.\n\nThanks,\nLead",
+      "cc": "cc@example.com",
+      "attachments": [
+        {
+          "filename": "attachment.txt",
+          "sha256": "a5afecb9ed6da23fc35d284a3ecf24bb4c6665f9dd71a67bd84e6669612b2681"
+        },
+        {
+          "filename": "attachment.bin",
+          "sha256": "785b0751fc2c53dc14a4ce3d800e69ef9ce1009eb327ccf458afe09c242c26c9"
+        }
+      ]
+    },
+    "c_reply_draft": {
+      "to": "alice@example.com",
+      "from": "bob@example.com",
+      "subject": "Re: Project Update — Q3 Roadmap",
+      "body": "Thanks Alice, this looks great. I'll review the timeline and get back to you by EOD.",
+      "in_reply_to": "<original@example.com>",
+      "references": ["<original@example.com>"]
+    }
+  }
+}

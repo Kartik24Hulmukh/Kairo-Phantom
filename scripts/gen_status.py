@@ -48,6 +48,7 @@ REGISTRY_DOMAIN_MAP: dict[str, tuple[int, str]] = {
     "legal_redline": (5, "Legal Redline"),
     "code": (7, "Code"),
     "notes": (10, "Research/notes"),
+    "email": (14, "Email/comms"),
     "data_analytics": (13, "Data/analytics"),
 }
 
