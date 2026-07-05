@@ -1,0 +1,11 @@
+{
+  "width": 800,
+  "height": 600,
+  "elements": [
+    {"type": "rect", "id": "rect1", "attrs": {"x": "50", "y": "50", "width": "200", "height": "100", "fill": "#4A90D9", "stroke": "#2C5F8A", "stroke-width": "2"}},
+    {"type": "ellipse", "id": "ellipse1", "attrs": {"cx": "400", "cy": "200", "rx": "80", "ry": "60", "fill": "#E8A838", "stroke": "#A07020", "stroke-width": "1"}},
+    {"type": "line", "id": "line1", "attrs": {"x1": "50", "y1": "200", "x2": "500", "y2": "200", "stroke": "#333333", "stroke-width": "3"}},
+    {"type": "text", "id": "title1", "attrs": {"x": "100", "y": "30", "font-family": "Arial", "font-size": "24", "fill": "#222222"}, "text": "Architecture Diagram"},
+    {"type": "circle", "id": "circle1", "attrs": {"cx": "600", "cy": "400", "r": "50", "fill": "#5CB85C", "stroke": "#3D8B3D", "stroke-width": "2"}}
+  ]
+}

@@ -1,0 +1,5 @@
+# No external dependencies required — pure stdlib SVG canvas engine.
+# Uses Python stdlib xml.etree.ElementTree for SVG create/edit/read.
+# svgwrite (MIT) is OPTIONAL for richer SVG generation; the core engine
+# uses only Python stdlib (xml.etree.ElementTree, pathlib, dataclasses).
+# Live Figma API and live vision detection are Experimental (require network/display).

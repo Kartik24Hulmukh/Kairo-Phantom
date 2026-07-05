@@ -24,7 +24,6 @@ if _REPO_ROOT not in sys.path:
 # ── Static domain entries (not registered in the plugin registry) ──────────
 # (number, display_name, status, notes)
 STATIC_PROMPT_ONLY: list[tuple[int, str, str]] = [
-    (6, "Design (Canva)", "No CUA verifier oracle"),
     (8, "Multimodal", "No oracle"),
     (9, "Media", "No oracle"),
     (11, "Cross-Platform", "No cross-platform E2E oracle"),
@@ -61,6 +60,7 @@ REGISTRY_DOMAIN_MAP: dict[str, tuple[int, str]] = {
     "powerpoint": (3, "PowerPoint (PPTX)"),
     "pdf": (4, "PDF"),
     "legal_redline": (5, "Legal Redline"),
+    "design": (6, "Design (Canvas)"),
     "code": (7, "Code"),
     "notes": (10, "Research/notes"),
     "email": (14, "Email/comms"),

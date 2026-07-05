@@ -1,0 +1,60 @@
+{
+  "scenarios": {
+    "a_multi_shape_diagram": {
+      "description": "Multi-shape diagram with rect+ellipse+line+circle",
+      "spec": {
+        "width": 800,
+        "height": 600,
+        "elements": [
+          {"type": "rect", "id": "box1", "attrs": {"x": "100", "y": "100", "width": "200", "height": "80", "fill": "#4A90D9"}},
+          {"type": "ellipse", "id": "oval1", "attrs": {"cx": "500", "cy": "150", "rx": "60", "ry": "40", "fill": "#E8A838"}},
+          {"type": "line", "id": "connector1", "attrs": {"x1": "300", "y1": "140", "x2": "440", "y2": "150", "stroke": "#333333", "stroke-width": "2"}},
+          {"type": "circle", "id": "node1", "attrs": {"cx": "200", "cy": "300", "r": "30", "fill": "#5CB85C"}}
+        ]
+      },
+      "expected_element_count": 4,
+      "expected_types": ["rect", "ellipse", "line", "circle"],
+      "expected_ids": ["box1", "oval1", "connector1", "node1"],
+      "expected_z_orders": [0, 1, 2, 3]
+    },
+    "b_text_shape_layout": {
+      "description": "Text + shape layout",
+      "spec": {
+        "width": 600,
+        "height": 400,
+        "elements": [
+          {"type": "text", "id": "heading", "attrs": {"x": "50", "y": "40", "font-size": "28", "fill": "#222222"}, "text": "Flow Diagram"},
+          {"type": "rect", "id": "step1", "attrs": {"x": "50", "y": "80", "width": "150", "height": "60", "fill": "#4A90D9", "rx": "8"}},
+          {"type": "text", "id": "step1_label", "attrs": {"x": "60", "y": "115", "font-size": "16", "fill": "#FFFFFF"}, "text": "Input"},
+          {"type": "rect", "id": "step2", "attrs": {"x": "300", "y": "80", "width": "150", "height": "60", "fill": "#E8A838", "rx": "8"}},
+          {"type": "text", "id": "step2_label", "attrs": {"x": "310", "y": "115", "font-size": "16", "fill": "#FFFFFF"}, "text": "Process"},
+          {"type": "line", "id": "arrow1", "attrs": {"x1": "200", "y1": "110", "x2": "300", "y2": "110", "stroke": "#333333", "stroke-width": "2"}}
+        ]
+      },
+      "expected_element_count": 6,
+      "expected_types": ["text", "rect", "text", "rect", "text", "line"]
+    },
+    "c_edit_existing": {
+      "description": "Edit an existing canvas (move + restyle an element)",
+      "initial_spec": {
+        "width": 800,
+        "height": 600,
+        "elements": [
+          {"type": "rect", "id": "shape1", "attrs": {"x": "100", "y": "100", "width": "200", "height": "100", "fill": "#FF0000"}},
+          {"type": "rect", "id": "shape2", "attrs": {"x": "400", "y": "200", "width": "150", "height": "80", "fill": "#00FF00"}}
+        ]
+      },
+      "edits": [
+        {"op": "move", "id": "shape1", "attrs": {"x": "200", "y": "150"}},
+        {"op": "restyle", "id": "shape1", "attrs": {"fill": "#0000FF"}}
+      ],
+      "expected_after_edit": {
+        "element_count": 2,
+        "shape1_x": "200",
+        "shape1_y": "150",
+        "shape1_fill": "#0000FF",
+        "shape2_unchanged": true
+      }
+    }
+  }
+}
