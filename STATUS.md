@@ -26,7 +26,7 @@
 | 7 | Code | **Real** | compile_test_pass + parse_validity — tree-sitter parse (zero ERROR nodes) + py_compile + pytest on self-contained Python project, kill-proven, honest-degradation. Python = Real; other languages = Experimental. |
 | 8 | Multimodal | prompt-only / not shipped | No oracle |
 | 9 | Media | prompt-only / not shipped | No oracle |
-| 10 | Memory | prompt-only / not shipped | No oracle |
+| 10 | Research/notes | **Real** | backlink_integrity + graph_readback — pure-Python markdown vault with [[wikilinks]], bidirectional backlinks, document graph, create/edit/rename with link rewriting, kill-proven, honest-degradation |
 | 11 | Cross-Platform | prompt-only / not shipped | No cross-platform E2E oracle |
 | 12 | Security | **Real (wedge)** | injection_block oracle — reference monitor + 15-case injection corpus, 0% attack-success |
 | 13 | Data/analytics | **Real** | query_result + schema_readback — DuckDB SQL over local CSV/Parquet/xlsx, results verified vs independent pandas/numpy calc, kill-proven, honest-degradation |
