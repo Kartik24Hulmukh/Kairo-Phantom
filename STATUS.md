@@ -23,7 +23,7 @@
 | 4 | PDF | **Real** | pdf_text_roundtrip + pdf_render_diff + pdf_form_readback + pdf_signature_verify — pdfplumber coords, pikepdf true redaction (bytes removed), AcroForm fill+readback, pyHanko PAdES sign+verify, kill-proven, honest-degradation. OCR sub-capability: Experimental. |
 | 5 | Legal Redline | **Real** | docx_tracked_changes_readback + clause_coverage + no_hallucinated_citation + injection_block + airgap_egress + audit_log_integrity |
 | 6 | Design (Canva) | prompt-only / not shipped | No CUA verifier oracle |
-| 7 | Code | prompt-only / not shipped | No oracle |
+| 7 | Code | **Real** | compile_test_pass + parse_validity — tree-sitter parse (zero ERROR nodes) + py_compile + pytest on self-contained Python project, kill-proven, honest-degradation. Python = Real; other languages = Experimental. |
 | 8 | Multimodal | prompt-only / not shipped | No oracle |
 | 9 | Media | prompt-only / not shipped | No oracle |
 | 10 | Memory | prompt-only / not shipped | No oracle |
