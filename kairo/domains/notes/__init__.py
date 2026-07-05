@@ -268,7 +268,9 @@ DOMAIN = Domain(
     ),
     register_cli=_register_cli,
     run=_run,
-    requirements=[],
+    requirements=[
+        "# pure-stdlib — no external dependencies required",
+    ],
 )
 
 register(DOMAIN)
