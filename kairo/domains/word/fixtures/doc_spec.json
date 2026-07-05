@@ -1,0 +1,17 @@
+{
+  "content": [
+    {"type": "title", "text": "Q3 Project Report"},
+    {"type": "heading", "text": "Executive Summary", "level": 1},
+    {"type": "paragraph", "text": "This report summarizes Q3 achievements across all teams.", "style": "Normal"},
+    {"type": "heading", "text": "Key Milestones", "level": 2},
+    {"type": "paragraph", "text": "The following milestones were reached:", "style": "Normal"},
+    {"type": "list", "list_type": "bullet", "items": ["API v2 launched", "Migration tooling completed", "GA release on schedule"]},
+    {"type": "heading", "text": "Budget Overview", "level": 2},
+    {"type": "paragraph", "text": "Budget allocation by department:", "style": "Normal"},
+    {"type": "table", "rows": 4, "cols": 3, "data": [["Department", "Allocated", "Spent"], ["Engineering", "$500K", "$480K"], ["Marketing", "$200K", "$190K"], ["Operations", "$150K", "$145K"]]},
+    {"type": "heading", "text": "Action Items", "level": 2},
+    {"type": "list", "list_type": "number", "items": ["Finalize Q4 roadmap", "Schedule team retrospectives", "Update stakeholder presentation"]},
+    {"type": "heading", "text": "Conclusion", "level": 1},
+    {"type": "paragraph", "text": "Q3 was a successful quarter with all major milestones met.", "style": "Normal"}
+  ]
+}

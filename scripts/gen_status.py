@@ -24,7 +24,6 @@ if _REPO_ROOT not in sys.path:
 # ── Static domain entries (not registered in the plugin registry) ──────────
 # (number, display_name, status, notes)
 STATIC_PROMPT_ONLY: list[tuple[int, str, str]] = [
-    (1, "Word (DOCX)", "No passing read-back oracle for general Word editing"),
     (6, "Design (Canva)", "No CUA verifier oracle"),
     (8, "Multimodal", "No oracle"),
     (9, "Media", "No oracle"),
@@ -42,6 +41,7 @@ STATIC_REAL: list[tuple[int, str, str]] = [
 
 # Map registry domain names to (number, display_name)
 REGISTRY_DOMAIN_MAP: dict[str, tuple[int, str]] = {
+    "word": (1, "Word (DOCX)"),
     "excel": (2, "Excel (XLSX)"),
     "powerpoint": (3, "PowerPoint (PPTX)"),
     "pdf": (4, "PDF"),

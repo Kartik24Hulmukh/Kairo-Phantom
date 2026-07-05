@@ -1,0 +1,55 @@
+{
+  "scenarios": {
+    "a_multi_heading_styled": {
+      "description": "Multi-heading styled document with paragraphs",
+      "spec": {
+        "content": [
+          {"type": "title", "text": "Technical Specification"},
+          {"type": "heading", "text": "Introduction", "level": 1},
+          {"type": "paragraph", "text": "This document describes the technical architecture.", "style": "Normal"},
+          {"type": "heading", "text": "Architecture Overview", "level": 2},
+          {"type": "paragraph", "text": "The system uses a modular design with clear separation of concerns.", "style": "Normal"},
+          {"type": "heading", "text": "Components", "level": 2},
+          {"type": "paragraph", "text": "Key components include the engine, oracles, and CLI.", "style": "Normal"}
+        ]
+      },
+      "expected_paragraph_count": 7,
+      "expected_heading_levels": [0, 1, 2, 2],
+      "expected_table_count": 0
+    },
+    "b_table_document": {
+      "description": "Document with a real table",
+      "spec": {
+        "content": [
+          {"type": "heading", "text": "Sales Report", "level": 1},
+          {"type": "paragraph", "text": "Quarterly sales by region:", "style": "Normal"},
+          {"type": "table", "rows": 4, "cols": 3, "data": [["Region", "Q3 Sales", "Growth"], ["North", "$1.2M", "+15%"], ["South", "$0.8M", "+8%"], ["West", "$1.5M", "+22%"]]}
+        ]
+      },
+      "expected_paragraph_count": 2,
+      "expected_heading_levels": [1],
+      "expected_table_count": 1,
+      "expected_table_dims": [[4, 3]]
+    },
+    "c_list_with_formatting": {
+      "description": "Document with numbered/bulleted list + bold/italic runs",
+      "spec": {
+        "content": [
+          {"type": "heading", "text": "Meeting Notes", "level": 1},
+          {"type": "paragraph", "text": "", "style": "Normal", "runs": [
+            {"text": "Important: ", "bold": true},
+            {"text": "review ", "italic": true},
+            {"text": "before next meeting."}
+          ]},
+          {"type": "heading", "text": "Action Items", "level": 2},
+          {"type": "list", "list_type": "number", "items": ["Send weekly update", "Review pull requests", "Update documentation"]},
+          {"type": "heading", "text": "Discussion Points", "level": 2},
+          {"type": "list", "list_type": "bullet", "items": ["API versioning strategy", "Database migration plan"]}
+        ]
+      },
+      "expected_paragraph_count": 9,
+      "expected_heading_levels": [1, 2, 2],
+      "expected_table_count": 0
+    }
+  }
+}

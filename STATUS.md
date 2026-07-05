@@ -17,7 +17,7 @@
 
 | # | Domain | Status | Notes |
 |---|---|---|---|
-| 1 | Word (DOCX) | prompt-only / not shipped | No passing read-back oracle for general Word editing |
+| 1 | Word (DOCX) | **Real** | docx_readback + structure_readback — python-docx real .docx create/edit (headings, styled paragraphs, numbered/bulleted lists, tables, bold/italic runs), read-back verified via reopen, kill-proven, honest-degradation |
 | 2 | Excel (XLSX) | **Real** | xlsx_recompute + xlsx_structure_readback — LibreOffice headless recompute, values verified vs independent Python calc, kill-proven, honest-degradation |
 | 3 | PowerPoint (PPTX) | **Real** | slide_shape_readback + structure_readback — python-pptx real .pptx create/edit (slides, text, bullets, tables, images, shapes), read-back verified via reopen, kill-proven, honest-degradation |
 | 4 | PDF | **Real** | pdf_text_roundtrip + pdf_render_diff + pdf_form_readback + pdf_signature_verify — pdfplumber coords, pikepdf true redaction (bytes removed), AcroForm fill+readback, pyHanko PAdES sign+verify, kill-proven, honest-degradation. OCR sub-capability: Experimental. |
