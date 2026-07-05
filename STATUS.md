@@ -29,6 +29,7 @@
 | 10 | Memory | prompt-only / not shipped | No oracle |
 | 11 | Cross-Platform | prompt-only / not shipped | No cross-platform E2E oracle |
 | 12 | Security | **Real (wedge)** | injection_block oracle — reference monitor + 15-case injection corpus, 0% attack-success |
+| 13 | Data/analytics | **Real** | query_result + schema_readback — DuckDB SQL over local CSV/Parquet/xlsx, results verified vs independent pandas/numpy calc, kill-proven, honest-degradation |
 
 ## Trust Infrastructure
 

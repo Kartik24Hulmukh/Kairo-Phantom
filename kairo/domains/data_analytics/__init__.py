@@ -26,16 +26,12 @@ def _register_cli(subparsers: argparse._SubParsersAction) -> None:
     dq = data_sub.add_parser("query", help="Run a SQL query over a data file")
     dq.add_argument("input", help="Path to the data file (.csv, .parquet, .xlsx)")
     dq.add_argument("sql", help="SQL query to execute")
-    dq.add_argument(
-        "--out", default="data_output", help="Output directory (default: data_output)"
-    )
+    dq.add_argument("--out", default="data_output", help="Output directory (default: data_output)")
 
     # data schema
     ds = data_sub.add_parser("schema", help="Show table schema after loading a file")
     ds.add_argument("input", help="Path to the data file")
-    ds.add_argument(
-        "--out", default="data_output", help="Output directory (default: data_output)"
-    )
+    ds.add_argument("--out", default="data_output", help="Output directory (default: data_output)")
 
 
 def _run(args: argparse.Namespace) -> int:
@@ -76,9 +72,7 @@ def _run(args: argparse.Namespace) -> int:
 
         # Write audit + egress
         if result.audit_log_json:
-            (out_dir / "audit_log.json").write_text(
-                result.audit_log_json, encoding="utf-8"
-            )
+            (out_dir / "audit_log.json").write_text(result.audit_log_json, encoding="utf-8")
         if result.egress_report_json:
             (out_dir / "zero_egress_report.json").write_text(
                 result.egress_report_json, encoding="utf-8"
