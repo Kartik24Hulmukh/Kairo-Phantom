@@ -1,0 +1,54 @@
+{
+  "scenarios": {
+    "a_text_email_password": {
+      "html_file": "form_text_fields.html",
+      "form_id": "registration_form",
+      "fields": {
+        "username": {"selector": "#username", "type": "text", "value": "johndoe123"},
+        "email": {"selector": "#email", "type": "email", "value": "john.doe@example.com"},
+        "password": {"selector": "#password", "type": "password", "value": "SecurePass!2024"},
+        "confirm_password": {"selector": "#confirm_password", "type": "password", "value": "SecurePass!2024"},
+        "phone": {"selector": "#phone", "type": "tel", "value": "+1-555-0123"}
+      },
+      "expected_field_count": 6,
+      "expected_field_types": ["text", "email", "password", "password", "tel", "submit"],
+      "required_fields": ["username", "email", "password", "confirm_password"],
+      "expect_submit_blocked": false,
+      "expect_verification_pass": true
+    },
+    "b_select_checkbox_radio": {
+      "html_file": "form_select_checkbox_radio.html",
+      "form_id": "survey_form",
+      "fields": {
+        "country": {"selector": "#country", "type": "select", "value": "de"},
+        "plan_pro": {"selector": "#plan_pro", "type": "radio", "value": true},
+        "interest_tech": {"selector": "#interest_tech", "type": "checkbox", "value": true},
+        "interest_music": {"selector": "#interest_music", "type": "checkbox", "value": true},
+        "feedback": {"selector": "#feedback", "type": "textarea", "value": "Great product overall!"},
+        "newsletter": {"selector": "#newsletter", "type": "checkbox", "value": true}
+      },
+      "expected_field_count": 11,
+      "expected_field_types": ["select", "radio", "radio", "radio", "checkbox", "checkbox", "checkbox", "checkbox", "textarea", "checkbox", "submit"],
+      "required_fields": [],
+      "expect_submit_blocked": false,
+      "expect_verification_pass": true
+    },
+    "c_required_blank": {
+      "html_file": "form_required_blank.html",
+      "form_id": "contact_form",
+      "fields": {
+        "name": {"selector": "#name", "type": "text", "value": ""},
+        "email": {"selector": "#email", "type": "email", "value": "jane@example.com"},
+        "subject": {"selector": "#subject", "type": "text", "value": ""},
+        "message": {"selector": "#message", "type": "textarea", "value": "Hello, I need help with my account."},
+        "department": {"selector": "#department", "type": "select", "value": "support"},
+        "urgent": {"selector": "#urgent", "type": "checkbox", "value": true}
+      },
+      "expected_field_count": 7,
+      "expected_field_types": ["text", "email", "text", "textarea", "select", "checkbox", "submit"],
+      "required_fields": ["name", "email", "subject", "message"],
+      "expect_submit_blocked": true,
+      "expect_verification_pass": false
+    }
+  }
+}
