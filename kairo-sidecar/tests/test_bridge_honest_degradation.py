@@ -74,7 +74,9 @@ class TestSynthesizerBridgeHonestDegradation:
             except EngineUnavailableError:
                 pass
             # The output file MUST NOT exist (no mock WAV written)
-            assert not os.path.exists(out), "FAIL: Mock WAV file was written despite engine being absent!"
+            assert not os.path.exists(
+                out
+            ), "FAIL: Mock WAV file was written despite engine being absent!"
 
     def test_kill_proof_silent_mock_would_fail(self):
         """Kill-proof: if a silent mock were re-introduced, this test would fail
@@ -131,7 +133,9 @@ class TestNotebookLMBridgeHonestDegradation:
                     bridge.convert_to_podcast("test text", out)
                 except EngineUnavailableError:
                     pass
-                assert not os.path.exists(out), "FAIL: Mock WAV file was written despite API being absent!"
+                assert not os.path.exists(
+                    out
+                ), "FAIL: Mock WAV file was written despite API being absent!"
         finally:
             if old_key:
                 os.environ["NOTEBOOKLM_API_KEY"] = old_key
@@ -166,7 +170,9 @@ class TestComfyUIBridgeHonestDegradation:
                 bridge.generate_asset("test prompt", "default", output_path=out)
             except EngineUnavailableError:
                 pass
-            assert not os.path.exists(out), "FAIL: Mock image was written despite ComfyUI being absent!"
+            assert not os.path.exists(
+                out
+            ), "FAIL: Mock image was written despite ComfyUI being absent!"
 
     def test_is_available_returns_false_offline(self):
         """is_available() returns False in offline mode."""
