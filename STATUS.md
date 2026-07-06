@@ -33,6 +33,7 @@
 | 14 | Email/comms | **Real** | draft_readback + mailbox_structure_readback — RFC-5322 email draft composition with Maildir storage, attachments, replies (In-Reply-To/References threading), kill-proven read-back, honest-degradation; MAPI/IMAP Experimental (fail-loud offline) |
 | 15 | Anchor Perception | **Real (wedge)** | grounding_accuracy + stable_id + token_reduction — local AX-tree + OCR + vision fusion, bbox-overlap dedup (UFO²), >=90% grounding on 120-screen corpus (incl. 20 canvas), stable IDs across frames, >=70% token reduction; live capture/OCR/vision = Experimental |
 | 16 | CUA World Model + Verifier | **Real (wedge)** | uistate_transition + verifier_agreement + loop_detection + no_receipt_without_verification — CUWM-style structural prediction, Universal Verifier (process+outcome rubric), stagnation/loop hard-stop, Ed25519 receipt gating (no receipt on verify-fail); live observe→act = Experimental |
+| 17 | Web-forms/apps | **Real** | form_fill_readback + uistate_readback — local HTML form fill (text, email, password, select, checkbox, radio, textarea), read-back verified via DOM re-parse, kill-proven, honest-degradation; live browser/page-agent = Experimental |
 
 ## Trust Infrastructure
 

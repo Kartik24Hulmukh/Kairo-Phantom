@@ -65,6 +65,7 @@ REGISTRY_DOMAIN_MAP: dict[str, tuple[int, str]] = {
     "notes": (10, "Research/notes"),
     "email": (14, "Email/comms"),
     "data_analytics": (13, "Data/analytics"),
+    "webforms": (17, "Web-forms/apps"),
 }
 
 
