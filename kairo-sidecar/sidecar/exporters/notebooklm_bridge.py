@@ -1,7 +1,12 @@
 """
 NotebookLM Bridge for Kairo Phantom Domain 7.
 Cloud-based document-to-multimedia conversion (podcasts, quizzes, flashcards).
-Provides complete local-first fallback when APIs or Python dependencies are offline.
+
+HONEST DEGRADATION:
+  If the NotebookLM API key is not set or the module is unavailable, this bridge
+  RAISES EngineUnavailableError for audio conversion — it NEVER writes a mock WAV
+  file and claims success. Quiz/flashcard generation falls back to local text
+  extraction (truthful: clearly labeled as "local extractor", not fake API output).
 """
 
 import json
@@ -11,58 +16,63 @@ import tempfile
 import subprocess
 from typing import Dict, Any
 
+from sidecar.bridge_health import EngineUnavailableError
+
 logger = logging.getLogger("kairo.sidecar.notebooklm_bridge")
 
 
 class NotebookLMBridge:
-    """Programmatic cloud API bridge with seamless offline fallbacks."""
+    """Programmatic cloud API bridge with honest offline degradation."""
+
+    def is_available(self) -> bool:
+        """Check if the NotebookLM API is configured."""
+        return bool(os.environ.get("NOTEBOOKLM_API_KEY"))
 
     def convert_to_podcast(self, document_text: str, output_path: str) -> str:
         """
         Convert a document to an audio podcast dialog summary.
-        If offline or package missing, falls back to a high-fidelity synthesized mock audio file.
+
+        Raises:
+            EngineUnavailableError: If NotebookLM API key is not set or conversion fails.
+                NEVER writes a mock WAV file.
         """
         logger.info(f"Converting document to podcast audio overview at {output_path}")
 
-        # 1. Try real notebooklm invocation if environment is configured
-        if os.environ.get("NOTEBOOKLM_API_KEY"):
-            try:
-                with tempfile.NamedTemporaryFile(
-                    suffix=".txt", mode="w", delete=False, encoding="utf-8"
-                ) as f:
-                    f.write(document_text)
-                    temp_path = f.name
+        if not self.is_available():
+            raise EngineUnavailableError(
+                engine_name="notebooklm",
+                message="NotebookLM API key not set. Cannot generate podcast audio.",
+                install_hint="Set NOTEBOOKLM_API_KEY environment variable to enable podcast conversion.",
+            )
 
-                cmd = [
-                    "python",
-                    "-m",
-                    "notebooklm",
-                    "convert",
-                    "--input",
-                    temp_path,
-                    "--output",
-                    output_path,
-                    "--format",
-                    "podcast",
-                ]
-                subprocess.run(cmd, check=True, timeout=120)
-                os.unlink(temp_path)
-                return output_path
-            except Exception as e:
-                logger.warning(
-                    f"NotebookLM API convert failed ({e}). Falling back to local synthesizer..."
-                )
+        try:
+            with tempfile.NamedTemporaryFile(
+                suffix=".txt", mode="w", delete=False, encoding="utf-8"
+            ) as f:
+                f.write(document_text)
+                temp_path = f.name
 
-        # 2. Local fallback: write a clean mock audio overview file (simple mock wav/mp3 header or standard file)
-        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-
-        # Write mock audio bytes (RIFF WAVE empty header) to ensure valid size and format
-        mock_wav_header = b"RIFF\x24\x08\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x22\x56\x00\x00\x44\xac\x00\x00\x02\x00\x10\x00data\x00\x08\x00\x00\x00\x00\x00\x00"
-        with open(output_path, "wb") as f:
-            f.write(mock_wav_header * 1000)  # creates a valid file on disk > 40KB
-
-        logger.info(f"✅ Local podcast fallback successfully written: {output_path}")
-        return output_path
+            cmd = [
+                "python",
+                "-m",
+                "notebooklm",
+                "convert",
+                "--input",
+                temp_path,
+                "--output",
+                output_path,
+                "--format",
+                "podcast",
+            ]
+            subprocess.run(cmd, check=True, timeout=120)
+            os.unlink(temp_path)
+            return output_path
+        except Exception as e:
+            raise EngineUnavailableError(
+                engine_name="notebooklm",
+                message=f"NotebookLM API convert failed: {e}",
+                install_hint="Check NOTEBOOKLM_API_KEY and network connectivity.",
+            ) from e
 
     def generate_quiz(self, document_text: str) -> Dict[str, Any]:
         """

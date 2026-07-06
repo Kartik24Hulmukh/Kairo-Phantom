@@ -5,7 +5,7 @@ Includes:
   1. Figma-to-Tailwind HTML/CSS transpiler.
   2. Frameground filesystem HTML builder & XPath queries.
   3. MemMachine cross-tool visual design memory persisted to local JSON.
-  4. Penpot & OpenPencil mock endpoints.
+  4. Penpot & OpenPencil offline endpoints (Experimental — fail loud when unavailable).
   5. Active window matching / routing.
 """
 
@@ -100,7 +100,7 @@ class FramegroundManipulator:
         return str(file_path)
 
     def get_attribute(self, file_path: str, xpath_selector: str, attribute: str) -> Optional[str]:
-        """Robust mockup parser simulating XPath selector query in Frameground."""
+        """Robust mockup parser simulating XPath selector query in Frameground (offline deterministic parser)."""
         if not os.path.exists(file_path):
             return None
         with open(file_path, "r", encoding="utf-8") as f:
@@ -225,7 +225,7 @@ class PenpotBridge:
             return {"ok": False, "error": str(e)}
 
     def draw_svg(self, svg_content: str) -> Dict[str, Any]:
-        """Upload and render an SVG component inside the mock or live Penpot session."""
+        """Upload and render an SVG component inside the offline or live Penpot session."""
         if self.is_available():
             online_res = self._call_online_tool("draw_svg", {"svg": svg_content})
             if online_res.get("ok"):

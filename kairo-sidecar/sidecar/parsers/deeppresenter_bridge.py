@@ -1,4 +1,11 @@
-"""DeepPresenter Bridge: Research-grade PPT generation for Kairo."""
+"""DeepPresenter Bridge: Research-grade PPT generation for Kairo.
+
+HONEST DEGRADATION:
+  When DeepPresenter-9B is not available, the bridge falls back to a basic
+  python-pptx template engine. The fallback is LOUDLY labeled with
+  status="fallback" and a visible message — it NEVER claims to be
+  DeepPresenter output and NEVER emits a provenance receipt for fake work.
+"""
 
 import subprocess
 import json

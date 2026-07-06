@@ -400,7 +400,7 @@ class PptxMcpBridge:
 
     def apply_theme_colors(self, pres_id: str, theme_name: str = "Modern Blue") -> dict:
         """Apply professional color scheme."""
-        # Local fallback theme coloring (can just be mock or simple background fill)
+        # Local fallback theme coloring (simple background fill — NOT a mock, real python-pptx color application)
         if self.use_fallback:
             from pptx import Presentation
             from pptx.dml.color import RGBColor

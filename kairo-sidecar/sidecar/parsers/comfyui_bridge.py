@@ -1,7 +1,11 @@
 """ComfyUI Bridge for Kairo Domain 5.
 
 Bridges to local ComfyUI instance on port 8188.
-Provides high-fidelity offline fallbacks generating image assets using PIL or raw BMP bytes.
+
+HONEST DEGRADATION:
+  If ComfyUI is not available (offline mode or server unreachable), this bridge
+  RAISES EngineUnavailableError — it NEVER generates a mock/placeholder image
+  and claims success. The caller must handle the absence explicitly.
 """
 
 import os
@@ -9,9 +13,10 @@ import json
 import socket
 import urllib.request
 import logging
-import struct
 import tempfile
 from typing import Any, Dict, Optional
+
+from sidecar.bridge_health import EngineUnavailableError
 
 log = logging.getLogger("kairo-sidecar.comfyui_bridge")
 
@@ -30,7 +35,6 @@ class ComfyUIBridge:
         if self.offline_mode:
             return False
         try:
-            # Quick socket connection check
             with socket.create_connection((self.host, self.port), timeout=1.0):
                 return True
         except Exception:
@@ -39,24 +43,33 @@ class ComfyUIBridge:
     def generate_asset(
         self, prompt: str, style: str = "default", output_path: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Trigger a local ComfyUI generation or fall back to high-fidelity offline mock."""
+        """Trigger a local ComfyUI generation.
+
+        Raises:
+            EngineUnavailableError: If ComfyUI is not available.
+                NEVER generates a mock image.
+        """
         log.info(f"ComfyUI generate_asset request: prompt='{prompt}', style='{style}'")
 
+        if not self.is_available():
+            raise EngineUnavailableError(
+                engine_name="comfyui",
+                message="ComfyUI server is not reachable. Cannot generate image assets.",
+                install_hint="Start ComfyUI on localhost:8188 or disable offline_mode.",
+            )
+
         if output_path is None:
-            # Create a path in temp directory
-            suffix = ".png" if self._has_pil() else ".bmp"
-            fd, output_path = tempfile.mkstemp(suffix=suffix, prefix="kairo_asset_")
+            fd, output_path = tempfile.mkstemp(suffix=".png", prefix="kairo_asset_")
             os.close(fd)
 
-        if self.is_available():
-            try:
-                return self._generate_online(prompt, style, output_path)
-            except Exception as e:
-                log.warning(
-                    f"ComfyUI online generation failed: {e}. Falling back to offline generation."
-                )
-
-        return self._generate_offline(prompt, style, output_path)
+        try:
+            return self._generate_online(prompt, style, output_path)
+        except Exception as e:
+            raise EngineUnavailableError(
+                engine_name="comfyui",
+                message=f"ComfyUI online generation failed: {e}",
+                install_hint="Check ComfyUI server status and model availability.",
+            ) from e
 
     def _has_pil(self) -> bool:
         """Check if PIL/Pillow is importable."""
@@ -150,80 +163,3 @@ class ComfyUIBridge:
         urllib.request.urlretrieve(view_url, output_path)
 
         return {"ok": True, "prompt_id": prompt_id, "image_path": output_path, "offline": False}
-
-    def _generate_offline(self, prompt: str, style: str, output_path: str) -> Dict[str, Any]:
-        """Generate high-fidelity mock image using PIL/Pillow or raw BMP structure."""
-        # Derive color from style
-        style_lower = style.lower()
-        if "hero" in style_lower or "primary" in style_lower:
-            color = (97, 64, 240)  # Kairo purple
-        elif "success" in style_lower or "active" in style_lower:
-            color = (16, 185, 129)  # Green
-        elif "dark" in style_lower:
-            color = (13, 13, 20)  # Sleek dark
-        elif "light" in style_lower:
-            color = (245, 245, 247)  # Slate light
-        else:
-            color = (100, 116, 139)  # Cool grey
-
-        if self._has_pil():
-            try:
-                from PIL import Image, ImageDraw
-
-                # Create a beautiful gradient image
-                img = Image.new("RGB", (512, 512), color)
-                draw = ImageDraw.Draw(img)
-                # Draw minor grid pattern for tech aesthetic
-                for i in range(0, 512, 32):
-                    draw.line(
-                        [(i, 0), (i, 512)],
-                        fill=(max(0, color[0] - 20), max(0, color[1] - 20), max(0, color[2] - 20)),
-                    )
-                    draw.line(
-                        [(0, i), (512, i)],
-                        fill=(max(0, color[0] - 20), max(0, color[1] - 20), max(0, color[2] - 20)),
-                    )
-
-                # Save as PNG
-                img.save(output_path, "PNG")
-                log.info(f"Offline PNG mock image saved to {output_path}")
-            except Exception as e:
-                log.error(f"Offline PIL image generation failed: {e}. Falling back to Raw BMP.")
-                self._write_raw_bmp(output_path, color)
-        else:
-            self._write_raw_bmp(output_path, color)
-
-        return {
-            "ok": True,
-            "image_path": output_path,
-            "offline": True,
-            "details": f"Generated high-fidelity offline mock for prompt '{prompt}' in {style} style.",
-        }
-
-    def _write_raw_bmp(self, path: str, color: tuple):
-        """Generate a raw 512x512 24-bit BMP image with solid color."""
-        width = 512
-        height = 512
-        r, g, b = color
-
-        pixel_data = bytearray()
-        # BMP rows must be padded to a multiple of 4 bytes
-        row_size = (width * 3 + 3) & ~3
-        padding = row_size - (width * 3)
-
-        for _ in range(height):
-            for _ in range(width):
-                pixel_data.append(b)
-                pixel_data.append(g)
-                pixel_data.append(r)
-            pixel_data.extend([0] * padding)
-
-        file_size = 54 + len(pixel_data)
-        header = struct.pack("<2sIHHI", b"BM", file_size, 0, 0, 54)
-        dib_header = struct.pack(
-            "<IiiHHIIiiII", 40, width, height, 1, 24, 0, len(pixel_data), 2835, 2835, 0, 0
-        )
-
-        with open(path, "wb") as f:
-            f.write(header + dib_header + pixel_data)
-        log.info(f"Offline Raw BMP mock image saved to {path}")
