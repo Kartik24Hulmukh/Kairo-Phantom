@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Survey Form</title>
+</head>
+<body>
+    <h1>Product Survey</h1>
+    <form id="survey_form" action="/survey" method="POST">
+        <label for="country">Country:</label>
+        <select id="country" name="country">
+            <option value="">-- Select --</option>
+            <option value="us">United States</option>
+            <option value="uk">United Kingdom</option>
+            <option value="de">Germany</option>
+            <option value="fr">France</option>
+            <option value="jp">Japan</option>
+        </select>
+
+        <fieldset>
+            <legend>Subscription Plan</legend>
+            <label><input type="radio" name="plan" value="free" id="plan_free"> Free</label>
+            <label><input type="radio" name="plan" value="pro" id="plan_pro"> Pro</label>
+            <label><input type="radio" name="plan" value="enterprise" id="plan_enterprise"> Enterprise</label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Interests (check all that apply)</legend>
+            <label><input type="checkbox" name="interests" value="tech" id="interest_tech"> Technology</label>
+            <label><input type="checkbox" name="interests" value="sports" id="interest_sports"> Sports</label>
+            <label><input type="checkbox" name="interests" value="music" id="interest_music"> Music</label>
+            <label><input type="checkbox" name="interests" value="travel" id="interest_travel"> Travel</label>
+        </fieldset>
+
+        <label for="feedback">Feedback:</label>
+        <textarea id="feedback" name="feedback" rows="4" cols="40"></textarea>
+
+        <label>
+            <input type="checkbox" name="newsletter" value="yes" id="newsletter">
+            Subscribe to newsletter
+        </label>
+
+        <button type="submit" id="submit_btn">Submit Survey</button>
+    </form>
+</body>
+</html>
