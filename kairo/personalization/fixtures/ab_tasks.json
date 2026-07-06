@@ -1,0 +1,9 @@
+{
+  "ab_tasks": [
+    {"prompt": "Finish this section about quarterly results:", "context": "Q3 revenue grew 15% year-over-year."},
+    {"prompt": "Complete the introduction:", "context": "This report examines customer satisfaction trends."},
+    {"prompt": "Write the conclusion:", "context": "The data shows improvement in three key areas."},
+    {"prompt": "Add a recommendation:", "context": "Based on our analysis, the next phase should focus on."},
+    {"prompt": "Finish the summary paragraph:", "context": "Overall, the project delivered on time and within budget."}
+  ]
+}

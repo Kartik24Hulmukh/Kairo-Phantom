@@ -1,0 +1,5 @@
+# On-device style personalization dependencies.
+# The CI mechanics use pure Python stdlib (json, math, random, collections).
+# No external dependencies required for the automatable oracles.
+# In production, this would require llama.cpp + LoRA/PEFT weights,
+# but those are NOT needed for the tiny fixture model mechanics.

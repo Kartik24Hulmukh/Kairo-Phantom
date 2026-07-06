@@ -1,0 +1,23 @@
+{
+  "user_samples": [
+    "The quick brown fox jumps over the lazy dog.",
+    "She writes with clarity and precision, always choosing simple words.",
+    "Keep sentences short. Avoid jargon. Be direct.",
+    "The report concludes with a summary of key findings.",
+    "Our team achieved significant milestones this quarter.",
+    "Please review the attached document and provide feedback.",
+    "The analysis reveals three primary trends in the data.",
+    "We recommend adopting a phased approach to implementation."
+  ],
+  "baseline_samples": [
+    "It is furthermore incumbent upon the committee to deliberate upon the aforementioned matters with due diligence.",
+    "Notwithstanding the foregoing, the parties hereto agree to the terms set forth herein.",
+    "Pursuant to the provisions of Article 7, the contractor shall be liable for damages.",
+    "The aforementioned analysis notwithstanding, it is imperative that all stakeholders be consulted.",
+    "In accordance with established protocols, the procedure shall be initiated forthwith."
+  ],
+  "style_markers": {
+    "avg_sentence_length": 8.5,
+    "common_words": ["keep", "short", "direct", "simple", "clear", "team", "report"]
+  }
+}
