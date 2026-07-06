@@ -1,0 +1,8 @@
+# Web-forms/apps domain dependencies.
+# beautifulsoup4 (MIT) — HTML parsing and DOM manipulation.
+# lxml (BSD) — fast XML/HTML parser backend for BeautifulSoup.
+# Both are permissive licenses (MIT/BSD) — no AGPL/GPL.
+# Live browser navigation / page-agent (Playwright/Selenium) = Experimental
+# (not required for the offline local HTML form fill path).
+beautifulsoup4>=4.12
+lxml>=5.1
