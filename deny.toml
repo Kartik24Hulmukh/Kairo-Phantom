@@ -30,6 +30,10 @@ ignore = [
     # REMOVE when plist adopts quick-xml >= 0.41. Review by 2026-08-03.
     { id = "RUSTSEC-2026-0194", reason = "Quadratic run time checking start tag for duplicate attribute names in quick-xml 0.39.4 (transitive via plist 1.9.0 which pins ^0.39.2). plist is used only in macOS packaging metadata, not on any untrusted-input runtime path. Patched in quick-xml >= 0.41.0 but plist has not adopted it yet. Time-boxed waiver: review by 2026-08-03; remove when plist upgrades." },
     { id = "RUSTSEC-2026-0195", reason = "Unbounded namespace-declaration allocation in NsReader enables memory-exhaustion DoS in quick-xml 0.39.4 (transitive via plist 1.9.0 which pins ^0.39.2). plist is used only in macOS packaging metadata, not on any untrusted-input runtime path. Patched in quick-xml >= 0.41.0 but plist has not adopted it yet. Time-boxed waiver: review by 2026-08-03; remove when plist upgrades." },
+    # Invalid pointer dereference in fmt::Pointer impl for Atomic/Shared — transitive via stable_deref_trait.
+    # Exposure: only triggered when formatting an invalid pointer (not a normal runtime path).
+    # Time-boxed waiver: review by 2026-09-06; remove when upstream fixes.
+    { id = "RUSTSEC-2026-0204", reason = "Invalid pointer dereference in fmt::Pointer impl for Atomic and Shared when the underlying pointer is invalid. Transitive dependency (stable_deref_trait). Only triggered when formatting an already-invalid pointer — not on any normal runtime path with trusted input. No safe upgrade available yet. Time-boxed waiver: review by 2026-09-06." },
 ]
 
 # ── Unfixed advisories: treat as vulnerabilities (not warnings) ──
