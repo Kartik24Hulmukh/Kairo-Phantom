@@ -1,0 +1,86 @@
+# .github/workflows/acceptance_gauntlet.yml
+# Full Acceptance Gauntlet — every Real domain + trust stack + canary-breaks + audit.
+# Per prompts/13_gauntlet_and_acceptance.md: this IS the final release gate.
+#
+# NO continue-on-error. A gate that cannot fail is not a gate.
+
+name: Full Acceptance Gauntlet
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  KAIRO_OFFLINE: "1"
+  KAIRO_SEALED: "1"
+  KAIRO_NO_NET: "1"
+
+jobs:
+  acceptance-gauntlet:
+    name: Full Acceptance Gauntlet + Canary + Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y libreoffice-calc
+          pip install --upgrade pip
+          pip install python-docx cryptography pytest openpyxl python-pptx pdfplumber \
+            Pillow imagehash psutil ruff==0.6.9 duckdb reportlab beautifulsoup4
+
+      # 1. Ruff lint on new test files
+      - name: Ruff lint
+        run: |
+          ruff check tests/test_acceptance_gauntlet.py tests/test_canary_break.py \
+            scripts/acceptance_audit.py --select E9,F
+
+      # 2. Run the full acceptance gauntlet
+      - name: Full Acceptance Gauntlet
+        run: |
+          python -m pytest tests/test_acceptance_gauntlet.py -v --tb=short --no-header
+
+      # 3. Run canary-break tests (proves gates are honest)
+      - name: Canary-Break Tests
+        run: |
+          python -m pytest tests/test_canary_break.py -v --tb=short --no-header
+
+      # 4. Verify zero skips
+      - name: Verify zero skips
+        run: |
+          OUTPUT=$(python -m pytest tests/test_acceptance_gauntlet.py tests/test_canary_break.py -q 2>&1)
+          echo "$OUTPUT" | tail -5
+          if echo "$OUTPUT" | grep -E "^[0-9]+ passed.*[1-9]+ skipped"; then
+            echo "::error::Skipped tests detected in acceptance gauntlet"
+            exit 1
+          fi
+          echo "✅ Zero skips confirmed"
+
+      # 5. Generate signed acceptance audit
+      - name: Generate Acceptance Audit
+        run: |
+          python scripts/acceptance_audit.py
+
+      # 6. Verify the audit signature
+      - name: Verify Audit Signature
+        run: |
+          python scripts/acceptance_audit.py --verify
+
+      # 7. Upload acceptance bundle
+      - name: Upload Acceptance Bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: acceptance-bundle
+          path: |
+            docs/acceptance/acceptance_audit.json
+            docs/acceptance/acceptance_public_key.pem
+            docs/acceptance/README.md

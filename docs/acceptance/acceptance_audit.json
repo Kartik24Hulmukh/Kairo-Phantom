@@ -1,0 +1,308 @@
+{
+  "timestamp": "2026-07-07T03:50:06.810797+00:00",
+  "sha": "238664924d75c24628bf57342cd8c70eafc83b16",
+  "domains": [
+    {
+      "name": "code",
+      "cli_name": "code",
+      "status": "Real",
+      "summary": "compile_test_pass + parse_validity \u2014 tree-sitter parse (zero ERROR nodes) + py_compile + pytest on self-contained Python project, kill-proven, honest-degradation. Python = Real; other languages = Experimental."
+    },
+    {
+      "name": "data_analytics",
+      "cli_name": "data",
+      "status": "Real",
+      "summary": "query_result + schema_readback \u2014 DuckDB SQL over local CSV/Parquet/xlsx, results verified vs independent pandas/numpy calc, kill-proven, honest-degradation"
+    },
+    {
+      "name": "design",
+      "cli_name": "design",
+      "status": "Real",
+      "summary": "canvas_readback + structure_readback \u2014 SVG canvas create/edit (shapes, text, positions, z-order), read-back verified via re-parse, kill-proven, honest-degradation; live Figma/vision = Experimental"
+    },
+    {
+      "name": "email",
+      "cli_name": "email",
+      "status": "Real",
+      "summary": "draft_readback + mailbox_structure_readback \u2014 RFC-5322 email draft composition with Maildir storage, attachments, replies (In-Reply-To/References threading), kill-proven read-back, honest-degradation; MAPI/IMAP Experimental (fail-loud offline)"
+    },
+    {
+      "name": "excel",
+      "cli_name": "excel",
+      "status": "Real",
+      "summary": "xlsx_recompute + xlsx_structure_readback \u2014 LibreOffice headless recompute, values verified vs independent Python calc, kill-proven, honest-degradation"
+    },
+    {
+      "name": "legal_redline",
+      "cli_name": "redline",
+      "status": "Real",
+      "summary": "docx_tracked_changes_readback + clause_coverage + no_hallucinated_citation + injection_block + airgap_egress + audit_log_integrity"
+    },
+    {
+      "name": "notes",
+      "cli_name": "notes",
+      "status": "Real",
+      "summary": "backlink_integrity + graph_readback \u2014 pure-Python markdown vault with [[wikilinks]], bidirectional backlinks, document graph, create/edit/rename with link rewriting, kill-proven, honest-degradation"
+    },
+    {
+      "name": "pdf",
+      "cli_name": "pdf",
+      "status": "Real",
+      "summary": "pdf_text_roundtrip + pdf_render_diff + pdf_form_readback + pdf_signature_verify \u2014 pdfplumber coords, pikepdf true redaction (bytes removed), AcroForm fill+readback, pyHanko PAdES sign+verify, kill-proven, honest-degradation. OCR sub-capability: Experimental."
+    },
+    {
+      "name": "powerpoint",
+      "cli_name": "pptx",
+      "status": "Real",
+      "summary": "slide_shape_readback + structure_readback \u2014 python-pptx real .pptx create/edit (slides, text, bullets, tables, images, shapes), read-back verified via reopen, kill-proven, honest-degradation"
+    },
+    {
+      "name": "webforms",
+      "cli_name": "webforms",
+      "status": "Real",
+      "summary": "form_fill_readback + uistate_readback \u2014 local HTML form fill (text, email, password, select, checkbox, radio, textarea), read-back verified via DOM re-parse, kill-proven, honest-degradation; live browser/page-agent = Experimental"
+    },
+    {
+      "name": "word",
+      "cli_name": "word",
+      "status": "Real",
+      "summary": "docx_readback + structure_readback \u2014 python-docx real .docx create/edit (headings, styled paragraphs, numbered/bulleted lists, tables, bold/italic runs), read-back verified via reopen, kill-proven, honest-degradation"
+    }
+  ],
+  "real_verified": [
+    {
+      "domain": "code",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "data_analytics",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "design",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "email",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "excel",
+      "oracle_exists": false,
+      "verified": false
+    },
+    {
+      "domain": "legal_redline",
+      "oracle_exists": false,
+      "verified": false
+    },
+    {
+      "domain": "notes",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "pdf",
+      "oracle_exists": false,
+      "verified": false
+    },
+    {
+      "domain": "powerpoint",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "webforms",
+      "oracle_exists": true,
+      "verified": true
+    },
+    {
+      "domain": "word",
+      "oracle_exists": true,
+      "verified": true
+    }
+  ],
+  "canary_results": [
+    {
+      "name": "audit_log_tamper",
+      "description": "Tamper audit log entry \u2192 chain verification fails",
+      "passed": true
+    },
+    {
+      "name": "egress_sealed_caught",
+      "description": "Force egress in sealed mode \u2192 oracle catches it",
+      "passed": true
+    },
+    {
+      "name": "signature_tamper_rejected",
+      "description": "Tamper signed data \u2192 signature verification fails",
+      "passed": true
+    },
+    {
+      "name": "secret_scan_detects_planted",
+      "description": "Plant a secret \u2192 scanner detects it",
+      "passed": true
+    },
+    {
+      "name": "sealed_mode_one_way",
+      "description": "Sealed mode cannot be deactivated (one-way switch)",
+      "passed": true
+    }
+  ],
+  "all_canaries_pass": true,
+  "real_vs_experimental": {
+    "real": [
+      {
+        "name": "code",
+        "status": "Real",
+        "summary": "compile_test_pass + parse_validity \u2014 tree-sitter parse (zero ERROR nodes) + py_compile + pytest on self-contained Python project, kill-proven, honest-degradation. Python = Real; other languages = Experimental.",
+        "oracle_verified": true
+      },
+      {
+        "name": "data_analytics",
+        "status": "Real",
+        "summary": "query_result + schema_readback \u2014 DuckDB SQL over local CSV/Parquet/xlsx, results verified vs independent pandas/numpy calc, kill-proven, honest-degradation",
+        "oracle_verified": true
+      },
+      {
+        "name": "design",
+        "status": "Real",
+        "summary": "canvas_readback + structure_readback \u2014 SVG canvas create/edit (shapes, text, positions, z-order), read-back verified via re-parse, kill-proven, honest-degradation; live Figma/vision = Experimental",
+        "oracle_verified": true
+      },
+      {
+        "name": "email",
+        "status": "Real",
+        "summary": "draft_readback + mailbox_structure_readback \u2014 RFC-5322 email draft composition with Maildir storage, attachments, replies (In-Reply-To/References threading), kill-proven read-back, honest-degradation; MAPI/IMAP Experimental (fail-loud offline)",
+        "oracle_verified": true
+      },
+      {
+        "name": "excel",
+        "status": "Real",
+        "summary": "xlsx_recompute + xlsx_structure_readback \u2014 LibreOffice headless recompute, values verified vs independent Python calc, kill-proven, honest-degradation",
+        "oracle_verified": false
+      },
+      {
+        "name": "legal_redline",
+        "status": "Real",
+        "summary": "docx_tracked_changes_readback + clause_coverage + no_hallucinated_citation + injection_block + airgap_egress + audit_log_integrity",
+        "oracle_verified": false
+      },
+      {
+        "name": "notes",
+        "status": "Real",
+        "summary": "backlink_integrity + graph_readback \u2014 pure-Python markdown vault with [[wikilinks]], bidirectional backlinks, document graph, create/edit/rename with link rewriting, kill-proven, honest-degradation",
+        "oracle_verified": true
+      },
+      {
+        "name": "pdf",
+        "status": "Real",
+        "summary": "pdf_text_roundtrip + pdf_render_diff + pdf_form_readback + pdf_signature_verify \u2014 pdfplumber coords, pikepdf true redaction (bytes removed), AcroForm fill+readback, pyHanko PAdES sign+verify, kill-proven, honest-degradation. OCR sub-capability: Experimental.",
+        "oracle_verified": false
+      },
+      {
+        "name": "powerpoint",
+        "status": "Real",
+        "summary": "slide_shape_readback + structure_readback \u2014 python-pptx real .pptx create/edit (slides, text, bullets, tables, images, shapes), read-back verified via reopen, kill-proven, honest-degradation",
+        "oracle_verified": true
+      },
+      {
+        "name": "webforms",
+        "status": "Real",
+        "summary": "form_fill_readback + uistate_readback \u2014 local HTML form fill (text, email, password, select, checkbox, radio, textarea), read-back verified via DOM re-parse, kill-proven, honest-degradation; live browser/page-agent = Experimental",
+        "oracle_verified": true
+      },
+      {
+        "name": "word",
+        "status": "Real",
+        "summary": "docx_readback + structure_readback \u2014 python-docx real .docx create/edit (headings, styled paragraphs, numbered/bulleted lists, tables, bold/italic runs), read-back verified via reopen, kill-proven, honest-degradation",
+        "oracle_verified": true
+      },
+      {
+        "name": "security",
+        "status": "Real (wedge)",
+        "summary": "injection_block oracle"
+      },
+      {
+        "name": "anchor_perception",
+        "status": "Real (wedge)",
+        "summary": "grounding_accuracy + stable_id + token_reduction"
+      },
+      {
+        "name": "cua_verifier",
+        "status": "Real (wedge)",
+        "summary": "uistate_transition + verifier_agreement + loop_detection"
+      },
+      {
+        "name": "audit_log",
+        "status": "Real (wedge)",
+        "summary": "Ed25519 hash-chained audit log"
+      },
+      {
+        "name": "airgap_egress",
+        "status": "Real (wedge)",
+        "summary": "Zero egress in sealed mode, kill-proven"
+      },
+      {
+        "name": "sealed_profile",
+        "status": "Real (wedge)",
+        "summary": "One-way sealed mode, no network symbols"
+      },
+      {
+        "name": "production_ops",
+        "status": "Real",
+        "summary": "Telemetry/update/supply-chain oracles"
+      }
+    ],
+    "experimental": [],
+    "prompt_only": [
+      {
+        "name": "multimodal",
+        "status": "prompt-only / not shipped",
+        "summary": "No oracle"
+      },
+      {
+        "name": "media",
+        "status": "prompt-only / not shipped",
+        "summary": "No oracle"
+      },
+      {
+        "name": "cross_platform_e2e",
+        "status": "prompt-only / not shipped",
+        "summary": "No cross-platform E2E oracle"
+      },
+      {
+        "name": "personalization",
+        "status": "Experimental",
+        "summary": "Pending author A/B preference test"
+      },
+      {
+        "name": "installer_signing",
+        "status": "Experimental",
+        "summary": "Pending real code-signing cert"
+      },
+      {
+        "name": "live_gui_browser",
+        "status": "Experimental",
+        "summary": "Live GUI/browser/Figma/OCR paths"
+      }
+    ]
+  },
+  "claims": [
+    "Real domains are fixture-verified with deterministic oracles",
+    "Canary-breaks prove all gates are honest and load-bearing",
+    "Experimental/prompt-only domains are NOT claimed as Real"
+  ],
+  "non_claims": [
+    "The 12-domain product is NOT declared fully production-ready",
+    "Personalization is Experimental (pending author A/B test)",
+    "Installer signing is Experimental (pending real cert)",
+    "Live GUI/browser/Figma/OCR paths are Experimental",
+    "Multimodal and Media are prompt-only / not shipped"
+  ],
+  "signature": "c97e49ff45f656e6edb3b21b45fe7e457633fe0e7e6e368a7e909a07c0c9c306abf298c0bb726533d80c7c6c5c69327bccff599c13c95bda159a80fe791dcf0c"
+}
