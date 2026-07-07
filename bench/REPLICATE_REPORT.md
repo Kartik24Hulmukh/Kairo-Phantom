@@ -1,16 +1,16 @@
 # Kairo Phantom — Replication Report
 
-> Generated: 2026-06-21T21:43:23.567798+00:00
-> Corpus hash: `2881e0c3f8fb5c63...`
-> Platform: Linux-6.1.158+-x86_64-with-glibc2.41
-> Python: 3.12.12
+> Generated: 2026-07-07T15:44:59.097638+00:00
+> Corpus hash: `2e008813b3866e7d...`
+> Platform: Linux-5.10.174-x86_64-with-glibc2.34
+> Python: 3.13.11
 
 ## Aggregate Gates
 
 | Gate | Measured | Target | Status |
 | :--- | :--- | :--- | :--- |
-| grounded_answer_rate | 100.0 | 95.0 | ✅ |
-| false_refusal_rate | 0.0 | 5.0 | ❌ |
+| grounded_answer_rate | 96.39 | 95.0 | ✅ |
+| false_refusal_rate | 3.61 | 5.0 | ❌ |
 | refusal_on_unanswerable | 100.0 | 100.0 | ✅ |
 | ungrounded_render_count | 0 | 0 | ✅ |
 
@@ -20,16 +20,16 @@
 
 | Metric | Value | Target |
 | :--- | :--- | :--- |
-| Grounded-Answer Rate | 100.0% | ≥95% |
-| False-Refusal Rate | 0.0% | <5% |
+| Grounded-Answer Rate | 75.0% | ≥95% |
+| False-Refusal Rate | 25.0% | <5% |
 | Refusal-Correctness | 100.0% | 100% |
 | Ungrounded Renders | 0 | 0 |
 
 | Fixture | Answerable | Grounded | False Refusals | FR Rate |
 | :--- | :--- | :--- | :--- | :--- |
-| sample_generic_01 | 4 | 4 | 0 | 0.0% |
-| sample_generic_02 | 4 | 4 | 0 | 0.0% |
-| sample_generic_03 | 4 | 4 | 0 | 0.0% |
+| sample_generic_01 | 4 | 3 | 1 | 25.0% |
+| sample_generic_02 | 4 | 3 | 1 | 25.0% |
+| sample_generic_03 | 4 | 3 | 1 | 25.0% |
 
 ### invoice
 
