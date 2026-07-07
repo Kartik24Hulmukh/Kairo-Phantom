@@ -8,11 +8,26 @@
 
 ---
 
+> **IMPLEMENTATION STATUS CORRECTION (2026-07, no-fake-green audit):**
+> Several controls in this document are **PLANNED / NOT YET IMPLEMENTED**, despite
+> being marked COMPLIANT below. Specifically, the files
+> `phantom-core/src/enterprise/sso.rs`, `enterprise/spiffe_identity.rs`,
+> `enterprise/rbac.rs`, `enterprise/compliance.rs`, and `enterprise/audit.rs`
+> **do not exist in this repository** — there is no `enterprise/` module.
+> The `SpiffeIdentity` struct that does exist (in `phantom-core/src/identity.rs`)
+> issues a **hardcoded mock certificate** (`MOCK_SPIFFE_CERT`), not a real SVID.
+> What IS implemented and test-covered: the Ed25519-signed receipt hash chain
+> (`identity.rs::ReceiptLog`), Merkle checkpointing + external verifier
+> (`kairo/trust/`, `tools/verify_receipts_external.py`), the prompt-injection
+> firewall, and zero-egress enforcement. Treat any row below whose
+> Implementation column cites `enterprise/*` as **planned, not compliant**.
+
 ## Executive Summary
 
 Kairo Phantom v4.0 implements mitigations for all 10 OWASP Agentic AI security risks
 as of the 2025 draft. Every control is deterministic Rust code running 100% offline
 on the user's machine. No cloud component can be compromised to bypass any control.
+**(See status correction above: enterprise-module controls are planned, not implemented.)**
 
 ---
 
@@ -318,19 +333,29 @@ phantom-core/src/model_manager.rs     — mmap + OOM handling
 | HIPAA Safe Harbor (§164.514(b)) | ✅ 25 rules in hipaa.toml | `compliance/hipaa.toml` |
 | GDPR Article 4 + Article 9 | ✅ 20 rules in gdpr.toml | `compliance/gdpr.toml` |
 | PCI-DSS v4.0 Requirements 3-4 | ✅ 15 rules in pci.toml | `compliance/pci.toml` |
-| SPIFFE/SPIRE Agent Identity | ✅ Ed25519 + SPIFFE URI | `enterprise/spiffe_identity.rs` |
-| SOC 2 Type II (audit readiness) | ✅ Immutable audit chain | `enterprise/audit.rs` |
+| SPIFFE-style Agent Identity | ✅ Ed25519 keypair + `spiffe://` URI structs | `phantom-core/src/identity.rs` (`SpiffeIdentity`) |
+| SOC 2 Type II (audit readiness) | ✅ Linear hash-chained receipts + Merkle checkpoints | `phantom-core/src/identity.rs` (`ReceiptLog`), `kairo/trust/merkle.py`, `tools/verify_receipts_external.py` |
+
+> **Honesty note:** full SPIRE integration (SVID rotation, workload attestation
+> server) is **planned, not yet implemented**. What exists today is an Ed25519
+> agent keypair with a SPIFFE-format URI and hash-chained signed receipts.
 
 ---
 
 ## Deployment Checklist for Enterprise Security Review
 
-- [ ] Generate SPIFFE identity: `kairo agent identity show` (auto-created on first run)
+> **Status note:** the `kairo agent identity show`, `kairo audit-verify`, and
+> `kairo audit-export` CLI subcommands referenced below are **planned / not yet
+> implemented** (no such subcommands exist in `phantom-core/src/main.rs`).
+> Until they ship, verify the receipt chain with the standalone verifier:
+> `python tools/verify_receipts_external.py <receipts.jsonl> [--checkpoints <checkpoints.jsonl>]`
+
+- [ ] Generate SPIFFE identity: `kairo agent identity show` *(planned CLI — identity is auto-created on first run)*
 - [ ] Configure SSO in `~/.kairo-phantom/config.toml` under `[enterprise.sso]`
 - [ ] Place RSA public key at `~/.kairo-phantom/enterprise/sso_public_key.pem`
 - [ ] Set HMAC key for audit sealing in `[enterprise.audit] hmac_key_b64`
-- [ ] Run `kairo audit-verify` to confirm chain is intact
-- [ ] Export audit records: `kairo audit-export --format json --since <date>`
+- [ ] Verify receipt chain: `python tools/verify_receipts_external.py` *(replaces planned `kairo audit-verify`)*
+- [ ] Export audit records: `kairo audit-export --format json --since <date>` *(planned CLI)*
 - [ ] Review RBAC policy for each Waza agent in `~/.kairo-phantom/waza/*.toml`
 - [ ] Run `cargo audit` to confirm no known CVEs in dependencies
 

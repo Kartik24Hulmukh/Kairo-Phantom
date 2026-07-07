@@ -28,17 +28,20 @@ Kairo Phantom is designed as a **privacy-first, offline-first** AI ghost-writer.
 
 Kairo Phantom enforces access control at three levels:
 
-**Agent Identity (SPIFFE)**
+**Agent Identity (SPIFFE-style)**
 - Each running Kairo instance has a cryptographic identity (Ed25519 keypair)
-- Identity is stored in `~/.kairo-phantom/enterprise/spiffe_identity.json`
-- SPIFFE SVID issued per-agent with trust domain `kairo-phantom.io`
-- Verified via: `kairo agent identity show`
+  — implemented in `phantom-core/src/identity.rs` (`SpiffeIdentity`)
+- SPIFFE-format URI (`spiffe://<trust-domain>/agent/<name>`) attached per agent
+- *Planned / not yet implemented:* SVID issuance via a SPIRE server, identity
+  file at `~/.kairo-phantom/enterprise/spiffe_identity.json`, and the
+  `kairo agent identity show` CLI subcommand
 
 **RBAC Engine**
-- Document access governed by configurable RBAC policy (`enterprise/rbac_policy.json`)
+- In-memory RBAC table implemented in `phantom-core/src/identity.rs` (`RbacTable`),
+  gated by `rbac_enabled` in config
 - Roles: `viewer`, `editor`, `admin`, `compliance`
-- Policy enforced per ghost-write session in `main.rs` before any LLM call
-- CLI validation: `kairo rbac-check --agent <id> --user <email> --roles <roles>`
+- *Planned / not yet implemented:* file-based policy at
+  `enterprise/rbac_policy.json` and the `kairo rbac-check` CLI subcommand
 
 **SSO Integration (Enterprise)**
 - Logto/OIDC integration available for enterprise deployments
