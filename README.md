@@ -76,6 +76,8 @@ cargo build --release
 make run
 ```
 
+The `pip install` step pulls in the Python dependencies (numpy, fastapi, uvicorn, pydantic, and friends — see `kairo-sidecar/requirements.txt` and `requirements-test.txt` for the full list). numpy powers the embedding math in retrieval; the sidecar is Python because the OCR and document-layout engines it builds on (like Docling) are Python-native.
+
 That starts:
 
 - **phantom-core** — the Rust daemon ("the hands") that ghost-types into real apps
