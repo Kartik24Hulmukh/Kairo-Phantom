@@ -141,7 +141,15 @@ class OpikTracer:
         Write a trace to the local JSONL file.
 
         Returns the trace_id. Raises on write failure — NEVER silently drops.
+
+        Per specs/R3_AIRGAP_ENFORCEMENT.md §1, in sealed/air-gap mode ALL
+        observability writes are suppressed — even local JSONL. This ensures
+        zero egress and zero local trace artifacts that could be mistaken
+        for phone-home behavior. The trace_id is still returned for chaining.
         """
+        if os.environ.get("KAIRO_SEALED") == "1" or os.environ.get("KAIRO_OFFLINE") == "1":
+            return ctx.trace_id  # suppressed in sealed/air-gap mode
+
         trace_dict = ctx.to_dict()
 
         line = json.dumps(trace_dict, ensure_ascii=False)

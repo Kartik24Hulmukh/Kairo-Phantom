@@ -52,8 +52,15 @@ LOGS_JSONL_FILE = Path.home() / ".kairo-phantom" / "logs.jsonl"
 
 
 def _is_air_gapped() -> bool:
-    """Return True if offline mode is active — suppresses all telemetry writes."""
-    return os.environ.get("KAIRO_OFFLINE") == "1"
+    """Return True if offline or sealed mode is active — suppresses all telemetry writes.
+
+    Per specs/R3_AIRGAP_ENFORCEMENT.md §1, sealed mode ships with no network client
+    code linked at all. Telemetry (even local JSONL writes that could later be flushed)
+    is suppressed in sealed mode to enforce the air-gap guarantee. This ensures that
+    even with telemetry "enabled" in config, sealed mode emits ZERO egress and ZERO
+    local telemetry writes that could be mistaken for phone-home behavior.
+    """
+    return os.environ.get("KAIRO_OFFLINE") == "1" or os.environ.get("KAIRO_SEALED") == "1"
 
 
 def is_opted_in() -> bool:

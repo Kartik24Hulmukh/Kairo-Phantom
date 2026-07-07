@@ -291,3 +291,4 @@ def _clear_offline_env(monkeypatch):
     # These tests exercise the opted-in / online paths, so clear it per-test.
     # Tests that need offline behavior set KAIRO_OFFLINE themselves via patch.dict.
     monkeypatch.delenv("KAIRO_OFFLINE", raising=False)
+    monkeypatch.delenv("KAIRO_SEALED", raising=False)

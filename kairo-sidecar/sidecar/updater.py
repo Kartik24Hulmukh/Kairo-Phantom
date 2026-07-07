@@ -37,9 +37,12 @@ def check_for_update() -> Optional[Tuple[str, str]]:
     Check GitHub releases for a newer version.
     Returns (latest_version, download_url) if newer available, else None.
     Times out in 5 seconds.
+
+    Per specs/R3_AIRGAP_ENFORCEMENT.md §1, auto-update is disabled in sealed/air-gap
+    mode. The network call is never made — the capability is architecturally removed.
     """
-    if os.environ.get("KAIRO_OFFLINE") == "1":
-        log.info("[Updater] Offline mode active; skipping update check.")
+    if os.environ.get("KAIRO_OFFLINE") == "1" or os.environ.get("KAIRO_SEALED") == "1":
+        log.info("[Updater] Sealed/air-gap mode active; skipping update check.")
         return None
 
     try:
@@ -171,7 +174,14 @@ def apply_update(
     """
     Verifies signature and checksum, backs up target directory, extracts update archive,
     runs health check, and rolls back if the health check fails.
+
+    Per specs/R3_AIRGAP_ENFORCEMENT.md §1, auto-update is disabled in sealed/air-gap
+    mode. The update is never applied — the capability is architecturally removed.
     """
+    if os.environ.get("KAIRO_SEALED") == "1":
+        log.error("[Updater] Sealed mode active; auto-update is disabled.")
+        return False
+
     if not verify_checksum(archive_path, expected_sha256):
         log.error("[Updater] Update failed: Checksum mismatch")
         return False

@@ -38,6 +38,23 @@ from kairo.oracles.airgap_egress import (
     run_kill_proof,
     sealed_binary_scan,
 )
+from kairo.oracles.production_ops import (  # noqa: F401
+    AirgapTelemetryReport,
+    UpdateSignatureReport,
+    SupplyChainReport,
+    run_airgap_telemetry_oracle,
+    verify_airgap_telemetry,
+    run_airgap_telemetry_kill_proof,
+    run_update_signature_oracle,
+    verify_update_signature,
+    run_update_signature_kill_proof,
+    run_supply_chain_oracle,
+    verify_supply_chain,
+    run_supply_chain_kill_proof,
+    scan_for_secrets,
+    generate_cyclonedx_sbom,
+    validate_sbom,
+)
 
 __all__ = [
     "Revision",
@@ -63,4 +80,19 @@ __all__ = [
     "verify_airgap_egress",
     "run_kill_proof",
     "sealed_binary_scan",
+    "AirgapTelemetryReport",
+    "UpdateSignatureReport",
+    "SupplyChainReport",
+    "run_airgap_telemetry_oracle",
+    "verify_airgap_telemetry",
+    "run_airgap_telemetry_kill_proof",
+    "run_update_signature_oracle",
+    "verify_update_signature",
+    "run_update_signature_kill_proof",
+    "run_supply_chain_oracle",
+    "verify_supply_chain",
+    "run_supply_chain_kill_proof",
+    "scan_for_secrets",
+    "generate_cyclonedx_sbom",
+    "validate_sbom",
 ]
