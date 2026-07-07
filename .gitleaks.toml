@@ -49,6 +49,8 @@ paths = [
     # Test files use mock/dummy keys — not real secrets
     '''kairo-sidecar/tests/.*''',
     '''phantom-core/tests/.*''',
+    # Production-ops oracle tests use planted secrets for kill-proof verification
+    '''tests/test_production_ops_oracles\.py''',
     # The SBOM gate script contains a documented mock key (hex representation)
     # PROVEN: scripts/ci/sbom_gate.py exists (8208 bytes)
     '''scripts/ci/sbom_gate\.py''',

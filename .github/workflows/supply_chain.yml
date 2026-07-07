@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@0b93645e9fea7ee810b1296779098a130e903d8f # v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
 
@@ -114,7 +114,7 @@ jobs:
 
       # 7. Upload SBOM artifact
       - name: Upload SBOM
-        uses: actions/upload-artifact@b4b6b899dce8d0c25e3a93f91c3c3c3c3c3c3c3 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: kairo-sbom
