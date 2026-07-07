@@ -117,7 +117,7 @@ What I think is genuinely novel:
 
 **The memory system.** Most AI tools are stateless. Kairo builds a profile of how you write across every session. After a week, it knows your preferred sentence length, vocabulary, formatting style, and structural patterns. We published a benchmark showing 57.7% better personalization than a baseline GPT-4o call.
 
-**The security model.** Each session gets a unique UUID sentinel embedded in the system prompt. If the LLM echoes it back (a sign of prompt injection or leakage), the response is blocked before it ever reaches your document. There's also a 50-pattern injection firewall, SPIFFE-based agent identity, and a tamper-evident audit chain.
+**The security model.** Each session gets a unique UUID sentinel embedded in the system prompt. If the LLM echoes it back (a sign of prompt injection or leakage), the response is blocked before it ever reaches your document. There's also a 50-pattern injection firewall, an Ed25519 agent identity with a tamper-evident, Merkle-checkpointed audit chain (SPIFFE-based identity is planned, not yet implemented).
 
 **The // protocol.** Typing `//` in any document is the activation prefix. `// rewrite this`, `//! urgent`, `//? what's the word count`. The Skills marketplace (Waza) extends this: `// legal review this contract`, `// code review this function`, `// SOAP note`.
 

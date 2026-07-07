@@ -27,12 +27,20 @@ fallbacks must be loud; stub-only coverage must be labeled Experimental.
   builds. Now: `opt-level=3, lto="thin", strip="symbols"`, with a comment
   documenting the history.
 
-### 3. Trust-claim audit (item 4)
+### 3. Trust-claim audit (item 4) — CORRECTED after deeper verification
 - grep audit over all non-blueprint *.md: NO doc claims Merkle log,
   policy-as-code, co-signing, deterministic replay, or transparency log exist.
-  Zero relabels required. Agent identity claims (SPIFFE/Ed25519) are backed by
-  real code (`phantom-core/src/identity.rs`,
-  `phantom-core/src/enterprise/spiffe_identity.rs`).
+- Agent identity: `SpiffeIdentity` / `RbacTable` / `ReceiptLog` structs ARE
+  real (`phantom-core/src/identity.rs`). BUT the docs cited a NONEXISTENT
+  file (`enterprise/spiffe_identity.rs` — no `enterprise/` dir exists) and
+  FIVE nonexistent CLI subcommands (`kairo audit-verify`, `kairo owasp-report`,
+  `kairo agent identity show`, `kairo rbac-check`, `kairo audit-export` —
+  none present in `phantom-core/src/main.rs`).
+- RELABELED as planned / not yet implemented, with corrected evidence paths:
+  - `docs/security/OWASP_AGENTIC_TOP10_COMPLIANCE.md` (certification table +
+    deployment checklist; verifier command substituted where available)
+  - `docs/enterprise/SOC2_READINESS.md` (agent identity, RBAC engine,
+    audit checklist sections)
 - `kairo/trust/__init__.py` documents which trust-layer features are
   IMPLEMENTED vs PLANNED.
 
@@ -59,19 +67,21 @@ fallbacks must be loud; stub-only coverage must be labeled Experimental.
   not implemented.
 
 ### 5. CI OOM fix
-- `.github/workflows/root_suite.yml` (+ fallback copy at
-  `ci/root_suite.yml.proposed` in case the Git App lacks `workflows`
-  permission): 4-way file shard matrix + pytest-xdist (`--dist loadfile`),
+- CONFIRMED: push of `.github/workflows/root_suite.yml` was REJECTED (GitHub
+  App token lacks `workflows` permission). The workflow now lives ONLY at
+  `ci/root_suite.yml.proposed`. MAINTAINER ACTION REQUIRED:
+  `git mv ci/root_suite.yml.proposed .github/workflows/root_suite.yml` pushed
+  with a personal token that has `workflow` scope (or add via GitHub web UI).
+- Contents: 4-way file shard matrix + pytest-xdist (`--dist loadfile`),
   model2vec model cached via actions/cache and pre-downloaded on miss,
   `KAIRO_REQUIRE_SEMANTIC=1` in the run env. Root cause: single-process full
   suite accumulates memory (test_resource_bounds.py allocates deliberately)
   → exit 137 in 4 GB sandbox.
 
 ## NEXT STEPS (in order)
-1. Commit + push branch; open PR against master. If push is rejected due to
-   workflow permissions, delete `.github/workflows/root_suite.yml` from the
-   commit, keep `ci/root_suite.yml.proposed`, and tell the maintainer to move
-   it (one `git mv`).
+1. Commit + push branch (workflow file already moved out of
+   `.github/workflows/` after the rejected push); open PR against master.
+   PR body must call out the maintainer action for `ci/root_suite.yml.proposed`.
 2. Watch PR CI on the head commit (`gh run list/watch`). Do NOT declare done
    until green. Known risk: pre-existing workflows may have unrelated failures
    on master — compare against master's CI status before attributing to this
