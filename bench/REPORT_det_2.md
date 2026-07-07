@@ -2,15 +2,15 @@
 
 > Model ID: `kairo-test-mode-v1` | Seed: `42` | Corpus Hash: `52ceb0265dfff3ce31604ae98ebadf75a488df1f6993610d4d0ddfc810482060`
 
-> Python: `3.12.12` | Platform: `Linux-x86_64`
+> Python: `3.13.11` | Platform: `Linux-x86_64`
 
 ## Release Gates
 
 | Gate | Measured | Target | Status | Numerator | Denominator |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Grounded Answer Rate | 100.0% | ≥95.0% | ✅ PASS | 83 | 83 |
+| Grounded Answer Rate | 96.3855% | ≥95.0% | ✅ PASS | 80 | 83 |
 | Refusal On Unanswerable | 100.0% | ≥100.0% | ✅ PASS | 1 | 1 |
-| False Refusal Rate | 0.0% | <5.0% | ✅ PASS | 0 | 83 |
+| False Refusal Rate | 3.6145% | <5.0% | ✅ PASS | 3 | 83 |
 | Ungrounded Render Count | 0 | =0 | ✅ PASS | — | — |
 
 ## Per-Pack Breakdown
@@ -45,17 +45,17 @@
 | :--- | :--- |
 | Total Documents | 3 |
 | Answerable Fields | 12 |
-| Grounded Answers | 12 |
+| Grounded Answers | 9 |
 | Ungrounded Render Count | 0 |
-| Grounded-Answer Rate | 100.0% |
+| Grounded-Answer Rate | 75.0% |
 | Refusal-on-Unanswerable | 100.0% |
-| False-Refusal Rate | 0.0% |
+| False-Refusal Rate | 25.0% |
 
 #### Per-Field Accuracy (generic)
 
 | Field | Accuracy |
 | :--- | :--- |
-| `entities` | 100.0% |
+| `entities` | 0.0% |
 | `key_claims` | 100.0% |
 | `summary` | 100.0% |
 | `topics` | 100.0% |
@@ -115,9 +115,9 @@
 
 | Fixture | Pack | Grounded% | Refusal% | FalseRef% | Ungrounded |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| sample_generic_01 | generic | 100.0% | 100.0% | 0.0% | 0 |
-| sample_generic_02 | generic | 100.0% | 100.0% | 0.0% | 0 |
-| sample_generic_03 | generic | 100.0% | 100.0% | 0.0% | 0 |
+| sample_generic_01 | generic | 75.0% | 100.0% | 25.0% | 0 |
+| sample_generic_02 | generic | 75.0% | 100.0% | 25.0% | 0 |
+| sample_generic_03 | generic | 75.0% | 100.0% | 25.0% | 0 |
 | sample_invoice_01 | invoice | 100.0% | 100.0% | 0.0% | 0 |
 | sample_invoice_02 | invoice | 100.0% | 100.0% | 0.0% | 0 |
 | sample_invoice_03 | invoice | 100.0% | 100.0% | 0.0% | 0 |
@@ -137,8 +137,8 @@
 | summary | grounded | Kairo Phantom Project Overview Kairo Phantom is a  | Kairo Phantom Project Overview
 Kairo Phantom is a  | ✅ | ✅ | exact |
 | key_claims | grounded | ['Every extraction must be grounded or it is block | ["Every extraction must be grounded or it is block | ✅ | ✅ | exact |
-| entities | grounded | ['Kairo Phantom', 'Antigravity Team'] | ["Kairo Phantom Project Overview\nKairo Phantom",  | ✅ | ✅ | exact |
-| topics | grounded | ['technology', 'security', 'intelligence'] | ["system", "intelligence", "data", "technology", " | ✅ | ✅ | exact |
+| entities | false_refusal | ['Kairo Phantom', 'Antigravity Team'] | — | ❌ | ❌ | — |
+| topics | grounded | ['technology', 'security', 'intelligence'] | ["technology", "security", "data", "automotive"] | ✅ | ✅ | exact |
 
 ### sample_generic_02 (generic)
 
@@ -147,8 +147,8 @@ Kairo Phantom is a  | ✅ | ✅ | exact |
 | summary | grounded | Verifiable RAG Systems in 2026 Standard Retrieval- | Verifiable RAG Systems in 2026
 Standard Retrieval- | ✅ | ✅ | exact |
 | key_claims | grounded | ['Standard RAG systems suffer from high hallucinat | ["Standard RAG systems suffer from high hallucinat | ✅ | ✅ | exact |
-| entities | grounded | ['RAG', 'Kairo Phantom', 'DeepMind Team'] | ["Verifiable RAG Systems", "Standard Retrieval", " | ✅ | ✅ | exact |
-| topics | grounded | ['technology', 'security'] | ["financial", "system", "technology"] | ✅ | ✅ | exact |
+| entities | false_refusal | ['RAG', 'Kairo Phantom', 'DeepMind Team'] | — | ❌ | ❌ | — |
+| topics | grounded | ['technology', 'security'] | ["technology", "financial", "automotive"] | ✅ | ✅ | exact |
 
 ### sample_generic_03 (generic)
 
@@ -157,8 +157,8 @@ Standard Retrieval- | ✅ | ✅ | exact |
 | summary | grounded | Local-First Software Development The local-first s | Local-First Software Development
 The local-first s | ✅ | ✅ | exact |
 | key_claims | grounded | ['Local-first software provides superior privacy a | ["Local-first software provides superior privacy a | ✅ | ✅ | exact |
-| entities | grounded | ['Ollama', 'Qdrant Edge', 'Kairo Phantom', 'OSS Co | ["Local", "First Software Development\nThe", "Olla | ✅ | ✅ | exact |
-| topics | grounded | ['technology', 'paper', 'intelligence'] | ["security", "data", "technology", "paper"] | ✅ | ✅ | exact |
+| entities | false_refusal | ['Ollama', 'Qdrant Edge', 'Kairo Phantom', 'OSS Co | — | ❌ | ❌ | — |
+| topics | grounded | ['technology', 'paper', 'intelligence'] | ["technology", "security", "data", "automotive"] | ✅ | ✅ | exact |
 
 ### sample_invoice_01 (invoice)
 
@@ -248,7 +248,7 @@ The local-first s | ✅ | ✅ | exact |
 | parties | grounded | ['ACME Corp', 'Client Solutions Inc.'] | ["ACME Corp", "Client Solutions Inc"] | ✅ | ✅ | exact |
 | effective_date | grounded | 2026-06-01 | 2026-06-01 | ✅ | ✅ | exact |
 | termination_date | grounded | 2029-06-01 | 2029-06-01 | ✅ | ✅ | exact |
-| obligations | grounded | ['Licensee shall pay the license fees within 30 da | ["Licensee shall pay the license fees within 30 da | ✅ | ✅ | exact |
+| obligations | grounded | ['Licensee shall pay the license fees within 30 da | ["License Grant and Obligations: Licensee shall pa | ✅ | ✅ | fuzzy |
 | governing_law | grounded | Delaware | Delaware | ✅ | ✅ | exact |
 | payment_terms | grounded | within 30 days | within 30 days | ✅ | ✅ | exact |
 | confidentiality_clause | grounded | Each party agrees to maintain confidentiality of a | Each party agrees to maintain confidentiality of a | ✅ | ✅ | exact |
@@ -260,7 +260,7 @@ The local-first s | ✅ | ✅ | exact |
 | parties | grounded | ['Wayne Enterprises', 'Globex Corporation'] | ["Wayne Enterprises", "Globex Corporation"] | ✅ | ✅ | exact |
 | effective_date | grounded | 2026-05-15 | 2026-05-15 | ✅ | ✅ | exact |
 | termination_date | grounded | 2027-05-15 | 2027-05-15 | ✅ | ✅ | exact |
-| obligations | grounded | ['Consulting Services Agreement is entered into as | ["Consultant shall perform the services described  | ✅ | ✅ | exact |
+| obligations | grounded | ['Consulting Services Agreement is entered into as | ["Services and Obligations: Consultant shall perfo | ✅ | ✅ | fuzzy |
 | governing_law | grounded | New York | New York | ✅ | ✅ | exact |
 | payment_terms | grounded | within 15 days | within 15 days | ✅ | ✅ | exact |
 | confidentiality_clause | grounded | Consultant agrees that all Wayne Enterprises busin | Consultant agrees that all Wayne Enterprises busin | ✅ | ✅ | exact |
@@ -272,7 +272,7 @@ The local-first s | ✅ | ✅ | exact |
 | parties | grounded | ['Initech LLC', 'Intertrode Corp'] | ["Initech LLC", "Intertrode Corp"] | ✅ | ✅ | exact |
 | effective_date | grounded | 2026-06-12 | 2026-06-12 | ✅ | ✅ | exact |
 | termination_date | grounded | 2028-06-12 | 2028-06-12 | ✅ | ✅ | exact |
-| obligations | grounded | ['Receiving Party shall use the information solely | ["Receiving Party shall use the information solely | ✅ | ✅ | exact |
+| obligations | grounded | ['Receiving Party shall use the information solely | ["Obligations: Receiving Party shall use the infor | ✅ | ✅ | fuzzy |
 | governing_law | grounded | Texas | Texas | ✅ | ✅ | exact |
 | payment_terms | correct_refusal | None | — | ❌ | ❌ | — |
 | confidentiality_clause | grounded | Receiving Party agrees to keep all Disclosing Part | Receiving Party agrees to keep all Disclosing Part | ✅ | ✅ | exact |

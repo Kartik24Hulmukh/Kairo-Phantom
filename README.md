@@ -76,6 +76,8 @@ cargo build --release
 make run
 ```
 
+The `pip install` step pulls in the Python dependencies (numpy, fastapi, uvicorn, pydantic, and friends — see `kairo-sidecar/requirements.txt` and `requirements-test.txt` for the full list). numpy powers the embedding math in retrieval; the sidecar is Python because the OCR and document-layout engines it builds on (like Docling) are Python-native.
+
 That starts:
 
 - **phantom-core** — the Rust daemon ("the hands") that ghost-types into real apps
@@ -177,7 +179,7 @@ pytest tests/test_injection_parity.py tests/test_injection_connector.py -v  # 34
 
 ---
 
-## 🧾 The Receipt
+## �� The Receipt
 
 Every action Kairo Phantom takes produces an Ed25519-signed, hash-chained provenance receipt. This is not a log file you trust — it is a cryptographic signature you verify.
 
@@ -354,6 +356,30 @@ Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelin
 - [Star the repo](https://github.com/Kartik24Hulmukh/Kairo-Phantom) — if Kairo Phantom is useful, let others know
 
 All PRs must pass 14 gates before merge. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full list.
+
+---
+
+## Scope Boundaries — What Kairo Does and Does Not Do
+
+### Kairo DOES:
+- **Read** documents and extract structured data with grounded citations to exact source regions
+- **Suggest** actions to the user — never auto-applies without explicit human confirmation
+- **Refuse** to answer when it cannot ground a claim to source text ("No source → no answer")
+- **Audit** every answer and every refusal in a tamper-evident, cryptographically signed log
+- Run **local-first** with zero network egress by default (air-gap proven in CI)
+- Support **four launch Packs**: generic, invoice, paper, contract
+- Provide a **standalone grounding verifier** that any RAG pipeline can bolt on
+
+### Kairo Does NOT:
+- Write to or drive source applications (Word, Excel, desktop) — v1 is **READ + SUGGEST ONLY**
+- Act as a multi-domain expert swarm or router
+- Operate as a collaborative/cloud-by-default layer
+- Auto-apply any suggestion without explicit human confirmation
+- Support Packs beyond the four launch Packs in v1
+- Allow the model to self-certify a bounding box — the verifier independently re-checks every citation
+
+### If a feature seems out of scope
+It probably is. Kairo's scope is deliberately narrow: verifiable, grounded document intelligence. See [CONTRIBUTING.md](CONTRIBUTING.md) for scope boundaries and [docs/PUBLIC_ROADMAP.md](docs/PUBLIC_ROADMAP.md) for planned features.
 
 ---
 

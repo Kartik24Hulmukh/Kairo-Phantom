@@ -471,7 +471,11 @@ class TestWritingIntelligenceOrchestrator:
         assert sanitized == text
         assert result.safe_to_output
 
-    def test_process_and_sanitize_verbatim_paraphrase(self):
+    def test_process_and_sanitize_verbatim_paraphrase(self, monkeypatch):
+        # The real paraphrase service is unavailable in CI; enable the
+        # deterministic stub explicitly (gated off by default in production —
+        # see kairo-sidecar/tests/test_production_mocks_gating.py).
+        monkeypatch.setenv("KAIRO_PARAPHRASE_STUB", "1")
         orch = get_writing_orchestrator()
         text = "Permission is hereby granted, free of charge, to any person obtaining a copy."
         sanitized, result = orch.process_and_sanitize(text)

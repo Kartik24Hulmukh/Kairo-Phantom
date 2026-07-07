@@ -1,0 +1,132 @@
+# Root Test Suite — runs the FULL root tests/ suite (~887 tests).
+#
+# Why this workflow exists:
+# - No other workflow runs the full root tests/ suite; ci.yml and verify.yml
+#   run kairo-sidecar/tests, and cross-platform.yml runs a 10-file subset.
+# - Running all ~60 root test files in a single pytest process accumulates
+#   memory (test_resource_bounds.py deliberately allocates) and can OOM-kill
+#   the run (observed: exit 137 in a 4 GB sandbox). Sharding the files across
+#   a matrix bounds per-process memory; pytest-xdist (--dist loadfile) inside
+#   each shard bounds it further via worker processes.
+# - The e2e shard requires REAL semantic embeddings: the model2vec model is
+#   cached (actions/cache) and pre-downloaded on cache miss, and
+#   KAIRO_REQUIRE_SEMANTIC=1 turns any silent hash-embedding fallback into a
+#   hard failure (anti-fake-green).
+
+name: Root Test Suite (full, sharded)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  KAIRO_OFFLINE: "1"
+  KAIRO_FORCE_CPU: "1"
+
+jobs:
+  root-tests:
+    name: Root tests shard ${{ matrix.shard }}/4
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            kairo-sidecar/requirements.txt
+            requirements-test.txt
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r kairo-sidecar/requirements.txt
+          pip install -r requirements-test.txt
+          pip install pytest pytest-asyncio pytest-xdist anyio
+
+      - name: Cache model2vec potion-base-8M
+        id: model-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: model2vec-potion-base-8M-v1
+
+      - name: Download model2vec model (cache miss only)
+        if: steps.model-cache.outputs.cache-hit != 'true'
+        env:
+          HF_HUB_OFFLINE: "0"
+          TRANSFORMERS_OFFLINE: "0"
+        run: |
+          python -c "from model2vec import StaticModel; StaticModel.from_pretrained('minishlab/potion-base-8M'); print('model cached OK')"
+
+      - name: Compute shard file list (deterministic round-robin by file)
+        id: shard
+        run: |
+          FILES=$(ls tests/*.py | sort | awk -v s="${{ matrix.shard }}" 'NR % 4 == (s - 1) % 4' | tr '\n' ' ')
+          if [ -z "$FILES" ]; then
+            echo "Shard is empty — file layout changed; fix the sharding." >&2
+            exit 1
+          fi
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+          echo "Shard ${{ matrix.shard }} files: $FILES"
+
+      - name: Run shard (xdist, loud semantic fallback)
+        env:
+          KAIRO_REQUIRE_SEMANTIC: "1"
+        run: |
+          python -m pytest ${{ steps.shard.outputs.files }} \
+            -n 2 --dist loadfile \
+            --tb=short \
+            -p no:cacheprovider
+
+  root-tests-e2e:
+    name: Root e2e (real semantic embeddings, no fallback)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            kairo-sidecar/requirements.txt
+            requirements-test.txt
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r kairo-sidecar/requirements.txt
+          pip install -r requirements-test.txt
+          pip install pytest pytest-asyncio anyio
+
+      - name: Cache model2vec potion-base-8M
+        id: model-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: model2vec-potion-base-8M-v1
+
+      - name: Download model2vec model (cache miss only)
+        if: steps.model-cache.outputs.cache-hit != 'true'
+        env:
+          HF_HUB_OFFLINE: "0"
+          TRANSFORMERS_OFFLINE: "0"
+        run: |
+          python -c "from model2vec import StaticModel; StaticModel.from_pretrained('minishlab/potion-base-8M'); print('model cached OK')"
+
+      - name: Run e2e suite (KAIRO_REQUIRE_SEMANTIC enforced by conftest)
+        run: |
+          python -m pytest tests/e2e \
+            --tb=short \
+            -p no:cacheprovider

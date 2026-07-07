@@ -7,6 +7,16 @@
 
 ---
 
+> **IMPLEMENTATION STATUS CORRECTION (2026-07, no-fake-green audit):**
+> References in this document to **SPIFFE-based agent identity**, an RBAC engine,
+> and `~/.kairo-phantom/enterprise/spiffe_identity.json` describe **planned**
+> controls — the `enterprise/` Rust module does not exist in the repository, and
+> the existing `SpiffeIdentity` struct issues a mock certificate. What IS
+> implemented: an Ed25519 agent keypair with a signed, hash-chained receipt log
+> (`phantom-core/src/identity.rs`), Merkle checkpoints with a standalone external
+> verifier (`kairo/trust/`, `tools/verify_receipts_external.py`), and zero-egress
+> enforcement proven in CI. Read "SPIFFE" claims below as **roadmap, not current state**.
+
 ## Executive Summary
 
 Kairo Phantom is designed as a **privacy-first, offline-first** AI ghost-writer. The architecture eliminates the most common SOC 2 failure modes by design:
@@ -28,17 +38,20 @@ Kairo Phantom is designed as a **privacy-first, offline-first** AI ghost-writer.
 
 Kairo Phantom enforces access control at three levels:
 
-**Agent Identity (SPIFFE)**
+**Agent Identity (SPIFFE-style)**
 - Each running Kairo instance has a cryptographic identity (Ed25519 keypair)
-- Identity is stored in `~/.kairo-phantom/enterprise/spiffe_identity.json`
-- SPIFFE SVID issued per-agent with trust domain `kairo-phantom.io`
-- Verified via: `kairo agent identity show`
+  — implemented in `phantom-core/src/identity.rs` (`SpiffeIdentity`)
+- SPIFFE-format URI (`spiffe://<trust-domain>/agent/<name>`) attached per agent
+- *Planned / not yet implemented:* SVID issuance via a SPIRE server, identity
+  file at `~/.kairo-phantom/enterprise/spiffe_identity.json`, and the
+  `kairo agent identity show` CLI subcommand
 
 **RBAC Engine**
-- Document access governed by configurable RBAC policy (`enterprise/rbac_policy.json`)
+- In-memory RBAC table implemented in `phantom-core/src/identity.rs` (`RbacTable`),
+  gated by `rbac_enabled` in config
 - Roles: `viewer`, `editor`, `admin`, `compliance`
-- Policy enforced per ghost-write session in `main.rs` before any LLM call
-- CLI validation: `kairo rbac-check --agent <id> --user <email> --roles <roles>`
+- *Planned / not yet implemented:* file-based policy at
+  `enterprise/rbac_policy.json` and the `kairo rbac-check` CLI subcommand
 
 **SSO Integration (Enterprise)**
 - Logto/OIDC integration available for enterprise deployments
@@ -176,11 +189,18 @@ Kairo Phantom enforces access control at three levels:
 
 For enterprise SOC 2 audit preparation, gather the following evidence:
 
-- [ ] `kairo audit-verify` — chain integrity pass
-- [ ] `kairo owasp-report` — OWASP compliance matrix
-- [ ] `kairo agent identity show` — SPIFFE identity document
-- [ ] `kairo rbac-check` — RBAC policy validation output
-- [ ] `kairo audit-export --format json` — 90 days of audit events
+> **Status note:** the `kairo audit-verify`, `kairo owasp-report`,
+> `kairo agent identity show`, `kairo rbac-check`, and `kairo audit-export`
+> CLI subcommands are **planned / not yet implemented**. Today, chain
+> integrity is verified with the standalone external verifier:
+> `python tools/verify_receipts_external.py <receipts.jsonl> --checkpoints <checkpoints.jsonl> --require-signatures`
+
+- [ ] `python tools/verify_receipts_external.py ...` — receipt chain + Merkle checkpoint integrity pass *(available now)*
+- [ ] `kairo audit-verify` — chain integrity pass *(planned CLI)*
+- [ ] `kairo owasp-report` — OWASP compliance matrix *(planned CLI)*
+- [ ] `kairo agent identity show` — SPIFFE identity document *(planned CLI)*
+- [ ] `kairo rbac-check` — RBAC policy validation output *(planned CLI)*
+- [ ] `kairo audit-export --format json` — 90 days of audit events *(planned CLI)*
 - [ ] `cargo audit` — zero known vulnerabilities
 - [ ] CI/CD pipeline — all security tests passing (Domain 10)
 

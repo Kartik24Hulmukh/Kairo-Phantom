@@ -67,6 +67,15 @@ class WritingIntelligenceOrchestrator:
         """
         Audit output and attempt automatic paraphrasing if memorization is flagged.
         Returns the sanitized text and final audit report.
+
+        EXPERIMENTAL — STUB-ONLY SANITIZATION:
+        There is NO real paraphrase service. The only sanitization path is the
+        rule-based stub gated behind KAIRO_PARAPHRASE_STUB=1 (off by default).
+        In production (stub off), flagged text raises MemorizationError — this
+        is the honest behavior and is covered by
+        tests/test_production_mocks_gating.py::test_writing_intelligence_disabled.
+        Any green test of the sanitization path is testing the STUB, not a real
+        service. Do not treat stub-path green as production readiness.
         """
         result = self.audit_output(generated_text)
         if result.safe_to_output and result.risk != MemorizationRisk.HIGH:

@@ -76,13 +76,28 @@ class RetrievalIndex:
             return
 
         except Exception as e:
-            logger.warning(
-                "model2vec unavailable (%s) — falling back to hash embedding. "
-                "Paraphrase retrieval quality will be reduced.",
+            # LOUD fallback policy: silent degradation to hash embeddings is a
+            # latent fake-green (lexical overlap can mask broken semantics).
+            # If KAIRO_REQUIRE_SEMANTIC=1 (set in CI/e2e), missing model2vec is
+            # a hard error — never a quiet quality downgrade.
+            if os.getenv("KAIRO_REQUIRE_SEMANTIC", "0") == "1":
+                raise RuntimeError(
+                    "KAIRO_REQUIRE_SEMANTIC=1 but model2vec potion-base-8M is "
+                    f"unavailable ({type(e).__name__}: {e}). Refusing to fall "
+                    "back to hash embeddings. Cache the model (e.g. "
+                    "`python -c \"from model2vec import StaticModel; "
+                    "StaticModel.from_pretrained('minishlab/potion-base-8M')\"`) "
+                    "or unset KAIRO_REQUIRE_SEMANTIC."
+                ) from e
+            logger.error(
+                "LOUD WARNING: model2vec unavailable (%s) — falling back to "
+                "DEGRADED hash embedding. Paraphrase/semantic retrieval will "
+                "NOT work correctly. Set KAIRO_REQUIRE_SEMANTIC=1 to make this "
+                "a hard failure.",
                 type(e).__name__,
             )
 
-        # Fallback: kernel hash embedding
+        # Fallback: kernel hash embedding (DEGRADED — lexical only)
         from kernel.core.embeddings import get_embedding
 
         self._embed_dim = 384
@@ -92,7 +107,7 @@ class RetrievalIndex:
             return get_embedding(text, dim=384)
 
         self._embed_fn = hash_embed
-        logger.info("Using hash embedding (384-dim) — fallback mode")
+        logger.error("LOUD WARNING: Using hash embedding (384-dim) — DEGRADED fallback mode")
 
     def add_document(self, result: IngestResult) -> None:
         """Add all chunks from an ingested document to the index."""
