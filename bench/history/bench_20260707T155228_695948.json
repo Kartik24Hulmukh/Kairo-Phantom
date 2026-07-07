@@ -1,0 +1,1079 @@
+{
+  "corpus_hash": "52ceb0265dfff3ce31604ae98ebadf75a488df1f6993610d4d0ddfc810482060",
+  "gates": {
+    "false_refusal_rate": {
+      "denominator": 83,
+      "measured": 3.6145,
+      "numerator": 3,
+      "passes": true,
+      "target": 5.0,
+      "unit": "percent"
+    },
+    "grounded_answer_rate": {
+      "denominator": 83,
+      "measured": 96.3855,
+      "numerator": 80,
+      "passes": true,
+      "target": 95.0,
+      "unit": "percent"
+    },
+    "refusal_on_unanswerable": {
+      "denominator": 1,
+      "measured": 100.0,
+      "numerator": 1,
+      "passes": true,
+      "target": 100.0,
+      "unit": "percent"
+    },
+    "ungrounded_render_count": {
+      "measured": 0,
+      "passes": true,
+      "target": 0,
+      "unit": "count"
+    }
+  },
+  "model_id": "kairo-test-mode-v1",
+  "packs": {
+    "contract": {
+      "answerable_fields": 20,
+      "correct_refusals": 1,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 20,
+      "passed_extractions": 20,
+      "per_field_accuracy": {
+        "confidentiality_clause": 1.0,
+        "effective_date": 1.0,
+        "governing_law": 1.0,
+        "obligations": 1.0,
+        "parties": 1.0,
+        "payment_terms": 0.6667,
+        "termination_date": 1.0
+      },
+      "refusal_on_unanswerable": 100.0,
+      "total_documents": 3,
+      "total_extractions": 20,
+      "unanswerable_fields": 1,
+      "ungrounded_render_count": 0
+    },
+    "generic": {
+      "answerable_fields": 12,
+      "correct_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 3,
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 9,
+      "passed_extractions": 9,
+      "per_field_accuracy": {
+        "entities": 0.0,
+        "key_claims": 1.0,
+        "summary": 1.0,
+        "topics": 1.0
+      },
+      "refusal_on_unanswerable": 100.0,
+      "total_documents": 3,
+      "total_extractions": 9,
+      "unanswerable_fields": 0,
+      "ungrounded_render_count": 0
+    },
+    "invoice": {
+      "answerable_fields": 27,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 27,
+      "passed_extractions": 27,
+      "per_field_accuracy": {
+        "currency": 1.0,
+        "due_date": 1.0,
+        "invoice_date": 1.0,
+        "invoice_number": 1.0,
+        "line_items": 1.0,
+        "payment_terms": 1.0,
+        "tax_amount": 1.0,
+        "total_amount": 1.0,
+        "vendor_name": 1.0
+      },
+      "refusal_on_unanswerable": 100.0,
+      "total_documents": 3,
+      "total_extractions": 27,
+      "unanswerable_fields": 0,
+      "ungrounded_render_count": 0
+    },
+    "paper": {
+      "answerable_fields": 24,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 24,
+      "passed_extractions": 24,
+      "per_field_accuracy": {
+        "abstract_summary": 1.0,
+        "authors": 1.0,
+        "figure_references": 1.0,
+        "key_claims": 1.0,
+        "methods": 1.0,
+        "reported_numbers": 1.0,
+        "table_references": 1.0,
+        "title": 1.0
+      },
+      "refusal_on_unanswerable": 100.0,
+      "total_documents": 3,
+      "total_extractions": 24,
+      "unanswerable_fields": 0,
+      "ungrounded_render_count": 0
+    }
+  },
+  "per_document": [
+    {
+      "answerable_fields": 4,
+      "correct_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 1,
+      "field_details": [
+        {
+          "expected": "Kairo Phantom Project Overview Kairo Phantom is a verifiable document intelligence system designed f",
+          "extracted": "Kairo Phantom Project Overview\nKairo Phantom is a verifiable document intelligence system designed f",
+          "field": "summary",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Every extraction must be grounded or it is blocked.', 'The system maintains a local SQLite databas",
+          "extracted": "[\"Every extraction must be grounded or it is blocked.\", \"The system maintains a local SQLite databas",
+          "field": "key_claims",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Kairo Phantom', 'Antigravity Team']",
+          "extracted": null,
+          "field": "entities",
+          "grounded": false,
+          "rendered": false,
+          "status": "false_refusal"
+        },
+        {
+          "expected": "['technology', 'security', 'intelligence']",
+          "extracted": "[\"technology\", \"security\", \"data\", \"automotive\"]",
+          "field": "topics",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_generic_01.txt",
+      "fixture_id": "sample_generic_01",
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 3,
+      "pack": "generic",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 4,
+      "correct_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 1,
+      "field_details": [
+        {
+          "expected": "Verifiable RAG Systems in 2026 Standard Retrieval-Augmented Generation (RAG) systems are notorious f",
+          "extracted": "Verifiable RAG Systems in 2026\nStandard Retrieval-Augmented Generation (RAG) systems are notorious f",
+          "field": "summary",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Standard RAG systems suffer from high hallucination rates.', 'The grounding cascade filters out un",
+          "extracted": "[\"Standard RAG systems suffer from high hallucination rates.\", \"The grounding cascade filters out un",
+          "field": "key_claims",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['RAG', 'Kairo Phantom', 'DeepMind Team']",
+          "extracted": null,
+          "field": "entities",
+          "grounded": false,
+          "rendered": false,
+          "status": "false_refusal"
+        },
+        {
+          "expected": "['technology', 'security']",
+          "extracted": "[\"technology\", \"financial\", \"automotive\"]",
+          "field": "topics",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_generic_02.txt",
+      "fixture_id": "sample_generic_02",
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 3,
+      "pack": "generic",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 4,
+      "correct_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 1,
+      "field_details": [
+        {
+          "expected": "Local-First Software Development The local-first software movement prioritizes user ownership of dat",
+          "extracted": "Local-First Software Development\nThe local-first software movement prioritizes user ownership of dat",
+          "field": "summary",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Local-first software provides superior privacy and offline capabilities.', 'Ollama enables fully o",
+          "extracted": "[\"Local-first software provides superior privacy and offline capabilities.\", \"Ollama enables fully o",
+          "field": "key_claims",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Ollama', 'Qdrant Edge', 'Kairo Phantom', 'OSS Community']",
+          "extracted": null,
+          "field": "entities",
+          "grounded": false,
+          "rendered": false,
+          "status": "false_refusal"
+        },
+        {
+          "expected": "['technology', 'paper', 'intelligence']",
+          "extracted": "[\"technology\", \"security\", \"data\", \"automotive\"]",
+          "field": "topics",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_generic_03.txt",
+      "fixture_id": "sample_generic_03",
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 3,
+      "pack": "generic",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 9,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "ACME Corp",
+          "extracted": "ACME Corp",
+          "field": "vendor_name",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "INV-2026-001",
+          "extracted": "INV-2026-001",
+          "field": "invoice_number",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-06-15",
+          "extracted": "2026-06-15",
+          "field": "invoice_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-07-15",
+          "extracted": "2026-07-15",
+          "field": "due_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "1250.0",
+          "extracted": "1250.00",
+          "field": "total_amount",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "USD",
+          "extracted": "USD",
+          "field": "currency",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "[{'description': 'Consulting Services', 'quantity': 10, 'unit_price': 125.0, 'total': 1250.0}]",
+          "extracted": "[{\"description\": \"Consulting Services\", \"quantity\": 10, \"unit_price\": 125.0, \"total\": 1250.0}]",
+          "field": "line_items",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "0.0",
+          "extracted": "0.00",
+          "field": "tax_amount",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Net 30",
+          "extracted": "Net 30",
+          "field": "payment_terms",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_invoice_01.txt",
+      "fixture_id": "sample_invoice_01",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 9,
+      "pack": "invoice",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 9,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "Globex Corporation",
+          "extracted": "Globex Corporation",
+          "field": "vendor_name",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "INV-10024",
+          "extracted": "INV-10024",
+          "field": "invoice_number",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-06-10",
+          "extracted": "2026-06-10",
+          "field": "invoice_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-07-10",
+          "extracted": "2026-07-10",
+          "field": "due_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "3000.0",
+          "extracted": "3000.00",
+          "field": "total_amount",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "USD",
+          "extracted": "USD",
+          "field": "currency",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "[{'description': 'Custom Widgets', 'quantity': 5, 'unit_price': 500.0, 'total': 2500.0}, {'descripti",
+          "extracted": "[{\"description\": \"Custom Widgets\", \"quantity\": 5, \"unit_price\": 500.0, \"total\": 2500.0}, {\"descripti",
+          "field": "line_items",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "50.0",
+          "extracted": "50.00",
+          "field": "tax_amount",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Net 30",
+          "extracted": "Net 30",
+          "field": "payment_terms",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_invoice_02.txt",
+      "fixture_id": "sample_invoice_02",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 9,
+      "pack": "invoice",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 9,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "Initech LLC",
+          "extracted": "Initech LLC",
+          "field": "vendor_name",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "INV-998877",
+          "extracted": "INV-998877",
+          "field": "invoice_number",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-06-12",
+          "extracted": "2026-06-12",
+          "field": "invoice_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-06-12",
+          "extracted": "2026-06-12",
+          "field": "due_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "4320.0",
+          "extracted": "4320.00",
+          "field": "total_amount",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "USD",
+          "extracted": "USD",
+          "field": "currency",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "[{'description': 'Software Licenses', 'quantity': 100, 'unit_price': 40.0, 'total': 4000.0}]",
+          "extracted": "[{\"description\": \"Software Licenses\", \"quantity\": 100, \"unit_price\": 40.0, \"total\": 4000.0}]",
+          "field": "line_items",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "320.0",
+          "extracted": "320.00",
+          "field": "tax_amount",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Due on Receipt",
+          "extracted": "Due on Receipt",
+          "field": "payment_terms",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_invoice_03.txt",
+      "fixture_id": "sample_invoice_03",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 9,
+      "pack": "invoice",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 8,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "Attention Is All You Need",
+          "extracted": "Attention Is All You Need",
+          "field": "title",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Ashish Vaswani', 'Noam Shazeer', 'Niki Parmar', 'Jakob Uszkoreit', 'Llion Jones', 'Aidan N. Gomez'",
+          "extracted": "[\"Ashish Vaswani\", \"Noam Shazeer\", \"Niki Parmar\", \"Jakob Uszkoreit\", \"Llion Jones\", \"Aidan N. Gomez\"",
+          "field": "authors",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms,",
+          "extracted": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms,",
+          "field": "abstract_summary",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['The Transformer model outperforms recurrent or convolutional models in translation quality.', 'Tra",
+          "extracted": "[\"The Transformer model outperforms recurrent or convolutional models in translation quality.\", \"Tra",
+          "field": "key_claims",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['We used the Transformer architecture with multi-head self-attention.']",
+          "extracted": "[\"We used the Transformer architecture with multi-head self-attention.\", \"Self-attention layers link",
+          "field": "methods",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['28.4', '2.0']",
+          "extracted": "[\"28.4\", \"2.0\"]",
+          "field": "reported_numbers",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Figure 1', 'Figure 2']",
+          "extracted": "[\"Figure 1\", \"Figure 2\"]",
+          "field": "figure_references",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Table 1', 'Table 2']",
+          "extracted": "[\"Table 1\", \"Table 2\"]",
+          "field": "table_references",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_paper_01.txt",
+      "fixture_id": "sample_paper_01",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 8,
+      "pack": "paper",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 8,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "LoRA: Low-Rank Adaptation of Large Language Models",
+          "extracted": "LoRA: Low-Rank Adaptation of Large Language Models",
+          "field": "title",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Edward J. Hu', 'Yibin Shen', 'Phillip Wallis', 'Zeyuan Allen-Zhu', 'Yuanzhi Li', 'Shean Wang', 'Lu",
+          "extracted": "[\"Edward J. Hu\", \"Yibin Shen\", \"Phillip Wallis\", \"Zeyuan Allen-Zhu\", \"Yuanzhi Li\", \"Shean Wang\", \"Lu",
+          "field": "authors",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "We propose Low-Rank Adaptation, or LoRA, which freezes the pre-trained model weights and injects tra",
+          "extracted": "We propose Low-Rank Adaptation, or LoRA, which freezes the pre-trained model weights and injects tra",
+          "field": "abstract_summary",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['LoRA reduces the number of trainable parameters by 10000 times.', 'Performance is comparable or su",
+          "extracted": "[\"LoRA reduces the number of trainable parameters by 10000 times.\", \"Performance is comparable or su",
+          "field": "key_claims",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['We parameterize the weight updates by representing them as product of two low-rank matrices.']",
+          "extracted": "[\"We parameterize the weight updates by representing them as product of two low-rank matrices.\", \"Th",
+          "field": "methods",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['82.5%', '0.12%']",
+          "extracted": "[\"82.5\", \"0.12\"]",
+          "field": "reported_numbers",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Figure 1', 'Figure 3']",
+          "extracted": "[\"Figure 1\", \"Figure 3\"]",
+          "field": "figure_references",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Table 1', 'Table 2']",
+          "extracted": "[\"Table 1\", \"Table 2\"]",
+          "field": "table_references",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_paper_02.txt",
+      "fixture_id": "sample_paper_02",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 8,
+      "pack": "paper",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 8,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "extracted": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "field": "title",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Patrick Lewis', 'Ethan Perez', 'Aleksandara Piktus', 'Fabio Petroni', 'Vladimir Karpukhin', 'Naman",
+          "extracted": "[\"Patrick Lewis\", \"Ethan Perez\", \"Aleksandara Piktus\", \"Fabio Petroni\", \"Vladimir Karpukhin\", \"Naman",
+          "field": "authors",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "We introduce Retrieval-Augmented Generation (RAG) models, which combine pre-trained parametric memor",
+          "extracted": "We introduce Retrieval-Augmented Generation (RAG) models, which combine pre-trained parametric memor",
+          "field": "abstract_summary",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['RAG models produce more factual, specific, and diverse responses than parametric-only models.', 'I",
+          "extracted": "[\"RAG models produce more factual, specific, and diverse responses than parametric-only models.\", \"I",
+          "field": "key_claims",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['We combine a dense passage retriever (DPR) with a sequence-to-sequence generator (BART).']",
+          "extracted": "[\"We combine a dense passage retriever (DPR) with a sequence-to-sequence generator (BART).\", \"The re",
+          "field": "methods",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['44.5%']",
+          "extracted": "[\"44.5\"]",
+          "field": "reported_numbers",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Figure 1', 'Figure 2']",
+          "extracted": "[\"Figure 1\", \"Figure 2\"]",
+          "field": "figure_references",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Table 1', 'Table 3']",
+          "extracted": "[\"Table 1\", \"Table 3\"]",
+          "field": "table_references",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_paper_03.txt",
+      "fixture_id": "sample_paper_03",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 8,
+      "pack": "paper",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 7,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "['ACME Corp', 'Client Solutions Inc.']",
+          "extracted": "[\"ACME Corp\", \"Client Solutions Inc\"]",
+          "field": "parties",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-06-01",
+          "extracted": "2026-06-01",
+          "field": "effective_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2029-06-01",
+          "extracted": "2029-06-01",
+          "field": "termination_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Licensee shall pay the license fees within 30 days of invoice. Licensee agree to keep the software",
+          "extracted": "[\"License Grant and Obligations: Licensee shall pay the license fees within 30 days of invoice.\", \"L",
+          "field": "obligations",
+          "grounded": true,
+          "method": "fuzzy",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Delaware",
+          "extracted": "Delaware",
+          "field": "governing_law",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "within 30 days",
+          "extracted": "within 30 days",
+          "field": "payment_terms",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Each party agrees to maintain confidentiality of all proprietary information disclosed by the other ",
+          "extracted": "Each party agrees to maintain confidentiality of all proprietary information disclosed by the other ",
+          "field": "confidentiality_clause",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_contract_01.txt",
+      "fixture_id": "sample_contract_01",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 7,
+      "pack": "contract",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 7,
+      "correct_refusals": 0,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "['Wayne Enterprises', 'Globex Corporation']",
+          "extracted": "[\"Wayne Enterprises\", \"Globex Corporation\"]",
+          "field": "parties",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-05-15",
+          "extracted": "2026-05-15",
+          "field": "effective_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2027-05-15",
+          "extracted": "2027-05-15",
+          "field": "termination_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Consulting Services Agreement is entered into as of May 15, 2026, between Wayne Enterprises (\"Clie",
+          "extracted": "[\"Services and Obligations: Consultant shall perform the services described in Exhibit A.\", \"Client ",
+          "field": "obligations",
+          "grounded": true,
+          "method": "fuzzy",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "New York",
+          "extracted": "New York",
+          "field": "governing_law",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "within 15 days",
+          "extracted": "within 15 days",
+          "field": "payment_terms",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Consultant agrees that all Wayne Enterprises business secrets are strictly confidential.",
+          "extracted": "Consultant agrees that all Wayne Enterprises business secrets are strictly confidential.",
+          "field": "confidentiality_clause",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_contract_02.txt",
+      "fixture_id": "sample_contract_02",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 7,
+      "pack": "contract",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 0,
+      "ungrounded_renders": 0
+    },
+    {
+      "answerable_fields": 6,
+      "correct_refusals": 1,
+      "false_refusal_rate": 0.0,
+      "false_refusals": 0,
+      "field_details": [
+        {
+          "expected": "['Initech LLC', 'Intertrode Corp']",
+          "extracted": "[\"Initech LLC\", \"Intertrode Corp\"]",
+          "field": "parties",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2026-06-12",
+          "extracted": "2026-06-12",
+          "field": "effective_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "2028-06-12",
+          "extracted": "2028-06-12",
+          "field": "termination_date",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "['Receiving Party shall use the information solely for evaluation. Receiving Party shall protect inf",
+          "extracted": "[\"Obligations: Receiving Party shall use the information solely for evaluation.\", \"Receiving Party s",
+          "field": "obligations",
+          "grounded": true,
+          "method": "fuzzy",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": "Texas",
+          "extracted": "Texas",
+          "field": "governing_law",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        },
+        {
+          "expected": null,
+          "extracted": null,
+          "field": "payment_terms",
+          "grounded": false,
+          "rendered": false,
+          "status": "correct_refusal"
+        },
+        {
+          "expected": "Receiving Party agrees to keep all Disclosing Party technical data strictly confidential.",
+          "extracted": "Receiving Party agrees to keep all Disclosing Party technical data strictly confidential.",
+          "field": "confidentiality_clause",
+          "grounded": true,
+          "method": "exact",
+          "rendered": true,
+          "status": "grounded"
+        }
+      ],
+      "file": "sample_contract_03.txt",
+      "fixture_id": "sample_contract_03",
+      "grounded_answer_rate": 100.0,
+      "grounded_answers": 6,
+      "pack": "contract",
+      "refusal_on_unanswerable": 100.0,
+      "unanswerable_fields": 1,
+      "ungrounded_renders": 0
+    }
+  ],
+  "platform": "Linux-x86_64",
+  "python_version": "3.13.11",
+  "seed": 42
+}
