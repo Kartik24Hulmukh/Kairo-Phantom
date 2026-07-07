@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install cryptography pytest ruff
+          pip install cryptography pytest ruff python-docx openpyxl python-pptx pdfplumber Pillow imagehash psutil
 
       # 1. SBOM generation — CycloneDX JSON from Cargo.toml + requirements.txt
       - name: Generate CycloneDX SBOM
