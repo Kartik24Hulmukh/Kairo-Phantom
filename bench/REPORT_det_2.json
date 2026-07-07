@@ -3,16 +3,16 @@
   "gates": {
     "false_refusal_rate": {
       "denominator": 83,
-      "measured": 0.0,
-      "numerator": 0,
+      "measured": 3.6145,
+      "numerator": 3,
       "passes": true,
       "target": 5.0,
       "unit": "percent"
     },
     "grounded_answer_rate": {
       "denominator": 83,
-      "measured": 100.0,
-      "numerator": 83,
+      "measured": 96.3855,
+      "numerator": 80,
       "passes": true,
       "target": 95.0,
       "unit": "percent"
@@ -60,20 +60,20 @@
     "generic": {
       "answerable_fields": 12,
       "correct_refusals": 0,
-      "false_refusal_rate": 0.0,
-      "false_refusals": 0,
-      "grounded_answer_rate": 100.0,
-      "grounded_answers": 12,
-      "passed_extractions": 12,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 3,
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 9,
+      "passed_extractions": 9,
       "per_field_accuracy": {
-        "entities": 1.0,
+        "entities": 0.0,
         "key_claims": 1.0,
         "summary": 1.0,
         "topics": 1.0
       },
       "refusal_on_unanswerable": 100.0,
       "total_documents": 3,
-      "total_extractions": 12,
+      "total_extractions": 9,
       "unanswerable_fields": 0,
       "ungrounded_render_count": 0
     },
@@ -131,8 +131,8 @@
     {
       "answerable_fields": 4,
       "correct_refusals": 0,
-      "false_refusal_rate": 0.0,
-      "false_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 1,
       "field_details": [
         {
           "expected": "Kairo Phantom Project Overview Kairo Phantom is a verifiable document intelligence system designed f",
@@ -154,16 +154,15 @@
         },
         {
           "expected": "['Kairo Phantom', 'Antigravity Team']",
-          "extracted": "[\"Kairo Phantom Project Overview\\nKairo Phantom\", \"Its\", \"Key Claims\", \"Every\", \"SQLite\", \"User\", \"T",
+          "extracted": null,
           "field": "entities",
-          "grounded": true,
-          "method": "exact",
-          "rendered": true,
-          "status": "grounded"
+          "grounded": false,
+          "rendered": false,
+          "status": "false_refusal"
         },
         {
           "expected": "['technology', 'security', 'intelligence']",
-          "extracted": "[\"system\", \"intelligence\", \"data\", \"technology\", \"security\"]",
+          "extracted": "[\"technology\", \"security\", \"data\", \"automotive\"]",
           "field": "topics",
           "grounded": true,
           "method": "exact",
@@ -173,8 +172,8 @@
       ],
       "file": "sample_generic_01.txt",
       "fixture_id": "sample_generic_01",
-      "grounded_answer_rate": 100.0,
-      "grounded_answers": 4,
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 3,
       "pack": "generic",
       "refusal_on_unanswerable": 100.0,
       "unanswerable_fields": 0,
@@ -183,8 +182,8 @@
     {
       "answerable_fields": 4,
       "correct_refusals": 0,
-      "false_refusal_rate": 0.0,
-      "false_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 1,
       "field_details": [
         {
           "expected": "Verifiable RAG Systems in 2026 Standard Retrieval-Augmented Generation (RAG) systems are notorious f",
@@ -206,16 +205,15 @@
         },
         {
           "expected": "['RAG', 'Kairo Phantom', 'DeepMind Team']",
-          "extracted": "[\"Verifiable RAG Systems\", \"Standard Retrieval\", \"Augmented Generation\", \"RAG\", \"Studies\", \"Kairo Ph",
+          "extracted": null,
           "field": "entities",
-          "grounded": true,
-          "method": "exact",
-          "rendered": true,
-          "status": "grounded"
+          "grounded": false,
+          "rendered": false,
+          "status": "false_refusal"
         },
         {
           "expected": "['technology', 'security']",
-          "extracted": "[\"financial\", \"system\", \"technology\"]",
+          "extracted": "[\"technology\", \"financial\", \"automotive\"]",
           "field": "topics",
           "grounded": true,
           "method": "exact",
@@ -225,8 +223,8 @@
       ],
       "file": "sample_generic_02.txt",
       "fixture_id": "sample_generic_02",
-      "grounded_answer_rate": 100.0,
-      "grounded_answers": 4,
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 3,
       "pack": "generic",
       "refusal_on_unanswerable": 100.0,
       "unanswerable_fields": 0,
@@ -235,8 +233,8 @@
     {
       "answerable_fields": 4,
       "correct_refusals": 0,
-      "false_refusal_rate": 0.0,
-      "false_refusals": 0,
+      "false_refusal_rate": 25.0,
+      "false_refusals": 1,
       "field_details": [
         {
           "expected": "Local-First Software Development The local-first software movement prioritizes user ownership of dat",
@@ -258,16 +256,15 @@
         },
         {
           "expected": "['Ollama', 'Qdrant Edge', 'Kairo Phantom', 'OSS Community']",
-          "extracted": "[\"Local\", \"First Software Development\\nThe\", \"Ollama\", \"Qdrant Edge\", \"Kairo Phantom\", \"MIT\", \"Key C",
+          "extracted": null,
           "field": "entities",
-          "grounded": true,
-          "method": "exact",
-          "rendered": true,
-          "status": "grounded"
+          "grounded": false,
+          "rendered": false,
+          "status": "false_refusal"
         },
         {
           "expected": "['technology', 'paper', 'intelligence']",
-          "extracted": "[\"security\", \"data\", \"technology\", \"paper\"]",
+          "extracted": "[\"technology\", \"security\", \"data\", \"automotive\"]",
           "field": "topics",
           "grounded": true,
           "method": "exact",
@@ -277,8 +274,8 @@
       ],
       "file": "sample_generic_03.txt",
       "fixture_id": "sample_generic_03",
-      "grounded_answer_rate": 100.0,
-      "grounded_answers": 4,
+      "grounded_answer_rate": 75.0,
+      "grounded_answers": 3,
       "pack": "generic",
       "refusal_on_unanswerable": 100.0,
       "unanswerable_fields": 0,
@@ -619,7 +616,7 @@
         },
         {
           "expected": "['We used the Transformer architecture with multi-head self-attention.']",
-          "extracted": "[\"We used the Transformer architecture with multi-head self-attention. Self-attention layers link al",
+          "extracted": "[\"We used the Transformer architecture with multi-head self-attention.\", \"Self-attention layers link",
           "field": "methods",
           "grounded": true,
           "method": "exact",
@@ -707,7 +704,7 @@
         },
         {
           "expected": "['We parameterize the weight updates by representing them as product of two low-rank matrices.']",
-          "extracted": "[\"We parameterize the weight updates by representing them as product of two low-rank matrices. The r",
+          "extracted": "[\"We parameterize the weight updates by representing them as product of two low-rank matrices.\", \"Th",
           "field": "methods",
           "grounded": true,
           "method": "exact",
@@ -795,7 +792,7 @@
         },
         {
           "expected": "['We combine a dense passage retriever (DPR) with a sequence-to-sequence generator (BART).']",
-          "extracted": "[\"We combine a dense passage retriever (DPR) with a sequence-to-sequence generator (BART). The retri",
+          "extracted": "[\"We combine a dense passage retriever (DPR) with a sequence-to-sequence generator (BART).\", \"The re",
           "field": "methods",
           "grounded": true,
           "method": "exact",
@@ -874,10 +871,10 @@
         },
         {
           "expected": "['Licensee shall pay the license fees within 30 days of invoice. Licensee agree to keep the software",
-          "extracted": "[\"Licensee shall pay the license fees within 30 days of invoice. Licensee agree to keep the software",
+          "extracted": "[\"License Grant and Obligations: Licensee shall pay the license fees within 30 days of invoice.\", \"L",
           "field": "obligations",
           "grounded": true,
-          "method": "exact",
+          "method": "fuzzy",
           "rendered": true,
           "status": "grounded"
         },
@@ -953,10 +950,10 @@
         },
         {
           "expected": "['Consulting Services Agreement is entered into as of May 15, 2026, between Wayne Enterprises (\"Clie",
-          "extracted": "[\"Consultant shall perform the services described in Exhibit A. Client shall pay Consultant within 1",
+          "extracted": "[\"Services and Obligations: Consultant shall perform the services described in Exhibit A.\", \"Client ",
           "field": "obligations",
           "grounded": true,
-          "method": "exact",
+          "method": "fuzzy",
           "rendered": true,
           "status": "grounded"
         },
@@ -1032,10 +1029,10 @@
         },
         {
           "expected": "['Receiving Party shall use the information solely for evaluation. Receiving Party shall protect inf",
-          "extracted": "[\"Receiving Party shall use the information solely for evaluation. Receiving Party shall protect inf",
+          "extracted": "[\"Obligations: Receiving Party shall use the information solely for evaluation.\", \"Receiving Party s",
           "field": "obligations",
           "grounded": true,
-          "method": "exact",
+          "method": "fuzzy",
           "rendered": true,
           "status": "grounded"
         },
@@ -1077,6 +1074,6 @@
     }
   ],
   "platform": "Linux-x86_64",
-  "python_version": "3.12.12",
+  "python_version": "3.13.11",
   "seed": 42
 }
