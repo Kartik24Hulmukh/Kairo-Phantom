@@ -8,9 +8,13 @@ Every outbound message to Telegram/Discord/Email passes through redact()
 Redaction patterns cover:
 - SSN (XXX-XX-XXXX)
 - Email addresses
-- Phone numbers (XXX-XXX-XXXX)
-- Credit card numbers (XXXX-XXXX-XXXX-XXXX)
+- Phone numbers (XXX-XXX-XXXX, +1-XXX-XXX-XXXX, (XXX) XXX-XXXX)
+- Credit card numbers (XXXX-XXXX-XXXX-XXXX, 16 consecutive digits)
 - IP addresses (optional, off by default to avoid false positives)
+- Passport numbers (US format: 1 letter + 8 digits)
+- IBAN (international bank account numbers)
+- Date of birth (MM/DD/YYYY, DD/MM/YYYY)
+- ZIP codes (with street-type context to reduce false positives)
 
 This module is NOT mocked — the patterns and redaction logic are real.
 """
@@ -24,20 +28,34 @@ from typing import List, Tuple
 log = logging.getLogger("kairo-sidecar.pii_guard")
 
 
-# ── PII Redaction Patterns ────────────────────────────────────────────────────
-# Each entry is (regex, replacement_string)
+# ── PII Redaction Patterns ───────────────────────────────────────────────────
+# Each entry is (regex, replacement_string, type_name)
 
-PII_PATTERNS: List[Tuple[re.Pattern, str]] = [
+PII_PATTERNS: List[Tuple[re.Pattern, str, str]] = [
     # SSN: XXX-XX-XXXX
-    (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "[REDACTED_SSN]"),
+    (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "[REDACTED_SSN]", "SSN"),
     # Email addresses
-    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"), "[REDACTED_EMAIL]"),
+    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"), "[REDACTED_EMAIL]", "EMAIL"),
     # Phone: XXX-XXX-XXXX
-    (re.compile(r"\b\d{3}-\d{3}-\d{4}\b"), "[REDACTED_PHONE]"),
+    (re.compile(r"\b\d{3}-\d{3}-\d{4}\b"), "[REDACTED_PHONE]", "PHONE"),
+    # Phone: +1-XXX-XXX-XXXX
+    (re.compile(r"\+1-\d{3}-\d{3}-\d{4}\b"), "[REDACTED_PHONE]", "PHONE"),
+    # Phone: (XXX) XXX-XXXX
+    (re.compile(r"\(\d{3}\)\s*\d{3}-\d{4}\b"), "[REDACTED_PHONE]", "PHONE"),
     # Credit card: XXXX-XXXX-XXXX-XXXX
-    (re.compile(r"\b\d{4}-\d{4}-\d{4}-\d{4}\b"), "[REDACTED_CC]"),
+    (re.compile(r"\b\d{4}-\d{4}-\d{4}-\d{4}\b"), "[REDACTED_CC]", "CC"),
     # Credit card: XXXXXXXXXXXXXXXX (16 consecutive digits)
-    (re.compile(r"\b\d{16}\b"), "[REDACTED_CC]"),
+    (re.compile(r"\b\d{16}\b"), "[REDACTED_CC]", "CC"),
+    # Passport: US format (1 letter + 8 digits)
+    (re.compile(r"\b[A-Z]\d{8}\b"), "[REDACTED_PASSPORT]", "PASSPORT"),
+    # IBAN: 2-letter country code + 2 check digits + 11-30 alphanumeric
+    (re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b"), "[REDACTED_IBAN]", "IBAN"),
+    # Date of birth: MM/DD/YYYY
+    (re.compile(r"\b(0[1-9]|1[0-2])/(0[1-9]|[12]\d|3[01])/(\d{4})\b"), "[REDACTED_DOB]", "DOB"),
+    # Date of birth: DD/MM/YYYY (ambiguous with MM/DD, but catch both)
+    (re.compile(r"\b(0[1-9]|[12]\d|3[01])/(0[1-9]|1[0-2])/(\d{4})\b"), "[REDACTED_DOB]", "DOB"),
+    # ZIP code: 5-digit (with street-type context to reduce false positives)
+    (re.compile(r"\b\d{5}(?:-\d{4})?\b(?=\s+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Way|Court|Ct|Place|Pl))"), "[REDACTED_ZIP]", "ZIP"),
 ]
 
 
@@ -62,7 +80,7 @@ class PiiGuard:
             return text
 
         result = text
-        for pattern, replacement in self.patterns:
+        for pattern, replacement, _ in self.patterns:
             result = pattern.sub(replacement, result)
         return result
 
@@ -78,11 +96,9 @@ class PiiGuard:
             return {"has_pii": False, "found_types": []}
 
         found_types = []
-        type_names = ["SSN", "EMAIL", "PHONE", "CC", "CC"]
 
-        for i, (pattern, _) in enumerate(self.patterns):
+        for pattern, _, type_name in self.patterns:
             if pattern.search(text):
-                type_name = type_names[i] if i < len(type_names) else "UNKNOWN"
                 if type_name not in found_types:
                     found_types.append(type_name)
 
