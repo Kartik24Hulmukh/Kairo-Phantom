@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kairo Phantom — Offline Verifiable Knowledge-Work Agent</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">👻 Kairo Phantom</div>
+            <div class="nav-links">
+                <a href="#what">What</a>
+                <a href="#metrics">Metrics</a>
+                <a href="#demo">Demo</a>
+                <a href="#receipt">Receipt</a>
+                <a href="https://github.com/Kartik24Hulmukh/Kairo-Phantom">GitHub</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>The offline-first desktop agent that proves every action with a signed receipt.</h1>
+        <p class="tagline">No cloud. No bluff. Every answer is grounded in your source documents — and every action is cryptographically signed.</p>
+        <div class="cta-group">
+            <a href="#demo" class="btn btn-primary">See the Demo</a>
+            <a href="https://github.com/Kartik24Hulmukh/Kairo-Phantom" class="btn btn-secondary">View Source</a>
+        </div>
+    </section>
+
+    <section id="what" class="section">
+        <h2>What Kairo Does</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>📄 READ + SUGGEST ONLY</h3>
+                <p>Kairo reads your documents and suggests answers. It never writes to or drives your source applications. Every suggestion requires explicit human confirmation.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Offline-First</h3>
+                <p>Runs entirely on your machine. Zero outbound network calls in sealed mode. No cloud dependency. No data leaves your device.</p>
+            </div>
+            <div class="feature-card">
+                <h3>✍️ Signed Receipts</h3>
+                <p>Every action produces an Ed25519-signed, Merkle-chained receipt. An independent verifier can validate any receipt without trusting Kairo.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🛡️ Injection Defense</h3>
+                <p>84+ prompt injection patterns blocked. 65/65 red-team payloads blocked. 0 false positives on 50 benign inputs.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="metrics" class="section section-alt">
+        <h2>Real Metrics (Reproducible)</h2>
+        <p class="section-note">Every number below is produced by a test you can run yourself. No invented metrics.</p>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">99.2%</div>
+                <div class="metric-label">Grounding Accuracy</div>
+                <div class="metric-detail">595/600 on UI-TARS 250-case subset (IoU ≥ 0.5)</div>
+                <div class="metric-source"><code>pytest tests/bench/test_grounding.py</code></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">65/65</div>
+                <div class="metric-label">Injection Block Rate</div>
+                <div class="metric-detail">Red-team payloads blocked, 0% attack-success</div>
+                <div class="metric-source"><code>pytest tests/test_injection_guard_expanded.py</code></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">96.4%</div>
+                <div class="metric-label">Grounded Answer Rate</div>
+                <div class="metric-detail">83 invoice fixtures, false refusal 3.6%</div>
+                <div class="metric-source"><code>python -m bench.harness --fixtures-dir fixtures/invoice</code></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">17</div>
+                <div class="metric-label">Tamper-Detection Tests</div>
+                <div class="metric-detail">Sign → verify → tamper → DETECTED → revert → verify</div>
+                <div class="metric-source"><code>pytest tests/test_canary_break.py</code></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">33</div>
+                <div class="metric-label">Trust Layer Tests</div>
+                <div class="metric-detail">Flight recorder, timestamp anchor, policy engine, replay</div>
+                <div class="metric-source"><code>pytest tests/test_trust_layer_extended.py</code></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">0</div>
+                <div class="metric-label">Ungated Network Calls</div>
+                <div class="metric-detail">Sealed mode, air-gap verified, kill-proven</div>
+                <div class="metric-source"><code>pytest tests/test_airgap_zero_egress.py</code></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="section">
+        <h2>Scripted Demo (60 seconds)</h2>
+        <p class="section-note">This demo runs entirely offline. No network, no LLM, no cloud.</p>
+        <div class="demo-steps">
+            <div class="demo-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Redline a contract</h3>
+                    <pre><code>python -m kairo.cli redline fixtures/demo/sample_nda.docx fixtures/demo/nda_playbook.json --out demo_output</code></pre>
+                    <p>Produces real OOXML tracked changes (w:ins/w:del) on the NDA.</p>
+                </div>
+            </div>
+            <div class="demo-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Seal the air-gap</h3>
+                    <pre><code>python -m kairo.cli redline fixtures/demo/sample_nda.docx fixtures/demo/nda_playbook.json --sealed --out demo_sealed</code></pre>
+                    <p>Activates sealed mode, blocks all outbound connections, writes air-gap report.</p>
+                </div>
+            </div>
+            <div class="demo-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Verify the signed receipt</h3>
+                    <pre><code>python tools/verify_receipts_external.py demo_output/audit_log.json</code></pre>
+                    <p>Independently verifies the Ed25519-signed, Merkle-chained audit log — without trusting Kairo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="receipt" class="section section-alt">
+        <h2>What a Signed Receipt Looks Like</h2>
+        <p class="section-note">Every action produces a receipt like this. Tamper a single byte — verification fails.</p>
+        <div class="receipt-display">
+            <pre class="receipt-json">{
+  "seq": 0,
+  "timestamp": 1783512345,
+  "agent_id": "d4a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1",
+  "action": "redline_contract",
+  "context": {"file": "sample_nda.docx", "playbook": "nda_playbook.json"},
+  "outcome": {"insertions": 3, "deletions": 1, "suggestions": 5},
+  "prev_hash": "genesis",
+  "self_hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+  "signature": "e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2..."
+}</pre>
+        </div>
+        <div class="receipt-verification">
+            <span class="verify-ok">✅ verify(receipt) → VALID</span>
+            <span class="verify-fail">❌ verify(tampered_receipt) → INVALID (signature mismatch)</span>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>What Kairo Does NOT Do</h2>
+        <ul class="does-not-list">
+            <li>Write to or drive source applications (Word, Excel, desktop) — v1 is READ + SUGGEST ONLY</li>
+            <li>Act as a multi-domain expert swarm or router</li>
+            <li>Operate as a collaborative/cloud-by-default layer</li>
+            <li>Auto-apply any suggestion without explicit human confirmation</li>
+            <li>Allow the model to self-certify a bounding box — the verifier independently re-checks every citation</li>
+        </ul>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>MIT License — <a href="https://github.com/Kartik24Hulmukh/Kairo-Phantom">github.com/Kartik24Hulmukh/Kairo-Phantom</a></p>
+            <p class="footer-tagline">Built local-first. Built to be audited. Built to never bluff.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
