@@ -8,9 +8,17 @@ into Canva designs. This module implements UIA-first targeting to eliminate
 the 56.7% coordinate miss rate of generic CUA systems.
 
 Priority:
-    1. UIA accessibility tree (comtypes IUIAutomation) — no pixel guessing
-    2. farscry OCR fallback — visual element detection
-    3. Clipboard fallback — user pastes manually
+    1. UIA ValuePattern.SetValue — direct API, no clipboard (safest)
+    2. UIA accessibility tree (comtypes IUIAutomation) + SendInput typing — no clipboard
+    3. farscry OCR fallback + SendInput typing — no clipboard
+    4. Clipboard fallback — paste + immediate clear (last resort only)
+
+CLIPBOARD INJECTION LEAKAGE (W6):
+    The clipboard is a shared system resource. When text is copied to the
+    clipboard, any application can read it — creating a data-leak and
+    injection vector. This module now prioritizes direct UIA ValuePattern
+    and SendInput Unicode typing over clipboard paste. Clipboard is only
+    used as a last resort, and is immediately cleared after paste.
 
 SAFETY LIMITS:
     - max_actions: 5 per invocation
@@ -298,9 +306,9 @@ class CanvaCUAAgent:
     def _uia_text_replace(self, element, new_text: str) -> bool:
         """
         Replace text in a UIA element by:
-        1. Clicking the element center to ensure focus
-        2. Select All (Ctrl+A)
-        3. Type the replacement text
+        1. Try ValuePattern.SetValue (no clipboard, direct API)
+        2. Fallback: Click + Select All + SendInput typing (no clipboard)
+        3. Last resort: Click + Select All + clipboard paste + clear
 
         Returns True on success.
         """
@@ -310,8 +318,12 @@ class CanvaCUAAgent:
             center_x = rect.left + (rect.right - rect.left) // 2
             center_y = rect.top + (rect.bottom - rect.top) // 2
 
-            # Use enigo via subprocess for keyboard actions
-            # (avoids importing heavy enigo Python wrapper)
+            # Priority 1: UIA ValuePattern — direct set, no clipboard
+            if self._uia_set_value(element, new_text):
+                log.info("[CanvaCUA] Text set via UIA ValuePattern (no clipboard)")
+                return True
+
+            # Priority 2: SendInput-based typing (no clipboard)
             import ctypes
 
             # Click element center to ensure focus
@@ -325,12 +337,111 @@ class CanvaCUAAgent:
             self._send_key_combo("ctrl", "a")
             time.sleep(0.05)
 
-            # Type replacement text
+            # Type replacement text via SendInput (no clipboard)
+            if self._sendinput_type_text(new_text):
+                log.info("[CanvaCUA] Text typed via SendInput (no clipboard)")
+                return True
+
+            # Last resort: clipboard paste + immediate clear
+            log.warning("[CanvaCUA] Falling back to clipboard paste — will clear after")
             self._type_text(new_text)
             return True
 
         except Exception as e:
             log.error(f"[CanvaCUA] UIA text replace failed: {e}")
+            return False
+
+    def _uia_set_value(self, element, text: str) -> bool:
+        """
+        Set text directly via UIA ValuePattern — no clipboard involved.
+
+        This is the safest text input method: it uses the accessibility
+        tree's ValuePattern.SetValue to programmatically set the text
+        of a UI element without any keyboard simulation or clipboard use.
+        """
+        if not self.uia:
+            return False
+        try:
+            import comtypes.gen.UIAutomationClient as UIA
+
+            # Check if element supports ValuePattern
+            pattern_id = UIA.UIA_ValuePatternId
+            if not element.GetCurrentPatternAs(pattern_id, None):
+                # Try getting the pattern interface directly
+                try:
+                    value_pattern = element.GetCurrentPattern(pattern_id)
+                    if value_pattern:
+                        value_pattern.SetValue(text)
+                        return True
+                except Exception:
+                    pass
+                return False
+
+            # Element supports ValuePattern
+            value_pattern = element.GetCurrentPattern(pattern_id)
+            if value_pattern:
+                value_pattern.SetValue(text)
+                return True
+            return False
+        except Exception as e:
+            log.debug(f"[CanvaCUA] ValuePattern.SetValue failed: {e}")
+            return False
+
+    def _sendinput_type_text(self, text: str) -> bool:
+        """
+        Type text using Windows SendInput API with Unicode characters.
+
+        This method sends each character as a Unicode KEYEVENTF_UNICODE
+        event via SendInput — no clipboard involved. This is safer than
+        clipboard paste because:
+        1. No data is written to the system clipboard
+        2. Other applications cannot intercept the text
+        3. No clipboard residue remains after typing
+
+        Returns True on success, False if SendInput is unavailable.
+        """
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            # INPUT structure for SendInput
+            INPUT_KEYBOARD = 1
+            KEYEVENTF_UNICODE = 0x0004
+            KEYEVENTF_KEYUP = 0x0002
+
+            class KEYBDINPUT(ctypes.Structure):
+                _fields_ = [
+                    ("wVk", wintypes.WORD),
+                    ("wScan", wintypes.WORD),
+                    ("dwFlags", wintypes.DWORD),
+                    ("time", wintypes.DWORD),
+                    ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+                ]
+
+            class INPUT(ctypes.Structure):
+                class _INPUT(ctypes.Union):
+                    _fields_ = [("ki", KEYBDINPUT)]
+
+                _anonymous_ = ("_input",)
+                _fields_ = [("type", wintypes.DWORD), ("_input", _INPUT)]
+
+            for char in text:
+                scan = ord(char)
+                # Key down
+                inp = INPUT()
+                inp.type = INPUT_KEYBOARD
+                inp.ki.wVk = 0
+                inp.ki.wScan = scan
+                inp.ki.dwFlags = KEYEVENTF_UNICODE
+                ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+                # Key up
+                inp.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
+                ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+                time.sleep(0.005)  # Small delay between characters
+
+            return True
+        except Exception as e:
+            log.debug(f"[CanvaCUA] SendInput typing failed: {e}")
             return False
 
     # ── farscry Methods ──────────────────────────────────────────────────────
@@ -409,10 +520,14 @@ class CanvaCUAAgent:
             ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
             time.sleep(0.1)
 
-            # Select All + Type
+            # Select All + Type (SendInput first, clipboard as last resort)
             self._send_key_combo("ctrl", "a")
             time.sleep(0.05)
-            self._type_text(new_text)
+            # Try SendInput typing first (no clipboard)
+            if not self._sendinput_type_text(new_text):
+                # Last resort: clipboard paste + clear
+                log.warning("[CanvaCUA] SendInput failed in farscry path — clipboard fallback")
+                self._type_text(new_text)
             return True
 
         except Exception as e:
@@ -609,17 +724,36 @@ class CanvaCUAAgent:
                 time.sleep(0.02)
 
     def _type_text(self, text: str) -> None:
-        """Type text using Windows SendInput API."""
+        """Type text using clipboard paste (last resort — clears clipboard after).
+
+        WARNING: This method uses the system clipboard, which creates a
+        data-leak vector. Other applications can read the clipboard during
+        the paste operation, and residue remains after. This is only used
+        when UIA ValuePattern and SendInput typing both fail.
+        """
         from sidecar.clipboard_mutex import CLIPBOARD_LOCK
 
         with CLIPBOARD_LOCK:
             try:
+                # Save original clipboard content
+                original = self._get_clipboard()
                 # Use clipboard paste for reliability with Unicode text
                 self._copy_to_clipboard(text)
                 time.sleep(0.05)
                 self._send_key_combo("ctrl", "v")
+                # Clear clipboard immediately after paste to remove residue
+                time.sleep(0.05)
+                self._clear_clipboard()
+                # Restore original clipboard content if it existed
+                if original:
+                    self._copy_to_clipboard(original)
             except Exception as e:
                 log.error(f"[CanvaCUA] Type text failed: {e}")
+                # Always try to clear clipboard on error
+                try:
+                    self._clear_clipboard()
+                except Exception:
+                    pass
 
     def _copy_to_clipboard(self, text: str) -> None:
         """Copy text to Windows clipboard."""
@@ -635,6 +769,36 @@ class CanvaCUAAgent:
             )
         except Exception as e:
             log.debug(f"[CanvaCUA] Clipboard copy failed: {e}")
+
+    def _get_clipboard(self) -> str:
+        """Get current clipboard content (for restore after paste)."""
+        try:
+            result = subprocess.run(
+                ["powershell", "-Command", "Get-Clipboard"],
+                capture_output=True,
+                text=True,
+                timeout=3.0,
+            )
+            return result.stdout if result.returncode == 0 else ""
+        except Exception:
+            return ""
+
+    def _clear_clipboard(self) -> None:
+        """Clear the system clipboard to remove any residue.
+
+        This is called after every clipboard paste operation to ensure
+        no sensitive text remains in the clipboard for other applications
+        to read.
+        """
+        try:
+            subprocess.run(
+                ["powershell", "-Command", "Set-Clipboard -Value ''"],
+                capture_output=True,
+                timeout=2.0,
+            )
+            log.debug("[CanvaCUA] Clipboard cleared after paste")
+        except Exception as e:
+            log.debug(f"[CanvaCUA] Clipboard clear failed: {e}")
 
     # ── Audit Logging ─────────────────────────────────────────────────────────
 
