@@ -1,1 +1,264 @@
-IiIiCkthaXJvIENvbnRleHQgQ29tcHJlc3NvciDigJQgRG9jdW1lbnQtQXdhcmUgQ29udGV4dCBDb21wcmVzc2lvbi4KCldyYXBzIGEgY29udGV4dCBjb21wcmVzc2lvbiBlbmdpbmUgd2l0aCBLYWlyby1zcGVjaWZpYyBpbXByb3ZlbWVudHM6CiAgMS4gQmJveC1hd2FyZSBkZWR1cDogbWVyZ2UgY2h1bmtzIHdpdGggSW9VID4gMC44IGJlZm9yZSBjb21wcmVzc2luZy4KICAyLiBNZXRhZGF0YSBwcmVzZXJ2YXRpb246IGNvbXByZXNzIHRleHQgb25seSwga2VlcCBiYm94L3BhZ2UvcHJvdmVuYW5jZS4KICAzLiBDb21wcmVzc2lvbiBzdGF0czogdG9rZW5zX2JlZm9yZSwgdG9rZW5zX2FmdGVyLCByZWR1Y3Rpb25fcGN0LgoKVGhlIHVuZGVybHlpbmcgY29tcHJlc3Npb24gZW5naW5lIHdvcmtzIG9uIGNoYXQgbWVzc2FnZXMuIFdlIHdyYXAgZG9jdW1lbnQKY2h1bmtzIGFzIG1lc3NhZ2VzLCBjb21wcmVzcywgdGhlbiByZWNvbnN0cnVjdCB3aXRoIG9yaWdpbmFsIG1ldGFkYXRhLgoiIiIKZnJvbSBfX2Z1dHVyZV9fIGltcG9ydCBhbm5vdGF0aW9ucwoKaW1wb3J0IGxvZ2dpbmcKZnJvbSBkYXRhY2xhc3NlcyBpbXBvcnQgZGF0YWNsYXNzLCBmaWVsZApmcm9tIHR5cGluZyBpbXBvcnQgQW55Cgpmcm9tIGtlcm5lbC5jb3JlLmRhdGFfbW9kZWwgaW1wb3J0IEJCb3gsIENodW5rCgpsb2dnZXIgPSBsb2dnaW5nLmdldExvZ2dlcihfX25hbWVfXykKCgpAZGF0YWNsYXNzCmNsYXNzIENvbXByZXNzaW9uU3RhdHM6CiAgICAiIiJNZXRyaWNzIGZyb20gYSBzaW5nbGUgY29tcHJlc3Npb24gcnVuLiIiIgogICAgdG9rZW5zX2JlZm9yZTogaW50ID0gMAogICAgdG9rZW5zX2FmdGVyOiBpbnQgPSAwCiAgICB0b2tlbnNfc2F2ZWQ6IGludCA9IDAKICAgIHJlZHVjdGlvbl9wY3Q6IGZsb2F0ID0gMC4wCiAgICBjaHVua3NfYmVmb3JlOiBpbnQgPSAwCiAgICBjaHVua3NfYWZ0ZXI6IGludCA9IDAKICAgIHRyYW5zZm9ybXNfYXBwbGllZDogbGlzdFtzdHJdID0gZmllbGQoZGVmYXVsdF9mYWN0b3J5PWxpc3QpCgogICAgZGVmIHRvX2RpY3Qoc2VsZikgLT4gZGljdFtzdHIsIEFueV06CiAgICAgICAgcmV0dXJuIHsKICAgICAgICAgICAgInRva2Vuc19iZWZvcmUiOiBzZWxmLnRva2Vuc19iZWZvcmUsCiAgICAgICAgICAgICJ0b2tlbnNfYWZ0ZXIiOiBzZWxmLnRva2Vuc19hZnRlciwKICAgICAgICAgICAgInRva2Vuc19zYXZlZCI6IHNlbGYudG9rZW5zX3NhdmVkLAogICAgICAgICAgICAicmVkdWN0aW9uX3BjdCI6IHJvdW5kKHNlbGYucmVkdWN0aW9uX3BjdCwgMiksCiAgICAgICAgICAgICJjaHVua3NfYmVmb3JlIjogc2VsZi5jaHVua3NfYmVmb3JlLAogICAgICAgICAgICAiY2h1bmtzX2FmdGVyIjogc2VsZi5jaHVua3NfYWZ0ZXIsCiAgICAgICAgICAgICJ0cmFuc2Zvcm1zX2FwcGxpZWQiOiBzZWxmLnRyYW5zZm9ybXNfYXBwbGllZCwKICAgICAgICB9CgoKZGVmIF9iYm94X2lvdShiMTogQkJveCwgYjI6IEJCb3gpIC0+IGZsb2F0OgogICAgIiIiQ29tcHV0ZSBJb1UgYmV0d2VlbiB0d28gYm91bmRpbmcgYm94ZXMuIiIiCiAgICBpeDAgPSBtYXgoYjEueDAsIGIyLngwKQogICAgaXkwID0gbWF4KGIxLnkwLCBiMi55MCkKICAgIGl4MSA9IG1pbihiMS54MSwgYjIueDEpCiAgICBpeTEgPSBtaW4oYjEueTEsIGIyLnkxKQogICAgaW50ZXJfdyA9IG1heCgwLjAsIGl4MSAtIGl4MCkKICAgIGludGVyX2ggPSBtYXgoMC4wLCBpeTEgLSBpeTApCiAgICBpbnRlcl9hcmVhID0gaW50ZXJfdyAqIGludGVyX2gKICAgIGFyZWExID0gKGIxLngxIC0gYjEueDApICogKGIxLnkxIC0gYjEueTApCiAgICBhcmVhMiA9IChiMi54MSAtIGIyLngwKSAqIChiMi55MSAtIGIyLnkwKQogICAgdW5pb24gPSBhcmVhMSArIGFyZWEyIC0gaW50ZXJfYXJlYQogICAgaWYgdW5pb24gPD0gMDoKICAgICAgICByZXR1cm4gMC4wCiAgICByZXR1cm4gaW50ZXJfYXJlYSAvIHVuaW9uCgoKZGVmIG1lcmdlX292ZXJsYXBwaW5nX2NodW5rcyhjaHVua3M6IGxpc3RbQ2h1bmtdLCBpb3VfdGhyZXNob2xkOiBmbG9hdCA9IDAuOCkgLT4gbGlzdFtDaHVua106CiAgICAiIiJNZXJnZSBjaHVua3Mgd2l0aCBvdmVybGFwcGluZyBiYm94IHJlZ2lvbnMgKElvVSA+IHRocmVzaG9sZCkuCgogICAgUHJldmVudHMgdGhlIG1vZGVsIGZyb20gc2VlaW5nIHRoZSBzYW1lIGRvY3VtZW50IHJlZ2lvbiB0d2ljZS4KICAgIE1lcmdlZCBjaHVuayB0YWtlcyB0aGUgbGFyZ2VyIGJib3ggYW5kIGNvbmNhdGVuYXRlcyB0ZXh0LgogICAgIiIiCiAgICBpZiBub3QgY2h1bmtzOgogICAgICAgIHJldHVybiBbXQoKICAgIG1lcmdlZDogbGlzdFtDaHVua10gPSBbXQogICAgdXNlZCA9IFtGYWxzZV0gKiBsZW4oY2h1bmtzKQoKICAgIGZvciBpLCBjIGluIGVudW1lcmF0ZShjaHVua3MpOgogICAgICAgIGlmIHVzZWRbaV06CiAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgY3VycmVudCA9IGMKICAgICAgICBmb3IgaiBpbiByYW5nZShpICsgMSwgbGVuKGNodW5rcykpOgogICAgICAgICAgICBpZiB1c2VkW2pdOgogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAgb3RoZXIgPSBjaHVua3Nbal0KICAgICAgICAgICAgaWYgY3VycmVudC5iYm94IGFuZCBvdGhlci5iYm94IGFuZCBjdXJyZW50LnBhZ2UgPT0gb3RoZXIucGFnZToKICAgICAgICAgICAgICAgIGlvdSA9IF9iYm94X2lvdShjdXJyZW50LmJib3gsIG90aGVyLmJib3gpCiAgICAgICAgICAgICAgICBpZiBpb3UgPiBpb3VfdGhyZXNob2xkOgogICAgICAgICAgICAgICAgICAgICMgTWVyZ2U6IGNvbWJpbmUgdGV4dCwgdGFrZSBsYXJnZXIgYmJveAogICAgICAgICAgICAgICAgICAgIG1lcmdlZF90ZXh0ID0gY3VycmVudC50ZXh0ICsgIlxuIiArIG90aGVyLnRleHQKICAgICAgICAgICAgICAgICAgICBsYXJnZXJfYmJveCA9IGN1cnJlbnQuYmJveAogICAgICAgICAgICAgICAgICAgIGlmIG90aGVyLmJib3g6CiAgICAgICAgICAgICAgICAgICAgICAgIGFyZWFfb3RoZXIgPSAob3RoZXIuYmJveC54MSAtIG90aGVyLmJib3gueDApICogKG90aGVyLmJib3gueTEgLSBvdGhlci5iYm94LnkwKQogICAgICAgICAgICAgICAgICAgICAgICBhcmVhX2N1cnJlbnQgPSAoY3VycmVudC5iYm94LngxIC0gY3VycmVudC5iYm94LngwKSAqIChjdXJyZW50LmJib3gueTEgLSBjdXJyZW50LmJib3gueTApCiAgICAgICAgICAgICAgICAgICAgICAgIGlmIGFyZWFfb3RoZXIgPiBhcmVhX2N1cnJlbnQ6CiAgICAgICAgICAgICAgICAgICAgICAgICAgICBsYXJnZXJfYmJveCA9IG90aGVyLmJib3gKICAgICAgICAgICAgICAgICAgICBmcm9tIGRhdGFjbGFzc2VzIGltcG9ydCByZXBsYWNlCiAgICAgICAgICAgICAgICAgICAgY3VycmVudCA9IHJlcGxhY2UoY3VycmVudCwgdGV4dD1tZXJnZWRfdGV4dCwgYmJveD1sYXJnZXJfYmJveCkKICAgICAgICAgICAgICAgICAgICB1c2VkW2pdID0gVHJ1ZQogICAgICAgIG1lcmdlZC5hcHBlbmQoY3VycmVudCkKICAgICAgICB1c2VkW2ldID0gVHJ1ZQoKICAgIHJldHVybiBtZXJnZWQKCgpkZWYgX2RlZHVwX3NlbnRlbmNlcyh0ZXh0OiBzdHIpIC0+IHN0cjoKICAgICIiIlJlbW92ZSBkdXBsaWNhdGUgc2VudGVuY2VzIGZyb20gdGV4dCAoS2Fpcm8gZG9jdW1lbnQtc3BlY2lmaWMgdHJhbnNmb3JtKS4KCiAgICBEb2N1bWVudCBjaHVua3Mgb2Z0ZW4gY29udGFpbiByZXBlYXRlZCBib2lsZXJwbGF0ZSAoaGVhZGVycywgZm9vdGVycywKICAgIHBhZ2UgbnVtYmVycykuIFRoaXMgcmVtb3ZlcyBleGFjdCBkdXBsaWNhdGUgc2VudGVuY2VzIHdoaWxlIHByZXNlcnZpbmcKICAgIG9yZGVyIGFuZCB1bmlxdWUgY29udGVudC4KICAgICIiIgogICAgaW1wb3J0IHJlCiAgICAjIFNwbGl0IGludG8gc2VudGVuY2VzIChrZWVwIGRlbGltaXRlcnMpCiAgICBzZW50ZW5jZXMgPSByZS5zcGxpdChyJyg/PD1bLiE/XSlccysnLCB0ZXh0KQogICAgc2VlbiA9IHNldCgpCiAgICB1bmlxdWUgPSBbXQogICAgZm9yIHMgaW4gc2VudGVuY2VzOgogICAgICAgIHNfc3RyaXBwZWQgPSBzLnN0cmlwKCkubG93ZXIoKQogICAgICAgIGlmIHNfc3RyaXBwZWQgYW5kIHNfc3RyaXBwZWQgbm90IGluIHNlZW46CiAgICAgICAgICAgIHNlZW4uYWRkKHNfc3RyaXBwZWQpCiAgICAgICAgICAgIHVuaXF1ZS5hcHBlbmQocykKICAgIHJldHVybiAiICIuam9pbih1bmlxdWUpCgoKZGVmIF9jb3VudF90b2tlbnModGV4dDogc3RyKSAtPiBpbnQ6CiAgICAiIiJFc3RpbWF0ZSB0b2tlbiBjb3VudCBmb3IgYSB0ZXh0IHN0cmluZy4KCiAgICBVc2VzIHRoZSBjb21wcmVzc2lvbiBlbmdpbmUncyB0b2tlbiBjb3VudGVyIGlmIGF2YWlsYWJsZSwgb3RoZXJ3aXNlCiAgICBmYWxscyBiYWNrIHRvIHdvcmQtYmFzZWQgZXN0aW1hdGlvbiAofjAuNzUgdG9rZW5zIHBlciB3b3JkKS4KICAgICIiIgogICAgdHJ5OgogICAgICAgIGZyb20gaGVhZHJvb20gaW1wb3J0IGNvdW50X3Rva2Vuc190ZXh0LCBUb2tlbkNvdW50ZXIKICAgICAgICByZXR1cm4gY291bnRfdG9rZW5zX3RleHQodGV4dCwgVG9rZW5Db3VudGVyKCkpCiAgICBleGNlcHQgRXhjZXB0aW9uOgogICAgICAgIHJldHVybiBtYXgoMSwgaW50KGxlbih0ZXh0LnNwbGl0KCkpICogMC43NSkpCgoKZGVmIGNvbXByZXNzX2RvY3VtZW50X2NodW5rcygKICAgIGNodW5rczogbGlzdFtDaHVua10sCiAgICBtb2RlbDogc3RyID0gImdwdC00by1taW5pIiwKICAgIHRhcmdldF9yYXRpbzogZmxvYXQgPSAwLjUsCikgLT4gdHVwbGVbbGlzdFtDaHVua10sIENvbXByZXNzaW9uU3RhdHNdOgogICAgIiIiQ29tcHJlc3MgZG9jdW1lbnQgY2h1bmtzIHdoaWxlIHByZXNlcnZpbmcgYmJveC9wYWdlL3Byb3ZlbmFuY2UgbWV0YWRhdGEuCgogICAgQXJnczoKICAgICAgICBjaHVua3M6IExpc3Qgb2YgQ2h1bmsgb2JqZWN0cyB3aXRoIHRleHQsIGJib3gsIHBhZ2UgbWV0YWRhdGEuCiAgICAgICAgbW9kZWw6IE1vZGVsIG5hbWUgZm9yIHRva2VuIGNvdW50aW5nLgogICAgICAgIHRhcmdldF9yYXRpbzogVGFyZ2V0IGNvbXByZXNzaW9uIHJhdGlvICgwLjUgPSBrZWVwIDUwJSBvZiB0b2tlbnMpLgoKICAgIFJldHVybnM6CiAgICAgICAgVHVwbGUgb2YgKGNvbXByZXNzZWRfY2h1bmtzLCBzdGF0cykuIENvbXByZXNzZWQgY2h1bmtzIGhhdmUgdGhlIHNhbWUKICAgICAgICBiYm94L3BhZ2UvY2h1bmtfaWQgYXMgaW5wdXQgYnV0IHNob3J0ZXIgdGV4dC4gU3RhdHMgaW5jbHVkZSBiZWZvcmUvYWZ0ZXIKICAgICAgICB0b2tlbiBjb3VudHMgYW5kIHJlZHVjdGlvbiBwZXJjZW50YWdlLgogICAgIiIiCiAgICBpZiBub3QgY2h1bmtzOgogICAgICAgIHJldHVybiBbXSwgQ29tcHJlc3Npb25TdGF0cygpCgogICAgIyBTdGVwIDE6IEJib3gtYXdhcmUgZGVkdXAg4oCUIG1lcmdlIG92ZXJsYXBwaW5nIGNodW5rcwogICAgbWVyZ2VkID0gbWVyZ2Vfb3ZlcmxhcHBpbmdfY2h1bmtzKGNodW5rcykKICAgIGNodW5rc19iZWZvcmUgPSBsZW4oY2h1bmtzKQogICAgY2h1bmtzX2FmdGVyX2RlZHVwID0gbGVuKG1lcmdlZCkKCiAgICAjIFN0ZXAgMjogQ291bnQgdG9rZW5zIGJlZm9yZSBjb21wcmVzc2lvbgogICAgdG9rZW5zX2JlZm9yZSA9IHN1bShfY291bnRfdG9rZW5zKGMudGV4dCkgZm9yIGMgaW4gbWVyZ2VkKQoKICAgICMgU3RlcCAzOiBCdWlsZCBtZXNzYWdlcyBmb3IgdGhlIGNvbXByZXNzaW9uIGVuZ2luZQogICAgIyBFYWNoIGNodW5rIGJlY29tZXMgYSB1c2VyIG1lc3NhZ2Ugd2l0aCBpdHMgdGV4dAogICAgbWVzc2FnZXMgPSBbeyJyb2xlIjogInVzZXIiLCAiY29udGVudCI6IGMudGV4dH0gZm9yIGMgaW4gbWVyZ2VkXQoKICAgICMgU3RlcCA0OiBDb21wcmVzcyB2aWEgdGhlIGNvbXByZXNzaW9uIGVuZ2luZQogICAgY29tcHJlc3NlZF9tZXNzYWdlcyA9IFtdCiAgICB0cnk6CiAgICAgICAgZnJvbSBoZWFkcm9vbSBpbXBvcnQgU21hcnRDcnVzaGVyCiAgICAgICAgY3J1c2hlciA9IFNtYXJ0Q3J1c2hlcigpCiAgICAgICAgY29tcHJlc3NlZF90ZXh0cyA9IFtdCiAgICAgICAgdHJhbnNmb3JtcyA9IFtdCiAgICAgICAgZm9yIG0gaW4gbWVzc2FnZXM6CiAgICAgICAgICAgIHRleHQgPSBtWyJjb250ZW50Il0KICAgICAgICAgICAgY3J1c2hfcmVzdWx0ID0gY3J1c2hlci5jcnVzaCh0ZXh0KQogICAgICAgICAgICBjb21wcmVzc2VkX3RleHRzLmFwcGVuZChjcnVzaF9yZXN1bHQuY29tcHJlc3NlZCkKICAgICAgICAgICAgaWYgY3J1c2hfcmVzdWx0Lndhc19tb2RpZmllZDoKICAgICAgICAgICAgICAgIHRyYW5zZm9ybXMuYXBwZW5kKGNydXNoX3Jlc3VsdC5zdHJhdGVneSkKICAgICAgICAjIElmIFNtYXJ0Q3J1c2hlciBkaWQgcGFzc3Rocm91Z2ggKGNsZWFuIHRleHQpLCBhcHBseSBLYWlybydzCiAgICAgICAgIyBkb2N1bWVudC1zcGVjaWZpYyBkZWR1cDogcmVtb3ZlIHJlcGVhdGVkIHNlbnRlbmNlcy9wYXJhZ3JhcGhzCiAgICAgICAgaWYgbm90IHRyYW5zZm9ybXM6CiAgICAgICAgICAgIGZvciBpLCB0ZXh0IGluIGVudW1lcmF0ZShjb21wcmVzc2VkX3RleHRzKToKICAgICAgICAgICAgICAgIGRlZHVwZWQgPSBfZGVkdXBfc2VudGVuY2VzKHRleHQpCiAgICAgICAgICAgICAgICBpZiBsZW4oZGVkdXBlZCkgPCBsZW4odGV4dCk6CiAgICAgICAgICAgICAgICAgICAgY29tcHJlc3NlZF90ZXh0c1tpXSA9IGRlZHVwZWQKICAgICAgICAgICAgICAgICAgICB0cmFuc2Zvcm1zLmFwcGVuZCgia2Fpcm9fc2VudGVuY2VfZGVkdXAiKQogICAgICAgIGNvbXByZXNzZWRfbWVzc2FnZXMgPSBbeyJyb2xlIjogInVzZXIiLCAiY29udGVudCI6IHR9IGZvciB0IGluIGNvbXByZXNzZWRfdGV4dHNdCiAgICAgICAgdG9rZW5zX2FmdGVyID0gc3VtKF9jb3VudF90b2tlbnModCkgZm9yIHQgaW4gY29tcHJlc3NlZF90ZXh0cykKICAgICAgICBpZiBub3QgdHJhbnNmb3JtczoKICAgICAgICAgICAgdHJhbnNmb3JtcyA9IFsicGFzc3Rocm91Z2giXQogICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBlOgogICAgICAgIGxvZ2dlci53YXJuaW5nKGYiQ29tcHJlc3Npb24gZW5naW5lIHVuYXZhaWxhYmxlICh7ZX0pLCB1c2luZyBwYXNzdGhyb3VnaCBmYWxsYmFjayIpCiAgICAgICAgIyBGYWxsYmFjazogcGFzcyB0aHJvdWdoIG9yaWdpbmFsIHRleHQgdW5jaGFuZ2VkLgogICAgICAgICMgQmxpbmQgdHJ1bmNhdGlvbiBkZXN0cm95cyBjcml0aWNhbCBkYXRhIChlLmcuIGludm9pY2UgdG90YWxzIGF0IGVuZCBvZiBjaHVuaykuCiAgICAgICAgIyBPbmx5IGEgcmVhbCBjb21wcmVzc2lvbiBlbmdpbmUgY2FuIHNhZmVseSByZWR1Y2UgdGV4dCB3aGlsZSBwcmVzZXJ2aW5nIHNlbWFudGljcy4KICAgICAgICBjb21wcmVzc2VkX3RleHRzID0gW21bImNvbnRlbnQiXSBmb3IgbSBpbiBtZXNzYWdlc10KICAgICAgICBjb21wcmVzc2VkX21lc3NhZ2VzID0gW3sicm9sZSI6ICJ1c2VyIiwgImNvbnRlbnQiOiB0fSBmb3IgdCBpbiBjb21wcmVzc2VkX3RleHRzXQogICAgICAgIHRva2Vuc19hZnRlciA9IHN1bShfY291bnRfdG9rZW5zKHQpIGZvciB0IGluIGNvbXByZXNzZWRfdGV4dHMpCiAgICAgICAgdHJhbnNmb3JtcyA9IFsiZmFsbGJhY2tfcGFzc3Rocm91Z2giXQoKICAgICMgU3RlcCA1OiBSZWNvbnN0cnVjdCBjaHVua3Mgd2l0aCBvcmlnaW5hbCBtZXRhZGF0YQogICAgZnJvbSBkYXRhY2xhc3NlcyBpbXBvcnQgcmVwbGFjZQogICAgY29tcHJlc3NlZF9jaHVua3M6IGxpc3RbQ2h1bmtdID0gW10KICAgIGZvciBpLCBvcmlnIGluIGVudW1lcmF0ZShtZXJnZWQpOgogICAgICAgIGlmIGkgPCBsZW4oY29tcHJlc3NlZF9tZXNzYWdlcyk6CiAgICAgICAgICAgIG5ld190ZXh0ID0gY29tcHJlc3NlZF9tZXNzYWdlc1tpXS5nZXQoImNvbnRlbnQiLCBvcmlnLnRleHQpCiAgICAgICAgZWxzZToKICAgICAgICAgICAgbmV3X3RleHQgPSBvcmlnLnRleHQKICAgICAgICBjb21wcmVzc2VkX2NodW5rcy5hcHBlbmQocmVwbGFjZShvcmlnLCB0ZXh0PW5ld190ZXh0KSkKCiAgICAjIFN0ZXAgNjogQnVpbGQgc3RhdHMKICAgIHRva2Vuc19zYXZlZCA9IHRva2Vuc19iZWZvcmUgLSB0b2tlbnNfYWZ0ZXIKICAgIHJlZHVjdGlvbl9wY3QgPSAodG9rZW5zX3NhdmVkIC8gdG9rZW5zX2JlZm9yZSAqIDEwMC4wKSBpZiB0b2tlbnNfYmVmb3JlID4gMCBlbHNlIDAuMAoKICAgIHN0YXRzID0gQ29tcHJlc3Npb25TdGF0cygKICAgICAgICB0b2tlbnNfYmVmb3JlPXRva2Vuc19iZWZvcmUsCiAgICAgICAgdG9rZW5zX2FmdGVyPXRva2Vuc19hZnRlciwKICAgICAgICB0b2tlbnNfc2F2ZWQ9dG9rZW5zX3NhdmVkLAogICAgICAgIHJlZHVjdGlvbl9wY3Q9cmVkdWN0aW9uX3BjdCwKICAgICAgICBjaHVua3NfYmVmb3JlPWNodW5rc19iZWZvcmUsCiAgICAgICAgY2h1bmtzX2FmdGVyPWxlbihjb21wcmVzc2VkX2NodW5rcyksCiAgICAgICAgdHJhbnNmb3Jtc19hcHBsaWVkPXRyYW5zZm9ybXMsCiAgICApCgogICAgbG9nZ2VyLmluZm8oCiAgICAgICAgZiJDb21wcmVzc2VkIHtjaHVua3NfYmVmb3JlfSBjaHVua3MgLT4ge2xlbihjb21wcmVzc2VkX2NodW5rcyl9ICIKICAgICAgICBmIih7dG9rZW5zX2JlZm9yZX0gLT4ge3Rva2Vuc19hZnRlcn0gdG9rZW5zLCB7cmVkdWN0aW9uX3BjdDouMWZ9JSByZWR1Y3Rpb24pIgogICAgKQoKICAgIHJldHVybiBjb21wcmVzc2VkX2NodW5rcywgc3RhdHMKCgojIE1vZHVsZS1sZXZlbCBzdGF0cyBhY2N1bXVsYXRvciBmb3IgdGhlIC9hcGkvY29tcHJlc3Npb24vc3RhdHMgZW5kcG9pbnQKX2dsb2JhbF9zdGF0czogbGlzdFtDb21wcmVzc2lvblN0YXRzXSA9IFtdCgoKZGVmIHJlY29yZF9jb21wcmVzc2lvbihzdGF0czogQ29tcHJlc3Npb25TdGF0cykgLT4gTm9uZToKICAgICIiIlJlY29yZCBjb21wcmVzc2lvbiBzdGF0cyBmb3IgdGhlIHN0YXRzIGVuZHBvaW50LiIiIgogICAgX2dsb2JhbF9zdGF0cy5hcHBlbmQoc3RhdHMpCgoKZGVmIGdldF9jb21wcmVzc2lvbl9zdGF0cygpIC0+IGRpY3Rbc3RyLCBBbnldOgogICAgIiIiR2V0IGFnZ3JlZ2F0ZSBjb21wcmVzc2lvbiBzdGF0cyBmb3IgdGhlIC9hcGkvY29tcHJlc3Npb24vc3RhdHMgZW5kcG9pbnQuIiIiCiAgICBpZiBub3QgX2dsb2JhbF9zdGF0czoKICAgICAgICByZXR1cm4gewogICAgICAgICAgICAidG90YWxfcnVucyI6IDAsCiAgICAgICAgICAgICJ0b3RhbF90b2tlbnNfYmVmb3JlIjogMCwKICAgICAgICAgICAgInRvdGFsX3Rva2Vuc19hZnRlciI6IDAsCiAgICAgICAgICAgICJ0b3RhbF90b2tlbnNfc2F2ZWQiOiAwLAogICAgICAgICAgICAiYXZnX3JlZHVjdGlvbl9wY3QiOiAwLjAsCiAgICAgICAgfQogICAgdG90YWxfYmVmb3JlID0gc3VtKHMudG9rZW5zX2JlZm9yZSBmb3IgcyBpbiBfZ2xvYmFsX3N0YXRzKQogICAgdG90YWxfYWZ0ZXIgPSBzdW0ocy50b2tlbnNfYWZ0ZXIgZm9yIHMgaW4gX2dsb2JhbF9zdGF0cykKICAgIHRvdGFsX3NhdmVkID0gc3VtKHMudG9rZW5zX3NhdmVkIGZvciBzIGluIF9nbG9iYWxfc3RhdHMpCiAgICByZXR1cm4gewogICAgICAgICJ0b3RhbF9ydW5zIjogbGVuKF9nbG9iYWxfc3RhdHMpLAogICAgICAgICJ0b3RhbF90b2tlbnNfYmVmb3JlIjogdG90YWxfYmVmb3JlLAogICAgICAgICJ0b3RhbF90b2tlbnNfYWZ0ZXIiOiB0b3RhbF9hZnRlciwKICAgICAgICAidG90YWxfdG9rZW5zX3NhdmVkIjogdG90YWxfc2F2ZWQsCiAgICAgICAgImF2Z19yZWR1Y3Rpb25fcGN0Ijogcm91bmQodG90YWxfc2F2ZWQgLyB0b3RhbF9iZWZvcmUgKiAxMDAsIDIpIGlmIHRvdGFsX2JlZm9yZSA+IDAgZWxzZSAwLjAsCiAgICAgICAgImxhc3RfcnVuIjogX2dsb2JhbF9zdGF0c1stMV0udG9fZGljdCgpIGlmIF9nbG9iYWxfc3RhdHMgZWxzZSBOb25lLAogICAgfQ==
+"""
+Kairo Context Compressor — Document-Aware Context Compression.
+
+Wraps a context compression engine with Kairo-specific improvements:
+  1. Bbox-aware dedup: merge chunks with IoU > 0.8 before compressing.
+  2. Metadata preservation: compress text only, keep bbox/page/provenance.
+  3. Compression stats: tokens_before, tokens_after, reduction_pct.
+
+The underlying compression engine works on chat messages. We wrap document
+chunks as messages, compress, then reconstruct with original metadata.
+"""
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any
+
+from kernel.core.data_model import BBox, Chunk
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class CompressionStats:
+    """Metrics from a single compression run."""
+    tokens_before: int = 0
+    tokens_after: int = 0
+    tokens_saved: int = 0
+    reduction_pct: float = 0.0
+    chunks_before: int = 0
+    chunks_after: int = 0
+    transforms_applied: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "tokens_before": self.tokens_before,
+            "tokens_after": self.tokens_after,
+            "tokens_saved": self.tokens_saved,
+            "reduction_pct": round(self.reduction_pct, 2),
+            "chunks_before": self.chunks_before,
+            "chunks_after": self.chunks_after,
+            "transforms_applied": self.transforms_applied,
+        }
+
+
+def _bbox_iou(b1: BBox, b2: BBox) -> float:
+    """Compute IoU between two bounding boxes."""
+    ix0 = max(b1.x0, b2.x0)
+    iy0 = max(b1.y0, b2.y0)
+    ix1 = min(b1.x1, b2.x1)
+    iy1 = min(b1.y1, b2.y1)
+    inter_w = max(0.0, ix1 - ix0)
+    inter_h = max(0.0, iy1 - iy0)
+    inter_area = inter_w * inter_h
+    area1 = (b1.x1 - b1.x0) * (b1.y1 - b1.y0)
+    area2 = (b2.x1 - b2.x0) * (b2.y1 - b2.y0)
+    union = area1 + area2 - inter_area
+    if union <= 0:
+        return 0.0
+    return inter_area / union
+
+
+def merge_overlapping_chunks(chunks: list[Chunk], iou_threshold: float = 0.8) -> list[Chunk]:
+    """Merge chunks with overlapping bbox regions (IoU > threshold).
+
+    Prevents the model from seeing the same document region twice.
+    Merged chunk takes the larger bbox and concatenates text.
+    """
+    if not chunks:
+        return []
+
+    merged: list[Chunk] = []
+    used = [False] * len(chunks)
+
+    for i, c in enumerate(chunks):
+        if used[i]:
+            continue
+        current = c
+        for j in range(i + 1, len(chunks)):
+            if used[j]:
+                continue
+            other = chunks[j]
+            if current.bbox and other.bbox and current.page == other.page:
+                iou = _bbox_iou(current.bbox, other.bbox)
+                if iou > iou_threshold:
+                    # Merge: combine text, take larger bbox
+                    merged_text = current.text + "\n" + other.text
+                    larger_bbox = current.bbox
+                    if other.bbox:
+                        area_other = (other.bbox.x1 - other.bbox.x0) * (other.bbox.y1 - other.bbox.y0)
+                        area_current = (current.bbox.x1 - current.bbox.x0) * (current.bbox.y1 - current.bbox.y0)
+                        if area_other > area_current:
+                            larger_bbox = other.bbox
+                    from dataclasses import replace
+                    current = replace(current, text=merged_text, bbox=larger_bbox)
+                    used[j] = True
+        merged.append(current)
+        used[i] = True
+
+    return merged
+
+
+def _dedup_sentences(text: str) -> str:
+    """Remove duplicate sentences from text (Kairo document-specific transform).
+
+    Document chunks often contain repeated boilerplate (headers, footers,
+    page numbers). This removes exact duplicate sentences while preserving
+    order and unique content.
+    """
+    import re
+    # Split into sentences (keep delimiters)
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    seen = set()
+    unique = []
+    for s in sentences:
+        s_stripped = s.strip().lower()
+        if s_stripped and s_stripped not in seen:
+            seen.add(s_stripped)
+            unique.append(s)
+    return " ".join(unique)
+
+
+def _count_tokens(text: str) -> int:
+    """Estimate token count for a text string.
+
+    Uses the compression engine's token counter if available, otherwise
+    falls back to word-based estimation (~0.75 tokens per word).
+    """
+    try:
+        from headroom import count_tokens_text, TokenCounter
+        return count_tokens_text(text, TokenCounter())
+    except Exception:
+        return max(1, int(len(text.split()) * 0.75))
+
+
+def compress_document_chunks(
+    chunks: list[Chunk],
+    model: str = "gpt-4o-mini",
+    target_ratio: float = 0.5,
+) -> tuple[list[Chunk], CompressionStats]:
+    """Compress document chunks while preserving bbox/page/provenance metadata.
+
+    Args:
+        chunks: List of Chunk objects with text, bbox, page metadata.
+        model: Model name for token counting.
+        target_ratio: Target compression ratio (0.5 = keep 50% of tokens).
+
+    Returns:
+        Tuple of (compressed_chunks, stats). Compressed chunks have the same
+        bbox/page/chunk_id as input but shorter text. Stats include before/after
+        token counts and reduction percentage.
+    """
+    if not chunks:
+        return [], CompressionStats()
+
+    # Step 1: Bbox-aware dedup — merge overlapping chunks
+    merged = merge_overlapping_chunks(chunks)
+    chunks_before = len(chunks)
+    chunks_after_dedup = len(merged)
+
+    # Step 2: Count tokens before compression
+    tokens_before = sum(_count_tokens(c.text) for c in merged)
+
+    # Step 3: Build messages for the compression engine
+    # Each chunk becomes a user message with its text
+    messages = [{"role": "user", "content": c.text} for c in merged]
+
+    # Step 4: Compress via the compression engine
+    compressed_messages = []
+    try:
+        from headroom import SmartCrusher
+        crusher = SmartCrusher()
+        compressed_texts = []
+        transforms = []
+        for m in messages:
+            text = m["content"]
+            crush_result = crusher.crush(text)
+            compressed_texts.append(crush_result.compressed)
+            if crush_result.was_modified:
+                transforms.append(crush_result.strategy)
+        # If SmartCrusher did passthrough (clean text), apply Kairo's
+        # document-specific dedup: remove repeated sentences/paragraphs
+        if not transforms:
+            for i, text in enumerate(compressed_texts):
+                deduped = _dedup_sentences(text)
+                if len(deduped) < len(text):
+                    compressed_texts[i] = deduped
+                    transforms.append("kairo_sentence_dedup")
+        compressed_messages = [{"role": "user", "content": t} for t in compressed_texts]
+        tokens_after = sum(_count_tokens(t) for t in compressed_texts)
+        if not transforms:
+            transforms = ["passthrough"]
+    except Exception as e:
+        logger.warning(f"Compression engine unavailable ({e}), using passthrough fallback")
+        # Fallback: pass through original text unchanged.
+        # Blind truncation destroys critical data (e.g. invoice totals at end of chunk).
+        # Only a real compression engine can safely reduce text while preserving semantics.
+        compressed_texts = [m["content"] for m in messages]
+        compressed_messages = [{"role": "user", "content": t} for t in compressed_texts]
+        tokens_after = sum(_count_tokens(t) for t in compressed_texts)
+        transforms = ["fallback_passthrough"]
+
+    # Step 5: Reconstruct chunks with original metadata
+    from dataclasses import replace
+    compressed_chunks: list[Chunk] = []
+    for i, orig in enumerate(merged):
+        if i < len(compressed_messages):
+            new_text = compressed_messages[i].get("content", orig.text)
+        else:
+            new_text = orig.text
+        compressed_chunks.append(replace(orig, text=new_text))
+
+    # Step 6: Build stats
+    tokens_saved = tokens_before - tokens_after
+    reduction_pct = (tokens_saved / tokens_before * 100.0) if tokens_before > 0 else 0.0
+
+    stats = CompressionStats(
+        tokens_before=tokens_before,
+        tokens_after=tokens_after,
+        tokens_saved=tokens_saved,
+        reduction_pct=reduction_pct,
+        chunks_before=chunks_before,
+        chunks_after=len(compressed_chunks),
+        transforms_applied=transforms,
+    )
+
+    logger.info(
+        f"Compressed {chunks_before} chunks -> {len(compressed_chunks)} "
+        f"({tokens_before} -> {tokens_after} tokens, {reduction_pct:.1f}% reduction)"
+    )
+
+    return compressed_chunks, stats
+
+
+# Module-level stats accumulator for the /api/compression/stats endpoint
+_global_stats: list[CompressionStats] = []
+
+
+def record_compression(stats: CompressionStats) -> None:
+    """Record compression stats for the stats endpoint."""
+    _global_stats.append(stats)
+
+
+def get_compression_stats() -> dict[str, Any]:
+    """Get aggregate compression stats for the /api/compression/stats endpoint."""
+    if not _global_stats:
+        return {
+            "total_runs": 0,
+            "total_tokens_before": 0,
+            "total_tokens_after": 0,
+            "total_tokens_saved": 0,
+            "avg_reduction_pct": 0.0,
+        }
+    total_before = sum(s.tokens_before for s in _global_stats)
+    total_after = sum(s.tokens_after for s in _global_stats)
+    total_saved = sum(s.tokens_saved for s in _global_stats)
+    return {
+        "total_runs": len(_global_stats),
+        "total_tokens_before": total_before,
+        "total_tokens_after": total_after,
+        "total_tokens_saved": total_saved,
+        "avg_reduction_pct": round(total_saved / total_before * 100, 2) if total_before > 0 else 0.0,
+        "last_run": _global_stats[-1].to_dict() if _global_stats else None,
+    }
