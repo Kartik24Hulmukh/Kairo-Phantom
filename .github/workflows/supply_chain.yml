@@ -79,13 +79,7 @@ jobs:
             echo "✅ cargo-deny: advisories + licenses check passed"
           else
             echo "⚠️ cargo-deny not installed — verifying deny.toml structure"
-            python3 -c "
-            with open('deny.toml') as f:
-              content = f.read()
-            assert '[advisories]' in content, 'deny.toml missing [advisories]'
-            assert '[licenses]' in content, 'deny.toml missing [licenses]'
-            print('✅ deny.toml structure verified')
-            "
+            python3 -c "with open('deny.toml') as f: content = f.read(); assert '[advisories]' in content, 'deny.toml missing [advisories]'; assert '[licenses]' in content, 'deny.toml missing [licenses]'; print('✅ deny.toml structure verified')"
           fi
 
       # 4. Kill-proof — planted secret MUST be detected
