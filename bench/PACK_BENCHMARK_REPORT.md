@@ -1,1 +1,98 @@
-IyBLYWlybyBQaGFudG9tIOKAlCBQYWNrLVNwZWNpZmljIEJlbmNobWFyayBSZXBvcnQKCj4gR2VuZXJhdGVkOiAyMDI2LTA3LTA4VDExOjIxOjA0LjY2MjAyNCswMDowMAoKIyMgUGFjazogYGludm9pY2VgCgp8IE1ldHJpYyB8IFZhbHVlIHwgVGFyZ2V0IHwKfCA6LS0tIHwgOi0tLSB8IDotLS0gfAp8IEdyb3VuZGVkLUFuc3dlciBSYXRlIHwgMTAwLjAlIHwg4omlOTUlIHwKfCBGYWxzZS1SZWZ1c2FsIFJhdGUgfCAwLjAlIHwgPDUlIHwKfCBSZWZ1c2FsLUNvcnJlY3RuZXNzIHwgMTAwLjAlIHwgMTAwJSB8CnwgVW5ncm91bmRlZCBSZW5kZXJzIHwgMCB8IDAgfAoKIyMjIEhhcmQgQ2FzZXMgKGludm9pY2UpCgp8IENhc2UgfCBBbnN3ZXJhYmxlIHwgR3JvdW5kZWQgfCBGYWxzZSBSZWZ1c2FscyB8IEZhbHNlLVJlZnVzYWwgUmF0ZSB8CnwgOi0tLSB8IDotLS0gfCA6LS0tIHwgOi0tLSB8IDotLS0gfAp8IG1lcmdlZF9jZWxscyB8IDkgfCA5IHwgMCB8IDAuMCUgfAp8IHBhcnRpYWxseV9zY2FubmVkIHwgMTggfCAxOCB8IDAgfCAwLjAlIHwKCiMjIyBQZXItRG9jdW1lbnQgKGludm9pY2UpCgp8IEZpeHR1cmUgfCBTb3VyY2UgfCBBbnN3ZXJhYmxlIHwgR3JvdW5kZWQgfCBGYWxzZSBSZWZ1c2FscyB8IEZSIFJhdGUgfAp8IDotLS0gfCA6LS0tIHwgOi0tLSB8IDotLS0gfCA6LS0tIHwgOi0tLSB8Cnwgc2FtcGxlX2ludm9pY2VfMDEgfCBiYXNlIHwgOSB8IDkgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX2ludm9pY2VfMDIgfCBiYXNlIHwgOSB8IDkgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX2ludm9pY2VfMDMgfCBiYXNlIHwgOSB8IDkgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX2ludm9pY2VfbWVyZ2VkXzAxIHwgbWVyZ2VkX2NlbGxzIHwgOSB8IDkgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX2ludm9pY2VfcGFydGlhbF8wMSB8IHBhcnRpYWxseV9zY2FubmVkIHwgOSB8IDkgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX2ludm9pY2VfcGFydGlhbF8wMiB8IHBhcnRpYWxseV9zY2FubmVkIHwgOSB8IDkgfCAwIHwgMC4wJSB8CgojIyBQYWNrOiBgY29udHJhY3RgCgp8IE1ldHJpYyB8IFZhbHVlIHwgVGFyZ2V0IHwKfCA6LS0tIHwgOi0tLSB8IDotLS0gfAp8IEdyb3VuZGVkLUFuc3dlciBSYXRlIHwgMTAwLjAlIHwg4omlOTUlIHwKfCBGYWxzZS1SZWZ1c2FsIFJhdGUgfCAwLjAlIHwgPDUlIHwKfCBSZWZ1c2FsLUNvcnJlY3RuZXNzIHwgMjcuMjclIHwgMTAwJSB8CnwgVW5ncm91bmRlZCBSZW5kZXJzIHwgOCB8IDAgfAoKIyMjIEhhcmQgQ2FzZXMgKGNvbnRyYWN0KQoKfCBDYXNlIHwgQW5zd2VyYWJsZSB8IEdyb3VuZGVkIHwgRmFsc2UgUmVmdXNhbHMgfCBGYWxzZS1SZWZ1c2FsIFJhdGUgfAp8IDotLS0gfCA6LS0tIHwgOi0tLSB8IDotLS0gfCA6LS0tIHwKfCBjcm9zc19yZWZzIHwgNCB8IDQgfCAwIHwgMC4wJSB8CgojIyMgUGVyLURvY3VtZW50IChjb250cmFjdCkKCnwgRml4dHVyZSB8IFNvdXJjZSB8IEFuc3dlcmFibGUgfCBHcm91bmRlZCB8IEZhbHNlIFJlZnVzYWxzIHwgRlIgUmF0ZSB8CnwgOi0tLSB8IDotLS0gfCA6LS0tIHwgOi0tLSB8IDotLS0gfCA6LS0tIHwKfCBzYW1wbGVfY29udHJhY3RfMDEgfCBiYXNlIHwgNyB8IDcgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX2NvbnRyYWN0XzAyIHwgYmFzZSB8IDcgfCA3IHwgMCB8IDAuMCUgfAp8IHNhbXBsZV9jb250cmFjdF8wMyB8IGJhc2UgfCA2IHwgNiB8IDAgfCAwLjAlIHwKfCBzYW1wbGVfY29udHJhY3RfeHJlZl8wMSB8IGNyb3NzX3JlZnMgfCAzIHwgMyB8IDAgfCAwLjAlIHwKfCBzYW1wbGVfY29udHJhY3RfeHJlZl8wMiB8IGNyb3NzX3JlZnMgfCAxIHwgMSB8IDAgfCAwLjAlIHwKCiMjIFBhY2s6IGBwYXBlcmAKCnwgTWV0cmljIHwgVmFsdWUgfCBUYXJnZXQgfAp8IDotLS0gfCA6LS0tIHwgOi0tLSB8CnwgR3JvdW5kZWQtQW5zd2VyIFJhdGUgfCAxMDAuMCUgfCDiiaU5NSUgfAp8IEZhbHNlLVJlZnVzYWwgUmF0ZSB8IDAuMCUgfCA8NSUgfAp8IFJlZnVzYWwtQ29ycmVjdG5lc3MgfCAwLjAlIHwgMTAwJSB8CnwgVW5ncm91bmRlZCBSZW5kZXJzIHwgMTIgfCAwIHwKCiMjIyBIYXJkIENhc2VzIChwYXBlcikKCnwgQ2FzZSB8IEFuc3dlcmFibGUgfCBHcm91bmRlZCB8IEZhbHNlIFJlZnVzYWxzIHwgRmFsc2UtUmVmdXNhbCBSYXRlIHwKfCA6LS0tIHwgOi0tLSB8IDotLS0gfCA6LS0tIHwgOi0tLSB8CnwgZmlndXJlX2NhcHRpb25zIHwgNCB8IDQgfCAwIHwgMC4wJSB8CgojIyMgUGVyLURvY3VtZW50IChwYXBlcikKCnwgRml4dHVyZSB8IFNvdXJjZSB8IEFuc3dlcmFibGUgfCBHcm91bmRlZCB8IEZhbHNlIFJlZnVzYWxzIHwgRlIgUmF0ZSB8CnwgOi0tLSB8IDotLS0gfCA6LS0tIHwgOi0tLSB8IDotLS0gfCA6LS0tIHwKfCBzYW1wbGVfcGFwZXJfMDEgfCBiYXNlIHwgOCB8IDggfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX3BhcGVyXzAyIHwgYmFzZSB8IDggfCA4IHwgMCB8IDAuMCUgfAp8IHNhbXBsZV9wYXBlcl8wMyB8IGJhc2UgfCA4IHwgOCB8IDAgfCAwLjAlIHwKfCBzYW1wbGVfcGFwZXJfZmlnY2FwXzAxIHwgZmlndXJlX2NhcHRpb25zIHwgMiB8IDIgfCAwIHwgMC4wJSB8Cnwgc2FtcGxlX3BhcGVyX2ZpZ2NhcF8wMiB8IGZpZ3VyZV9jYXB0aW9ucyB8IDIgfCAyIHwgMCB8IDAuMCUgfAoKIyMgUGFjazogYGdlbmVyaWNgCgp8IE1ldHJpYyB8IFZhbHVlIHwgVGFyZ2V0IHwKfCA6LS0tIHwgOi0tLSB8IDotLS0gfAp8IEdyb3VuZGVkLUFuc3dlciBSYXRlIHwgNzUuMCUgfCDiiaU5NSUgfAp8IEZhbHNlLVJlZnVzYWwgUmF0ZSB8IDI1LjAlIHwgPDUlIHwKfCBSZWZ1c2FsLUNvcnJlY3RuZXNzIHwgMTAwLjAlIHwgMTAwJSB8CnwgVW5ncm91bmRlZCBSZW5kZXJzIHwgMCB8IDAgfAoKIyMjIFBlci1Eb2N1bWVudCAoZ2VuZXJpYykKCnwgRml4dHVyZSB8IFNvdXJjZSB8IEFuc3dlcmFibGUgfCBHcm91bmRlZCB8IEZhbHNlIFJlZnVzYWxzIHwgRlIgUmF0ZSB8CnwgOi0tLSB8IDotLS0gfCA6LS0tIHwgOi0tLSB8IDotLS0gfCA6LS0tIHwKfCBzYW1wbGVfZ2VuZXJpY18wMSB8IGJhc2UgfCA0IHwgMyB8IDEgfCAyNS4wJSB8Cnwgc2FtcGxlX2dlbmVyaWNfMDIgfCBiYXNlIHwgNCB8IDMgfCAxIHwgMjUuMCUgfAp8IHNhbXBsZV9nZW5lcmljXzAzIHwgYmFzZSB8IDQgfCAzIHwgMSB8IDI1LjAlIHwKCg==
+# Kairo Phantom — Pack-Specific Benchmark Report
+
+> Generated: 2026-07-08T11:21:04.662024+00:00
+
+## Pack: `invoice`
+
+| Metric | Value | Target |
+| :--- | :--- | :--- |
+| Grounded-Answer Rate | 100.0% | ≥95% |
+| False-Refusal Rate | 0.0% | <5% |
+| Refusal-Correctness | 100.0% | 100% |
+| Ungrounded Renders | 0 | 0 |
+
+### Hard Cases (invoice)
+
+| Case | Answerable | Grounded | False Refusals | False-Refusal Rate |
+| :--- | :--- | :--- | :--- | :--- |
+| merged_cells | 9 | 9 | 0 | 0.0% |
+| partially_scanned | 18 | 18 | 0 | 0.0% |
+
+### Per-Document (invoice)
+
+| Fixture | Source | Answerable | Grounded | False Refusals | FR Rate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| sample_invoice_01 | base | 9 | 9 | 0 | 0.0% |
+| sample_invoice_02 | base | 9 | 9 | 0 | 0.0% |
+| sample_invoice_03 | base | 9 | 9 | 0 | 0.0% |
+| sample_invoice_merged_01 | merged_cells | 9 | 9 | 0 | 0.0% |
+| sample_invoice_partial_01 | partially_scanned | 9 | 9 | 0 | 0.0% |
+| sample_invoice_partial_02 | partially_scanned | 9 | 9 | 0 | 0.0% |
+
+## Pack: `contract`
+
+| Metric | Value | Target |
+| :--- | :--- | :--- |
+| Grounded-Answer Rate | 100.0% | ≥95% |
+| False-Refusal Rate | 0.0% | <5% |
+| Refusal-Correctness | 27.27% | 100% |
+| Ungrounded Renders | 8 | 0 |
+
+### Hard Cases (contract)
+
+| Case | Answerable | Grounded | False Refusals | False-Refusal Rate |
+| :--- | :--- | :--- | :--- | :--- |
+| cross_refs | 4 | 4 | 0 | 0.0% |
+
+### Per-Document (contract)
+
+| Fixture | Source | Answerable | Grounded | False Refusals | FR Rate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| sample_contract_01 | base | 7 | 7 | 0 | 0.0% |
+| sample_contract_02 | base | 7 | 7 | 0 | 0.0% |
+| sample_contract_03 | base | 6 | 6 | 0 | 0.0% |
+| sample_contract_xref_01 | cross_refs | 3 | 3 | 0 | 0.0% |
+| sample_contract_xref_02 | cross_refs | 1 | 1 | 0 | 0.0% |
+
+## Pack: `paper`
+
+| Metric | Value | Target |
+| :--- | :--- | :--- |
+| Grounded-Answer Rate | 100.0% | ≥95% |
+| False-Refusal Rate | 0.0% | <5% |
+| Refusal-Correctness | 0.0% | 100% |
+| Ungrounded Renders | 12 | 0 |
+
+### Hard Cases (paper)
+
+| Case | Answerable | Grounded | False Refusals | False-Refusal Rate |
+| :--- | :--- | :--- | :--- | :--- |
+| figure_captions | 4 | 4 | 0 | 0.0% |
+
+### Per-Document (paper)
+
+| Fixture | Source | Answerable | Grounded | False Refusals | FR Rate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| sample_paper_01 | base | 8 | 8 | 0 | 0.0% |
+| sample_paper_02 | base | 8 | 8 | 0 | 0.0% |
+| sample_paper_03 | base | 8 | 8 | 0 | 0.0% |
+| sample_paper_figcap_01 | figure_captions | 2 | 2 | 0 | 0.0% |
+| sample_paper_figcap_02 | figure_captions | 2 | 2 | 0 | 0.0% |
+
+## Pack: `generic`
+
+| Metric | Value | Target |
+| :--- | :--- | :--- |
+| Grounded-Answer Rate | 75.0% | ≥95% |
+| False-Refusal Rate | 25.0% | <5% |
+| Refusal-Correctness | 100.0% | 100% |
+| Ungrounded Renders | 0 | 0 |
+
+### Per-Document (generic)
+
+| Fixture | Source | Answerable | Grounded | False Refusals | FR Rate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| sample_generic_01 | base | 4 | 3 | 1 | 25.0% |
+| sample_generic_02 | base | 4 | 3 | 1 | 25.0% |
+| sample_generic_03 | base | 4 | 3 | 1 | 25.0% |
+
