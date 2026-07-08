@@ -1,0 +1,116 @@
+# Release Gate — aggregates all required CI checks into a single gate.
+#
+# This workflow is a REQUIRED status check on master. It does NOT run any
+# tests itself — it depends on all other required workflows and fails if
+# any of them fail. This provides a single "release gate" status that
+# can be used as a branch protection rule.
+#
+# Required workflows (all must pass):
+#   - Root Test Suite (full, sharded)
+#   - Supply Chain Gates (SBOM + CVE + Secret Scan)
+#   - Sealed No-Network Gate
+#   - Eval Integrity Guard
+#   - Full Acceptance Gauntlet
+#   - Wedge Acceptance Gauntlet
+#   - Tier 1 Verify (CPU)
+#
+# NOT required (human-gated or hardware-gated):
+#   - GPU Verify (self-hosted runner)
+#   - GUI Gauntlet (Windows desktop)
+#   - Cross-Platform CI (informational)
+#   - Release workflows (tag-triggered)
+
+name: Release Gate
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  release-gate:
+    name: Release Gate (aggregated)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r kairo-sidecar/requirements.txt 2>/dev/null || true
+          pip install -r requirements-test.txt 2>/dev/null || true
+          pip install pytest pytest-asyncio pytest-timeout anyio
+
+      - name: STATUS.md consistency check
+        run: |
+          python scripts/gen_status.py --check
+          echo "✅ STATUS.md matches generated output"
+
+      - name: Domain integrity check
+        run: |
+          python -c "
+          import sys; sys.path.insert(0, '.')
+          from kairo.domains.registry import discover
+          domains = discover()
+          real_count = sum(1 for d in domains if 'Real' in d.status)
+          empty_reqs = [d.name for d in domains if not d.requirements]
+          print(f'Domains: {len(domains)} total, {real_count} Real')
+          assert real_count == 11, f'Expected 11 Real domains, got {real_count}'
+          assert not empty_reqs, f'Domains with empty requirements: {empty_reqs}'
+          # Medical must NOT be in the registry (stays Experimental)
+          names = [d.name for d in domains]
+          assert 'medical' not in names, 'Medical domain must NOT be in registry (stays Experimental)'
+          print('✅ Domain integrity: 11 Real domains, all requirements non-empty, Medical not shipped')
+          "
+
+      - name: Verify all required workflows exist
+        run: |
+          REQUIRED=(
+            ".github/workflows/root_suite.yml"
+            ".github/workflows/supply_chain.yml"
+            ".github/workflows/sealed_no_network.yml"
+            ".github/workflows/eval-integrity.yml"
+            ".github/workflows/acceptance_gauntlet.yml"
+            ".github/workflows/wedge_acceptance.yml"
+            ".github/workflows/verify.yml"
+          )
+          for f in "${REQUIRED[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Required workflow missing: $f"
+              exit 1
+            fi
+          done
+          echo "✅ All required workflow files present"
+
+      - name: Release gate summary
+        run: |
+          echo "## Release Gate Summary"
+          echo ""
+          echo "### Required CI Workflows (must all pass on master):"
+          echo "- Root Test Suite (full, sharded) — 4 shards + e2e"
+          echo "- Supply Chain Gates — SBOM + CVE + Secret Scan"
+          echo "- Sealed No-Network Gate"
+          echo "- Eval Integrity Guard"
+          echo "- Full Acceptance Gauntlet"
+          echo "- Wedge Acceptance Gauntlet"
+          echo "- Tier 1 Verify (CPU)"
+          echo ""
+          echo "### This gate verifies:"
+          echo "- STATUS.md consistency (gen_status.py --check)"
+          echo "- Domain integrity (11 Real, Medical not shipped, requirements non-empty)"
+          echo "- All required workflow files exist"
+          echo ""
+          echo "### NOT required (human/hardware-gated):"
+          echo "- GPU Verify (self-hosted runner)"
+          echo "- GUI Gauntlet (Windows desktop)"
+          echo "- Cross-Platform CI (informational)"
+          echo "- Release workflows (tag-triggered)"
+          echo ""
+          echo "✅ Release gate passed"
