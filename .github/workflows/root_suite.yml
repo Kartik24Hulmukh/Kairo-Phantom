@@ -51,7 +51,7 @@ jobs:
           pip install --upgrade pip
           pip install -r kairo-sidecar/requirements.txt
           pip install -r requirements-test.txt
-          pip install pytest pytest-asyncio pytest-xdist anyio
+          pip install pytest pytest-asyncio pytest-xdist pytest-timeout anyio
 
       - name: Cache model2vec potion-base-8M
         id: model-cache
@@ -79,14 +79,16 @@ jobs:
           echo "files=$FILES" >> "$GITHUB_OUTPUT"
           echo "Shard ${{ matrix.shard }} files: $FILES"
 
-      - name: Run shard (xdist, loud semantic fallback)
+      - name: Run shard (xdist, loud semantic fallback, fail-fast timeout)
         env:
           KAIRO_REQUIRE_SEMANTIC: "1"
         run: |
           python -m pytest ${{ steps.shard.outputs.files }} \
             -n 2 --dist loadfile \
+            --timeout=120 --timeout-method=thread \
             --tb=short \
             -p no:cacheprovider
+    timeout-minutes: 30
 
   root-tests-e2e:
     name: Root e2e (real semantic embeddings, no fallback)
@@ -108,7 +110,7 @@ jobs:
           pip install --upgrade pip
           pip install -r kairo-sidecar/requirements.txt
           pip install -r requirements-test.txt
-          pip install pytest pytest-asyncio anyio
+          pip install pytest pytest-asyncio pytest-timeout anyio
 
       - name: Cache model2vec potion-base-8M
         id: model-cache
@@ -128,5 +130,7 @@ jobs:
       - name: Run e2e suite (KAIRO_REQUIRE_SEMANTIC enforced by conftest)
         run: |
           python -m pytest tests/e2e \
+            --timeout=120 --timeout-method=thread \
             --tb=short \
             -p no:cacheprovider
+    timeout-minutes: 30

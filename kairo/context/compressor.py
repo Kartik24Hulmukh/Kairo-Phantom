@@ -193,6 +193,12 @@ def compress_document_chunks(
     except Exception as e:
         logger.warning(f"Compression engine unavailable ({e}), using text truncation fallback")
         # Fallback: simple truncation to target ratio
+        compressed_texts = []
+        for m in messages:
+            text = m["content"]
+            # Truncate to target_ratio of original length (char-based approximation)
+            max_chars = int(len(text) * target_ratio)
+            compressed_texts.append(text[:max_chars])
         compressed_messages = [{"role": "user", "content": t} for t in compressed_texts]
         tokens_after = sum(_count_tokens(t) for t in compressed_texts)
         transforms = ["fallback_truncation"]
