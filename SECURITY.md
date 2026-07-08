@@ -5,8 +5,7 @@
 | Version | Supported |
 |---------|-----------|
 | 0.3.x   | ✅ Active security updates |
-| 0.2.x   | ⚠️ Critical fixes only |
-| < 0.2   | ❌ End of life |
+| < 0.3   | ⚠️ End of life |
 
 ## Reporting a Vulnerability
 
@@ -14,7 +13,7 @@
 
 Please report security issues privately:
 
-1. Go to the [GitHub Security Advisories](https://github.com/KairoPhantom/Kairo-Phantom/security/advisories/new) page for this repository.
+1. Go to the [GitHub Security Advisories](https://github.com/Kartik24Hulmukh/Kairo-Phantom/security/advisories/new) page for this repository.
 2. Click **"Report a vulnerability"**.
 3. Fill in the details: affected version, reproduction steps, and potential impact.
 
@@ -22,14 +21,13 @@ We will acknowledge your report within **48 hours** and provide a resolution tim
 
 ## Security Architecture
 
-Kairo Phantom is designed with security as a core constraint:
+Kairo-Phantom is designed with security as a core constraint:
 
-- **Zero telemetry by default.** No data leaves your machine unless you explicitly configure a cloud LLM provider.
-- **ToolGate enforcement.** All tool calls are validated against an explicit allowlist before execution. File access is restricted to `~/.kairo-phantom/` and explicitly approved paths.
-- **SPIFFE identity.** Each internal agent carries a cryptographically signed SPIFFE ID verified at every inter-agent call boundary.
-- **WASM sandbox.** Third-party plugins run in a Wasmtime sandbox with Ed25519 signature verification and capability bounding. A plugin cannot access the network or filesystem unless its manifest explicitly declares and the user approves those capabilities.
-- **Sentinel sanitizer.** All AI-generated output is scanned for prompt injection, system prompt leakage, and PII before being typed into the active window.
-- **No vendored secrets.** Kairo Phantom contains zero hardcoded API keys, tokens, or credentials. All cloud provider keys are stored in `~/.kairo-phantom/config.toml` (user-controlled, never committed to git).
+- **Zero telemetry by default.** No data leaves your machine. In sealed mode (`KAIRO_SEALED=1`), zero outbound connections are established — verified by the air-gap oracle (`pytest tests/test_airgap_zero_egress.py`).
+- **Reference monitor.** The primary load-bearing security layer gates every action. PromptShield blocks 106 injection patterns; 25/25 red-team payloads blocked, 0/15 false positives.
+- **Signed audit trail.** Every action is Ed25519-signed and hash-chained. Tamper any byte → verification fails. Independently verifiable via `tools/verify_receipts_external.py`.
+- **Sealed build profile.** Static scan + runtime oracle confirm no network symbols in the sealed build.
+- **No vendored secrets.** Kairo-Phantom contains zero hardcoded API keys, tokens, or credentials.
 
 ## Disclosure Policy
 
