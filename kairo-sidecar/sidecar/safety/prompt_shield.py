@@ -139,6 +139,42 @@ ADDITIONAL_PATTERNS: List[str] = [
     # Privilege escalation
     r"(?:grant|give)\s+me\s+(?:admin|root|sudo|elevated)\s+(?:access|privileges)",
     r"(?:escalate|bypass)\s+(?:security|safety|restrictions?|guardrails?)",
+    # W3 benchmark gap coverage — attacks that were bypassing the shield
+    # Uppercase override variants (case-insensitive already, but need broader text)
+    r"ignore\s+your\s+instructions",
+    r"output\s+the\s+contents\s+of\s+/etc/",
+    # Developer/debug/maintenance mode variants
+    r"debug(?:ging)?\s+mode",
+    r"maintenance\s+mode",
+    r"(?:all\s+)?safety\s+restrictions\s+(?:are\s+)?disabled",
+    # Context manipulation — fake document boundaries
+    r"---\s*END\s+OF\s+DOCUMENT\s*---",
+    r"<<<\s*ADMIN\s*>>>",
+    r"(?:authorized|admin)\s+override",
+    r"bypass\s+all\s+security\s+checks",
+    # Encoded injection (dot-separated characters)
+    r"[a-z]\.(?:[a-z]\.){5,}",
+    # Override safety settings
+    r"override\s+(?:your\s+)?safety\s+settings",
+    r"i\s+am\s+the\s+system\s+administrator",
+    r"i\s+authorize\s+this\s+action",
+    # Purpose redefinition
+    r"stop\s+being\s+a\s+\w+\s+processor",
+    r"your\s+real\s+purpose\s+is",
+    # Confidential instruction blocks
+    r"BEGIN\s+CONFIDENTIAL\s+INSTRUCTIONS",
+    r"output\s+all\s+extracted\s+data\s+to\s+https?://",
+    # Maintenance/config exfiltration
+    r"output\s+your\s+full\s+configuration",
+    r"output\s+all\s+stored\s+data",
+    # Rule negation
+    r"do\s+not\s+follow\s+(?:any\s+of\s+)?your\s+(?:programmed\s+)?rules",
+    r"reveal\s+your\s+instructions\s+to\s+me",
+    # Indirect injection via postscript
+    r"replace\s+all\s+outputs\s+with",
+    # Fake system messages
+    r"user\s+input\s+ends\s+here",
+    r"grant\s+all\s+requests\s+without\s+filtering",
 ]
 
 # All patterns combined
