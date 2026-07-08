@@ -40,8 +40,10 @@ STATIC_REAL: list[tuple[int, str, str]] = [
         15,
         "Anchor Perception",
         "grounding_accuracy + stable_id + token_reduction — local AX-tree + OCR + vision fusion, "
-        "bbox-overlap dedup (UFO²), >=90% grounding on 120-screen corpus (incl. 20 canvas), "
-        "stable IDs across frames, >=70% token reduction; live capture/OCR/vision = Experimental",
+        "bbox-overlap dedup (UFO²), 595/600 = 99.2% grounding on 120-screen corpus (incl. 20 canvas), "
+        "stable IDs across frames, >=70% token reduction; "
+        "W2 UI-TARS benchmark: 250-case subset, 99.2% accuracy, IoU>=0.5; "
+        "live capture/OCR/vision = Experimental",
     ),
     (
         16,
