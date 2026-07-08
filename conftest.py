@@ -1,1 +1,13 @@
-IiIiUm9vdCBjb25mdGVzdCDigJQgZW5zdXJlcyByZXBvIHJvb3QgaXMgb24gc3lzLnBhdGggZm9yIGFsbCB0ZXN0IHdvcmtlcnMuCgpXaGVuIHB5dGVzdC14ZGlzdCBzcGF3bnMgd29ya2VyIHByb2Nlc3NlcywgdGhleSBkb24ndCBpbmhlcml0IHN5cy5wYXRoCm1vZGlmaWNhdGlvbnMgbWFkZSBhdCBpbXBvcnQgdGltZSBpbiB0ZXN0IG1vZHVsZXMuIFRoaXMgY29uZnRlc3QgZW5zdXJlcwp0aGUgcmVwbyByb290IGlzIG9uIHN5cy5wYXRoIHNvIHRoYXQgYGJlbmNoLipgLCBga2VybmVsLipgLCBgcGFja3MuKmAsCmFuZCBga2Fpcm8uKmAgYXJlIGltcG9ydGFibGUgZnJvbSBhbGwgd29ya2Vycy4KIiIiCmltcG9ydCBvcwppbXBvcnQgc3lzCgpfUkVQT19ST09UID0gb3MucGF0aC5kaXJuYW1lKG9zLnBhdGguYWJzcGF0aChfX2ZpbGVfXykpCmlmIF9SRVBPX1JPT1Qgbm90IGluIHN5cy5wYXRoOgogICAgc3lzLnBhdGguaW5zZXJ0KDAsIF9SRVBPX1JPT1QpCg==
+"""Root conftest — ensures repo root is on sys.path for all test workers.
+
+When pytest-xdist spawns worker processes, they don't inherit sys.path
+modifications made at import time in test modules. This conftest ensures
+the repo root is on sys.path so that `bench.*`, `kernel.*`, `packs.*`,
+and `kairo.*` are importable from all workers.
+"""
+import os
+import sys
+
+_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
