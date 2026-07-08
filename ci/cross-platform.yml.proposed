@@ -1,0 +1,120 @@
+# Kairo Phantom — Cross-Platform CI Matrix (T6)
+# Tests on macOS (Intel + Apple Silicon), Linux, Windows with clean images.
+# No caching that would hide a cold-install failure.
+
+name: Cross-Platform CI
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  cross-platform-test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-13, macos-14, ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.12']
+        include:
+          - os: macos-13
+            platform: macOS (Intel)
+          - os: macos-14
+            platform: macOS (Apple Silicon)
+          - os: ubuntu-latest
+            platform: Linux
+          - os: windows-latest
+            platform: Windows
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          # NO caching — we want to catch cold-install failures
+
+      - name: Install dependencies (cold install)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r kairo-sidecar/requirements.txt
+          pip install pytest
+        shell: bash
+
+      - name: Build check
+        run: |
+          python -c "import kernel; import packs; import bench; print('kernel + packs + bench import OK')"
+          python scripts/ci/kernel_purity_guard.py
+        shell: bash
+        env:
+          KAIRO_GATEWAY_TEST_MODE: "true"
+
+      - name: Run bundled sample — assert grounded answer
+        run: |
+          python -m bench.harness --fixtures-dir fixtures/invoice --output bench/REPORT_ci.json
+          python -c "
+          import json
+          with open('bench/REPORT_ci.json') as f:
+              report = json.load(f)
+          for pack, metrics in report.get('packs', {}).items():
+              assert metrics['grounded_answer_rate'] >= 95.0, \
+                  f'{pack}: grounded_answer_rate {metrics[\"grounded_answer_rate\"]}% < 95%'
+              print(f'{pack}: grounded_answer_rate={metrics[\"grounded_answer_rate\"]}% PASS')
+          print('Grounded answer assertion: PASS')
+          "
+        shell: bash
+        env:
+          KAIRO_GATEWAY_TEST_MODE: "true"
+
+      - name: Run bundled sample — assert refusal on unanswerable
+        run: |
+          python -c "
+          import json
+          with open('bench/REPORT_ci.json') as f:
+              report = json.load(f)
+          for pack, metrics in report.get('packs', {}).items():
+              assert metrics['refusal_correctness'] >= 100.0, \
+                  f'{pack}: refusal_correctness {metrics[\"refusal_correctness\"]}% < 100%'
+              print(f'{pack}: refusal_correctness={metrics[\"refusal_correctness\"]}% PASS')
+          print('Refusal assertion: PASS')
+          "
+        shell: bash
+
+      - name: Verify clean exit
+        run: |
+          python -m bench.safety --fixtures-dir fixtures/invoice
+          echo "Clean exit code: $?"
+        shell: bash
+        env:
+          KAIRO_GATEWAY_TEST_MODE: "true"
+
+      - name: Run T6-T10 test suite
+        run: |
+          python -m pytest tests/test_determinism.py tests/test_overfitting_guard.py tests/test_corpus_integrity.py tests/test_historical_tracking.py tests/test_refusal_diagnostic.py tests/test_sidecar_lifecycle.py tests/test_resource_bounds.py tests/test_ipc_robustness.py tests/test_concurrency.py tests/test_release_check.py -v --tb=short
+        shell: bash
+        env:
+          KAIRO_GATEWAY_TEST_MODE: "true"
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run dependency audit
+        run: |
+          python scripts/dependency_audit.py --requirements kairo-sidecar/requirements.txt
+        shell: bash

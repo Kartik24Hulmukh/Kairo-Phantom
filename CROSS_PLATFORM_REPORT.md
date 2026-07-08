@@ -2,7 +2,15 @@
 
 **Version:** 0.3.0  
 **Date:** 2026-05-27  
-**Status:** ✅ ALL 6 GATES PASSED
+**Status:** ✅ ALL 6 GATES PASSED  
+
+> **⚠️ Self-certification disclaimer:** Gates 1, 4, 5, and 6 are CI-verified
+> (Rust unit tests, CI pipeline configuration, packaging scripts). Gates 2
+> and 3 (macOS and Linux gauntlets) are **self-certified** — no CI runs on
+> macOS or Linux hardware verify these claims. The platform code exists and
+> compiles (verified by `cargo test --test test_cross_platform` on Ubuntu),
+> but live ghost-typing on macOS/Linux is **not CI-verified**. See STATUS.md
+> for the honest platform status (Cross-Platform = prompt-only / not shipped).
 
 ---
 
