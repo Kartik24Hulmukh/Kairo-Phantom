@@ -18,7 +18,16 @@
 - [ ] New tests added for the change
 - [ ] Tested manually on: Windows / macOS / Linux
 
-## Checklist
+## No-Bluff Checklist
+
+- [ ] CI is green on the latest commit (both required gates: `CI Pass (aggregate)` and `Release Gate / Release Gate (aggregated)`)
+- [ ] Every quantitative claim cites a reproducible command — no invented numbers
+- [ ] No fabricated users, revenue, ARR, customers, stars, or downloads
+- [ ] Real vs Experimental labels are correct (Experimental is never asserted as Real)
+- [ ] No secrets, API keys, or credentials committed
+- [ ] Branch auto-deletes after merge (enable in repo settings if not already on)
+
+## Code Quality Checklist
 
 - [ ] Code follows the project's Rust conventions (`cargo fmt`, `cargo clippy`)
 - [ ] No new `unwrap()` calls without a comment explaining why it's safe

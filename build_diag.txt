@@ -1,8 +1,0 @@
-﻿cargo :    Compiling phantom-core v0.3.0 (C:\Users\SANDIP\Desktop\Memory\KairoPhantom\phantom-core)
-At line:1 char:1
-+ cargo build --release 2>&1 | Out-File -Encoding utf8 C:\Users\SANDIP\ ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (   Compiling ph...m\phantom-core):String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-    Finished `release` profile [optimized] target(s) in 2m 57s
