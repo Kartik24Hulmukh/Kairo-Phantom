@@ -31,7 +31,7 @@ on:
 
 jobs:
   release-gate:
-    name: Release Gate (aggregated)
+    name: Release Gate / Release Gate (aggregated)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kairo Phantom — Interactive Receipt Demo</title>
+<meta name="description" content="An in-browser demonstration of Kairo Phantom's signed-receipt trust model: real Ed25519 keys generated in your browser, real signatures, real tamper detection." />
+<style>
+  :root {
+    --bg: #0b0e11;
+    --surface: #12161b;
+    --border: #232a32;
+    --text: #e8ebee;
+    --muted: #9aa4ae;
+    --accent: #4ade80;
+    --accent-dim: #14532d;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 1.25rem; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  header { border-bottom: 1px solid var(--border); padding: 1rem 0; }
+  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .logo { font-weight: 700; color: var(--text); }
+  .logo span { color: var(--accent); }
+  main { padding: 3rem 0 4rem; }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.25rem); letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
+  p.lede { color: var(--muted); margin: 1rem 0 0; max-width: 62ch; text-wrap: pretty; }
+  .disclaimer {
+    border-left: 3px solid var(--warn); background: var(--surface);
+    padding: .85rem 1.15rem; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--muted); font-size: .85rem; margin: 1.5rem 0 2.5rem; max-width: 72ch;
+  }
+  .disclaimer strong { color: var(--text); }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .panel h2 { font-size: 1.05rem; margin-bottom: .35rem; }
+  .panel h2 .num { color: var(--accent); font-family: ui-monospace, Menlo, monospace; font-size: .85rem; margin-right: .5rem; }
+  .panel p.desc { color: var(--muted); font-size: .875rem; margin-bottom: 1rem; max-width: 68ch; }
+  .btn {
+    display: inline-block; border-radius: var(--radius); padding: .55rem 1.1rem;
+    font-size: .875rem; font-weight: 600; border: 1px solid var(--border);
+    color: var(--text); background: var(--bg); cursor: pointer;
+  }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--accent); color: #06210f; border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.danger { border-color: var(--danger); color: var(--danger); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-row { display: flex; gap: .6rem; flex-wrap: wrap; }
+  pre.out {
+    background: #0d1117; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem 1.15rem; overflow-x: auto; font-size: .75rem; line-height: 1.55;
+    color: #c9d1d9; margin-top: 1rem; white-space: pre-wrap; word-break: break-all;
+  }
+  .status { font-size: .85rem; font-weight: 600; margin-top: .75rem; display: none; }
+  .status.ok { display: block; color: var(--accent); }
+  .status.bad { display: block; color: var(--danger); }
+  .receipt-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: #0d1117; padding: 1rem 1.15rem; margin-top: 1rem;
+    font-size: .75rem; overflow-x: auto;
+  }
+  .receipt-card .head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: .5rem; }
+  .receipt-card .action { color: var(--accent); font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+  .receipt-card .verdict { font-weight: 700; }
+  .receipt-card .verdict.valid { color: var(--accent); }
+  .receipt-card .verdict.invalid { color: var(--danger); }
+  .receipt-card pre { white-space: pre-wrap; word-break: break-all; color: #9aa4ae; line-height: 1.5; }
+  .unsupported {
+    display: none; border-left: 3px solid var(--danger); background: var(--surface);
+    padding: .85rem 1.15rem; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--muted); font-size: .875rem; margin-bottom: 2rem;
+  }
+  footer { border-top: 1px solid var(--border); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="index.html">Kairo <span>Phantom</span></a>
+    <nav><a href="index.html">&larr; Back to landing page</a></nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <h1>See the receipt trust model work. In your browser. Right now.</h1>
+    <p class="lede">
+      This page generates a real Ed25519 keypair in your browser (WebCrypto — nothing leaves this page),
+      simulates a legal-redline session that emits hash-chained receipts, signs each one, and lets you
+      tamper with a receipt to watch verification fail. This is the same trust model Kairo Phantom uses.
+    </p>
+
+    <div class="disclaimer">
+      <strong>What this is and is not:</strong> this is an illustrative, in-browser demonstration of the
+      receipt scheme (Ed25519 signatures over hash-chained JSON receipts). It is <strong>not</strong> the
+      Kairo Phantom agent itself — the agent is a desktop application. The redline actions below are
+      scripted for the demo. The cryptography, however, is real: real keys, real signatures, real
+      verification, generated live on your machine.
+    </div>
+
+    <div class="unsupported" id="unsupported">
+      Your browser does not support Ed25519 in WebCrypto. Try a recent version of Chrome, Firefox, or
+      Safari — or verify the same property from the repo with
+      <code>python tools/verify_receipts_external.py demo_output/audit_log.json</code>.
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">01</span>Generate a signing key</h2>
+      <p class="desc">Kairo Phantom holds a local Ed25519 signing key. Here, your browser generates one. The private key never leaves this page.</p>
+      <div class="btn-row">
+        <button class="btn primary" id="btn-keygen">Generate Ed25519 keypair</button>
+      </div>
+      <pre class="out" id="out-key" hidden></pre>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">02</span>Run the redline session</h2>
+      <p class="desc">
+        A simulated redline of an indemnification clause: open the document, insert a tracked change,
+        save. Each step emits a receipt whose <code>chain_prev</code> is the SHA-256 hash of the previous
+        receipt, then signs the receipt bytes with the key from step 01.
+      </p>
+      <div class="btn-row">
+        <button class="btn primary" id="btn-run" disabled>Run session &amp; sign receipts</button>
+      </div>
+      <div id="receipts"></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">03</span>Verify the chain</h2>
+      <p class="desc">Verification checks two things: every signature is valid under the public key, and every <code>chain_prev</code> matches the hash of the previous receipt.</p>
+      <div class="btn-row">
+        <button class="btn primary" id="btn-verify" disabled>Verify all receipts</button>
+      </div>
+      <p class="status" id="status-verify" role="status"></p>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">04</span>Now tamper with it</h2>
+      <p class="desc">
+        Flip one byte: change the redlined liability cap in receipt #2 from &ldquo;12 months&rdquo; to
+        &ldquo;24 months&rdquo; after signing — the kind of edit a bad actor would want to hide. Then verify again.
+      </p>
+      <div class="btn-row">
+        <button class="btn danger" id="btn-tamper" disabled>Tamper with receipt #2</button>
+        <button class="btn" id="btn-reverify" disabled>Re-verify chain</button>
+        <button class="btn" id="btn-revert" disabled>Revert &amp; verify again</button>
+      </div>
+      <p class="status" id="status-tamper" role="status"></p>
+    </div>
+
+    <p style="color:var(--muted); font-size:.875rem; max-width:68ch;">
+      That full round-trip — sign &rarr; verify &rarr; tamper &rarr; <strong style="color:var(--danger)">DETECTED</strong> &rarr;
+      revert &rarr; verify — is what the repository&apos;s tamper-detection tests exercise
+      (<code>pytest tests/test_canary_break.py</code>, 17 tests), and any third party can re-verify a real
+      audit log independently with <code>python tools/verify_receipts_external.py demo_output/audit_log.json</code>.
+    </p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Kairo Phantom &middot; MIT open-core &middot; <a href="https://github.com/Kartik24Hulmukh/Kairo-Phantom">GitHub</a></div>
+</footer>
+
+<script>
+(function () {
+  var keyPair = null;
+  var receipts = [];        // { obj, json, sig }
+  var originalJson2 = null; // for revert
+
+  var $ = function (id) { return document.getElementById(id); };
+  var enc = new TextEncoder();
+
+  function hex(buf) {
+    return Array.from(new Uint8Array(buf)).map(function (b) {
+      return b.toString(16).padStart(2, "0");
+    }).join("");
+  }
+
+  async function sha256Hex(str) {
+    var digest = await crypto.subtle.digest("SHA-256", enc.encode(str));
+    return "sha256:" + hex(digest);
+  }
+
+  async function sign(json) {
+    var sig = await crypto.subtle.sign("Ed25519", keyPair.privateKey, enc.encode(json));
+    return sig;
+  }
+
+  async function verify(json, sig) {
+    return crypto.subtle.verify("Ed25519", keyPair.publicKey, sig, enc.encode(json));
+  }
+
+  function renderReceipt(i, r, verdict) {
+    var el = document.createElement("div");
+    el.className = "receipt-card";
+    el.id = "receipt-" + i;
+    var v = verdict ? '<span class="verdict ' + verdict.cls + '">' + verdict.text + "</span>" : "";
+    el.innerHTML =
+      '<div class="head"><span class="action">' + r.obj.action + "</span>" + v + "</div>" +
+      "<pre>" + r.json.replace(/</g, "&lt;") + '\n\nsignature: ed25519:' + hex(r.sig).slice(0, 64) + "&hellip;</pre>";
+    return el;
+  }
+
+  // 01 — keygen
+  $("btn-keygen").addEventListener("click", async function () {
+    try {
+      keyPair = await crypto.subtle.generateKey("Ed25519", true, ["sign", "verify"]);
+    } catch (e) {
+      $("unsupported").style.display = "block";
+      return;
+    }
+    var raw = await crypto.subtle.exportKey("raw", keyPair.publicKey);
+    var out = $("out-key");
+    out.hidden = false;
+    out.textContent = "public key (ed25519, raw hex):\n" + hex(raw) + "\n\nprivate key: generated, held in-page only, never exported.";
+    $("btn-run").disabled = false;
+  });
+
+  // 02 — run session
+  $("btn-run").addEventListener("click", async function () {
+    receipts = [];
+    $("receipts").innerHTML = "";
+    var now = new Date().toISOString();
+    var steps = [
+      { action: "open.word", target_window: "MSA_v3_draft.docx - Word", input: "MSA_v3_draft.docx", output: "document opened" },
+      { action: "ghost_type.redline", target_window: "MSA_v3_draft.docx - Word", input: "clause 8.2 (indemnification)", output: "tracked change: liability cap set to 12 months of fees" },
+      { action: "save.word", target_window: "MSA_v3_draft.docx - Word", input: "MSA_v3_draft.docx (modified)", output: "MSA_v3_redlined.docx" }
+    ];
+    var prevHash = "sha256:GENESIS";
+    for (var i = 0; i < steps.length; i++) {
+      var s = steps[i];
+      var obj = {
+        receipt_id: "rct_demo_" + String(i + 1).padStart(2, "0"),
+        timestamp: now,
+        agent: "kairo-phantom (browser demo)",
+        action: s.action,
+        target_app: "Microsoft Word (simulated)",
+        target_window: s.target_window,
+        domain: "legal",
+        input_hash: await sha256Hex(s.input),
+        output_hash: await sha256Hex(s.output),
+        output_summary: s.output,
+        chain_prev: prevHash,
+        signature_algorithm: "Ed25519",
+        version: "demo-1.0"
+      };
+      var json = JSON.stringify(obj, null, 2);
+      var sig = await sign(json);
+      receipts.push({ obj: obj, json: json, sig: sig });
+      prevHash = await sha256Hex(json);
+      $("receipts").appendChild(renderReceipt(i, receipts[i], null));
+    }
+    originalJson2 = receipts[1].json;
+    $("btn-verify").disabled = false;
+    $("btn-tamper").disabled = false;
+  });
+
+  async function verifyChain() {
+    var allOk = true;
+    var prevHash = "sha256:GENESIS";
+    for (var i = 0; i < receipts.length; i++) {
+      var r = receipts[i];
+      var sigOk = await verify(r.json, r.sig);
+      var parsed = JSON.parse(r.json);
+      var chainOk = parsed.chain_prev === prevHash;
+      var ok = sigOk && chainOk;
+      allOk = allOk && ok;
+      var card = renderReceipt(i, r, ok
+        ? { cls: "valid", text: "VALID \u2713" }
+        : { cls: "invalid", text: sigOk ? "CHAIN BROKEN \u2717" : "SIGNATURE INVALID \u2717" });
+      var old = $("receipt-" + i);
+      old.replaceWith(card);
+      prevHash = await sha256Hex(r.json);
+    }
+    return allOk;
+  }
+
+  // 03 — verify
+  $("btn-verify").addEventListener("click", async function () {
+    var ok = await verifyChain();
+    var st = $("status-verify");
+    st.className = "status " + (ok ? "ok" : "bad");
+    st.textContent = ok
+      ? "\u2713 All 3 receipts verified: signatures valid, chain intact."
+      : "\u2717 Verification failed.";
+  });
+
+  // 04 — tamper / re-verify / revert
+  $("btn-tamper").addEventListener("click", function () {
+    receipts[1].json = receipts[1].json
+      .replace("12 months", "24 months");
+    var st = $("status-tamper");
+    st.className = "status bad";
+    st.textContent = "Receipt #2 modified after signing: \u201c12 months\u201d \u2192 \u201c24 months\u201d. Signature was NOT re-created. Now re-verify.";
+    $("btn-reverify").disabled = false;
+    $("btn-tamper").disabled = true;
+  });
+
+  $("btn-reverify").addEventListener("click", async function () {
+    var ok = await verifyChain();
+    var st = $("status-tamper");
+    st.className = "status " + (ok ? "ok" : "bad");
+    st.textContent = ok
+      ? "\u2713 Chain verified."
+      : "\u2717 TAMPERING DETECTED \u2014 receipt #2 signature no longer matches its content, and receipt #3\u2019s chain_prev no longer matches receipt #2\u2019s hash.";
+    $("btn-revert").disabled = false;
+    $("btn-reverify").disabled = true;
+  });
+
+  $("btn-revert").addEventListener("click", async function () {
+    receipts[1].json = originalJson2;
+    var ok = await verifyChain();
+    var st = $("status-tamper");
+    st.className = "status " + (ok ? "ok" : "bad");
+    st.textContent = ok
+      ? "\u2713 Reverted to the signed bytes \u2014 chain verifies again. Round-trip complete: sign \u2192 verify \u2192 tamper \u2192 DETECTED \u2192 revert \u2192 verify."
+      : "\u2717 Unexpected: chain still invalid.";
+    $("btn-revert").disabled = true;
+  });
+})();
+</script>
+
+</body>
+</html>

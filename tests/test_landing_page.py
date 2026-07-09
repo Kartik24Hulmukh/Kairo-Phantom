@@ -94,8 +94,8 @@ class TestMetricClaimsAreSourced:
 
     def test_injection_block_rate_metric(self):
         html = INDEX_HTML.read_text()
-        assert "65/65" in html, (
-            "Landing page must show injection block rate (65/65)"
+        assert "25/25" in html, (
+            "Landing page must show injection block rate (25/25)"
         )
 
 

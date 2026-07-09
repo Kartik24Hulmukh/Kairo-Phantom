@@ -449,7 +449,7 @@ jobs:
   # JOB 7: Aggregate — "ci-pass" — the single required status check
   # ─────────────────────────────────────────────────────────────────────
   ci-pass:
-    name: ✅ CI Pass (aggregate)
+    name: CI Pass (aggregate)
     runs-on: ubuntu-latest
     needs:
       - secrets-scan
