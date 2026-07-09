@@ -1,5 +1,0 @@
-=====================================================================
-Running Kairo Phantom Acceptance Audit for sample_invoice_01.txt...
-=====================================================================
-[PASS] Acceptance report written to /home/user/Kairo-Phantom/ACCEPTANCE.md
-=====================================================================
