@@ -18,6 +18,14 @@ jobs:
     name: Fast Headless Checks (Static, Unit, Security, Anti-Cheat)
     runs-on: ubuntu-latest
     steps:
+      - name: Free up disk space
+        run: |
+          echo "Before:"; df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          sudo docker image prune --all --force || true
+          echo "After:"; df -h /
+
       - uses: actions/checkout@v4
 
       - name: Install Rust (stable)
@@ -100,6 +108,7 @@ jobs:
           rustup component add llvm-tools-preview
           # Honest baseline coverage floor (actual ~34.6%); ratchet up over time — do not lower to mask regressions.
           cargo llvm-cov --workspace --all-features --fail-under-lines 34
+          echo "Disk space after coverage build:"; df -h /
 
       - name: Run Python Coverage and enforce honest baseline floor
         run: |
