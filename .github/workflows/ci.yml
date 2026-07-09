@@ -22,8 +22,8 @@ jobs:
         run: |
           echo "Before:"; df -h /
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-            /opt/hostedtoolcache/CodeQL /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
-          sudo docker image prune --all --force || true
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+          if command -v docker >/dev/null 2>&1; then sudo docker image prune --all --force; fi
           echo "After:"; df -h /
 
       - uses: actions/checkout@v4
