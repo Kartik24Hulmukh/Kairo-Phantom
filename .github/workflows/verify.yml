@@ -365,7 +365,7 @@ jobs:
         uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: "1.88.0"
-          components: clippy,rust-src
+          components: clippy,rust-src,rustfmt
 
       - name: Install cargo-deny (advisory + license check — reads deny.toml)
         uses: taiki-e/install-action@682e7d9e49c5e653d371fc6adbda67653461378a # v2
@@ -394,7 +394,7 @@ jobs:
             $IGNORE_ARGS
 
       - name: cargo-deny — advisories + licenses (blocking)
-        run: cargo deny check --config deny.toml
+        run: cargo deny check --config deny.toml advisories licenses sources bans
 
       - name: Generate CycloneDX SBOM
         uses: anchore/sbom-action@d94f46e13c6c62f59525ac9a1e147a99dc0b9bf5 # v0.17.0

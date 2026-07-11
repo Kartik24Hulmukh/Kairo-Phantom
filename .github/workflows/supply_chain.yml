@@ -75,7 +75,7 @@ jobs:
       - name: CVE scan (cargo-deny check advisories + licenses)
         run: |
           if command -v cargo-deny &>/dev/null; then
-            cargo-deny --config deny.toml check advisories licenses
+            cargo-deny --config deny.toml check advisories licenses sources bans
             echo "✅ cargo-deny: advisories + licenses check passed"
           else
             echo "⚠️ cargo-deny not installed — verifying deny.toml structure"
