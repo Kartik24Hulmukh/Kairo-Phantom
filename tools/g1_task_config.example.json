@@ -1,0 +1,22 @@
+{
+  "_comment": "Task config for the G1 100-run gate harness (tools/run_g1.py). The redline workflow is parameterized here — NOT hardcoded in the harness. The founder will lock the final workflow spec; until then, this config is the single input point. Edit this file to change the workflow, canary checks, or tamper method.",
+  "workflow": "contract-redline-demo",
+  "steps": [
+    {"id": "seal",     "action": "seal_document",     "params": {"input": "demo_contract.docx"}},
+    {"id": "delegate", "action": "delegate_to_agent", "params": {"agent": "kairo-phantom"}},
+    {"id": "work",     "action": "execute_redline",   "params": {"rules": "rules/default_rules.json"}},
+    {"id": "attack",   "action": "inject_tamper",     "params": {"target_step": "work"}},
+    {"id": "assess",   "action": "assess_outcome",    "params": {}},
+    {"id": "contrast", "action": "contrast_runs",     "params": {}}
+  ],
+  "canary_checks": [
+    {"id": "receipt_chain_intact",   "type": "hash_chain"},
+    {"id": "merkle_root_consistent", "type": "merkle"},
+    {"id": "no_unexpected_egress",   "type": "egress_monitor"}
+  ],
+  "tamper": {
+    "method": "mutate_receipt_field",
+    "field": "outcome",
+    "value": "TAMPERED_VALUE"
+  }
+}
