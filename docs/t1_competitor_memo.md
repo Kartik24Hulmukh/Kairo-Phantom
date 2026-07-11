@@ -22,10 +22,25 @@
 
 **Verification note:** The NCCoE PDF confirms the Illinois LLC formation (File No. 17233815) and the USPTO trademark filing. The founder identity (Jack Brennan) is confirmed from the vendor's own About page and the SSRN preprint (doi.org/10.2139/ssrn.6866422, author: Jack Brennan). The research-redteam-source.md claim of "Jack Brennan as founder" is CONFIRMED from primary sources.
 
+**Namesake caution:** Jack Brennan (AGA founder, per SSRN preprint and attestedintelligence.com/about) is a different person from John Brennan, former CIA Director — do not conflate.
+
 ### 1.2 Patent application 19/433,835
 
-| Fact | Value | Primary source |
-|------|-------|----------------|
+**Independence classification:** The patent application number, title, filing date, and 3-independent/20-total claim breakdown are **AGA self-disclosure** (their website + their NCCoE RFI submission), NOT independently verifiable until USPTO publication. Under 35 U.S.C. 122(b), non-provisional utility applications publish at 18 months from filing — filed Dec 28, 2025, so publication is expected ~June 2027 unless a non-publication request was made. The USPTO Patent Center (patentscenter.uspto.gov) returned no public record when queried on July 11, 2026, consistent with pre-publication status.
+
+**Independently verifiable NOW (via USPTO public records):**
+
+| Artifact | Value | Independent source |
+|----------|-------|--------------------|
+| USPTO Trademark | "ATTESTED INTELLIGENCE" — Serial 99677085, filed March 2, 2026 | USPTO TSDR (via TrademarkElite: trademarkelite.com/trademark/trademark-detail/99677085/ATTESTED-INTELLIGENCE) |
+| Trademark status | "Response after non-final action entered" (as of July 1, 2026) | Same |
+| Trademark applicant address | 333 W Bethalto Dr, Ste C #113, Bethalto, IL 62010 | Same |
+| Illinois SOS entity | Attested Intelligence Holdings LLC — File No. 17233815 | Illinois Secretary of State (cited in NCCoE submission PDF, independently checkable via Illinois SOS business search) |
+
+**AGA self-disclosure (NOT independently verifiable until ~June 2027):**
+
+| Fact | Value | Source (AGA self-disclosure) |
+|------|-------|------------------------------|
 | Application number | USPTO 19/433,835 | attestedintelligence.com/patent (fetched 2026-07-11) |
 | Filing date | December 28, 2025 | Same |
 | Title | "Systems and Methods for Generating and Enforcing Attested Governance Artifacts" | Same; also attestedintelligence.com/about |
@@ -37,7 +52,7 @@
 | Cryptographic primitives | Ed25519, SHA-256, ML-DSA-65, JCS-lineage (RFC 8785 JSON canonicalization) | Same; also npm package description |
 | Hardware requirements | No TEEs, ZK proofs, or specialized hardware required; TEE attestation optional as input | Same |
 
-**USPTO Patent Center access note:** The USPTO Patent Center (patentscenter.uspto.gov) requires a registered account for full application status and transaction history. The application number 19/433,835 is confirmed from the vendor's own patent page and multiple cross-references (About, Trust, NIST submission). The USPTO direct lookup returned empty content (likely requires authentication or the application has not yet published — filed Dec 28, 2025, and non-provisional utility applications typically publish at 18 months from filing, so publication would be expected around June 2027 unless a non-publication request was made). **The patent status "Pending" is confirmed from the vendor's own statements; the USPTO docket should be verified by counsel via Patent Center access.**
+**USPTO Patent Center access note:** The USPTO Patent Center (patentscenter.uspto.gov) requires a registered account for full application status and transaction history. The application number 19/433,835 is confirmed from the vendor's own patent page and multiple cross-references (About, Trust, NIST submission). The USPTO direct lookup returned empty content on July 11, 2026 — consistent with pre-publication status (filed Dec 28, 2025; 18-month publication expected ~June 2027). **The patent status "Pending" and all claim details are AGA self-disclosure; the USPTO docket must be verified by counsel via Patent Center access once the application publishes.**
 
 ### 1.3 Architecture (from primary sources)
 
@@ -54,7 +69,7 @@
 | Reference implementation | GitHub attestedintelligence/aga-mcp-server (v3.0.0, June 8, 2026) | TypeScript 66%, JavaScript 19%, Go 8%, Python 7%. |
 | NIST submissions | attestedintelligence.com/diligence | NIST CAISI RFI response (Docket NIST-2025-0035, March 4, 2026); NCCoE concept paper response. |
 
-**What AGA does NOT publicly demonstrate (confirmed by absence in primary sources):**
+**What AGA does NOT publicly demonstrate (no public evidence found as of July 2026 — absence of public evidence, not proof of absence):**
 
 - No public demonstration of binding governance decisions to Win32 UI Automation events
 - No public demonstration of binding to AT-SPI2 events
@@ -187,7 +202,7 @@ Based on the primary-source verification above, the following claims are FROZEN 
 - ✅ AGA company identity, founder, state of formation — verified from primary sources
 - ✅ AGA patent application number, filing date, title, claims — verified from vendor site
 - ✅ AGA architecture and capabilities — verified from vendor site + GitHub repo
-- ✅ AGA's public gaps (no desktop outcome evidence) — confirmed by absence in primary sources
+- ✅ AGA's public gaps (no desktop outcome evidence) — no public evidence found as of July 2026 (absence of public evidence, not proof of absence)
 - ✅ Microsoft AGT, OPAQUE, Kiteworks — verified from vendor sites/repos
 - ✅ Prior art: SCITT, in-toto, RATS, RFC 6962, Sigstore — verified from IETF RFCs and repos
 - ✅ Novelty claims frozen conservatively — dropped claims that competitors already do
