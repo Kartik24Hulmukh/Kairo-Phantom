@@ -17,7 +17,7 @@ BANNED = [
     (r"\b0 competitors\b|\bzero competitors\b", "false; AGA et al. exist",
      "nearest rival: Attested Intelligence (AGA)"),
     (r"only (one|product|company) (that exists|in this category|in the (world|market))", "AGA disproves it",
-     "first to bind desktop outcome + scoped boundary evidence"),
+     "designed to bind desktop outcome + scoped boundary evidence"),
     (r"aug(ust)?\.?\s*0?2,?\s*2026", "dead EU deadline; high-risk/Art.12 is now Dec 2 2027",
      "Dec 2, 2027 (Digital Omnibus) -- verify OJ text"),
     (r"FIPS[- ]validated|FIPS certified", "module is not validated; algorithm only",
@@ -36,6 +36,24 @@ BANNED = [
      "gateway-only evidence can't establish downstream desktop state without observers"),
     (r"0 unjustified skips", "'unjustified' is a human judgment, not auditable",
      "1005 passed, 7 documented skips, 0 failed (see SKIPS.md)"),
+    # --- T1 §6 DROPPED claims (competitor already does it) ---
+    (r"nobody proves runtime", "AGA proves runtime governance decisions",
+     "AGA produces decision evidence at the gateway/tool boundary"),
+    (r"first cryptographic governance layer", "AGA and Microsoft AGT both exist",
+     "designed to bind desktop outcome evidence to governance receipts"),
+    (r"invented offline[- ]verifiable agent evidence", "AGA has an offline verifier; SCITT/in-toto predate both",
+     "offline-verifiable with the included standalone verifier; no independent third party has verified yet"),
+    (r"no competitor has two[- ]process enforcement", "AGA has two-process key separation (gateway holds keys, agent doesn't)",
+     "gateway-only evidence cannot establish downstream desktop state without additional observers"),
+    (r"only product in this category", "AGA, Microsoft AGT, OPAQUE, Kiteworks all exist",
+     "designed to bind desktop outcome evidence to governance receipts"),
+    # --- T1 §6 FROZEN-pending-counsel claims ---
+    (r"\bpatentable\b", "FTO requires licensed-attorney judgment; freeze until counsel opinion",
+     "FTO opinion pending from counsel (see docs/t1_competitor_memo.md)"),
+    (r"\bKairo'?s? mechanisms? (are|is) novel\b|\bour (approach|technology) is novel\b|\bwe are novel\b", "FTO requires licensed-attorney judgment; freeze until counsel opinion",
+     "FTO opinion pending from counsel (see docs/t1_competitor_memo.md)"),
+    (r"first to bind desktop outcome", "cannot assert 'first' without exhaustive search; freeze until counsel opinion",
+     "designed to bind desktop outcome evidence to governance receipts"),
 ]
 
 NEG = re.compile(
