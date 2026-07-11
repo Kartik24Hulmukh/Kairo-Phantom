@@ -1,0 +1,17 @@
+{
+  "_comment": "TEMPLATE ONLY — not valid evidence. Copy this, fill real values, point 'artifact' at your real report, then sign it with tools/sign_manifest.py. Every human-gate attestation needs one of these. The signature covers this whole object MINUS the 'signature' field.",
+  "target": "T3",
+  "base_commit": "<git rev-parse HEAD at the time the artifact was produced>",
+  "created_at": "2026-07-20T10:00:00",
+  "env": {
+    "os": "Windows 11 (build 26100)",
+    "toolchain": "python 3.11.9 / rustc 1.79.0",
+    "lockfile_sha256": "<sha256 of Cargo.lock + requirements.lock>"
+  },
+  "artifact": {
+    "path": "runs/g1_100run_report.json",
+    "sha256": "<sha256 of the artifact file>"
+  },
+  "signer": "kartik-founder",
+  "signature": "<base64 ed25519 signature, added by tools/sign_manifest.py>"
+}

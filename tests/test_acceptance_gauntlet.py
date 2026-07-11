@@ -596,9 +596,11 @@ class TestSecurityDomain:
         """Run injection corpus → all attacks blocked."""
         from kairo.security.reference_monitor import evaluate_injection_corpus, compute_attack_success_rate
 
-        corpus_path = os.path.join(_REPO_ROOT, "fixtures", "injection_corpus.json")
-        if not os.path.exists(corpus_path):
-            corpus_path = os.path.join(_REPO_ROOT, "fixtures", "injection", "corpus.json")
+        # The redline-pipeline injection corpus (fixtures/injection/corpus.json)
+        # has contract_text fields for evaluate_injection_corpus. The prompt-shield
+        # corpus (fixtures/injection_corpus.json) has payload fields and is used
+        # by tests/security/test_injection_suite.py — not here.
+        corpus_path = os.path.join(_REPO_ROOT, "fixtures", "injection", "corpus.json")
         if not os.path.exists(corpus_path):
             pytest.skip("Injection corpus fixture not available — honest degradation")
         with open(corpus_path) as f:
@@ -612,7 +614,8 @@ class TestSecurityDomain:
         try:
             results = evaluate_injection_corpus(corpus, playbook_path, str(tmp_path))
             rate = compute_attack_success_rate(results)
-            assert rate == 0.0, f"Attack success rate should be 0%, got {rate * 100}%"
+            mean_rate = rate["mean_attack_success"] if isinstance(rate, dict) else rate
+            assert mean_rate == 0.0, f"Attack success rate should be 0%, got {mean_rate * 100}%"
         except Exception as e:
             pytest.skip(f"Injection corpus evaluation needs full pipeline: {e} — honest degradation")
 
