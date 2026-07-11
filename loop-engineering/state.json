@@ -1,0 +1,252 @@
+{
+  "project": "kairo-phantom-aga-response-sprint",
+  "version": "1.2.1",
+  "generated": "2026-07-11",
+  "notes": "v1.2.1 integrity + structure correction (co-founder red-team of v1.2). Human attestations now require a signed manifest + content-validated artifact (see validators.py); the history ledger is hash-chain verified on load; T2 split into T2A (desktop outcome, feeds G2) and T2B (boundary value, after T6); T4 split into T4A (native crypto verifier) and T4B (first read-only adapter). The coverage scorer is a helper, never a pass oracle for a human gate.",
+  "repo": {
+    "head_commit": "",
+    "note": "Set head_commit (or pass --base-commit) to enforce that evidence was produced against the current tree; empty disables the base-commit match but base_commit is still required in every manifest."
+  },
+  "defaults": {
+    "max_iterations": 4,
+    "antithrash_repeat_limit": 2,
+    "max_evidence_age_days": 45
+  },
+  "gates": {
+    "G0": {
+      "title": "Funding eligibility & company structure documented",
+      "day": 7,
+      "status": "pending",
+      "deps": [],
+      "oracle": "attestation",
+      "pass": "Company structure decided; sbir_eligible_now stated true/false; if excluded, a replacement non-dilutive/revenue funding spine named. Do NOT design the cap table around a grant."
+    },
+    "G1": {
+      "title": "Desktop causal chain real on hardware",
+      "day": 30,
+      "status": "blocked",
+      "deps": [
+        "T3"
+      ],
+      "oracle": "attestation+runs/g1_100run_report.json",
+      "pass": "Computed from >=100 individual run records: readback >=99/100, tamper detection 100% of injected, canaries 100%, 0 silent gaps, Windows 11, screen-recording checksum present."
+    },
+    "G2": {
+      "title": "Assessor signal on desktop outcome (Mode A/B) \u2014 make/break",
+      "day": 60,
+      "status": "blocked",
+      "deps": [
+        "T2A"
+      ],
+      "oracle": "attestation",
+      "pass": "Blind test, >=3 assessors reviewing, >=1 prefers desktop-outcome Mode B in writing with a reason, willingness-to-pay recorded."
+    },
+    "G3": {
+      "title": "Market proof (paid/budgeted pilot + external repro + qualified workflows)",
+      "day": 90,
+      "status": "blocked",
+      "deps": [
+        "T2A"
+      ],
+      "oracle": "attestation",
+      "pass": "At least ONE paid or contractually budgeted pilot (budget owner, price, start date, workflow, decision date), AND >=1 external reproduction, AND >=3 qualified workflows. LOIs are a supporting metric, NOT the gate."
+    },
+    "G4": {
+      "title": "Bus factor (recovery + reproducible build + key custodian)",
+      "day": 90,
+      "status": "blocked",
+      "deps": [],
+      "oracle": "attestation",
+      "pass": "Documented recovery/succession; reproducible build by ONE external person; second key custodian or secure recovery; >=1 external reviewer; active co-founder pipeline. 'Co-founder onboarded or 2 maintainers' is a 12-MONTH target, not a day-90 pass/fail."
+    }
+  },
+  "tasks": [
+    {
+      "id": "T0",
+      "title": "Claims correction pass (truth)",
+      "phase": "0-truth",
+      "deps": [],
+      "status": "done",
+      "oracle": {
+        "type": "script",
+        "cmd": [
+          "oracles/check_forbidden_claims.py",
+          "../CLAIMS.md",
+          "../KAIRO-PHANTOM-ONE-PAGE-PITCH.md",
+          "../KAIRO-PHANTOM-CANONICAL-PLAN-v1.2.md",
+          "../SKIPS.md"
+        ],
+        "then": [
+          "oracles/check_claims_consistency.py",
+          "../CLAIMS.md",
+          "../SKIPS.md"
+        ]
+      },
+      "gate": null,
+      "attempts": [
+        {
+          "ts": "2026-07-11T07:55:39",
+          "kind": "script",
+          "passed": false,
+          "signature": "ef812f66a20e:OK: 0 asserted forbidden claims across 4 file(s).",
+          "output": "OK: 0 asserted forbidden claims across 4 file(s).\nFAIL: SKIPS.md has 1 unfilled <fill> placeholder(s) \u2014 document every skip before claiming they are documented\n\n1 problem(s)."
+        },
+        {
+          "ts": "2026-07-11T07:55:52",
+          "kind": "script",
+          "passed": true,
+          "signature": "PASS",
+          "output": "OK: 0 asserted forbidden claims across 4 file(s).\nOK: CLAIMS.md + SKIPS.md consistent."
+        }
+      ],
+      "max_iterations": 4
+    },
+    {
+      "id": "T1",
+      "title": "Competitive verification + FTO; freeze novelty claims",
+      "phase": "0-truth",
+      "deps": [
+        "T0"
+      ],
+      "status": "pending",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T3",
+      "title": "Demo hardening (100-run pinned desktop path on Win11)",
+      "phase": "1-desktop-outcome",
+      "deps": [
+        "T0"
+      ],
+      "status": "pending",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true,
+        "artifact": "runs/g1_100run_report.json"
+      },
+      "gate": "G1",
+      "attempts": []
+    },
+    {
+      "id": "T2A",
+      "title": "Desktop-outcome value test (blind Mode A vs Mode B) \u2014 THE company thesis",
+      "phase": "2-market-falsification",
+      "deps": [
+        "T0",
+        "T3"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": "G2",
+      "attempts": []
+    },
+    {
+      "id": "T6",
+      "title": "Boundary witness (scoped zero-egress: host + independent external witness)",
+      "phase": "3-boundary-evidence",
+      "deps": [
+        "T0",
+        "T3"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true,
+        "artifact": "runs/boundarybench_report.json"
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T2B",
+      "title": "Boundary-evidence value test (blind Mode B1 vs B2) \u2014 only if buyers value it",
+      "phase": "3-boundary-evidence",
+      "deps": [
+        "T2A",
+        "T6"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T4A",
+      "title": "Native cryptographic verifier (positive + negative conformance vectors)",
+      "phase": "4-interoperability",
+      "deps": [
+        "T0",
+        "T2A"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T4B",
+      "title": "First read-only adapter on a real public sample (pos + neg fixtures)",
+      "phase": "4-interoperability",
+      "deps": [
+        "T4A",
+        "T2A"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T5",
+      "title": "Assessor co-design (KSEE draft v0.1 + free offline verifier, after buyer signal)",
+      "phase": "5-profile",
+      "deps": [
+        "T2A"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    }
+  ],
+  "history": [
+    {
+      "ts": "2026-07-11T07:55:39",
+      "event": "oracle_run",
+      "prev_hash": "genesis",
+      "task": "T0",
+      "passed": false,
+      "signature": "ef812f66a20e:OK: 0 asserted forbidden claims across 4 file(s).",
+      "hash": "08f72cc603a127896868126a5f47d29c4f94ac489a25cfede9174f5736990034"
+    },
+    {
+      "ts": "2026-07-11T07:55:52",
+      "event": "oracle_run",
+      "prev_hash": "08f72cc603a127896868126a5f47d29c4f94ac489a25cfede9174f5736990034",
+      "task": "T0",
+      "passed": true,
+      "signature": "PASS",
+      "hash": "d6dc98ad618a25e5aa6f9cd8d8483599ddc6fea153e0a4140f302a2ff9580d94"
+    }
+  ]
+}

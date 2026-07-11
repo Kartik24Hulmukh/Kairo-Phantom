@@ -1,0 +1,69 @@
+{
+  "id": "demo-workflow-001",
+  "os": "Windows 11 (build 26100)",
+  "genesis": "",
+  "entries": [
+    {
+      "seq": 1,
+      "prev": "",
+      "body": {
+        "type": "MANDATE",
+        "principal": "user:kartik",
+        "scope": "edit:contract.docx",
+        "webauthn": "aaguid-xxxx"
+      },
+      "hash": "8f94109176e1ffe60621af32c541b36172feb643e4135f1505306fb24e6f5658"
+    },
+    {
+      "seq": 2,
+      "prev": "8f94109176e1ffe60621af32c541b36172feb643e4135f1505306fb24e6f5658",
+      "body": {
+        "type": "POLICY_DECISION",
+        "action": "edit_document",
+        "decision": "allow",
+        "policy_version": "1.4.0"
+      },
+      "hash": "9ff6121e5c8b662ce9875af14fa9e494dbb50a0bd83aa4bfe708f6b675e8160b"
+    },
+    {
+      "seq": 3,
+      "prev": "9ff6121e5c8b662ce9875af14fa9e494dbb50a0bd83aa4bfe708f6b675e8160b",
+      "body": {
+        "type": "OS_OBSERVATION",
+        "source": "win32-uia",
+        "event": "text-inserted",
+        "app": "winword.exe"
+      },
+      "hash": "32233da2b2e511b09253c3a2557d77b6b45b1dfb64c4cc5be6fcbb49ff3765c1"
+    },
+    {
+      "seq": 4,
+      "prev": "32233da2b2e511b09253c3a2557d77b6b45b1dfb64c4cc5be6fcbb49ff3765c1",
+      "body": {
+        "type": "READBACK",
+        "oracle": "docx-diff",
+        "artifact_sha256": "abc123",
+        "matches_expected": true
+      },
+      "hash": "9b6f6cf84b662287de4f907e386081a43126a1837d42576f808f31951eba853e"
+    }
+  ],
+  "dimensions": {
+    "receipt_integrity": "pass",
+    "signer_provenance": "pass",
+    "policy_binding": "pass",
+    "desktop_action_observation": "pass",
+    "artifact_state_verification": "pass",
+    "host_network_observation": "pass",
+    "external_witness_corroboration": "incomplete"
+  },
+  "observed_channels": {
+    "wifi": "not observed",
+    "bluetooth": "disabled, not attested",
+    "cellular": "out of scope",
+    "usb_net": "observed",
+    "second_nic": "observed",
+    "firmware": "out of scope"
+  },
+  "_note": "Hashes are real (sha256 of prev+sorted-body) so the integrity check passes and the sufficiency report renders. external_witness is intentionally 'incomplete' to show how the KSEE level is capped honestly."
+}

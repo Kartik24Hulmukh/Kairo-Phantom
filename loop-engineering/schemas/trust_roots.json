@@ -1,0 +1,4 @@
+{
+  "_comment": "Ed25519 public keys allowed to SIGN evidence manifests. FAIL-CLOSED: if a manifest's signer is not listed here, its attestation is REJECTED. Generate a key with tools/keygen.py, then paste the printed public key below as \"<signer-name>\": \"<base64-public-key>\". Keep private keys OFF this repo. Assessors/witnesses who sign their own statements get their own entry.",
+  "signers": {"kartik-founder": "XcAeupjM72iIo/E70ujplRksDYHBfM5PvoGcKPPAVXk=" }
+}
