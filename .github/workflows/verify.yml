@@ -394,7 +394,7 @@ jobs:
             $IGNORE_ARGS
 
       - name: cargo-deny — advisories + licenses (blocking)
-        run: cargo deny --config deny.toml check advisories licenses sources bans
+        run: cargo deny check --config deny.toml advisories licenses sources bans
 
       - name: Generate CycloneDX SBOM
         uses: anchore/sbom-action@d94f46e13c6c62f59525ac9a1e147a99dc0b9bf5 # v0.17.0
