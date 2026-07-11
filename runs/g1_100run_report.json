@@ -1,0 +1,10 @@
+{
+  "_comment": "TEMPLATE — NOT REAL EVIDENCE. This file is a placeholder for the real 100-run report. It is produced ONLY by executing the T3 run protocol (docs/t3_run_protocol.md §4) on actual Windows 11 hardware. Do NOT hand-edit this file. Do NOT use runs/g1_smoke_report.json as a substitute. The validate_G1_desktop validator requires >=100 per-run records computed from real runs.",
+  "workflow": "contract-redline-demo",
+  "os": "PRODUCED BY HUMAN RUN — see docs/t3_run_protocol.md",
+  "recording": {
+    "path": "PRODUCED BY HUMAN RUN",
+    "sha256": "PRODUCED BY HUMAN RUN"
+  },
+  "runs": []
+}
