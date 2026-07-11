@@ -108,13 +108,21 @@
       "deps": [
         "T0"
       ],
-      "status": "pending",
+      "status": "wont_fix",
       "oracle": {
         "type": "attestation",
         "requires_evidence": true
       },
       "gate": null,
-      "attempts": []
+      "attempts": [],
+      "wont_fix": {
+        "reason": "FTO clearance requires counsel; verification memo done",
+        "evidence": {
+          "kind": "file",
+          "artifact": "../docs/t1_competitor_memo.md",
+          "sha256": "c4eabbb4213eae3c4858b407f722a0b134fb2d65c683da79b76ebeb1adb35dda"
+        }
+      }
     },
     {
       "id": "T3",
@@ -247,6 +255,15 @@
       "passed": true,
       "signature": "PASS",
       "hash": "57bff2f1e1bdd150362b509162f6ff77cb8045b66f9f552c44dfa7fc2bb4a6ac"
+    },
+    {
+      "ts": "2026-07-11T09:08:31",
+      "event": "wont_fix",
+      "prev_hash": "57bff2f1e1bdd150362b509162f6ff77cb8045b66f9f552c44dfa7fc2bb4a6ac",
+      "target": "T1",
+      "reason": "FTO clearance requires counsel; verification memo done",
+      "evidence_sha256": "c4eabbb4213eae3c4858b407f722a0b134fb2d65c683da79b76ebeb1adb35dda",
+      "hash": "a15bc2df5174ce73904224b44c540b3b0c9dc8f62fec31655bd1f39d73122821"
     }
   ]
 }
