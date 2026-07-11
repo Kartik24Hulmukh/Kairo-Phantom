@@ -18,7 +18,7 @@
 |---|---|---|---|
 | R1 | Python test suite | `pytest tests/ -q --ignore=tests/e2e` | 1006 passed / **6 skipped; skip audit in progress (see SKIPS.md)** / 0 failed *(local, unverified — full CI run with all deps needed for publication)* |
 | R2 | Coverage suite | `pytest --cov` *(exact invocation + evidence record — audit pending)* | 959 passed / 0 failed |
-| R3 | **Current prompt-injection fixture suite** *(not "injection-safe")* | injection gauntlet *(exact command + evidence record — audit pending)* | Blocked all **25/25 attacks in the current fixture suite** · 0/15 false positives · 106 patterns |
+| R3 | **Current prompt-injection fixture suite** *(not "injection-safe")* | `tests/security/test_injection_suite.py` — loads `fixtures/injection_corpus.json` (25 attacks, 4 categories) + 15 inline benign controls · 106 compiled patterns in `PromptShield` | Blocked all **25/25 attacks in the current fixture suite** · 0/15 false positives · 106 patterns *(local, unverified — kill-proofed: disabling `PromptShield.scan()` → test FAILS with "Block-rate dropped from 25/25 to 0/25")* |
 | R4 | Grounding accuracy | grounding bench *(exact command + evidence record — audit pending)* | 595/600 = 99.17% |
 | R5 | Grounded-answer rate | grounded-answer bench *(exact command + evidence record — audit pending)* | 96.39% |
 | R6 | Tamper detection (audit chain) | tamper tests *(exact command + evidence record — audit pending)* | 17/17 |
