@@ -138,7 +138,7 @@ Kairo-Phantom's production-ready wedge is **offline legal redlining**:
 - Reads a contract `.docx` and a redline playbook
 - Produces real OOXML tracked changes (`w:ins`/`w:del`) — not a diff mock
 - Every citation is grounded to exact source text; no hallucinated citations
-- Injection-safe: embedded prompt-injection attacks in the contract are blocked
+- Prompt-injection guarded: embedded prompt-injection attacks in the contract are blocked (25/25 in current fixture suite; not "injection-safe")
 - Air-gapped: runs in sealed mode with zero outbound connections
 - Signed: every action is Ed25519 hash-chained and independently verifiable
 
