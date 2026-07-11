@@ -157,7 +157,13 @@ def _load_json(path, what):
 def validate_G1_desktop(manifest, artifact_path, here):
     """G1 (via T3). Compute the outcome from INDIVIDUAL run records; never trust
     a summary field. Bar: >=100 runs, readback >=99/100, tamper 100% of injected,
-    canaries 100%, 0 silent gaps, Windows 11, recording checksum present."""
+    canaries 100%, 0 silent gaps, Windows 11, recording checksum present.
+
+    Synthetic-record guard: if ANY run record has synthetic=true, hard-FAIL
+    with "synthetic records are not attestable". This prevents harness-fabricated
+    smoke reports from being repurposed as real evidence. The computed stats are
+    still printed before the failure so schema wiring is visible.
+    """
     rep = _load_json(artifact_path, "G1 run report")
     runs = rep.get("runs")
     if not isinstance(runs, list):
@@ -169,7 +175,21 @@ def validate_G1_desktop(manifest, artifact_path, here):
     canaries = sum(1 for r in runs if r.get("canary_present") is True)
     gaps = sum(1 for r in runs if r.get("gap") is True)
     rec = rep.get("recording") or {}
+
+    # ── Synthetic-record guard (fail-closed, checked FIRST) ──
+    synthetic_runs = [r for r in runs if r.get("synthetic") is True]
+
+    # ── Compute and print field stats so schema wiring is visible ──
+    stats_line = (f"computed stats: runs={n}, readback={readback}/{n}, "
+                  f"tamper={tamper_caught}/{len(injected)}, canaries={canaries}/{n}, "
+                  f"gaps={gaps}, os={rep.get('os')!r}, recording_sha256={'yes' if rec.get('sha256') else 'no'}, "
+                  f"synthetic={len(synthetic_runs)}/{n}")
+    print(f"G1 validator: {stats_line}")
+
     problems = []
+    # Synthetic guard — hard-fail, non-negotiable
+    if synthetic_runs:
+        problems.append("synthetic records are not attestable")
     if n < 100:
         problems.append(f"only {n} runs (<100)")
     if readback < 99:

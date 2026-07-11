@@ -24,10 +24,10 @@ Usage:
   python3 tools/run_g1.py --task-config task_config.json --runs 100 \
       --output runs/g1_100run_report.json --os "Windows 11 (build 26100)"
 
-  # Smoke test (99 runs — fails the validator on run count ONLY):
+  # Smoke test (99 synthetic runs — fails on synthetic + <100, prints computed stats):
   python3 tools/run_g1.py --task-config task_config.json --runs 99 \
       --output runs/g1_smoke_report.json --os "Windows 11 (build 26100)" \
-      --recording-sha256 deadbeef
+      --recording-sha256 deadbeef --synthetic
 """
 import argparse
 import base64
@@ -194,8 +194,15 @@ def _execute_workflow(task_config, run_index, signing_key=None):
 
 def run_gate(task_config_path, num_runs, output_path, os_label,
              recording_path=None, recording_sha256=None,
-             verifier_path=None, tamper_every=1):
-    """Execute the G1 gate and write the report."""
+             verifier_path=None, tamper_every=1, synthetic=False):
+    """Execute the G1 gate and write the report.
+
+    Args:
+        synthetic: If True, stamp every run record with synthetic=true and
+                   source="smoke_fabricated". This marks the report as
+                   harness-fabricated so it can NEVER be used as real evidence.
+                   The real run_g1.py path on hardware must NOT set this.
+    """
     with open(task_config_path) as f:
         task_config = json.load(f)
 
@@ -253,6 +260,9 @@ def run_gate(task_config_path, num_runs, output_path, os_label,
             "gap": gap,
             "ts": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
         }
+        if synthetic:
+            run_record["synthetic"] = True
+            run_record["source"] = "smoke_fabricated"
         runs.append(run_record)
         print(f"  run {i:4d}/{num_runs}: readback={'Y' if readback_match else 'N'} "
               f"tamper={'inj+det' if tamper_injected and tamper_detected else 'none' if not tamper_injected else 'INJ_NOT_DET'} "
@@ -302,6 +312,10 @@ def main():
     ap.add_argument("--recording-sha256", default=None, help="SHA-256 of recording (if file not accessible)")
     ap.add_argument("--verifier", default=None, help="Path to verify_receipts_external.py")
     ap.add_argument("--tamper-every", type=int, default=1, help="Inject tamper every N runs (default: every run)")
+    ap.add_argument("--synthetic", action="store_true",
+                    help="Stamp runs with synthetic=true + source=smoke_fabricated. "
+                         "Marks the report as harness-fabricated — can NEVER be used as real evidence. "
+                         "The real run on hardware must NOT set this.")
     args = ap.parse_args()
 
     run_gate(
@@ -313,6 +327,7 @@ def main():
         recording_sha256=args.recording_sha256,
         verifier_path=args.verifier,
         tamper_every=args.tamper_every,
+        synthetic=args.synthetic,
     )
 
 

@@ -206,7 +206,7 @@ or mark `wont_fix` with a written reason.
 
 | File | Purpose | Runs | Validator result |
 |------|---------|------|------------------|
-| `runs/g1_smoke_report.json` | Schema wiring proof — 99 runs, every field correct | 99 | **FAIL** — "only 99 runs (<100)" |
+| `runs/g1_smoke_report.json` | Schema wiring proof — 99 synthetic runs, every field correct | 99 | **FAIL** — "synthetic records are not attestable; only 99 runs (<100)" |
 | `runs/g1_100run_report.json` | Real gate artifact — produced only by the human 100-run protocol | 100 | PASS (when all fields meet bar) |
 
 The smoke report is committed to the repo to prove the harness produces
