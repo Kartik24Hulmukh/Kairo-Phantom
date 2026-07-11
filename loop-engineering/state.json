@@ -1,0 +1,205 @@
+{
+  "project": "kairo-phantom-aga-response-sprint",
+  "version": "1.2",
+  "generated": "2026-07-11",
+  "notes": "v1.2: G0 reframed off SBIR; G3 requires a paid/budgeted pilot; G4 softened to a realistic day-90 bar; verifier renamed to score_evidence_manifest.py; dependency order puts market-falsification (T2/G2) BEFORE expensive TPM (T6) and broad adapter (T4) work.",
+  "defaults": {
+    "max_iterations": 4,
+    "antithrash_repeat_limit": 2
+  },
+  "gates": {
+    "G0": {
+      "title": "Funding eligibility & company structure documented",
+      "day": 7,
+      "status": "pending",
+      "oracle": "attestation",
+      "pass": "SBIR eligible now, OR SBIR explicitly excluded AND a replacement non-dilutive/revenue funding spine selected; decision note committed. Do NOT design the cap table around a grant."
+    },
+    "G1": {
+      "title": "Desktop causal chain real on hardware",
+      "day": 30,
+      "status": "blocked",
+      "oracle": "attestation+runs/g1_100run_report.json"
+    },
+    "G2": {
+      "title": "Assessor signal (Mode A/B) \u2014 make/break",
+      "day": 60,
+      "status": "blocked",
+      "oracle": "attestation"
+    },
+    "G3": {
+      "title": "Market proof (paid/budgeted pilot + external repro + qualified workflows)",
+      "day": 90,
+      "status": "blocked",
+      "oracle": "attestation",
+      "pass": "At least ONE paid or contractually budgeted pilot (budget owner, price, start date, workflow, decision date), AND >=1 external party reproduced a verification, AND >=3 qualified workflows. LOIs are a supporting metric, NOT the gate."
+    },
+    "G4": {
+      "title": "Bus factor (recovery + reproducible build + key custodian)",
+      "day": 90,
+      "status": "blocked",
+      "oracle": "attestation",
+      "pass": "Documented recovery/succession process; reproducible build by ONE external person; second key custodian or secure key-recovery; >=1 external contributor/reviewer; active co-founder pipeline. 'Co-founder onboarded or 2 maintainers' is a 12-MONTH target, not a day-90 pass/fail."
+    }
+  },
+  "tasks": [
+    {
+      "id": "T0",
+      "title": "Claims correction pass (truth)",
+      "phase": "0-truth",
+      "deps": [],
+      "status": "done",
+      "oracle": {
+        "type": "script",
+        "cmd": [
+          "oracles/check_forbidden_claims.py",
+          "../CLAIMS.md",
+          "../KAIRO-PHANTOM-ONE-PAGE-PITCH.md",
+          "../KAIRO-PHANTOM-CANONICAL-PLAN-v1.1.md",
+          "../SKIPS.md"
+        ],
+        "then": [
+          "oracles/check_claims_consistency.py",
+          "../CLAIMS.md",
+          "../SKIPS.md"
+        ]
+      },
+      "gate": null,
+      "attempts": [
+        {
+          "ts": "2026-07-11T04:42:17",
+          "kind": "script",
+          "passed": false,
+          "signature": "ef812f66a20e:OK: 0 asserted forbidden claims across 4 file(s).",
+          "output": "OK: 0 asserted forbidden claims across 4 file(s).\nFAIL: SKIPS.md has 27 unfilled <fill> placeholder(s) \u2014 document every skip before claiming they are documented\n\n1 problem(s)."
+        },
+        {
+          "ts": "2026-07-11T05:35:10",
+          "kind": "script",
+          "passed": true,
+          "signature": "PASS",
+          "output": "OK: 0 asserted forbidden claims across 4 file(s).\nOK: CLAIMS.md + SKIPS.md consistent."
+        }
+      ],
+      "max_iterations": 4
+    },
+    {
+      "id": "T1",
+      "title": "Competitive verification + FTO; freeze novelty claims",
+      "phase": "0-truth",
+      "deps": [
+        "T0"
+      ],
+      "status": "pending",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T3",
+      "title": "Demo hardening (100-run pinned desktop path)",
+      "phase": "1-desktop-outcome",
+      "deps": [
+        "T0"
+      ],
+      "status": "pending",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true,
+        "artifact": "runs/g1_100run_report.json"
+      },
+      "gate": "G1",
+      "attempts": []
+    },
+    {
+      "id": "T2",
+      "title": "Mode A vs Mode B blind comparative evidence test (market falsification)",
+      "phase": "2-market-falsification",
+      "deps": [
+        "T0",
+        "T3"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": "G2",
+      "attempts": []
+    },
+    {
+      "id": "T6",
+      "title": "Boundary witness (scoped zero-egress: host + external witness)",
+      "phase": "3-boundary-evidence",
+      "deps": [
+        "T0",
+        "T3"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true,
+        "artifact": "runs/boundarybench_report.json"
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T4",
+      "title": "Native verifier + read-only adapters + external repro",
+      "phase": "4-interoperability",
+      "deps": [
+        "T0",
+        "T2"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "script",
+        "cmd": [
+          "oracles/score_evidence_manifest.py",
+          "schemas/evidence_pack.example.json"
+        ]
+      },
+      "gate": null,
+      "attempts": []
+    },
+    {
+      "id": "T5",
+      "title": "Assessor co-design (KSEE draft v0.1, after feedback)",
+      "phase": "5-profile",
+      "deps": [
+        "T2"
+      ],
+      "status": "blocked",
+      "oracle": {
+        "type": "attestation",
+        "requires_evidence": true
+      },
+      "gate": null,
+      "attempts": []
+    }
+  ],
+  "history": [
+    {
+      "ts": "2026-07-11T04:42:17",
+      "event": "oracle_run",
+      "prev_hash": "genesis",
+      "task": "T0",
+      "passed": false,
+      "signature": "ef812f66a20e:OK: 0 asserted forbidden claims across 4 file(s).",
+      "hash": "c94ef0266e8415c2c49820ef87b174ac9f7f742b27ecbb5ce300b55564373bb5"
+    },
+    {
+      "ts": "2026-07-11T05:35:10",
+      "event": "oracle_run",
+      "prev_hash": "c94ef0266e8415c2c49820ef87b174ac9f7f742b27ecbb5ce300b55564373bb5",
+      "task": "T0",
+      "passed": true,
+      "signature": "PASS",
+      "hash": "d1d21951af2ed719a638eb5f5ea63af80f3ca14301f15d34289aac44440dac35"
+    }
+  ]
+}
