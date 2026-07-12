@@ -90,9 +90,9 @@
 **[SCREEN: Activity monitor showing Ollama running locally. No network requests.]**
 
 **VOICEOVER:**  
-*"Everything runs locally. Ollama. No API calls. Your documents never leave your machine. Enterprise teams get SPIFFE identity, audit logging, and SOC 2 readiness out of the box."*
+*"Everything runs locally. Ollama. No API calls. Your documents never leave your machine. Enterprise teams get Ed25519-signed audit logs and tamper-evident receipts (SPIFFE identity and SOC 2 readiness are planned, not yet implemented)."*
 
-**[TEXT OVERLAY: "100% offline · Zero cloud · Enterprise-ready"]**
+**[TEXT OVERLAY: "100% offline · Zero cloud · Enterprise-ready (planned)"]**
 
 ---
 

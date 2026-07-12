@@ -1,7 +1,14 @@
-# Kairo Phantom v4.0 — OWASP Agentic Top 10 Compliance Matrix
+# Kairo Phantom — OWASP Agentic Top 10 Compliance Matrix
 # Domain 9: Enterprise Governance & Compliance
 
-**Version**: 4.0.0 — Domain 9  
+> **⚠️ ASPIRATIONAL — NOT certified, NOT audited, NOT a compliance claim.**
+> This document describes **planned/designed** controls, not certified compliance.
+> Several controls reference `enterprise/*` modules that **do not exist** in the
+> repository (see correction note below). Rows marked "COMPLIANT" below are
+> **aspirational labels** — the real, test-verified security properties are
+> documented in CLAIMS.md. Do not cite this document as compliance certification.
+
+**Version**: Domain 9  
 **Date**: 2025-05  
 **License**: MIT / Apache-2.0  
 **Scope**: All 10 OWASP Agentic AI Security Risks (2025 Draft)
@@ -24,10 +31,12 @@
 
 ## Executive Summary
 
-Kairo Phantom v4.0 implements mitigations for all 10 OWASP Agentic AI security risks
-as of the 2025 draft. Every control is deterministic Rust code running 100% offline
-on the user's machine. No cloud component can be compromised to bypass any control.
-**(See status correction above: enterprise-module controls are planned, not implemented.)**
+Kairo Phantom is designed to mitigate all 10 OWASP Agentic AI security risks
+as of the 2025 draft. Controls referencing `enterprise/*` modules are **planned, not implemented**.
+What IS implemented and test-covered: the Ed25519-signed receipt hash chain
+(`identity.rs::ReceiptLog`), Merkle checkpointing + external verifier
+(`kairo/trust/`, `tools/verify_receipts_external.py`), the prompt-injection
+firewall (106 patterns, 25/25 blocked), and zero-egress enforcement. **(See status correction above: enterprise-module controls are planned, not implemented.)**
 
 ---
 
@@ -35,16 +44,16 @@ on the user's machine. No cloud component can be compromised to bypass any contr
 
 | # | Risk | Severity | Kairo Control | Implementation | Status |
 |---|------|----------|---------------|----------------|--------|
-| AT1 | Agent Impersonation | Critical | SsoGate + SpiffeAgent | `enterprise/sso.rs` + `enterprise/spiffe_identity.rs` | ✅ COMPLIANT |
-| AT2 | Prompt Injection | Critical | PromptShield (27 detectors) | `prompt_shield.rs` | ✅ COMPLIANT |
-| AT3 | Tool Abuse | High | RbacEngine + PluginPermissionManifest | `enterprise/rbac.rs` + `waza_registry.rs` | ✅ COMPLIANT |
-| AT4 | Data Exfiltration | Critical | ComplianceScanner + AuditLogger + offline-only | `enterprise/compliance.rs` + `enterprise/audit.rs` | ✅ COMPLIANT |
-| AT5 | Malicious Code Execution | High | Sidecar isolation + capability drop | `sidecar_bridge.rs` | ✅ COMPLIANT |
-| AT6 | Uncontrolled Recursion | Medium | Token budget + depth limiter | `pipeline_orchestrator.rs` | ✅ COMPLIANT |
-| AT7 | Training Data Poisoning | High | Read-only model bundle + hash verification | `model_manager.rs` | ✅ COMPLIANT |
-| AT8 | Sensitive Data in Context | High | ContextSanitizer + 64k window limit | `context_builder.rs` | ✅ COMPLIANT |
-| AT9 | Unmonitored Side Effects | Medium | 12-step deterministic pipeline + audit trail | `enterprise/audit.rs` | ✅ COMPLIANT |
-| AT10 | Resource Exhaustion | Medium | Rate limiter + memory guard + token cap | `resource_governor.rs` | ✅ COMPLIANT |
+| AT1 | Agent Impersonation | Critical | SsoGate + SpiffeAgent | `enterprise/sso.rs` + `enterprise/spiffe_identity.rs` | 🔶 PLANNED |
+| AT2 | Prompt Injection | Critical | PromptShield (106 patterns) | `prompt_shield.rs` | ✅ TEST-VERIFIED |
+| AT3 | Tool Abuse | High | RbacEngine + PluginPermissionManifest | `enterprise/rbac.rs` + `waza_registry.rs` | 🔶 PLANNED |
+| AT4 | Data Exfiltration | Critical | ComplianceScanner + AuditLogger + offline-only | `enterprise/compliance.rs` + `enterprise/audit.rs` | 🔶 PLANNED |
+| AT5 | Malicious Code Execution | High | Sidecar isolation + capability drop | `sidecar_bridge.rs` | 🔶 PLANNED |
+| AT6 | Uncontrolled Recursion | Medium | Token budget + depth limiter | `pipeline_orchestrator.rs` | 🔶 PLANNED |
+| AT7 | Training Data Poisoning | High | Read-only model bundle + hash verification | `model_manager.rs` | 🔶 PLANNED |
+| AT8 | Sensitive Data in Context | High | ContextSanitizer + 64k window limit | `context_builder.rs` | 🔶 PLANNED |
+| AT9 | Unmonitored Side Effects | Medium | 12-step deterministic pipeline + audit trail | `enterprise/audit.rs` | 🔶 PLANNED |
+| AT10 | Resource Exhaustion | Medium | Rate limiter + memory guard + token cap | `resource_governor.rs` | 🔶 PLANNED |
 
 ---
 

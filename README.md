@@ -4,7 +4,7 @@
 
 **A fully offline, air-gapped local AI desktop agent with a signed, verifiable audit trail.**
 
-The signed, offline, verifiable execution & verification layer for the agent era. Operates real apps on your machine; can be sealed so zero bytes leave it; every action is Ed25519 hash-chained and independently verifiable.
+The signed, offline, verifiable execution & verification layer for the agent era. Operates real apps on your machine; can be sealed so no outbound packets leave across the declared/tested interfaces; every action is Ed25519 hash-chained and independently verifiable.
 
 `pre-launch` · `solo-built` · `MIT` · `0 users` · `offline-first`
 
@@ -16,9 +16,9 @@ The signed, offline, verifiable execution & verification layer for the agent era
 
 ## Why It's Different
 
-- **Air-gapped.** `KAIRO_SEALED=1` → 0 sockets, 0 DNS, 0 telemetry. Kill-proven: the air-gap oracle activates sealed mode, runs the full pipeline, and asserts zero outbound connections — if a single byte escapes, the test fails.
+- **Air-gapped.** `KAIRO_SEALED=1` → 0 sockets, 0 DNS, 0 telemetry. Kill-proven: the air-gap oracle activates sealed mode, runs the full pipeline, and asserts zero outbound connections across the declared/tested interfaces — if any outbound connection is detected, the test fails.
 - **Signed, verifiable audit.** Every action is Ed25519-signed and hash-chained. Tamper any byte → verification fails. An independent verifier (`tools/verify_receipts_external.py`) validates receipts without trusting Kairo.
-- **Injection-safe.** A reference monitor + PromptShield blocks 25/25 red-team payloads (100%), with 0/15 false positives on benign inputs. 106 patterns. No false refusals.
+- **Prompt-injection guarded.** A reference monitor + PromptShield blocks 25/25 red-team payloads (100%), with 0/15 false positives on benign inputs. 106 patterns. Fail-closed permissions are the primary protection — a pattern detector is not a general injection defence.
 - **Honest labels.** Every capability is labelled Real (fixture-verified oracle passes) or Experimental (built, not independently validated). No bluffing. Shipping a mislabelled domain is a release blocker.
 
 ---
@@ -70,11 +70,11 @@ Refuses to answer if it cannot ground the claim to source text ("No source → n
 
 ## Verify It Yourself
 
-Every number below was reproduced from a clean clone on 2026-07-09. Run the commands yourself.
+Every number below was reproduced from a clean clone on 2026-07-12 at commit `1aaa76a`. Run the commands yourself.
 
 | Metric | Command | Real Result |
 |---|---|---|
-| Full Python suite | `pytest tests/ -q --ignore=tests/e2e` | **1005 passed, 7 skipped, 0 failed** |
+| Full Python suite | CI (runs 29191013782 + 29191013766) | **1,976 passed, 34 skipped, 0 failed** (see BENCHMARKS.md) |
 | Injection block rate | `pytest tests/security/test_injection_suite.py tests/test_injection_guard_expanded.py -q -s` | **25/25 blocked (100%), 0/15 false positives, 106 patterns, 25 tests** |
 | Grounding accuracy | `pytest tests/bench/test_grounding.py -q -s` | **595/600 = 99.17%** |
 | Grounded answer rate | `python -m bench.harness` | **96.39% (3/83 false refusal)** |
