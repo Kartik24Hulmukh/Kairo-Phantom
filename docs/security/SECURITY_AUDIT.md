@@ -1,11 +1,19 @@
 # SECURITY_AUDIT.md
-# Kairo Phantom v4.0 — Domain 10 Security Audit Report
+# Kairo Phantom — Domain 10 Security Audit Report
 
-**Status: CERTIFIED ✅**  
+> **⚠️ ASPIRATIONAL — NOT certified, NOT audited, NOT a compliance claim.**
+> This document was auto-generated from internal test results and has NOT been
+> independently audited. The "CERTIFIED" and "PRODUCTION CERTIFIED" labels below
+> are **aspirational and should not be cited as certification**. The real security
+> properties are: 25/25 injection attacks blocked in the current fixture suite,
+> 17 tamper-detection tests, 33 trust-layer tests, 12 air-gap tests. See CLAIMS.md
+> for the authoritative Real/Experimental/None labels.
+
+**Status: INTERNAL SELF-ASSESSMENT (not certified)**  
 **Classification: INTERNAL — SECURITY SENSITIVE**  
 **Date**: 2026-05-27  
 **Auditor**: Lead Security Engineer (Domain 10 Automated + E2E Red-Team)  
-**System Version**: Kairo Phantom v4.0 (phantom-core v0.3.0)
+**System Version**: Kairo Phantom (phantom-core)
 
 ---
 
@@ -17,7 +25,7 @@ with zero critical or high vulnerabilities found.
 
 | Gate | Description | Result |
 |------|-------------|--------|
-| G1 | Prompt injection firewall: 20 attack patterns blocked, 0 false positives on 50 legit prompts | ✅ PASSED |
+| G1 | Prompt injection firewall: 25/25 attack patterns blocked, 0/15 false positives on benign inputs | ✅ PASSED |
 | G2 | Autonomous red-team: 0 critical, 0 high findings; ≥95% block rate; all 6 surfaces covered | ✅ PASSED |
 | G3 | WASM sandbox: 5 escape attempts blocked (http, sig tamper, DoS, TOCTOU, env-read) | ✅ PASSED |
 | G4 | Supply chain: 0 GPL/AGPL violations, 0 CVEs, CycloneDX SBOM generated | ✅ PASSED |
@@ -25,14 +33,14 @@ with zero critical or high vulnerabilities found.
 | G6 | Cryptographic audit chain: tamper detection at record-level verified | ✅ PASSED |
 | G7 | SECURITY_AUDIT.md published with methodology, findings, fixes, and clean report | ✅ PASSED |
 
-**Verdict: PRODUCTION CERTIFIED — No known vulnerabilities remain.**
+**Verdict: INTERNAL SELF-ASSESSMENT — No independent audit has been performed.**
 
 ---
 
 ## 1. Prompt-Injection Firewall (PromptShield) Audit
 
 ### Architecture
-`PromptShield` wraps the 27-pattern `PromptGuard` baseline with 6 additional layers:
+`PromptShield` wraps the PromptGuard baseline with 6 additional layers (106 total patterns):
 
 | Layer | Mechanism | Detectors |
 |-------|-----------|-----------|
@@ -241,7 +249,7 @@ SHA-256 chain-linked SQLite with:
 
 ### Architecture Attestation ✅
 
-Kairo Phantom is verified **100% offline** in production mode:
+Kairo Phantom runs offline in sealed mode (0 outbound connections across declared/tested interfaces):
 
 | Component | Network Access | Verification |
 |-----------|---------------|--------------|
@@ -266,7 +274,7 @@ Domain 10 Test Suite                    Tests    Status
 ─────────────────────────────────────────────────────
 test_domain10_e2e (Gate conditions)      22       ✅
 test_prompt_injection (75 tests)         75       ✅
-  • 20 attack patterns blocked
+  • 25/25 attack patterns blocked (current fixture suite)
   • 50 legitimate prompts pass (0 FP)
   • 5 output scanner tests
 test_wasm_sandbox (9 tests)               9       ✅
@@ -281,7 +289,7 @@ prompt_injection_firewall unit tests     22       ✅
 red_team unit tests                       6       ✅
 supply_chain unit tests                   5       ✅
 ─────────────────────────────────────────────────────
-TOTAL                                   173       ✅ ALL GREEN
+TOTAL                                   see CLAIMS.md for authoritative counts    INTERNAL SELF-ASSESSMENT
 ```
 
 ---
@@ -300,7 +308,7 @@ TOTAL                                   173       ✅ ALL GREEN
 
 | Gate | Description | Evidence | Status |
 |------|-------------|----------|--------|
-| G1 | 20 attacks blocked, 0 FP on 50 legit prompts | `test_prompt_injection.rs` (75 tests) + `test_domain10_e2e.rs` | ✅ PASS |
+| G1 | 25/25 attacks blocked, 0/15 FP on benign inputs | `tests/security/test_injection_suite.py` (8 tests) + `tests/test_injection_guard_expanded.py` (17 tests) | ✅ PASS |
 | G2 | Red-team clean: 0 critical/high, ≥95% block rate | `red_team.rs` unit tests + `test_domain10_e2e.rs` | ✅ PASS |
 | G3 | WASM sandbox: 5 escapes blocked | `test_wasm_sandbox.rs` (9 tests) + `test_domain10_e2e.rs` | ✅ PASS |
 | G4 | Supply chain: 0 GPL/AGPL, 0 CVEs, SBOM generated | `supply_chain.rs` unit tests + `test_domain10_e2e.rs` | ✅ PASS |
@@ -324,7 +332,7 @@ Kairo's Computer Use Agent (CUA) module implements a multi-layered, deterministi
 | Control | Description | Mitigation |
 |---------|-------------|------------|
 | **AT3: Tool Abuse** | LLM taking unsafe actions in GUI | Deterministic Governance Gate filters commands. CUA is only triggered as a Tier 3 last resort (e.g. Canva) with explicit user approval required for every step. |
-| **AT4: Data Exfiltration** | Outbound exfiltration of data | System is verified 100% offline. Pre- and post-execution screenshots are captured and hashed locally to verify changes, preventing optical exfiltration. |
+| **AT4: Data Exfiltration** | Outbound exfiltration of data | Sealed mode blocks outbound connections across declared/tested interfaces (12 air-gap tests, 0 egress). Pre- and post-execution screenshots are captured and hashed locally to verify changes. |
 
 ---
 
@@ -337,6 +345,6 @@ Kairo's Computer Use Agent (CUA) module implements a multi-layered, deterministi
 ---
 
 *This report is generated from and verified by the Domain 10 security test suite.*  
-*All 0 critical findings. All 173 security tests pass.*
+*All 0 critical findings. Security tests pass per CLAIMS.md — see CLAIMS.md for authoritative counts.*
 
-*Kairo Phantom v4.0 — 100% offline. Zero exfiltration. Production certified.*
+*Kairo Phantom — 100% offline. Security properties verified by test suite, not by external certification.*

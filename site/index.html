@@ -115,7 +115,7 @@ pip install -r requirements-test.txt</code></pre>
                     <pre><code># Dependency-light subset — verified on a clean clone with only pytest installed: 28 passed
 pytest tests/test_landing_page.py tests/security/test_injection_suite.py -q
 
-# Full suite (needs requirements-test.txt) — verified on a clean clone: 1005 passed, 7 skipped, 0 failed
+# Full suite (needs requirements-test.txt) — verified on a clean clone at commit 1aaa76a: 997 passed, 6 skipped, 9 failed (environmental: OS keychain backend unavailable in headless env)
 # (e2e PDF tests need a cached model2vec model; without it they error, not fail)
 pytest tests/ -q --ignore=tests/e2e</code></pre>
                 </div>

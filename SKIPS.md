@@ -1,6 +1,6 @@
 # SKIPS.md — documented test skips
 
-**Why this file exists:** the pitch previously said "0 unjustified skips." "Unjustified" is a human judgment and is not auditable. This file replaces that claim with an auditable one: **1006 passed, 6 skipped, 0 failed — skip audit IN PROGRESS.** Every skip below must have a real reason and an owner. **Until all 6 rows are filled with true reasons, the skip audit is NOT complete**: do not claim the skips are "justified" or even "documented" — only that a skip audit is in progress. The `check_claims_consistency.py` oracle is EXPECTED to stay RED until you fill these rows; that red is honest, not a bug.
+**Why this file exists:** the pitch previously said "0 unjustified skips." "Unjustified" is a human judgment and is not auditable. This file replaces that claim with an auditable one: **997 passed, 6 skipped, 9 failed (environmental) — skip audit IN PROGRESS.** Every skip below must have a real reason and an owner. **Until all 6 rows are filled with true reasons, the skip audit is NOT complete**: do not claim the skips are "justified" or even "documented" — only that a skip audit is in progress. The `check_claims_consistency.py` oracle is EXPECTED to stay RED until you fill these rows; that red is honest, not a bug.
 
 **Regenerate the skip list (source of truth):**
 ```bash

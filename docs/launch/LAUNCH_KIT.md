@@ -25,7 +25,7 @@ What actually works today:
 - Alt+Ctrl+M in any Windows app – // command – AI writes into your document
 - python-docx write-back: correct paragraph styles, not clipboard paste
 - MemMachine: remembers your writing preferences across sessions (SQLite + Model2Vec)
-- 315 passing tests, SPIFFE-signed AI edits, SOC2-ready audit logs
+- 997 passing tests (6 skipped, 9 environmental failures), Ed25519-signed AI edits, tamper-evident audit logs (SPIFFE identity is planned, not yet implemented)
 
 What I'm shipping next week:
 - Fine-tuned KairoDocWriter-4B (Unsloth QLoRA on 3,500 document operation examples) – drops schema failure rate from ~25% to <3%
@@ -117,7 +117,7 @@ What I think is genuinely novel:
 
 **The memory system.** Most AI tools are stateless. Kairo builds a profile of how you write across every session. After a week, it knows your preferred sentence length, vocabulary, formatting style, and structural patterns. We published a benchmark showing 57.7% better personalization than a baseline GPT-4o call.
 
-**The security model.** Each session gets a unique UUID sentinel embedded in the system prompt. If the LLM echoes it back (a sign of prompt injection or leakage), the response is blocked before it ever reaches your document. There's also a 50-pattern injection firewall, an Ed25519 agent identity with a tamper-evident, Merkle-checkpointed audit chain (SPIFFE-based identity is planned, not yet implemented).
+**The security model.** Each session gets a unique UUID sentinel embedded in the system prompt. If the LLM echoes it back (a sign of prompt injection or leakage), the response is blocked before it ever reaches your document. There's also a 106-pattern injection firewall, an Ed25519 agent identity with a tamper-evident, Merkle-checkpointed audit chain (SPIFFE-based identity is planned, not yet implemented).
 
 **The // protocol.** Typing `//` in any document is the activation prefix. `// rewrite this`, `//! urgent`, `//? what's the word count`. The Skills marketplace (Waza) extends this: `// legal review this contract`, `// code review this function`, `// SOAP note`.
 
@@ -184,7 +184,7 @@ It's a system tray app that reads the focused window, sends the text + your `//`
 - Runs on your machine, talks to your local Ollama instance
 - Memory stored in SQLite at `~/.kairo-phantom/memory.db`
 - Config at `~/.kairo-phantom/config.toml` — set your model, API key, preferences
-- Enterprise audit logs at `~/.kairo-phantom/enterprise/audit.db`
+- Enterprise audit logs at `~/.kairo-phantom/enterprise/audit.db` *(planned — enterprise module not yet implemented; audit logs currently at `~/.kairo-phantom/audit_log.json`)*
 - Skills marketplace installs to `~/.kairo-phantom/skills/`
 
 **Docker:** Not available yet (it needs GUI/tray access), but a headless server mode for remote team use is on the roadmap.

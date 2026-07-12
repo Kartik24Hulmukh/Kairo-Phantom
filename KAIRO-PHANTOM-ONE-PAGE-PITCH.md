@@ -29,7 +29,7 @@ Kairo runs a local AI agent that operates real desktop applications and is desig
 - **Signed, hash-chained audit log** — Ed25519; tamper → verification FAILS; offline-verifiable with the included verifier (no independent third party has verified yet).
 - **Sealed mode** — blocked/detected the current forced-send fixtures within the Kairo runtime (published interface list per test).
 - **Prompt-injection fixture suite** — blocked all 25/25 attacks in the current fixture suite, 0/15 false positives. Fail-closed permissions are the primary protection.
-- **11 fixture-verified domain adapters**; local test run **1005 passed, 7 skipped, 0 failed** — quote only with date, commit, exact command, and "local result; skip audit in progress" (do not lead with the raw count externally until the 7 skips are documented from a current run); canary-breaks that turn CI red so "green" can't be faked.
+- **11 fixture-verified domain adapters**; local test run **997 passed, 6 skipped, 9 failed (environmental)** — quote only with date, commit, exact command, and "local result; skip audit in progress" (do not lead with the raw count externally until the skips are documented from a current run); canary-breaks that turn CI red so "green" can't be faked.
 - **Honest labels** — everything unproven is marked Experimental (see CLAIMS.md). We never assert Experimental as Real.
 
 ## Why now

@@ -135,7 +135,7 @@ kairo --help          # full command reference
 
 - [Memory System Deep Dive](memory/MEMORY_SYSTEM_DEEP_DIVE.md) — how Kairo learns your style
 - [Waza Agent Builder](launch/WAZA_TUTORIAL.md) — build custom AI agents
-- [Enterprise Guide](enterprise/SOC2_READINESS.md) — SSO, audit logs, compliance
+- [Enterprise Guide](enterprise/SOC2_READINESS.md) — SSO, audit logs, compliance (ASPIRATIONAL — not certified)
 - [KMB-1 Benchmark](benchmark/KMB1_BLOG_POST.md) — verify memory quality
 
 ---

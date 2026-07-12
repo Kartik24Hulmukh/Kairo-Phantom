@@ -1,8 +1,15 @@
 # SOC 2 Type II Readiness — Kairo Phantom
 
+> **⚠️ ASPIRATIONAL — NOT certified, NOT audited, NOT a compliance claim.**
+> This document is a **self-reported readiness assessment**. No SOC 2 audit has
+> been performed. No certification has been issued. Do not cite this document
+> as SOC 2 certification or compliance. The real, test-verified security
+> properties are documented in CLAIMS.md. This document describes **planned**
+> controls and design intent only.
+
 **Prepared by:** Kairo Phantom Security Team  
 **Applicable Trust Service Criteria:** CC6, CC7, CC8, CC9, A1, C1  
-**Status:** Readiness Assessment — Pre-Audit  
+**Status:** Readiness Assessment — Pre-Audit (NOT certified)  
 **Last Updated:** 2026-05-27
 
 ---
@@ -210,4 +217,4 @@ For enterprise SOC 2 audit preparation, gather the following evidence:
 
 For enterprise SOC 2 audit inquiries, open a GitHub Discussion or email: security@kairo.ai
 
-*This readiness assessment is self-reported and has not yet been independently audited. A formal Type II audit is planned for Q3 2026.*
+*This readiness assessment is self-reported and has not yet been independently audited. It is NOT a SOC 2 certification or compliance claim. A formal Type II audit is planned but has not been scheduled.*
