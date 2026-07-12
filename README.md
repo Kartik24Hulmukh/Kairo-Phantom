@@ -74,7 +74,7 @@ Every number below was reproduced from a clean clone on 2026-07-12 at commit `1a
 
 | Metric | Command | Real Result |
 |---|---|---|
-| Full Python suite | `pytest tests/ -q --ignore=tests/e2e` | **997 passed, 6 skipped, 9 failed (environmental)** |
+| Full Python suite | CI (runs 29191013782 + 29191013766) | **1,976 passed, 34 skipped, 0 failed** (see BENCHMARKS.md) |
 | Injection block rate | `pytest tests/security/test_injection_suite.py tests/test_injection_guard_expanded.py -q -s` | **25/25 blocked (100%), 0/15 false positives, 106 patterns, 25 tests** |
 | Grounding accuracy | `pytest tests/bench/test_grounding.py -q -s` | **595/600 = 99.17%** |
 | Grounded answer rate | `python -m bench.harness` | **96.39% (3/83 false refusal)** |

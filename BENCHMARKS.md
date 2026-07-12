@@ -1,10 +1,8 @@
 # Kairo Phantom — Benchmarks & Measured Test Results
 
-> **Every number on this page was measured on a clean clone at commit `1aaa76a`, 2026-07-12, Python 3.12.12, Linux (sandbox). No mocks on primary paths. No rounding. No bluff.**
+> **Every number on this page is CI-verified at commit `a56cdba`, 2026-07-12, Python 3.12, Ubuntu (GitHub Actions). No mocks on primary paths. No rounding. No bluff.**
 >
 > **Rust (`cargo test`) was NOT available in the measurement environment.** Do not trust Rust test counts unless you run `cargo test` yourself. Rust rows below are marked **UNVERIFIED**.
->
-> **9 Python failures are environmental:** the OS keychain backend (`keyring`) raises `NotImplementedError` in a headless sandbox with no OS keyring service. These tests pass when a keyring backend is available (macOS Keychain, Windows Credential Manager, or Linux Secret Service). They are not code bugs.
 >
 > Reproduce: `git clone https://github.com/Kartik24Hulmukh/Kairo-Phantom.git && cd Kairo-Phantom && pip install -r requirements-test.txt && pytest tests/ -q --ignore=tests/e2e`
 
@@ -12,9 +10,26 @@
 
 ## 📊 Headline Numbers
 
+**1,976 passed, 34 skipped, 0 failed across the full CI Python suite (kairo-sidecar CPU job + 4 root shards + e2e); the CPU job is no-skip-enforced. Runs 29191013782 + 29191013766. See the per-job breakdown below.**
+
+### Per-Job Breakdown (source of truth)
+
+| CI Job | Run ID | Passed | Skipped | Failed | Exact pytest command |
+|---|---|---|---|---|---|
+| 🐍 Python Tests (CPU, no-skip enforced) | 29191013782 | **959** | 0 | 0 | `xvfb-run --auto-servernum python -m pytest tests/ --strict-markers --tb=short --cov=sidecar --cov-fail-under=25 --cov-report=term-missing --cov-report=xml:coverage.xml -p no:cacheprovider` (from `kairo-sidecar/`) |
+| Root tests shard 1/4 | 29191013766 | **254** | 0 | 0 | `python -m pytest <shard_files> -n 2 --dist loadfile --timeout=120 --timeout-method=thread --tb=short -p no:cacheprovider` |
+| Root tests shard 2/4 | 29191013766 | **209** | 0 | 0 | same |
+| Root tests shard 3/4 | 29191013766 | **242** | 31 | 0 | same |
+| Root tests shard 4/4 | 29191013766 | **300** | 3 | 0 | same |
+| Root e2e (real semantic embeddings) | 29191013766 | **12** | 0 | 0 | `python -m pytest tests/e2e --timeout=120 --timeout-method=thread --tb=short -p no:cacheprovider` |
+| **TOTAL** | | **1,976** | **34** | **0** | |
+
+> The 34 skips are all environmental (LibreOffice, tree-sitter, PDF fixtures, cross-format docx/xlsx/pptx/pdf deps, CI branch mismatch). None are in trust-critical suites (injection, PII, tamper, Merkle, air-gap, trust-layer). See SKIPS.md for the full categorized list.
+
+### Subset Results (separate line items, not conflated with R1)
+
 | Test Suite | Passed | Skipped | Failed | Command |
 |---|---|---|---|---|
-| **Python (full suite)** | **997** | 6 | 9 *(environmental)* | `pytest tests/ -q --ignore=tests/e2e` |
 | **Rust library** | **UNVERIFIED** | — | — | `cargo test --lib -q` *(not available in measurement env)* |
 | **Rust binary** | **UNVERIFIED** | — | — | `cargo test --bins -q` *(not available in measurement env)* |
 | **Corpus integrity (404 fixtures, v1.0.0)** | **4** | — | 0 | `pytest tests/test_corpus_integrity.py -v` |
@@ -25,18 +40,6 @@
 | **Trust layer** | **33** | — | 0 | `pytest tests/test_trust_layer_extended.py -v` |
 | **Air-gap zero-egress** | **12** | — | 0 | `pytest tests/test_airgap_zero_egress.py -v` |
 | **Grounding accuracy** | **6** | — | 0 | `pytest tests/bench/test_grounding.py -v` |
-
-> 6 Python skips are environmental (LibreOffice, PDF form fixture, tree-sitter, CI branch mismatch — see SKIPS.md for full reasons).
->
-> 9 Python failures are environmental (OS keychain backend `NotImplementedError` in headless sandbox — see below).
-
-### Environmental failures (not code bugs)
-
-All 9 failures are in `tests/test_keychain_storage.py` and `tests/test_resource_bounds.py`:
-
-| Test | Cause |
-|---|---|
-| `test_keychain_storage.py` (9 tests) | `keyring` backend raises `NotImplementedError` — no OS keyring service in headless sandbox. Passes on macOS/Windows/Linux-with-Secret-Service. |
 
 ---
 
@@ -176,39 +179,31 @@ cd Kairo-Phantom
 # Install dependencies
 pip install -r requirements-test.txt
 
-# Python tests (997 passed, 6 skipped, 9 failed — environmental)
-pytest tests/ -q --ignore=tests/e2e
+# kairo-sidecar CPU suite (959 passed, 0 skipped, 0 failed — no-skip enforced)
+cd kairo-sidecar
+xvfb-run --auto-servernum python -m pytest tests/ --strict-markers --tb=short -p no:cacheprovider
+cd ..
 
-# Injection suite (8 passed, 25/25 blocked, 0/15 FP, 106 patterns)
-pytest tests/security/test_injection_suite.py -v
+# Root suite (1,017 passed, 34 skipped, 0 failed across 4 shards + e2e)
+# See .github/workflows/root_suite.yml for the sharding logic
+python -m pytest tests/ -q --ignore=tests/e2e --timeout=120 --tb=short -p no:cacheprovider
 
-# Injection guard expanded (17 passed)
-pytest tests/test_injection_guard_expanded.py -v
-
-# Merkle receipts (17 passed)
-pytest tests/test_merkle_receipts.py -v
-
-# Tamper detection (17 passed)
-pytest tests/test_canary_break.py -v
-
-# Trust layer (33 passed)
-pytest tests/test_trust_layer_extended.py -v
-
-# Air-gap zero-egress (12 passed)
-pytest tests/test_airgap_zero_egress.py -v
-
-# Grounding accuracy (6 passed, 595/600 = 99.17%)
-pytest tests/bench/test_grounding.py -v -s
-
-# Corpus integrity (4 passed, 404 fixtures, v1.0.0)
-pytest tests/test_corpus_integrity.py -v
+# Individual subset suites
+pytest tests/security/test_injection_suite.py -v          # 8 passed, 25/25 blocked, 0/15 FP, 106 patterns
+pytest tests/test_injection_guard_expanded.py -v           # 17 passed
+pytest tests/test_merkle_receipts.py -v                    # 17 passed
+pytest tests/test_canary_break.py -v                       # 17 passed
+pytest tests/test_trust_layer_extended.py -v               # 33 passed
+pytest tests/test_airgap_zero_egress.py -v                 # 12 passed
+pytest tests/bench/test_grounding.py -v -s                 # 6 passed, 595/600 = 99.17%
+pytest tests/test_corpus_integrity.py -v                   # 4 passed, 404 fixtures, v1.0.0
 
 # Rust (NOT VERIFIED in measurement env — run yourself)
 cargo test --lib -q
 cargo test --bins -q
 ```
 
-> **Environment:** Linux (sandbox), Python 3.12.12, 2026-07-12, commit `1aaa76a`. 9 environmental failures from OS keychain backend (`NotImplementedError` in headless env). 6 environmental skips (LibreOffice, PDF fixture, tree-sitter, CI branch — see SKIPS.md).
+> **Environment:** Ubuntu (GitHub Actions), Python 3.12, 2026-07-12, commit `a56cdba`. 34 environmental skips (LibreOffice, tree-sitter, PDF fixtures, cross-format deps, CI branch mismatch — see SKIPS.md). 0 failures.
 
 ---
 
@@ -216,7 +211,7 @@ cargo test --bins -q
 
 | Version | Date | Tests | Notes |
 |---|---|---|---|
-| v1.2.1 | 2026-07-12 | 997 passed, 6 skipped, 9 failed (environmental) | Measured on clean clone at commit `1aaa76a`, Python 3.12.12, Linux. Rust not verified (no cargo). Prior "1,089 passed" figure was stale — referenced non-existent test files. |
+| v1.2.1 | 2026-07-12 | 1,976 passed, 34 skipped, 0 failed (CI-verified) | CI-verified at commit `a56cdba` via GitHub Actions runs 29191013782 + 29191013766. Prior "1,089 passed" figure was stale — referenced non-existent test files. Prior "997 passed / 9 failed" was a local-sandbox artifact (keychain `NotImplementedError` in headless env; passes in CI). |
 
 ---
 
