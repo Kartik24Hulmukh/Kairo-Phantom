@@ -1,0 +1,7 @@
+# GitHub "Sponsor" button configuration.
+# The `github:` line only renders if GitHub Sponsors is enabled for the account;
+# leave it commented until Sponsors is approved, otherwise the button errors.
+# github: [Kartik24Hulmukh]
+custom:
+  - "https://kartik24hulmukh.github.io/Kairo-Phantom/"
+  - "https://dir.floss.fund/view/kairo-phantom"
