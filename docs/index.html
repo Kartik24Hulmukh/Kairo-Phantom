@@ -477,7 +477,7 @@ footer{padding:40px 0 48px}
       <div class="step reveal">
         <div class="step-num mono">01</div>
         <h3>The agent acts locally</h3>
-        <p>Kairo-Phantom runs entirely on your device and ghost-types into your real applications — Word, your PDF viewer, your matter management system. It operates in <code>read + suggest</code> mode: it drafts and redlines; you accept. Nothing ever leaves the machine.</p>
+        <p>Kairo-Phantom runs entirely on your device and ghost-types into your real applications — Word, your PDF viewer, your matter management system (driving live applications is an experimental capability under active hardening). It operates in <code>read + suggest</code> mode: it drafts and redlines; you accept. The agent runs with networking disabled; you can confirm there are no outbound connections from the agent process with a packet capture (runtime-scoped, not a whole-OS guarantee).</p>
       </div>
       <div class="step reveal">
         <div class="step-num mono">02</div>
@@ -614,40 +614,40 @@ sudo tcpdump -i any -n &amp; \
         </thead>
         <tbody>
           <tr>
-            <td>Tamper detection (single-byte flip, 10k trials)</td>
-            <td><span class="metric-val metric-placeholder">10,000 / 10,000 detected</span><!-- PLACEHOLDER: exact number --></td>
+            <td>Test suite (full CI Python)</td>
+            <td><span class="metric-val">1,976 passed / 34 skipped / 0 failed</span></td>
             <td><span class="pill pill-measured">Measured</span></td>
-            <td><code>make bench-tamper</code></td>
+            <td><code>pytest tests/ -q --ignore=tests/e2e</code> (CI runs 29191013782 + 29191013766; see BENCHMARKS.md)</td>
           </tr>
           <tr>
-            <td>Zero network egress during agent run</td>
-            <td><span class="metric-val metric-placeholder">0 packets / N sessions</span><!-- PLACEHOLDER: session count --></td>
+            <td>Tamper detection (canary break)</td>
+            <td><span class="metric-val">17 / 17 detected</span></td>
             <td><span class="pill pill-measured">Measured</span></td>
-            <td><code>make bench-egress</code></td>
+            <td><code>pytest tests/test_canary_break.py</code></td>
           </tr>
           <tr>
-            <td>Receipt verification speed (10k-entry chain)</td>
-            <td><span class="metric-val metric-placeholder">XX ms</span><!-- PLACEHOLDER: exact ms --></td>
+            <td>Network egress during agent run</td>
+            <td><span class="metric-val">0 egress across 12 sessions</span></td>
             <td><span class="pill pill-measured">Measured</span></td>
-            <td><code>make bench-verify</code></td>
+            <td><code>pytest tests/test_airgap_zero_egress.py</code></td>
           </tr>
           <tr>
-            <td>Prompt-injection resistance (agent-injection suite)</td>
-            <td><span class="metric-val metric-placeholder">XX.X% blocked (n=XXX)</span><!-- PLACEHOLDER: exact % and n --></td>
-            <td><span class="pill pill-pending">Pending hardware</span></td>
-            <td><code>make bench-injection</code></td>
+            <td>Prompt-injection resistance</td>
+            <td><span class="metric-val">25 / 25 blocked; 106 patterns; 0/15 false positives</span></td>
+            <td><span class="pill pill-measured">Measured</span></td>
+            <td><code>pytest tests/security/test_injection_suite.py</code></td>
           </tr>
           <tr>
-            <td>Redline grounding accuracy (clause-cite suite)</td>
-            <td><span class="metric-val metric-placeholder">XX.X% grounded (n=XXX)</span><!-- PLACEHOLDER: exact % and n --></td>
-            <td><span class="pill pill-pending">Pending hardware</span></td>
-            <td><code>make bench-grounding</code></td>
+            <td>Redline grounding accuracy</td>
+            <td><span class="metric-val">595 / 600 = 99.17% grounded</span></td>
+            <td><span class="pill pill-measured">Measured</span></td>
+            <td><code>pytest tests/bench/test_grounding.py -v -s</code></td>
           </tr>
           <tr>
-            <td>False-positive rate on suggested redlines</td>
-            <td><span class="metric-val metric-placeholder">X.X% (n=XXX)</span><!-- PLACEHOLDER: exact % and n --></td>
+            <td>Receipt verification speed</td>
+            <td><span class="metric-val">not yet measured</span></td>
             <td><span class="pill pill-pending">Pending hardware</span></td>
-            <td><code>make bench-fpr</code></td>
+            <td>harness not yet built</td>
           </tr>
         </tbody>
       </table>
@@ -736,7 +736,7 @@ sudo tcpdump -i any -n &amp; \
         <ul>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>Ed25519-signed, hash-chained receipt ledger and file format</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>Standalone offline verifier CLI (<span class="mono">kairo verify</span>)</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>Tamper-detection test harness (<span class="mono">make bench-tamper</span>)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>Tamper-detection test harness (<span class="mono">pytest tests/test_canary_break.py</span>)</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>Local agent core with read + suggest document redlining (early)</li>
         </ul>
       </div>
@@ -778,7 +778,7 @@ sudo tcpdump -i any -n &amp; \
       <button type="submit" class="btn btn-primary btn-lg">Request early access</button>
     </form>
     <p class="email-success" id="email-success" role="status">Thanks — we'll be in touch. (Demo form: connect a backend before launch.)</p>
-    <p class="email-note reveal">For design partners in legal, compliance, healthcare, and finance. No newsletter, no spam.</p>
+    <p class="email-note reveal">For design collaborators in legal, compliance, healthcare, and finance. No newsletter, no spam.</p>
   </div>
 </section>
 
