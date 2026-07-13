@@ -1,0 +1,79 @@
+{
+  "version": "v1.0.0",
+  "entity": {
+    "type": "individual",
+    "role": "owner",
+    "name": "Kartik Hulmukh",
+    "email": "kartikhulmukh24@gmail.com",
+    "phone": "",
+    "description": "Solo founder and maintainer of Kairo-Phantom, based in India. I build open-source, privacy-preserving desktop AI tooling whose behaviour can be independently verified rather than trusted. Kairo-Phantom is MIT-licensed and developed in the open.",
+    "webpageUrl": {
+      "url": "https://kartik24hulmukh.github.io/Kairo-Phantom/",
+      "wellKnown": "https://kartik24hulmukh.github.io/Kairo-Phantom/.well-known/funding-manifest-urls"
+    }
+  },
+  "projects": [
+    {
+      "guid": "kairo-phantom",
+      "name": "Kairo-Phantom",
+      "description": "An offline, on-device AI desktop agent that produces a signed, independently-verifiable audit trail of what it does. A sealed runtime mode lets you confirm the agent process made no outbound network connections during a session, and every action is appended to an Ed25519 hash-chained log that anyone can verify offline with the bundled external verifier - tampering with any entry breaks the chain. It includes a prompt-injection screen and a PII guard on inputs, and eleven domain adapters (documents, spreadsheets, PDF, email, code and others) that pass their current fixture/readback tests. Driving live desktop applications end-to-end is an experimental capability under active hardening. Built for people and organisations that need a local AI assistant whose actions leave a tamper-evident, offline-checkable record.",
+      "webpageUrl": {
+        "url": "https://kartik24hulmukh.github.io/Kairo-Phantom/",
+        "wellKnown": "https://kartik24hulmukh.github.io/Kairo-Phantom/.well-known/funding-manifest-urls"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/Kartik24Hulmukh/Kairo-Phantom",
+        "wellKnown": ""
+      },
+      "licenses": [
+        "spdx:MIT"
+      ],
+      "tags": [
+        "security",
+        "privacy",
+        "artificial-intelligence",
+        "developer-tools",
+        "automation",
+        "cryptography",
+        "desktop"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "primary-bank",
+        "type": "bank",
+        "address": "",
+        "description": "Indian bank account. Account details are shared privately with the funder on award; not published in this manifest."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "hardening-milestone",
+        "status": "active",
+        "name": "Security hardening + external verification milestone",
+        "description": "One-time grant to fund ~6 months of full-time development: prove the live-desktop execution path on real hardware, expand the deterministic test/oracle suite, commission an independent security review of the audit-trail and sealed-runtime claims, and publish a free offline verifier for third parties.",
+        "amount": 25000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "primary-bank"
+        ]
+      },
+      {
+        "guid": "ongoing-maintenance",
+        "status": "active",
+        "name": "Ongoing maintenance",
+        "description": "Recurring support for maintenance, dependency and security updates, issue triage, and documentation for the open-source project.",
+        "amount": 1000,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": [
+          "primary-bank"
+        ]
+      }
+    ],
+    "history": []
+  }
+}
