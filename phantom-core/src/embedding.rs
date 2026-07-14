@@ -65,36 +65,29 @@ fn embed_fastembed(text: &str) -> Result<Vec<f32>> {
     static ENGINE: OnceCell<TextEmbedding> = OnceCell::new();
 
     let engine = ENGINE.get_or_try_init(|| {
-        info!("🧠 Embedding: Loading vendored all-MiniLM-L6-v2 (quantized) from compiled-in bytes …");
+        info!(
+            "🧠 Embedding: Loading vendored all-MiniLM-L6-v2 (quantized) from compiled-in bytes …"
+        );
 
         // All model files are embedded at compile time via include_bytes!/include_str!.
         // This guarantees the model is always present — no filesystem path lookup, no
         // CWD dependency, no network download. Works identically in CI, dev, and the
         // shipped release binary. This is the offline-first guarantee.
-        let onnx_file = include_bytes!(
-            "../assets/models/all-MiniLM-L6-v2/model.onnx"
-        )
-        .to_vec();
-        let tokenizer_file = include_str!(
-            "../assets/models/all-MiniLM-L6-v2/tokenizer.json"
-        )
-        .as_bytes()
-        .to_vec();
-        let config_file = include_str!(
-            "../assets/models/all-MiniLM-L6-v2/config.json"
-        )
-        .as_bytes()
-        .to_vec();
-        let special_tokens_map_file = include_str!(
-            "../assets/models/all-MiniLM-L6-v2/special_tokens_map.json"
-        )
-        .as_bytes()
-        .to_vec();
-        let tokenizer_config_file = include_str!(
-            "../assets/models/all-MiniLM-L6-v2/tokenizer_config.json"
-        )
-        .as_bytes()
-        .to_vec();
+        let onnx_file = include_bytes!("../assets/models/all-MiniLM-L6-v2/model.onnx").to_vec();
+        let tokenizer_file = include_str!("../assets/models/all-MiniLM-L6-v2/tokenizer.json")
+            .as_bytes()
+            .to_vec();
+        let config_file = include_str!("../assets/models/all-MiniLM-L6-v2/config.json")
+            .as_bytes()
+            .to_vec();
+        let special_tokens_map_file =
+            include_str!("../assets/models/all-MiniLM-L6-v2/special_tokens_map.json")
+                .as_bytes()
+                .to_vec();
+        let tokenizer_config_file =
+            include_str!("../assets/models/all-MiniLM-L6-v2/tokenizer_config.json")
+                .as_bytes()
+                .to_vec();
 
         let tokenizer_files = TokenizerFiles {
             tokenizer_file,
@@ -115,10 +108,7 @@ fn embed_fastembed(text: &str) -> Result<Vec<f32>> {
         // SAFETY: env var set is thread-safe in practice for this one-shot init.
         std::env::set_var("HF_HUB_OFFLINE", "1");
 
-        TextEmbedding::try_new_from_user_defined(
-            user_model,
-            InitOptionsUserDefined::new(),
-        )
+        TextEmbedding::try_new_from_user_defined(user_model, InitOptionsUserDefined::new())
     })?;
 
     let mut results = engine.embed(vec![text], None)?;
