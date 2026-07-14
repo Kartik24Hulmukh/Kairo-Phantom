@@ -26,9 +26,7 @@ DEFAULT_CLIP_MODEL = "openai/clip-vit-base-patch32"
 class MediaEmbeddings:
     def __init__(self, model=DEFAULT_CLIP_MODEL, device="cpu"):
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError(
-                "embed-anything not installed. pip install embed-anything"
-            )
+            raise RuntimeError("embed-anything not installed. pip install embed-anything")
         self.model_name = model
         self.device = device
         # Lazy: do NOT call from_pretrained_hf here. CI/offline Tier-1 only
@@ -41,9 +39,7 @@ class MediaEmbeddings:
         if self._config is not None:
             return
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError(
-                "embed-anything not installed. pip install embed-anything"
-            )
+            raise RuntimeError("embed-anything not installed. pip install embed-anything")
         try:
             local = os.environ.get("KAIRO_CLIP_MODEL_PATH")
             if local and os.path.isdir(local):
@@ -61,15 +57,11 @@ class MediaEmbeddings:
                 self._config = EmbeddingModel.from_pretrained_hf(self.model_name)
                 log.info("CLIP model %s initialised via embed-anything", self.model_name)
         except Exception as exc:
-            raise RuntimeError(
-                "Failed to initialise embed-anything model: " + str(exc)
-            ) from exc
+            raise RuntimeError("Failed to initialise embed-anything model: " + str(exc)) from exc
 
     def embed_image(self, image_path):
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError(
-                "embed-anything not installed. pip install embed-anything"
-            )
+            raise RuntimeError("embed-anything not installed. pip install embed-anything")
         self._init_model()
         data = _ea.embed_file(image_path, embedder=self._config)
         if isinstance(data, list) and len(data) > 0:
@@ -81,9 +73,7 @@ class MediaEmbeddings:
 
     def embed_images(self, image_paths):
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError(
-                "embed-anything not installed. pip install embed-anything"
-            )
+            raise RuntimeError("embed-anything not installed. pip install embed-anything")
         return [self.embed_image(p) for p in image_paths]
 
     @staticmethod
