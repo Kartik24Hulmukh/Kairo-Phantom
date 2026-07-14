@@ -10,6 +10,14 @@
 //
 // The embedding dimension is 256 to match the existing MemMachine schema.
 // sqlite-vec is loaded as a runtime extension on the SQLite connection.
+//
+// OFFLINE MODEL LOADING:
+//   When the `local-embeddings` feature is enabled, the embedding model
+//   (all-MiniLM-L6-v2 quantized ONNX, ~22MB) is loaded from VENDORED files
+//   committed to the repo under phantom-core/assets/models/all-MiniLM-L6-v2/.
+//   No network access is required — this is critical for the offline-first
+//   product promise. HF_HUB_OFFLINE=1 is also set as a belt-and-suspenders
+//   measure, but the real guarantee is that the code reads local files.
 
 use anyhow::{anyhow, Result};
 use rusqlite::Connection;
@@ -23,9 +31,13 @@ pub const EMBED_DIM: usize = 256;
 /// Generate a real embedding vector for the given text.
 ///
 /// Production path (cargo build --features local-embeddings):
-///   Uses fastembed::AllMiniLML6V2 (384-dim ONNX, 80MB, CPU).
+///   Uses fastembed with a VENDORED all-MiniLM-L6-v2 quantized ONNX model
+///   (384-dim, ~22MB, CPU). The model files are committed to the repo under
+///   phantom-core/assets/models/all-MiniLM-L6-v2/ and loaded entirely from
+///   local bytes — NO network download, NO HuggingFace hub access. This is
+///   critical for an offline-first product: the shipping app must never
+///   depend on network availability for embeddings.
 ///   Truncated to 256 dims to match existing MemMachine schema.
-///   Model downloads on first use, cached in ~/.cache/
 ///
 /// CI / headless path (default):
 ///   Deterministic hash-based 256-dim vector. Same cosine-distance ranking
@@ -44,15 +56,68 @@ pub fn embed(text: &str) -> Result<Vec<f32>> {
 
 #[cfg(feature = "local-embeddings")]
 fn embed_fastembed(text: &str) -> Result<Vec<f32>> {
-    use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+    use fastembed::{
+        InitOptionsUserDefined, Pooling, QuantizationMode, TextEmbedding, TokenizerFiles,
+        UserDefinedEmbeddingModel,
+    };
     use once_cell::sync::OnceCell;
 
     static ENGINE: OnceCell<TextEmbedding> = OnceCell::new();
 
     let engine = ENGINE.get_or_try_init(|| {
-        info!("🧠 Embedding: Initialising fastembed all-MiniLM-L6-v2 …");
-        TextEmbedding::try_new(
-            InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
+        info!("🧠 Embedding: Loading vendored all-MiniLM-L6-v2 (quantized) from compiled-in bytes …");
+
+        // All model files are embedded at compile time via include_bytes!/include_str!.
+        // This guarantees the model is always present — no filesystem path lookup, no
+        // CWD dependency, no network download. Works identically in CI, dev, and the
+        // shipped release binary. This is the offline-first guarantee.
+        let onnx_file = include_bytes!(
+            "../assets/models/all-MiniLM-L6-v2/model.onnx"
+        )
+        .to_vec();
+        let tokenizer_file = include_str!(
+            "../assets/models/all-MiniLM-L6-v2/tokenizer.json"
+        )
+        .as_bytes()
+        .to_vec();
+        let config_file = include_str!(
+            "../assets/models/all-MiniLM-L6-v2/config.json"
+        )
+        .as_bytes()
+        .to_vec();
+        let special_tokens_map_file = include_str!(
+            "../assets/models/all-MiniLM-L6-v2/special_tokens_map.json"
+        )
+        .as_bytes()
+        .to_vec();
+        let tokenizer_config_file = include_str!(
+            "../assets/models/all-MiniLM-L6-v2/tokenizer_config.json"
+        )
+        .as_bytes()
+        .to_vec();
+
+        let tokenizer_files = TokenizerFiles {
+            tokenizer_file,
+            config_file,
+            special_tokens_map_file,
+            tokenizer_config_file,
+        };
+
+        // The vendored model is the quantized variant (model_quantized.onnx from
+        // Xenova/all-MiniLM-L6-v2), so we must specify Dynamic quantization.
+        // AllMiniLML6V2 uses Mean pooling (per fastembed's get_default_pooling_method).
+        let user_model = UserDefinedEmbeddingModel::new(onnx_file, tokenizer_files)
+            .with_quantization(QuantizationMode::Dynamic)
+            .with_pooling(Pooling::Mean);
+
+        // Belt-and-suspenders: set HF_HUB_OFFLINE so fastembed/ort never attempt
+        // any network call even if the local-load path somehow falls through.
+        // SAFETY: env var set is thread-safe in practice for this one-shot init.
+        std::env::set_var("HF_HUB_OFFLINE", "1");
+
+        TextEmbedding::try_new_from_user_defined(
+            user_model,
+            InitOptionsUserDefined::new(),
         )
     })?;
 
