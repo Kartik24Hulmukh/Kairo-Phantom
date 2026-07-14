@@ -56,14 +56,59 @@ class RetrievalIndex:
         if self._embed_fn is not None:
             return
 
-        # Try model2vec (same as sidecar.embeddings / MemMachine v2)
+        # Try model2vec (same as sidecar.embeddings / MemMachine v2).
+        # Weights are VENDORED under kairo-sidecar/assets/models/potion-base-8M/
+        # — load is fully offline (no HuggingFace / Xet CAS network).
         try:
-            # Set offline mode to prevent any network calls
-            os.environ.setdefault("HF_HUB_OFFLINE", "1")
-            os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+            # Prefer the shared offline loader when sidecar is on PYTHONPATH
+            # (CI / installed package). Fall back to a local-path load that
+            # still never hits the network.
+            model = None
+            try:
+                from sidecar.model_paths import load_potion_base_8m_static_model
 
-            from model2vec import StaticModel
-            model = StaticModel.from_pretrained("minishlab/potion-base-8M")
+                model = load_potion_base_8m_static_model()
+            except Exception:
+                # Repo-root / editable layouts without sidecar package on path:
+                # resolve the vendored directory relative to this file / CWD.
+                from pathlib import Path
+                from model2vec import StaticModel
+
+                os.environ["HF_HUB_OFFLINE"] = "1"
+                os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
+                candidates = [
+                    Path(os.environ["KAIRO_MODEL2VEC_PATH"]).expanduser()
+                    if os.environ.get("KAIRO_MODEL2VEC_PATH")
+                    else None,
+                    Path(__file__).resolve().parents[2]
+                    / "kairo-sidecar"
+                    / "assets"
+                    / "models"
+                    / "potion-base-8M",
+                    Path.cwd()
+                    / "kairo-sidecar"
+                    / "assets"
+                    / "models"
+                    / "potion-base-8M",
+                    Path.cwd() / "assets" / "models" / "potion-base-8M",
+                ]
+                model_dir = None
+                for cand in candidates:
+                    if cand is None:
+                        continue
+                    if (cand / "model.safetensors").is_file() and (
+                        cand / "config.json"
+                    ).is_file():
+                        model_dir = cand
+                        break
+                if model_dir is None:
+                    raise FileNotFoundError(
+                        "vendored potion-base-8M model not found locally"
+                    )
+                model = StaticModel.from_pretrained(
+                    str(model_dir), force_download=False
+                )
 
             def model2vec_embed(text: str) -> List[float]:
                 emb = model.encode([text])
@@ -72,7 +117,10 @@ class RetrievalIndex:
             self._embed_fn = model2vec_embed
             self._embed_dim = 256
             self._embed_backend = "model2vec"
-            logger.info("Using model2vec potion-base-8M (256-dim) for semantic retrieval")
+            logger.info(
+                "Using model2vec potion-base-8M (256-dim, vendored offline) "
+                "for semantic retrieval"
+            )
             return
 
         except Exception as e:
@@ -84,10 +132,9 @@ class RetrievalIndex:
                 raise RuntimeError(
                     "KAIRO_REQUIRE_SEMANTIC=1 but model2vec potion-base-8M is "
                     f"unavailable ({type(e).__name__}: {e}). Refusing to fall "
-                    "back to hash embeddings. Cache the model (e.g. "
-                    "`python -c \"from model2vec import StaticModel; "
-                    "StaticModel.from_pretrained('minishlab/potion-base-8M')\"`) "
-                    "or unset KAIRO_REQUIRE_SEMANTIC."
+                    "back to hash embeddings. Ensure the vendored model exists "
+                    "at kairo-sidecar/assets/models/potion-base-8M/ (or set "
+                    "KAIRO_MODEL2VEC_PATH), or unset KAIRO_REQUIRE_SEMANTIC."
                 ) from e
             logger.error(
                 "LOUD WARNING: model2vec unavailable (%s) — falling back to "
