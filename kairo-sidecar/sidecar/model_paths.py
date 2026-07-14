@@ -24,21 +24,13 @@ def _candidate_potion_dirs() -> list[Path]:
 
     here = Path(__file__).resolve()
     # kairo-sidecar/sidecar/model_paths.py -> kairo-sidecar/assets/models/...
-    candidates.append(
-        here.parents[1] / "assets" / "models" / POTION_BASE_8M_DIRNAME
-    )
+    candidates.append(here.parents[1] / "assets" / "models" / POTION_BASE_8M_DIRNAME)
     # Repo-root assets/ (alternate layout)
     # .../Kairo-Phantom/kairo-sidecar/sidecar -> parents[2] is repo root
     if len(here.parents) >= 3:
+        candidates.append(here.parents[2] / "assets" / "models" / POTION_BASE_8M_DIRNAME)
         candidates.append(
-            here.parents[2] / "assets" / "models" / POTION_BASE_8M_DIRNAME
-        )
-        candidates.append(
-            here.parents[2]
-            / "kairo-sidecar"
-            / "assets"
-            / "models"
-            / POTION_BASE_8M_DIRNAME
+            here.parents[2] / "kairo-sidecar" / "assets" / "models" / POTION_BASE_8M_DIRNAME
         )
 
     # CWD-relative (tests / CI often run from repo root or kairo-sidecar/)
