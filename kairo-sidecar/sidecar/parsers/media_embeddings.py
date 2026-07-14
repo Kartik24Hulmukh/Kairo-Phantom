@@ -1,5 +1,8 @@
 from __future__ import annotations
-import logging, math
+
+import logging
+import math
+import os
 
 log = logging.getLogger("kairo.media_embeddings")
 HAS_EMBED_ANYTHING = False
@@ -12,27 +15,62 @@ except ImportError:
     _ea = None
     EmbeddingModel = None
     WhichModel = None
+
+# Default HF id for CLIP. Weights are large (~605MB) and are NOT vendored
+# (GitHub 50MB limit / no LFS). Construction is offline-safe: model download
+# is deferred until the first embed_* call so Tier-1 wiring tests can assert
+# the import guard without phoning home to HuggingFace / Xet CAS.
 DEFAULT_CLIP_MODEL = "openai/clip-vit-base-patch32"
 
 
 class MediaEmbeddings:
     def __init__(self, model=DEFAULT_CLIP_MODEL, device="cpu"):
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError("embed-anything not installed. pip install embed-anything")
+            raise RuntimeError(
+                "embed-anything not installed. pip install embed-anything"
+            )
         self.model_name = model
         self.device = device
+        # Lazy: do NOT call from_pretrained_hf here. CI/offline Tier-1 only
+        # needs the constructor to prove the dep is wired; actual weights are
+        # loaded on first embed. Override with KAIRO_CLIP_MODEL_PATH to a local
+        # directory of HF-format weights if available offline.
         self._config = None
-        self._init_model()
 
     def _init_model(self):
+        if self._config is not None:
+            return
+        if not HAS_EMBED_ANYTHING:
+            raise RuntimeError(
+                "embed-anything not installed. pip install embed-anything"
+            )
         try:
-            self._config = EmbeddingModel.from_pretrained_hf(self.model_name)
+            local = os.environ.get("KAIRO_CLIP_MODEL_PATH")
+            if local and os.path.isdir(local):
+                # Prefer a local HF snapshot when the operator has staged one.
+                # embed-anything's from_pretrained_hf accepts a local path as
+                # model_id when the directory contains model weights.
+                os.environ.setdefault("HF_HUB_OFFLINE", "1")
+                os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+                self._config = EmbeddingModel.from_pretrained_hf(local)
+                log.info("CLIP loaded from local path %s (offline)", local)
+            else:
+                # May download on first use when network is available.
+                # Under HF_HUB_OFFLINE=1 / air-gap this raises — callers that
+                # need offline CLIP must set KAIRO_CLIP_MODEL_PATH.
+                self._config = EmbeddingModel.from_pretrained_hf(self.model_name)
+                log.info("CLIP model %s initialised via embed-anything", self.model_name)
         except Exception as exc:
-            raise RuntimeError("Failed to initialise embed-anything model: " + str(exc)) from exc
+            raise RuntimeError(
+                "Failed to initialise embed-anything model: " + str(exc)
+            ) from exc
 
     def embed_image(self, image_path):
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError("embed-anything not installed. pip install embed-anything")
+            raise RuntimeError(
+                "embed-anything not installed. pip install embed-anything"
+            )
+        self._init_model()
         data = _ea.embed_file(image_path, embedder=self._config)
         if isinstance(data, list) and len(data) > 0:
             emb = data[0]
@@ -43,7 +81,9 @@ class MediaEmbeddings:
 
     def embed_images(self, image_paths):
         if not HAS_EMBED_ANYTHING:
-            raise RuntimeError("embed-anything not installed. pip install embed-anything")
+            raise RuntimeError(
+                "embed-anything not installed. pip install embed-anything"
+            )
         return [self.embed_image(p) for p in image_paths]
 
     @staticmethod
