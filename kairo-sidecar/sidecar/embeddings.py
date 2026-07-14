@@ -13,14 +13,23 @@ def get_model():
     if _model is None:
         with _lock:
             if _model is None:
-                log.info("Loading Model2Vec 'minishlab/potion-base-8M'...")
+                log.info(
+                    "Loading Model2Vec 'minishlab/potion-base-8M' from vendored assets..."
+                )
                 try:
-                    from model2vec import StaticModel
+                    from sidecar.model_paths import (
+                        POTION_BASE_8M_HF_ID,
+                        load_potion_base_8m_static_model,
+                        resolve_potion_base_8m_path,
+                    )
 
-                    # Note: First load will download and cache the model from HuggingFace
-                    _model = StaticModel.from_pretrained("minishlab/potion-base-8M")
+                    model_dir = resolve_potion_base_8m_path()
+                    _model = load_potion_base_8m_static_model()
                     log.info(
-                        "Model2Vec model 'minishlab/potion-base-8M' loaded successfully (256 dimensions)"
+                        "Model2Vec model '%s' loaded from local path %s "
+                        "(256 dimensions, offline)",
+                        POTION_BASE_8M_HF_ID,
+                        model_dir,
                     )
                 except Exception as e:
                     log.error(f"Failed to load Model2Vec: {e}")
