@@ -13,9 +13,7 @@ def get_model():
     if _model is None:
         with _lock:
             if _model is None:
-                log.info(
-                    "Loading Model2Vec 'minishlab/potion-base-8M' from vendored assets..."
-                )
+                log.info("Loading Model2Vec 'minishlab/potion-base-8M' from vendored assets...")
                 try:
                     from sidecar.model_paths import (
                         POTION_BASE_8M_HF_ID,
