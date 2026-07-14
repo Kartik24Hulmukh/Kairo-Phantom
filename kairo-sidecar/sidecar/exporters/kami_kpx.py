@@ -84,10 +84,13 @@ class KAMIIndex:
             return self._embedder
         self._embedder_loaded = True
         try:
-            from model2vec import StaticModel
+            from sidecar.model_paths import load_potion_base_8m_static_model
 
-            self._embedder = StaticModel.from_pretrained("minishlab/potion-base-8M")
-            log.info("KAMI: model2vec potion-base-8M loaded for semantic search")
+            self._embedder = load_potion_base_8m_static_model()
+            log.info(
+                "KAMI: model2vec potion-base-8M loaded from vendored assets "
+                "(offline) for semantic search"
+            )
         except Exception as e:
             log.error(f"KAMI: Failed to load model2vec: {e}")
             self._embedder = None
