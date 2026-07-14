@@ -270,10 +270,10 @@ class TestAskYourDocsPdf:
         assert result.audit_entry_id, "No audit entry in offline mode"
         assert result.audit_signature, "No audit signature in offline mode"
 
-        # Clean up
+        # Clean up network-block flag only. Keep HF_HUB_OFFLINE=1 sticky —
+        # product is offline-first and weights are vendored; never re-enable
+        # HuggingFace downloads mid-suite.
         del os.environ["KAIRO_NO_NET"]
-        if "HF_HUB_OFFLINE" in os.environ:
-            del os.environ["HF_HUB_OFFLINE"]
 
     def test_bad_file_returns_typed_error(self):
         """A missing file must raise IngestError, not crash."""
