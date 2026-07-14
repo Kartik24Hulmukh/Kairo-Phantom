@@ -4,3 +4,4 @@ loop-engineering/__pycache__/
 loop-engineering/.state.lock
 .kairo/
 
+phantom-core/.fastembed_cache/

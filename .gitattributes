@@ -1,0 +1,2 @@
+# No Git LFS tracking — the vendored ONNX model (~22MB) is under GitHub's
+# 50MB limit and committed directly to git.
