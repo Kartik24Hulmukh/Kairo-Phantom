@@ -8,10 +8,10 @@
 #   the run (observed: exit 137 in a 4 GB sandbox). Sharding the files across
 #   a matrix bounds per-process memory; pytest-xdist (--dist loadfile) inside
 #   each shard bounds it further via worker processes.
-# - The e2e shard requires REAL semantic embeddings: the model2vec model is
-#   cached (actions/cache) and pre-downloaded on cache miss, and
-#   KAIRO_REQUIRE_SEMANTIC=1 turns any silent hash-embedding fallback into a
-#   hard failure (anti-fake-green).
+# - The e2e shard requires REAL semantic embeddings: model2vec potion-base-8M
+#   is VENDORED under kairo-sidecar/assets/models/potion-base-8M/ (no network,
+#   no HuggingFace / Xet CAS). KAIRO_REQUIRE_SEMANTIC=1 turns any silent
+#   hash-embedding fallback into a hard failure (anti-fake-green).
 
 name: Root Test Suite (full, sharded)
 
@@ -25,6 +25,9 @@ on:
 env:
   KAIRO_OFFLINE: "1"
   KAIRO_FORCE_CPU: "1"
+  # Offline-first: vendored model under kairo-sidecar/assets/models/potion-base-8M/
+  HF_HUB_OFFLINE: "1"
+  TRANSFORMERS_OFFLINE: "1"
 
 jobs:
   root-tests:
@@ -53,20 +56,29 @@ jobs:
           pip install -r requirements-test.txt
           pip install pytest pytest-asyncio pytest-xdist pytest-timeout anyio
 
-      - name: Cache model2vec potion-base-8M
-        id: model-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/huggingface
-          key: model2vec-potion-base-8M-v1
-
-      - name: Download model2vec model (cache miss only)
-        if: steps.model-cache.outputs.cache-hit != 'true'
-        env:
-          HF_HUB_OFFLINE: "0"
-          TRANSFORMERS_OFFLINE: "0"
+      - name: Verify vendored model2vec potion-base-8M (offline, no download)
         run: |
-          python -c "from model2vec import StaticModel; StaticModel.from_pretrained('minishlab/potion-base-8M'); print('model cached OK')"
+          test -f kairo-sidecar/assets/models/potion-base-8M/model.safetensors
+          test -f kairo-sidecar/assets/models/potion-base-8M/config.json
+          test -f kairo-sidecar/assets/models/potion-base-8M/tokenizer.json
+          # Refuse LFS pointer files (must be real binaries in git)
+          if head -c 50 kairo-sidecar/assets/models/potion-base-8M/model.safetensors | grep -q 'git-lfs'; then
+            echo "FATAL: model.safetensors is a Git LFS pointer, not a real binary" >&2
+            exit 1
+          fi
+          python -c "
+          import os
+          os.environ['HF_HUB_OFFLINE']='1'
+          os.environ['TRANSFORMERS_OFFLINE']='1'
+          import sys
+          sys.path.insert(0, 'kairo-sidecar')
+          from sidecar.model_paths import load_potion_base_8m_static_model, resolve_potion_base_8m_path
+          p = resolve_potion_base_8m_path()
+          m = load_potion_base_8m_static_model()
+          emb = m.encode(['offline smoke'])
+          assert emb.shape[-1] == 256, emb.shape
+          print('vendored model OK at', p, 'dim', emb.shape)
+          "
 
       - name: Compute shard file list (deterministic round-robin by file)
         id: shard
@@ -82,6 +94,9 @@ jobs:
       - name: Run shard (xdist, loud semantic fallback, fail-fast timeout)
         env:
           KAIRO_REQUIRE_SEMANTIC: "1"
+          HF_HUB_OFFLINE: "1"
+          TRANSFORMERS_OFFLINE: "1"
+          PYTHONPATH: kairo-sidecar
         run: |
           python -m pytest ${{ steps.shard.outputs.files }} \
             -n 2 --dist loadfile \
@@ -112,22 +127,35 @@ jobs:
           pip install -r requirements-test.txt
           pip install pytest pytest-asyncio pytest-timeout anyio
 
-      - name: Cache model2vec potion-base-8M
-        id: model-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/huggingface
-          key: model2vec-potion-base-8M-v1
-
-      - name: Download model2vec model (cache miss only)
-        if: steps.model-cache.outputs.cache-hit != 'true'
-        env:
-          HF_HUB_OFFLINE: "0"
-          TRANSFORMERS_OFFLINE: "0"
+      - name: Verify vendored model2vec potion-base-8M (offline, no download)
         run: |
-          python -c "from model2vec import StaticModel; StaticModel.from_pretrained('minishlab/potion-base-8M'); print('model cached OK')"
+          test -f kairo-sidecar/assets/models/potion-base-8M/model.safetensors
+          test -f kairo-sidecar/assets/models/potion-base-8M/config.json
+          test -f kairo-sidecar/assets/models/potion-base-8M/tokenizer.json
+          if head -c 50 kairo-sidecar/assets/models/potion-base-8M/model.safetensors | grep -q 'git-lfs'; then
+            echo "FATAL: model.safetensors is a Git LFS pointer, not a real binary" >&2
+            exit 1
+          fi
+          python -c "
+          import os
+          os.environ['HF_HUB_OFFLINE']='1'
+          os.environ['TRANSFORMERS_OFFLINE']='1'
+          import sys
+          sys.path.insert(0, 'kairo-sidecar')
+          from sidecar.model_paths import load_potion_base_8m_static_model, resolve_potion_base_8m_path
+          p = resolve_potion_base_8m_path()
+          m = load_potion_base_8m_static_model()
+          emb = m.encode(['offline smoke'])
+          assert emb.shape[-1] == 256, emb.shape
+          print('vendored model OK at', p, 'dim', emb.shape)
+          "
 
-      - name: Run e2e suite (KAIRO_REQUIRE_SEMANTIC enforced by conftest)
+      - name: Run e2e suite (KAIRO_REQUIRE_SEMANTIC + vendored offline model)
+        env:
+          KAIRO_REQUIRE_SEMANTIC: "1"
+          HF_HUB_OFFLINE: "1"
+          TRANSFORMERS_OFFLINE: "1"
+          PYTHONPATH: kairo-sidecar
         run: |
           python -m pytest tests/e2e \
             --timeout=120 --timeout-method=thread \
