@@ -46,7 +46,9 @@ Produces real OOXML tracked changes (`w:ins`/`w:del`) on the contract, with a si
 python -m kairo redline fixtures/demo/sample_nda.docx fixtures/demo/nda_playbook.json --sealed --out redline_sealed
 ```
 
-Activates sealed mode, blocks all outbound connections, and writes a signed zero-egress report alongside the redline output.
+Activates sealed mode, blocks all outbound connections across the declared/tested interfaces, and writes a signed zero-egress report alongside the redline output.
+
+**Models / network honesty:** default text embeddings load from the vendored offline `model2vec potion-base-8M` weights in-tree. Optional CLIP media embeddings (`openai/clip-vit-base-patch32`, ~605MB, not vendored) may require a one-time local model download or `KAIRO_CLIP_MODEL_PATH`; under sealed/offline flags (`KAIRO_SEALED`, `KAIRO_NO_NET`, `HF_HUB_OFFLINE`, …) remote CLIP download is refused. Sealed-runtime claims do not cover an unstaged CLIP fetch.
 
 ### Verify the signed receipt independently
 

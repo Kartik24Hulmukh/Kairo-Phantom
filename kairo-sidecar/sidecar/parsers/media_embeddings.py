@@ -20,7 +20,28 @@ except ImportError:
 # (GitHub 50MB limit / no LFS). Construction is offline-safe: model download
 # is deferred until the first embed_* call so Tier-1 wiring tests can assert
 # the import guard without phoning home to HuggingFace / Xet CAS.
+#
+# HONESTY / SEALED MODE:
+# - Text embeddings (model2vec potion-base-8M) are vendored and load offline.
+# - CLIP media embeddings are OPTIONAL and may require a one-time network
+#   download of openai/clip-vit-base-patch32 unless KAIRO_CLIP_MODEL_PATH
+#   points at a local HF-format snapshot.
+# - Under sealed / air-gap env (KAIRO_SEALED=1, KAIRO_NO_NET=1, KAIRO_OFFLINE=1,
+#   HF_HUB_OFFLINE=1) remote download is refused; operators must stage weights
+#   locally. Sealed runtime claims do NOT cover an unstaged CLIP download.
 DEFAULT_CLIP_MODEL = "openai/clip-vit-base-patch32"
+
+
+def _sealed_or_offline() -> bool:
+    """True when product policy forbids outbound model downloads."""
+    flags = (
+        os.environ.get("KAIRO_SEALED", ""),
+        os.environ.get("KAIRO_NO_NET", ""),
+        os.environ.get("KAIRO_OFFLINE", ""),
+        os.environ.get("HF_HUB_OFFLINE", ""),
+        os.environ.get("TRANSFORMERS_OFFLINE", ""),
+    )
+    return any(str(v).strip() in ("1", "true", "TRUE", "yes", "YES") for v in flags)
 
 
 class MediaEmbeddings:
@@ -51,11 +72,25 @@ class MediaEmbeddings:
                 self._config = EmbeddingModel.from_pretrained_hf(local)
                 log.info("CLIP loaded from local path %s (offline)", local)
             else:
-                # May download on first use when network is available.
-                # Under HF_HUB_OFFLINE=1 / air-gap this raises — callers that
-                # need offline CLIP must set KAIRO_CLIP_MODEL_PATH.
+                if _sealed_or_offline():
+                    raise RuntimeError(
+                        "CLIP media embeddings require a local model snapshot under "
+                        "sealed/offline mode. Set KAIRO_CLIP_MODEL_PATH to a directory "
+                        f"containing HF-format weights for {self.model_name} "
+                        "(~605MB; not vendored). Remote HuggingFace download is blocked "
+                        "while KAIRO_SEALED/KAIRO_NO_NET/KAIRO_OFFLINE/HF_HUB_OFFLINE is set. "
+                        "CLIP is an optional online-or-pre-staged capability; sealed "
+                        "runtime claims do not cover an unstaged CLIP download."
+                    )
+                # May download on first use when network is available and sealed
+                # flags are unset. This is intentionally NOT part of the sealed
+                # zero-egress product claim.
                 self._config = EmbeddingModel.from_pretrained_hf(self.model_name)
-                log.info("CLIP model %s initialised via embed-anything", self.model_name)
+                log.info(
+                    "CLIP model %s initialised via embed-anything "
+                    "(may have used network if weights were not cached)",
+                    self.model_name,
+                )
         except Exception as exc:
             raise RuntimeError("Failed to initialise embed-anything model: " + str(exc)) from exc
 
