@@ -1,94 +1,55 @@
-# Kairo-Phantom — CLAIMS.md (Real / Experimental / None yet)
+# Kairo Phantom — Claims Register
 
-**Version:** 1.2.1 (integrity-corrected) · **Date:** 11 July 2026 · **Stage:** code-complete, pre-launch, 0 users, 0 revenue
+**Last updated:** 2026-07-18
 
-**The rule:** a capability is **Real** only if backed by a reproducible command whose output anyone can regenerate. **Every public number must be linked to a reproducible command before external publication** (see Section 5 for the required evidence fields). Anything needing real hardware, an external party, a certificate, or an un-happened human judgment is **Experimental** or **None yet.** No "compliant/certified." This file is the single source of truth for what we may say out loud.
+## Scope
 
-**v1.1 changes (from external red-team):** removed "Injection-safe"; R3 renamed to a fixture-suite claim; R8 requires a published interface list; R12 reworded so "verifiable" ≠ "verified"; E2 promotion gate rewritten (TPM ≠ network witness); N8 renamed (no "deterministic/bit-identical"); cross-vendor verifier reworded to "designed to normalize." Skips now documented in `SKIPS.md`.
+This register maps every public claim to its reproducible artifact, scope
+boundary, and known limitation. Claims that cannot be reproduced are not
+made. Claims are scoped to the **legal-v3 mutual-NDA redlining** technical
+preview unless explicitly noted.
 
-**v1.2.1 changes (co-founder red-team):** the descriptive evidence labels below ("coverage run", "injection gauntlet", etc.) are NOT complete evidence — each is marked **audit pending** and needs the full Section 5 record (exact command + commit + env + raw path) before external use; the one-page pitch header changed from "Every metric is reproducible" to "Evidence audit in progress"; the loop now validates gate *content* (not just file existence) and hash-chain-verifies its ledger (see loop-engineering/validators.py + CHANGELOG-v1.2.1.md).
+## What is true (legal-v3 technical preview)
 
-**v1.2 changes (operational red-team):** R1 changed from "7 documented skips" to "6 skipped; skip audit in progress" (the skip audit is NOT complete until SKIPS.md has 6 real reasons — the consistency oracle stays RED until then, by design); R13 renamed to "11 fixture-verified domain adapters / readback contracts" (forbid "works in 11 real-world domains"); added Section 5 (required evidence fields); the loop kit's coverage script was renamed `score_evidence_manifest.py` and explicitly labeled an illustrative coverage evaluator (NOT a cryptographic verifier).
+| Claim | Evidence | Scope | Limitation |
+|:---|:---|:---|:---|
+| Mutual-NDA propose→approve→execute→observe→verify path | `tests/test_legal_v3_e2e.py` (3 tests) | DOCX redlining on sandbox Linux | Synthetic fixture only |
+| Exact source/playbook/intent/output binding | SHA-256 digests in proposal + bundle | Legal-v3 transaction | Not a general-purpose binding |
+| Independent OOXML readback | `kairo/oracles/docx_tracked_changes.py` | DOCX tracked changes | OOXML format only |
+| Separate producer/approver/observer identities | Ed25519 keypairs, observer collision rejected | Legal-v3 transaction | Demo keys, not OS keychain |
+| Signed event chain (8 mandatory events) | `verify_bundle` checks sequence + parent + digest + signature | Legal-v3 transaction | Not portable DSSE/in-toto yet |
+| Adversarial tamper/deletion/reorder/replay rejection | `tests/test_legal_v3_adversarial.py` (8 tests) | Legal-v3 transaction | Not exhaustive |
+| Negative conformance (corrupted bundle rejection) | `tests/test_legal_v3_negative_conformance.py` (13 tests) | verify_bundle | Not exhaustive |
+| 100-run synthetic soak | `scripts/legal_v3_soak.py`, `bench/LEGAL_V3_SOAK_REPORT.json` | One mutual-NDA fixture | Not multi-fixture |
+| Isolated release staging | `scripts/build_legal_v3_release.py`, `SURFACE_AUDIT.json` | Legal-v3 surface | Does not cover legacy code |
+| Surface audit zero findings | `SURFACE_AUDIT.json` | Staged legal-v3 release | Does not audit full repo |
+| CLI e2e propose/approve/execute/verify | CLI run with demo fixture | Legal-v3 CLI | Demo keys, local filesystem |
+| JSON Schema 2020-12 for evidence artifacts | `schemas/legal_v3/*.json` | Proposal, approval, event, bundle | Not DSSE/in-toto envelopes |
 
----
+## What is NOT true (forbidden claims)
 
-## 1. REAL — reproducible today
+The following claims are **not made** and must not appear in any legal-v3
+artifact:
 
-| # | Capability | Evidence (reproducible) | Number |
-|---|---|---|---|
-| R1 | Python test suite (full CI) | kairo-sidecar CPU job + 4 root shards + e2e (see BENCHMARKS.md) | 1976 passed / 34 skipped (all environmental — see SKIPS.md) / 0 failed *(CI-verified: runs 29191013782 + 29191013766, commit `a56cdba`, 2026-07-12; the CPU job is no-skip-enforced)* |
-| R2 | Coverage suite | `pytest --cov` *(exact invocation + evidence record — audit pending)* | 959 passed / 0 failed |
-| R3 | **Current prompt-injection fixture suite** *(not "injection-safe")* | `tests/security/test_injection_suite.py` — loads `fixtures/injection_corpus.json` (25 attacks, 4 categories) + 15 inline benign controls · 106 compiled patterns in `PromptShield` | Blocked all **25/25 attacks in the current fixture suite** · 0/15 false positives · 106 patterns *(local, unverified — kill-proofed: disabling `PromptShield.scan()` → test FAILS with "Block-rate dropped from 25/25 to 0/25")* |
-| R4 | Grounding accuracy | grounding bench *(exact command + evidence record — audit pending)* | 595/600 = 99.17% |
-| R5 | Grounded-answer rate | grounded-answer bench *(exact command + evidence record — audit pending)* | 96.39% |
-| R6 | Tamper detection (audit chain) | tamper tests *(exact command + evidence record — audit pending)* | 17/17 |
-| R7 | Trust-layer tests | trust-layer suite *(exact command + evidence record — audit pending)* | 33/33 |
-| R8 | Sealed-mode egress (Kairo runtime, tested fixtures) | airgap tests + forced-socket kill-proof | 12/0. **Every published result MUST name: OS, interface, process boundary, duration, protocols, canaries, observer version, excluded paths.** Absent that, say only: "blocked/detected the current forced-send fixtures inside the Kairo runtime." |
-| R9 | Merkle receipts (RFC 6962) | `tests/test_merkle_receipts.py` | 17/17 |
-| R10 | Dependency-light guarantees | dep-light suite *(exact command + evidence record — audit pending)* | 28/28 |
-| R11 | Rust core | `cargo test` | `test result: ok` |
-| R12 | Ed25519 hash-chained audit log | sign + verify + `tools/verify_receipts_external.py` | **Offline-verifiable with the included standalone verifier; no independent third party has yet completed verification.** Tamper → FAIL. |
-| R13 | 11 fixture-verified domain adapters / readback contracts | `scripts/gen_status.py` → `STATUS.md` | 11 domain adapters pass their current fixture/readback tests |
+- "production-ready" — legal-v3 is a technical preview
+- "injection-safe" — injection guard exists but is not certified
+- "zero sockets" / "whole-machine air gap" — not proven for legal-v3
+- "every action signed" — only the 8 mandatory events are signed
+- "certified" / "compliant" — no external certification exists
+- "100% accurate legal automation" — domain verdict is always `requires_human_review`
+- "uncopyable" / "1000x" / "unicorn-guaranteed" — not applicable
 
-**Permitted phrasing:** "produces tamper-evident runtime evidence"; "blocked all 25 attacks in the current fixture suite"; "offline-verifiable audit log"; "eleven domain adapters pass their current fixture/readback tests." **Forbidden:** "works in 11 real-world domains." **Fail-closed permissions are the primary protection — a pattern detector is not a general injection defence.**
+## Assurance level
 
----
+Legal-v3 currently targets **L3 (independently confirmed artifact effect)**
+for the DOCX artifact path. This means:
 
-## 2. EXPERIMENTAL — real code, not yet independently/hardware validated
+- L0 self-reported: ✅ (producer signs proposal)
+- L1 mediator-observed: ✅ (observer signs events)
+- L2 enforced: ✅ (policy decision + approval binding)
+- L3 independently confirmed artifact: ✅ (OOXML readback by independent observer)
+- L4 externally anchored: ❌ (no external security review or legal adjudication)
 
-| # | Capability | Why not Real yet | Gate to promote |
-|---|---|---|---|
-| E1 | Live desktop GUI actuation + readback on real hardware (Win32 UIA / AT-SPI2) | Not validated by repeated independent runs on stock hardware | 100-run pinned gate on real Win11 (G1) |
-| E2 | **Scoped zero-egress evidence** *(not "whole-machine")* | Today's proof covers the Kairo runtime, not the host | **Host observer + separately-administered external network witness + complete interface inventory + required canaries + explicit blind spots.** TPM quote is optional platform-state corroboration, **not** the egress witness. |
-| E3 | Personalization / StyleAdapter | No blind A/B on the founder's writing yet | ≥60% blind preference, recorded |
-| E4 | Live browser / OCR paths | Not fixture-verified as Real | Readback oracle + fixtures |
-| E5 | Desktop causal continuity graph / gap-proof | Plumbing exists; not shipped/validated end-to-end | Continuity chain with explicit EVIDENCE_GAP nodes shipped + tested |
+## Open blockers
 
-**Never assert an E-item as Real.**
-
----
-
-## 3. NONE YET — not built / not claimable
-
-| # | Item | Honest status |
-|---|---|---|
-| N1 | Independent third-party verification of a pack | Nobody external has verified a pack with zero trust in us yet |
-| N2 | Paying customers / users / revenue | 0 / 0 / 0 |
-| N3 | FIPS module validation | Ed25519 = approved algorithm (FIPS 186-5); the **module** is not validated. Never "FIPS validated." |
-| N4 | Installer code-signing | No EV/OV or Apple Developer ID cert |
-| N5 | Canary-in-the-Receipt | Planned (ship first). Proves control at **tested moments**, not continuously. |
-| N6 | Delegation-Chain Receipts | Planned |
-| N7 | Host + external network witness | Planned (this is the egress witness, per E2) |
-| N8 | **Evidence & state-transition replay** *(renamed; NOT "deterministic/bit-identical replay")* | Planned (north star) |
-| N9 | Cross-vendor verifier / normalizer | Planned. Say **"designed to normalize other platforms' evidence into the KSEE draft profile,"** never "can verify other platforms." |
-| N10 | KSEE evidence profile | Draft only. Call it **"KSEE draft evidence profile,"** never "the open standard." |
-| N11 | Any "compliance"/"certification" claim | Never. Only: "produces evidence supporting an assessor's evaluation of X." |
-| N12 | Assessor demand for the format | Unvalidated — the Mode A/B blind test must establish it |
-
----
-
-## 4. Hard language rules
-
-- ✅ "Evidence mapped to Article 12/19/26." · "Supports an assessor's evaluation." · "No outbound packet observed across the declared/tested interfaces during this nonce-bound interval; unobserved channels listed."
-- ❌ "EU AI Act certified" · "Regulator approved" · "Guarantees compliance" · "FIPS validated" · "Injection-safe" · "Zero bytes left the entire machine" · "0 competitors" · "only one that exists" · "deterministic replay" · "the TPM/second device proves no data left" · "rivals can't copy this."
-- ❌ The dead **Aug 2 2026** EU deadline (high-risk / Art. 12 record-keeping is now **Dec 2 2027**; verify OJ text). CMMC: "Phase 2 begins 10 Nov 2026; status/assessment type contract-dependent."
-- ❌ Any traction number that isn't 0.
-- ⚠️ Competitor facts from `research.md` (AGA patent #, founder, URLs) are **untrusted until independently verified.**
-
----
-
-## 5. Required evidence fields for every public number
-
-Before any metric in this file is published externally (deck, site, grant, pitch), it must carry a reproducible record with ALL of these fields. If a field is missing, the number is not publication-ready.
-
-- **Exact command** run (copy-pasteable).
-- **Commit hash** the command was run at.
-- **OS / platform** (e.g. Amazon Linux 2023, Windows 11 23H2).
-- **Python / Rust version** (e.g. Python 3.13.x, rustc 1.8x).
-- **Dependency lock hash** (e.g. `poetry.lock` / `Cargo.lock` sha256).
-- **Date** the run was executed.
-- **Raw result path** (committed artifact, e.g. `runs/g1_100run_report.json`).
-- **CI URL** (the run that produced it), where applicable.
-- **Exit code** of the command.
-
-Until a number has this record, describe it as "local, unverified" — never as an established result.
+See [docs/OPEN_BLOCKERS.md](docs/OPEN_BLOCKERS.md) for the full list.

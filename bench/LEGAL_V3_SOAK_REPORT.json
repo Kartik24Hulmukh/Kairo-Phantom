@@ -1,0 +1,8 @@
+{
+  "runs": 100,
+  "passed": 100,
+  "failed": 0,
+  "elapsed_seconds": 8.631,
+  "failures": [],
+  "scope": "synthetic mutual-NDA fixture on sandbox Linux"
+}
