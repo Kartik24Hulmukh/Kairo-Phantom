@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kairo.phantom/schemas/legal_v3/bundle.json",
+  "title": "Legal-v3 Evidence Bundle",
+  "description": "Complete evidence bundle for offline sufficiency verification.",
+  "type": "object",
+  "required": [
+    "profile",
+    "action",
+    "root",
+    "source",
+    "source_sha256",
+    "playbook",
+    "playbook_sha256",
+    "output",
+    "output_sha256",
+    "public_keys",
+    "proposal",
+    "approval",
+    "events",
+    "verifier_result"
+  ],
+  "properties": {
+    "profile": { "const": "kairo-legal-v3" },
+    "action": { "const": "mutual_nda.redline" },
+    "root": { "type": "string" },
+    "source": { "type": "string" },
+    "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "playbook": { "type": "string" },
+    "playbook_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "output": { "type": "string" },
+    "output_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "public_keys": {
+      "type": "object",
+      "description": "Map of key_id to base64 Ed25519 public key."
+    },
+    "proposal": { "type": "object" },
+    "approval": { "type": "object" },
+    "events": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "description": "Exactly 8 events in mandatory state machine order."
+    },
+    "verifier_result": {
+      "type": "object",
+      "required": ["ok", "integrity", "execution", "sufficiency", "domain"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "integrity": { "type": "string", "enum": ["pass", "fail"] },
+        "execution": { "type": "string", "enum": ["pass", "unknown"] },
+        "sufficiency": {
+          "type": "string",
+          "enum": ["complete_for_declared_boundary", "incomplete"]
+        },
+        "domain": { "const": "requires_human_review" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

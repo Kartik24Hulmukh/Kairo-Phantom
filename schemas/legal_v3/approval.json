@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kairo.phantom/schemas/legal_v3/approval.json",
+  "title": "Legal-v3 Redline Approval",
+  "description": "Human approval bound to a specific proposal with expiry and single-use capability.",
+  "type": "object",
+  "required": [
+    "proposal_sha256",
+    "approver_key_id",
+    "expires_at",
+    "capability_token",
+    "approval_sha256",
+    "signature"
+  ],
+  "properties": {
+    "proposal_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "approver_key_id": { "type": "string", "minLength": 1 },
+    "expires_at": { "type": "integer", "minimum": 0 },
+    "capability_token": { "type": "string", "minLength": 1 },
+    "approval_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "signature": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

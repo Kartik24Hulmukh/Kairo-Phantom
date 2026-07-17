@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kairo.phantom/schemas/legal_v3/proposal.json",
+  "title": "Legal-v3 Redline Proposal",
+  "description": "Canonical redline intent proposed by a producer for a mutual-NDA DOCX transaction.",
+  "type": "object",
+  "required": [
+    "profile",
+    "action",
+    "root",
+    "source",
+    "source_sha256",
+    "playbook",
+    "playbook_sha256",
+    "output",
+    "intent",
+    "producer_key_id",
+    "proposal_sha256",
+    "signature"
+  ],
+  "properties": {
+    "profile": { "const": "kairo-legal-v3" },
+    "action": { "const": "mutual_nda.redline" },
+    "root": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "playbook": { "type": "string", "minLength": 1 },
+    "playbook_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "output": { "type": "string", "minLength": 1 },
+    "intent": {
+      "type": "object",
+      "required": ["clauses"],
+      "properties": {
+        "clauses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["clause", "redline"],
+            "properties": {
+              "clause": { "type": "string", "minLength": 1 },
+              "redline": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "producer_key_id": { "type": "string", "minLength": 1 },
+    "proposal_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "signature": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

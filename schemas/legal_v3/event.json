@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kairo.phantom/schemas/legal_v3/event.json",
+  "title": "Legal-v3 Signed Event",
+  "description": "A single event in the signed lifecycle evidence chain (Action Passport).",
+  "type": "object",
+  "required": [
+    "event_type",
+    "sequence",
+    "parent_sha256",
+    "timestamp",
+    "observer_key_id",
+    "payload",
+    "event_sha256",
+    "signature"
+  ],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "INPUT_OBSERVED",
+        "TRUST_CLASSIFIED",
+        "POLICY_DECISION",
+        "ACTION_INTENT",
+        "APPROVAL_BOUND",
+        "ACTION_ATTEMPT",
+        "ARTIFACT_READBACK",
+        "RUN_CLOSED"
+      ]
+    },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "parent_sha256": {
+      "type": ["string", "null"],
+      "description": "SHA-256 of the previous event, null for the first event."
+    },
+    "timestamp": { "type": "integer", "minimum": 0 },
+    "observer_key_id": { "type": "string", "minLength": 1 },
+    "payload": { "type": "object" },
+    "event_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "signature": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}
