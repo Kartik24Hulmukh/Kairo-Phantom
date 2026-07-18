@@ -19,6 +19,15 @@
 - **Injection guard** (`kairo/security/injection_guard.py`):
   PromptShield-style taint scan for playbook clauses.
 
+- **Trust policy** (`kairo/legal_v3/trust_policy.py`):
+  Configurable trust-policy input for the verifier (allowed clauses,
+  trusted key IDs, approval TTL, observer collision policy, source size
+  limits). Backward-compatible default matches hardcoded allowlist.
+
+- **DSSE/in-toto envelopes** (`kairo/legal_v3/dsse_envelope.py`):
+  Wraps evidence bundles in DSSE (Dead Simple Signing Envelope) with
+  in-toto v1 Statement structure for portable third-party verification.
+
 - **CLI** (`tools/kairo_legal_v3.py`):
   keygen, propose, approve, execute, verify subcommands.
 
@@ -42,6 +51,9 @@
 | E2E (`test_legal_v3_e2e.py`) | 3 | PASS |
 | Adversarial (`test_legal_v3_adversarial.py`) | 8 | PASS |
 | Negative conformance (`test_legal_v3_negative_conformance.py`) | 13 | PASS |
+| Trust policy (`test_legal_v3_trust_policy.py`) | 17 | PASS |
+| DSSE envelope (`test_legal_v3_dsse_envelope.py`) | 11 | PASS |
+| Crash-during-publish (`test_legal_v3_crash_during_publish.py`) | 9 | PASS |
 | Synthetic soak (100 runs) | 100 | PASS |
 | Surface audit | 0 findings | PASS |
 | CLI e2e | 1 | PASS |
@@ -56,7 +68,6 @@ See [OPEN_BLOCKERS.md](OPEN_BLOCKERS.md) for the full list. Key gaps:
 - Authenticated OS IPC for legacy daemon
 - Signed installers
 - External security review
-- DSSE/in-toto portable envelopes
 - Real customer documents / paid pilot
 
 ## Assurance level
