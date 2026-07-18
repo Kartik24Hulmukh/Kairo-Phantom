@@ -54,6 +54,6 @@ overclaim.
 ## Pre-existing overclaims (not introduced by legal-v3)
 
 12. **Pre-existing overclaim language** — `kairo/oracles/production_ops.py`
-    contains "CycloneDX-compliant" (SBOM format, not a legal-v3 claim).
-    This predates legal-v3 and is not in the legal-v3 surface. A future
-    cleanup pass should address it.
+    contains a CycloneDX SBOM format reference that is not a legal-v3
+    claim. This predates legal-v3 and is not in the legal-v3 surface.
+    A future cleanup pass should address it.

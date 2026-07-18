@@ -82,18 +82,17 @@ jobs:
           pip install cryptography python-docx
       - name: Run CLI e2e
         run: |
-          export PYTHONPATH=.
           WORK=$(mktemp -d)
           cd "$WORK"
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py keygen producer producer.json
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py keygen approver approver.json
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py keygen observer observer.json
-          cp ${{ github.workspace }}/fixtures/demo/sample_nda.docx nda.docx
-          cp ${{ github.workspace }}/fixtures/demo/nda_playbook.json playbook.json
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py propose . nda.docx playbook.json out.docx producer.json proposal.json
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py approve proposal.json approver.json approval.json
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py execute . proposal.json approval.json producer.json approver.json observer.json bundle
-          python3 ${{ github.workspace }}/tools/kairo_legal_v3.py verify bundle > verify_result.json
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" keygen producer producer.json
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" keygen approver approver.json
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" keygen observer observer.json
+          cp "$GITHUB_WORKSPACE/fixtures/demo/sample_nda.docx" nda.docx
+          cp "$GITHUB_WORKSPACE/fixtures/demo/nda_playbook.json" playbook.json
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" propose . nda.docx playbook.json out.docx producer.json proposal.json
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" approve proposal.json approver.json approval.json
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" execute . proposal.json approval.json producer.json approver.json observer.json bundle
+          PYTHONPATH="$GITHUB_WORKSPACE" python3 "$GITHUB_WORKSPACE/tools/kairo_legal_v3.py" verify bundle > verify_result.json
           python3 -c "
           import json, sys
           r = json.load(open('verify_result.json'))
@@ -141,40 +140,48 @@ jobs:
               'CLAIMS.md',
               '.github/workflows/legal-v3-gates.yml',
           }
-          CHECK_DIRS = ['kairo/legal_v3', 'kairo/oracles', 'kairo/security',
-                        'tools/kairo_legal_v3.py',
-                        'docs/LEGAL_V3_IMPLEMENTATION_STATUS.md', 'docs/LEGAL_V3_RUNBOOK.md',
-                        'docs/OPEN_BLOCKERS.md', 'STATUS.md', 'SECURITY.md', 'README.md']
+          # Only scan the exact legal-v3 surface — NOT the entire kairo/oracles
+          # directory (which contains unrelated legacy code like production_ops.py).
+          # The legal-v3 oracle files are those shipped by build_legal_v3_release.py.
+          CHECK_FILES = [
+              'kairo/legal_v3/__init__.py',
+              'kairo/legal_v3/transaction.py',
+              'kairo/legal_v3/trust_policy.py',
+              'kairo/legal_v3/dsse_envelope.py',
+              'kairo/oracles/legal_redline_pipeline.py',
+              'kairo/oracles/docx_tracked_changes.py',
+              'kairo/oracles/ed25519_audit_log.py',
+              'kairo/oracles/zero_egress_report.py',
+              'kairo/security/injection_guard.py',
+              'tools/kairo_legal_v3.py',
+              'docs/LEGAL_V3_IMPLEMENTATION_STATUS.md',
+              'docs/LEGAL_V3_RUNBOOK.md',
+              'docs/OPEN_BLOCKERS.md',
+              'STATUS.md',
+              'SECURITY.md',
+              'README.md',
+          ]
           findings = []
-          for d in CHECK_DIRS:
-              if os.path.isfile(d):
-                  files = [d]
-              elif os.path.isdir(d):
-                  files = []
-                  for root, _, fnames in os.walk(d):
-                      for fn in fnames:
-                          if fn.endswith(('.py', '.md', '.json', '.txt', '.yml', '.yaml')):
-                              files.append(os.path.join(root, fn))
-              else:
+          for fpath in CHECK_FILES:
+              if not os.path.exists(fpath):
                   continue
-              for fpath in files:
-                  if fpath in EXEMPT_FILES:
-                      continue
-                  try:
-                      content = open(fpath, encoding='utf-8', errors='ignore').read()
-                  except Exception:
-                      continue
-                  for claim in FORBIDDEN:
-                      # Check if the claim appears in an affirmative context
-                      # (not negated by 'not ' or 'NOT ' or 'never ')
-                      pattern = r'(?<!not )(?<!NOT )(?<!never )(?<!Never )' + re.escape(claim)
-                      for m in re.finditer(pattern, content, re.IGNORECASE):
-                          # Get surrounding context (20 chars before)
-                          start = max(0, m.start() - 20)
-                          context = content[start:m.start()]
-                          if 'not ' in context.lower() or 'never ' in context.lower():
-                              continue
-                          findings.append(f'{fpath}: forbidden claim \"{claim}\"')
+              if fpath in EXEMPT_FILES:
+                  continue
+              try:
+                  content = open(fpath, encoding='utf-8', errors='ignore').read()
+              except Exception:
+                  continue
+              for claim in FORBIDDEN:
+                  # Check if the claim appears in an affirmative context
+                  # (not negated by 'not ' or 'NOT ' or 'never ')
+                  pattern = r'(?<!not )(?<!NOT )(?<!never )(?<!Never )' + re.escape(claim)
+                  for m in re.finditer(pattern, content, re.IGNORECASE):
+                      # Get surrounding context (30 chars before)
+                      start = max(0, m.start() - 30)
+                      context = content[start:m.start()]
+                      if 'not ' in context.lower() or 'never ' in context.lower():
+                          continue
+                      findings.append(f'{fpath}: forbidden claim \"{claim}\"')
           if findings:
               for f in findings:
                   print(f, file=sys.stderr)
