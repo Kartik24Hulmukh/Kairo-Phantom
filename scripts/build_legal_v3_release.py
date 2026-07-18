@@ -24,7 +24,10 @@ OUT = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / "target/legal-v3-release
 # Files allowed in the legal-v3 release surface.
 # ---------------------------------------------------------------------------
 allow = [
-    "kairo/legal_v3",
+    "kairo/legal_v3/__init__.py",
+    "kairo/legal_v3/transaction.py",
+    "kairo/legal_v3/trust_policy.py",
+    "kairo/legal_v3/dsse_envelope.py",
     "kairo/oracles/legal_redline_pipeline.py",
     "kairo/oracles/docx_tracked_changes.py",
     "kairo/oracles/ed25519_audit_log.py",

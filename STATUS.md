@@ -48,6 +48,6 @@
 
 ## Claim Discipline
 
-- ✅ "Legal-redline wedge: production-ready (offline, cited, injection-safe, signed, air-gapped)"
+- ✅ "Legal-redline wedge: technical preview (offline, cited, injection-guarded, signed, air-gapped)"
 - ❌ NOT "the 12-domain product is ready" — all other domains are prompt-only / not shipped
 - ❌ NOT "cryptographic proof no bytes ever leave" — we say "reproducible, signed report showing zero outbound connections"

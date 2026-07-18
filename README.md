@@ -135,7 +135,7 @@ Every number below was reproduced from a clean clone on 2026-07-12 at commit `1a
 
 ## Wedge Use Case: Offline Legal-Redline
 
-Kairo-Phantom's production-ready wedge is **offline legal redlining**:
+Kairo-Phantom's technical-preview wedge is **offline legal redlining**:
 
 - Reads a contract `.docx` and a redline playbook
 - Produces real OOXML tracked changes (`w:ins`/`w:del`) — not a diff mock
