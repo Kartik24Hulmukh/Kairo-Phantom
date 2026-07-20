@@ -5,3 +5,7 @@ loop-engineering/.state.lock
 .kairo/
 
 phantom-core/.fastembed_cache/
+
+# Committed bytecode prevention
+__pycache__/
+*.pyc
