@@ -84,11 +84,12 @@ def _hash_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _write_output_manifest(out_dir: Path, private_key) -> None:
+def _write_output_manifest(out_dir: Path, private_key, sealed: bool = False) -> None:
     """Write a signed manifest binding output artifacts to this run.
 
-    Records SHA-256 of redlined.docx, audit_log.json and
-    zero_egress_report.json, signed with the run's Ed25519 private key.
+    Records SHA-256 of redlined.docx, audit_log.json, zero_egress_report.json,
+    and airgap_egress_report.json (when present, i.e. sealed mode), signed
+    with the run's Ed25519 private key.
     Closes the gap where post-run tampering with redlined.docx was
     undetectable by `kairo verify` (which only checked existence).
     """
@@ -104,6 +105,12 @@ def _write_output_manifest(out_dir: Path, private_key) -> None:
             out_dir / "zero_egress_report.json"
         ),
     }
+
+    # Include airgap egress report hash when present (sealed mode)
+    airgap_path = out_dir / "airgap_egress_report.json"
+    if airgap_path.exists():
+        payload["airgap_egress_report_sha256"] = _hash_file(airgap_path)
+
     content = _json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
         "utf-8"
     )
@@ -142,6 +149,10 @@ def _verify_output_manifest(redlined_dir: Path, public_key) -> tuple[bool, str]:
         "audit_log.json": manifest.get("audit_log_sha256"),
         "zero_egress_report.json": manifest.get("zero_egress_report_sha256"),
     }
+    # Check airgap egress report when recorded in manifest (sealed mode)
+    airgap_hash = manifest.get("airgap_egress_report_sha256")
+    if airgap_hash is not None:
+        checks["airgap_egress_report.json"] = airgap_hash
     for name, expected in checks.items():
         p = redlined_dir / name
         if not p.exists():
@@ -262,7 +273,7 @@ def cmd_redline(args: argparse.Namespace) -> int:
     egress_ok = verify_zero_egress_report(egress_report, public_key)
 
     # Write signed output manifest (binds artifacts to this run)
-    _write_output_manifest(out_dir, private_key)
+    _write_output_manifest(out_dir, private_key, sealed=args.sealed)
 
     # Print human-readable summary
     print()
@@ -651,12 +662,24 @@ def main(argv: list[str] | None = None) -> int:
     # Shared verify command (not domain-specific)
     verify_parser = subparsers.add_parser(
         "verify",
-        help="Independently verify audit log + zero-egress report",
+        help="Independently verify audit log + zero-egress report + output manifest",
     )
     verify_parser.add_argument(
         "redlined_dir", help="Directory containing redline artifacts"
     )
-    verify_parser.add_argument("public_key", help="Path to the public key .pem file")
+    verify_parser.add_argument(
+        "public_key",
+        nargs="?",
+        default=None,
+        help="Path to a trusted public key .pem file (must be supplied externally, "
+             "not from the output directory). If omitted, --fingerprint must be set.",
+    )
+    verify_parser.add_argument(
+        "--fingerprint",
+        default=None,
+        help="SHA-256 fingerprint of the expected public key (hex). "
+             "The co-located public_key.pem is checked against this fingerprint.",
+    )
 
     # Domain commands via the plugin registry
     from kairo.domains.registry import discover
