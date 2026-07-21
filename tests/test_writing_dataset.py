@@ -5,7 +5,15 @@ Validates the generated 5,000-pair writing registers dataset for format, schemas
 """
 
 import json
+import unittest
 from pathlib import Path
+
+DATASET_PATH = Path(__file__).parent.parent / "training_data" / "kairo_writing_dataset_5k.jsonl"
+
+if not DATASET_PATH.exists():
+    raise unittest.SkipTest(
+        "training_data dataset ships as a release asset — see RELEASING.md"
+    )
 
 
 def test_writing_dataset_validation():

@@ -77,6 +77,95 @@ def _get_or_create_keypair(key_dir: Path) -> tuple[object, object, bytes]:
 # ---------------------------------------------------------------------------
 
 
+
+def _hash_file(path: Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_output_manifest(out_dir: Path, private_key, sealed: bool = False) -> None:
+    """Write a signed manifest binding output artifacts to this run.
+
+    Records SHA-256 of redlined.docx, audit_log.json, zero_egress_report.json,
+    and airgap_egress_report.json (when present, i.e. sealed mode), signed
+    with the run's Ed25519 private key.
+    Closes the gap where post-run tampering with redlined.docx was
+    undetectable by `kairo verify` (which only checked existence).
+    """
+    import json as _json
+    from datetime import datetime, timezone
+
+    payload = {
+        "version": 1,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "redlined_docx_sha256": _hash_file(out_dir / "redlined.docx"),
+        "audit_log_sha256": _hash_file(out_dir / "audit_log.json"),
+        "zero_egress_report_sha256": _hash_file(
+            out_dir / "zero_egress_report.json"
+        ),
+    }
+
+    # Include airgap egress report hash when present (sealed mode)
+    airgap_path = out_dir / "airgap_egress_report.json"
+    if airgap_path.exists():
+        payload["airgap_egress_report_sha256"] = _hash_file(airgap_path)
+
+    content = _json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    signature = private_key.sign(content).hex()
+    manifest = dict(payload)
+    manifest["signature"] = signature
+    (out_dir / "output_manifest.json").write_text(
+        _json.dumps(manifest, indent=2), encoding="utf-8"
+    )
+
+
+def _verify_output_manifest(redlined_dir: Path, public_key) -> tuple[bool, str]:
+    """Verify the signed output manifest against on-disk artifacts.
+
+    Returns (ok, detail). A missing manifest fails closed, with a
+    legacy-run explanation so old runs are distinguishable from tampering.
+    """
+    import json as _json
+
+    from cryptography.exceptions import InvalidSignature
+
+    manifest_path = redlined_dir / "output_manifest.json"
+    if not manifest_path.exists():
+        return False, "output_manifest.json missing (legacy run or deleted)"
+    try:
+        manifest = _json.loads(manifest_path.read_text(encoding="utf-8"))
+        signature = bytes.fromhex(manifest.pop("signature"))
+        content = _json.dumps(
+            manifest, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        public_key.verify(signature, content)
+    except (InvalidSignature, KeyError, ValueError, TypeError) as exc:
+        return False, f"manifest signature invalid: {exc.__class__.__name__}"
+    checks = {
+        "redlined.docx": manifest.get("redlined_docx_sha256"),
+        "audit_log.json": manifest.get("audit_log_sha256"),
+        "zero_egress_report.json": manifest.get("zero_egress_report_sha256"),
+    }
+    # Check airgap egress report when recorded in manifest (sealed mode)
+    airgap_hash = manifest.get("airgap_egress_report_sha256")
+    if airgap_hash is not None:
+        checks["airgap_egress_report.json"] = airgap_hash
+    for name, expected in checks.items():
+        p = redlined_dir / name
+        if not p.exists():
+            return False, f"{name} missing"
+        actual = _hash_file(p)
+        if actual != expected:
+            return False, (
+                f"{name} hash mismatch: expected {str(expected)[:16]}..., "
+                f"got {actual[:16]}..."
+            )
+    return True, "all artifact hashes match signed manifest"
+
+
 def cmd_redline(args: argparse.Namespace) -> int:
     """Run the real redline pipeline and write outputs."""
     contract_path = str(Path(args.contract).resolve())
@@ -183,6 +272,9 @@ def cmd_redline(args: argparse.Namespace) -> int:
     egress_report = report_from_json(result.egress_report_json)
     egress_ok = verify_zero_egress_report(egress_report, public_key)
 
+    # Write signed output manifest (binds artifacts to this run)
+    _write_output_manifest(out_dir, private_key, sealed=args.sealed)
+
     # Print human-readable summary
     print()
     print("=" * 60)
@@ -216,6 +308,7 @@ def cmd_redline(args: argparse.Namespace) -> int:
     print("    audit_log.json")
     print("    zero_egress_report.json")
     print("    public_key.pem")
+    print("    output_manifest.json")
     if args.sealed:
         print("    airgap_egress_report.json")
     print("=" * 60)
@@ -229,15 +322,56 @@ def cmd_redline(args: argparse.Namespace) -> int:
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
-    """Independently re-verify the audit log + zero-egress report."""
+    """Independently re-verify the audit log + zero-egress report + output manifest.
+
+    Security: the public key must be supplied externally (not from the
+    output directory) or verified against a known fingerprint. This
+    prevents an attacker from replacing public_key.pem in the output
+    directory and re-signing artifacts with their own key.
+    """
     redlined_dir = Path(args.redlined_dir).resolve()
-    pub_key_path = Path(args.public_key).resolve()
 
     if not redlined_dir.is_dir():
         print(f"ERROR: Directory not found: {redlined_dir}", file=sys.stderr)
         return 1
-    if not pub_key_path.exists():
-        print(f"ERROR: Public key not found: {pub_key_path}", file=sys.stderr)
+
+    # --- Trust anchor: external key or fingerprint verification ---
+    import hashlib
+
+    if args.public_key:
+        # External key supplied — use it directly
+        pub_pem_path = Path(args.public_key).resolve()
+        if not pub_pem_path.exists():
+            print(f"ERROR: Public key not found: {pub_pem_path}", file=sys.stderr)
+            return 1
+        pub_pem = pub_pem_path.read_bytes()
+    elif args.fingerprint:
+        # Fingerprint supplied — check co-located key against it
+        colocated = redlined_dir / "public_key.pem"
+        if not colocated.exists():
+            print("ERROR: No public_key.pem in output dir and no external key supplied",
+                  file=sys.stderr)
+            return 1
+        pub_pem = colocated.read_bytes()
+        actual_fp = hashlib.sha256(pub_pem).hexdigest()
+        expected_fp = args.fingerprint.lower().replace(":", "")
+        if actual_fp != expected_fp:
+            print(
+                f"ERROR: Public key fingerprint mismatch!\n"
+                f"  Expected: {expected_fp[:16]}...\n"
+                f"  Got:      {actual_fp[:16]}...\n"
+                f"  The co-located public_key.pem does not match the trusted fingerprint.",
+                file=sys.stderr,
+            )
+            return 1
+    else:
+        print(
+            "ERROR: A trusted public key is required for verification.\n"
+            "  Supply an external key:  kairo verify <dir> <trusted_key.pem>\n"
+            "  Or verify a fingerprint: kairo verify <dir> --fingerprint <sha256>\n"
+            "  Do NOT trust the co-located public_key.pem — an attacker can replace it.",
+            file=sys.stderr,
+        )
         return 1
 
     from kairo.oracles.ed25519_audit_log import Ed25519AuditLog
@@ -246,7 +380,6 @@ def cmd_verify(args: argparse.Namespace) -> int:
         verify_zero_egress_report,
     )
 
-    pub_pem = pub_key_path.read_bytes()
     public_key = Ed25519AuditLog.load_public_key(pub_pem)
 
     all_pass = True
@@ -294,10 +427,19 @@ def cmd_verify(args: argparse.Namespace) -> int:
         print("  Zero-egress report: MISSING ❌")
         all_pass = False
 
-    # 3. Check redlined.docx exists
+    # 3. Verify redlined.docx bytes against the signed output manifest
     docx_path = redlined_dir / "redlined.docx"
     if docx_path.exists():
-        print(f"  Redlined document: EXISTS ✅ ({docx_path.stat().st_size} bytes)")
+        manifest_ok, detail = _verify_output_manifest(redlined_dir, public_key)
+        if manifest_ok:
+            print(
+                f"  Redlined document: HASH VERIFIED ✅ "
+                f"({docx_path.stat().st_size} bytes)"
+            )
+            print(f"    {detail}")
+        else:
+            print(f"  Redlined document: UNVERIFIED ❌ ({detail})")
+            all_pass = False
     else:
         print("  Redlined document: MISSING ❌")
         all_pass = False
@@ -560,12 +702,24 @@ def main(argv: list[str] | None = None) -> int:
     # Shared verify command (not domain-specific)
     verify_parser = subparsers.add_parser(
         "verify",
-        help="Independently verify audit log + zero-egress report",
+        help="Independently verify audit log + zero-egress report + output manifest",
     )
     verify_parser.add_argument(
         "redlined_dir", help="Directory containing redline artifacts"
     )
-    verify_parser.add_argument("public_key", help="Path to the public key .pem file")
+    verify_parser.add_argument(
+        "public_key",
+        nargs="?",
+        default=None,
+        help="Path to a trusted public key .pem file (must be supplied externally, "
+             "not from the output directory). If omitted, --fingerprint must be set.",
+    )
+    verify_parser.add_argument(
+        "--fingerprint",
+        default=None,
+        help="SHA-256 fingerprint of the expected public key (hex). "
+             "The co-located public_key.pem is checked against this fingerprint.",
+    )
 
     # Domain commands via the plugin registry
     from kairo.domains.registry import discover
@@ -582,26 +736,40 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 1
 
-    # Shared verify command
-    if args.command == "verify":
-        return cmd_verify(args)
+    try:
+        # Shared verify command
+        if args.command == "verify":
+            return cmd_verify(args)
 
-    # Domain commands via registry
-    if args.command in domain_by_cli:
-        return domain_by_cli[args.command].run(args)
+        # Domain commands via registry
+        if args.command in domain_by_cli:
+            return domain_by_cli[args.command].run(args)
 
-    # Fallback for backward compat (should not reach here if registry is working)
-    if args.command == "redline":
-        return cmd_redline(args)
-    elif args.command == "excel":
-        return cmd_excel(args)
-    elif args.command == "pdf":
-        if not hasattr(args, "action") or args.action is None:
-            parser.print_help()
-            return 1
-        return cmd_pdf(args)
+        # Fallback for backward compat (should not reach here if registry is working)
+        if args.command == "redline":
+            return cmd_redline(args)
+        elif args.command == "excel":
+            return cmd_excel(args)
+        elif args.command == "pdf":
+            if not hasattr(args, "action") or args.action is None:
+                parser.print_help()
+                return 1
+            return cmd_pdf(args)
 
-    return 1
+        return 1
+    except KeyboardInterrupt:
+        print("Interrupted.", file=sys.stderr)
+        return 130
+    except Exception as exc:  # graceful CLI boundary — no raw tracebacks
+        import os
+
+        if os.environ.get("KAIRO_DEBUG"):
+            raise
+        print(
+            f"ERROR: {args.command} failed: {exc.__class__.__name__}: {exc}",
+            file=sys.stderr,
+        )
+        return 1
 
 
 if __name__ == "__main__":

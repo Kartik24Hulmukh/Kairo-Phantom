@@ -137,6 +137,8 @@ Every number below was reproduced from a clean clone on 2026-07-12 at commit `1a
 
 Kairo-Phantom's technical-preview wedge is **offline legal redlining**:
 
+Company-level claims are scoped to the legal-v3 mutual-NDA technical preview only — see CLAIMS.md and STATUS.md for the authoritative claim register.
+
 - Reads a contract `.docx` and a redline playbook
 - Produces real OOXML tracked changes (`w:ins`/`w:del`) — not a diff mock
 - Every citation is grounded to exact source text; no hallucinated citations
