@@ -322,15 +322,56 @@ def cmd_redline(args: argparse.Namespace) -> int:
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
-    """Independently re-verify the audit log + zero-egress report."""
+    """Independently re-verify the audit log + zero-egress report + output manifest.
+
+    Security: the public key must be supplied externally (not from the
+    output directory) or verified against a known fingerprint. This
+    prevents an attacker from replacing public_key.pem in the output
+    directory and re-signing artifacts with their own key.
+    """
     redlined_dir = Path(args.redlined_dir).resolve()
-    pub_key_path = Path(args.public_key).resolve()
 
     if not redlined_dir.is_dir():
         print(f"ERROR: Directory not found: {redlined_dir}", file=sys.stderr)
         return 1
-    if not pub_key_path.exists():
-        print(f"ERROR: Public key not found: {pub_key_path}", file=sys.stderr)
+
+    # --- Trust anchor: external key or fingerprint verification ---
+    import hashlib
+
+    if args.public_key:
+        # External key supplied — use it directly
+        pub_pem_path = Path(args.public_key).resolve()
+        if not pub_pem_path.exists():
+            print(f"ERROR: Public key not found: {pub_pem_path}", file=sys.stderr)
+            return 1
+        pub_pem = pub_pem_path.read_bytes()
+    elif args.fingerprint:
+        # Fingerprint supplied — check co-located key against it
+        colocated = redlined_dir / "public_key.pem"
+        if not colocated.exists():
+            print("ERROR: No public_key.pem in output dir and no external key supplied",
+                  file=sys.stderr)
+            return 1
+        pub_pem = colocated.read_bytes()
+        actual_fp = hashlib.sha256(pub_pem).hexdigest()
+        expected_fp = args.fingerprint.lower().replace(":", "")
+        if actual_fp != expected_fp:
+            print(
+                f"ERROR: Public key fingerprint mismatch!\n"
+                f"  Expected: {expected_fp[:16]}...\n"
+                f"  Got:      {actual_fp[:16]}...\n"
+                f"  The co-located public_key.pem does not match the trusted fingerprint.",
+                file=sys.stderr,
+            )
+            return 1
+    else:
+        print(
+            "ERROR: A trusted public key is required for verification.\n"
+            "  Supply an external key:  kairo verify <dir> <trusted_key.pem>\n"
+            "  Or verify a fingerprint: kairo verify <dir> --fingerprint <sha256>\n"
+            "  Do NOT trust the co-located public_key.pem — an attacker can replace it.",
+            file=sys.stderr,
+        )
         return 1
 
     from kairo.oracles.ed25519_audit_log import Ed25519AuditLog
@@ -339,7 +380,6 @@ def cmd_verify(args: argparse.Namespace) -> int:
         verify_zero_egress_report,
     )
 
-    pub_pem = pub_key_path.read_bytes()
     public_key = Ed25519AuditLog.load_public_key(pub_pem)
 
     all_pass = True
