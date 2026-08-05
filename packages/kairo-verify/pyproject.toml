@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kairo-verify"
+version = "0.1.0"
+description = "Offline verifier for Kairo-Phantom execution receipts: hash chain, Ed25519 signatures, RFC 6962 Merkle checkpoints, and an answerability report"
+readme = "README_VERIFY.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Kartik Hulmukh" }]
+keywords = ["audit-trail", "receipts", "ed25519", "merkle", "verification", "offline", "ai-agents"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security :: Cryptography",
+]
+dependencies = ["cryptography>=42.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+kairo-verify = "kairo_verify.cli:main"
+
+[project.urls]
+Source = "https://github.com/Kartik24Hulmukh/Kairo-Phantom"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kairo_verify"]
